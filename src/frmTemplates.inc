@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -67,13 +67,14 @@ private Function frmTemplates_OnCommand( ByVal HWnd As HWnd, _
             ' Open the template
             If pwszPath Then
                dim pDoc as clsDocument ptr
-               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                       False, _    ' bIsNewFile
-                                       true, _     ' bIsTemplate
-                                       True,  _    ' bShowInTab
-                                       false, _    ' bIsInclude
-                                       *pwszPath, _  ' wszName
-                                       0 )         ' pDocIn
+               pDoc = frmMain_OpenFileSafely( _
+                           HWND_FRMMAIN, _
+                           False, _    ' bIsNewFile
+                           true, _     ' bIsTemplate
+                           True,  _    ' bShowInTab
+                           false, _    ' bIsInclude
+                           *pwszPath, _  ' wszName
+                           0 )         ' pDocIn
    
                ' Ensure that the code window scrolls to the correct location
                dim as hwnd hEdit = pDoc->hWndActiveScintilla
@@ -134,18 +135,15 @@ End Function
 ' ========================================================================================
 ' Templates popup dialog
 ' ========================================================================================
-public Function frmTemplates_Show( ByVal hParent As HWnd, _
-                                   ByVal x As Long, _
-                                   ByVal y As Long _
-                                   ) As LRESULT
+public Function frmTemplates_Show( ByVal hParent As HWnd ) As LRESULT
 
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hParent)->DPI
-
-   pWindow->Create(hParent, L(176,"Templates"), @frmTemplates_WndProc, _
-               pWindow->UnScaleX(x), pWindow->UnScaleY(y), 0, 0, _
-               WS_CAPTION Or WS_POPUPWINDOW, WS_EX_WINDOWEDGE)
+	
+   pWindow->Create( hParent, L(176,"Templates"), @frmTemplates_WndProc, _
+                    0, 0, 0, 0, WS_CAPTION Or WS_POPUPWINDOW, WS_EX_WINDOWEDGE )
    pWindow->SetClientSize(420,395)
+   pWindow->Center(pWindow->hWindow, hParent)
    
    ' Set the small and large icon for the main window (must be set after main window is created)
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)

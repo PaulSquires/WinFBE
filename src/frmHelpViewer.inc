@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,6 @@ public Function ShowContextHelp( byval id as long ) As Long
    
    ' Ensure that the CurDrive parameter is converted if applicable
    gConfig.CompilerHelpFile = ProcessFromCurdriveApp( gConfig.CompilerHelpFile ) 
-   gConfig.Win32APIHelpfile = ProcessFromCurdriveApp( gConfig.Win32APIHelpfile ) 
    gConfig.WinFBXHelpfile   = ProcessFromCurdriveApp( gConfig.WinFBXHelpfile ) 
 
    select Case id
@@ -55,15 +54,6 @@ public Function ShowContextHelp( byval id as long ) As Long
             wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.CompilerHelpFile)
          else
             wszHelpFilename = gConfig.CompilerHelpFile
-         END IF
-
-      case IDM_HELPWINAPI
-         wszLabel = "WinAPI "
-         ' Convert relative path to absolute path if needed.
-         if AfxPathIsRelative(gConfig.Win32APIHelpfile) then
-            wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.Win32APIHelpfile)
-         else   
-            wszHelpFilename = gConfig.Win32APIHelpfile 
          END IF
 
       case IDM_HELPSHORTCUTS, IDM_HELPWINFBE, IDM_HELPWINFBX

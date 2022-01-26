@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -31,20 +31,20 @@
    
 ''
 ''
-Destructor clsDocument
+destructor clsDocument
    ' Delete any manually allocated CWindows in the designer
    for i as long = lbound(this.hWindow) to ubound(this.hWindow)
       DestroyWindow this.hWindow(i)    ' destroy the scintilla/designer windows
-   NEXT
+   next
    DestroyWindow this.hScrollbar       ' destroy the scrollbar
-   if this.IsDesigner THEN
+   if this.IsDesigner then
       ' Remove all controls
       dim pCtrl as clsControl ptr 
       do until this.Controls.Count <= 1 
          for i as long = this.Controls.ItemFirst to this.Controls.ItemLast
             pCtrl = this.Controls.ItemAt(i)
             this.Controls.Remove(pCtrl)
-         NEXT
+         next
       loop   
       for i as long = 0 to 3
          DestroyWindow(this.hSnapLine(i))
@@ -54,12 +54,26 @@ Destructor clsDocument
       DestroyWindow(this.hWndDesigner)
       DestroyWindow(this.hDesignTabCtrl)
       DeleteObject(this.hFontFakeMenu)
-   END IF
+   end if
 
    ' Repaint the main area because we don't want any splitter to show
    AfxRedrawWindow(HWND_FRMMAIN)
-   
-End Destructor
+
+end destructor
+
+
+''
+''  Returns true/False indicating whether user manual changes were made
+''  outside of whatever edit changes Scintilla makes.
+''
+property clsDocument.UserModified() as boolean
+   return m_UserModified
+end property
+
+property clsDocument.UserModified( byval nModified as boolean ) 
+   m_UserModified = nModified
+   this.AutoSaveRequired = nModified
+end property
 
 
 ' ========================================================================================
@@ -80,9 +94,9 @@ end function
 function clsDocument.GetActiveScintillaPtr() as any ptr
    dim as hwnd hEdit = this.hWndActiveScintilla
    for i as long = lbound(this.hWindow) to ubound(this.hWindow)
-      if this.hWindow(i) = hEdit THEN return m_pSci(i)
-   NEXT
-   ' If no other matches then return 
+      if this.hWindow(i) = hEdit then return m_pSci(i)
+   next
+   ' if no other matches then return 
    function = m_pSci(0)
 end function
 
@@ -97,8 +111,8 @@ property clsDocument.hWndActiveScintilla(byval hWindow as hwnd)
 end property
 
 ''
-''  Returns True/False indicating that a valid top mainmenu exists for this form.
-function clsDocument.MainMenuExists() as Boolean
+''  Returns true/False indicating that a valid top mainmenu exists for this form.
+function clsDocument.MainMenuExists() as boolean
    dim as long numItems = (ubound(this.MenuItems) - lbound(this.MenuItems)) + 1
    if (this.GenerateMenu = BST_CHECKED) andalso (numItems > 0) then
       return true
@@ -108,8 +122,8 @@ function clsDocument.MainMenuExists() as Boolean
 end function
 
 ''
-''  Returns True/False indicating that a valid top toolbar exists for this form.
-function clsDocument.ToolBarExists() as Boolean
+''  Returns true/False indicating that a valid top toolbar exists for this form.
+function clsDocument.ToolBarExists() as boolean
    dim as long numItems = (ubound(this.ToolBarItems) - lbound(this.ToolBarItems)) + 1
    if (this.GenerateToolBar = BST_CHECKED) andalso (numItems > 0) then
       return true
@@ -119,8 +133,8 @@ function clsDocument.ToolBarExists() as Boolean
 end function
 
 ''
-''  Returns True/False indicating that a valid top statusbar exists for this form.
-function clsDocument.StatusBarExists() as Boolean
+''  Returns true/False indicating that a valid top statusbar exists for this form.
+function clsDocument.StatusBarExists() as boolean
    dim as long numItems = (ubound(this.PanelItems) - lbound(this.PanelItems)) + 1
    if (this.GenerateStatusBar = BST_CHECKED) andalso (numItems > 0) then
       return true
@@ -131,9 +145,9 @@ end function
 
 ''
 ''
-Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd 
+function clsDocument.CreateDesignerWindow( byval hWndParent as HWnd ) as hwnd 
    
-   ' For the Visual Designer, there exists three (3) levels of windows:
+   ' for the Visual Designer, there exists three (3) levels of windows:
    ' (1) The DesignMain (hWindow) used by the top tabcontrol to display the document. 
    '     This is the highest level window and is basically just the container for 
    '     the other two windows. Contains tab control to switch between design/code views.
@@ -149,51 +163,51 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
    dim rc as RECT
    
    ' (1) Create the DesignMain window
-   dim pMain as CWindow ptr = New CWindow
+   dim pMain as CWindow ptr = new CWindow
    pMain->DPI = AfxCWindowPtr(hwndParent)->DPI
    this.hWndDesigner = _
    pMain->Create( hWndParent, "", @DesignerMain_WndProc, 0, 0, 0, 0, _
-        WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
-        WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+        WS_CHILD or WS_CLIPSIBLINGS or WS_CLIPCHILDREN, _
+        WS_EX_CONTROLPARENT or WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR)
    pMain->Brush = GetSysColorBrush(COLOR_WINDOW)
    pMain->SetClientSize(3000, 3000)
    ' We will set our own mouse pointer as needed
    SetClassLongPtr(this.hWindow(0), GCLP_HCURSOR, 0)   
    ' Allow the Designer Frame window to scroll. This allows us to create Forms that
    ' are larger than the current viewable screen area.
-   DIM pScrollWindow AS CScrollWindow PTR = NEW CScrollWindow(pMain->hWindow)
+   dim pScrollWindow as CScrollWindow ptr = new CScrollWindow(pMain->hWindow)
    pMain->ScrollWindowPtr = pScrollWindow
    
    ' Create a tabcontrol that allows us to switch between design/code views.
    this.hDesignTabCtrl = _
       pMain->AddControl("TABCONTROL", hWndParent, _
          IDC_DESIGNTABCTRL, "", 0, 0, 0, 24, _
-         WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
-         TCS_TABS Or TCS_FOCUSNEVER, WS_EX_LEFT Or WS_EX_LTRREADING )
+         WS_CHILD or WS_TABSTOP or TCS_SINGLELINE or TCS_RAGGEDRIGHT or TCS_HOTTRACK or _
+         TCS_TABS or TCS_FOCUSNEVER, WS_EX_LEFT or WS_EX_LTRREADING )
    
    dim wszTemp as wstring * MAX_PATH
-   Dim TB As TC_ITEM 
+   dim TB as TC_ITEM 
    TB.Mask = TCIF_TEXT
    
    ' Add the two tabs. Design and Code views.
    wszTemp = L(327, "Design")
    TB.pszText = @wszTemp
-   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 0, Cast(LPARAM, @TB) )     
+   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 0, cast(LPARAM, @TB) )     
 
    wszTemp = L(328, "Code")
    TB.pszText = @wszTemp
-   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 1, Cast(LPARAM, @TB) )     
+   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 1, cast(LPARAM, @TB) )     
 
    TabCtrl_SetCurSel( this.hDesignTabCtrl, 0 )
 
    
    ' (2) Create the Design Frame window (child of the Main)
-   dim pFrame as CWindow ptr = New CWindow
+   dim pFrame as CWindow ptr = new CWindow
    pFrame->DPI = AfxCWindowPtr(hwndParent)->DPI
    this.hWndFrame = _
    pFrame->Create( pMain->hWindow, "", @DesignerFrame_WndProc, 0, 0, 0, 0, _
-        WS_CHILD or WS_VISIBLE or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _ 
-        WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+        WS_CHILD or WS_VISIBLE or WS_CLIPSIBLINGS or WS_CLIPCHILDREN, _ 
+        WS_EX_CONTROLPARENT or WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR)
    pFrame->ClassStyle = CS_DBLCLKS
    SetWindowLongPtr( pFrame->hWindow, GWLP_ID, IDC_DESIGNFRAME )
    ' We will set our own mouse pointer as needed
@@ -215,30 +229,46 @@ end function
 
 ''
 ''
-Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
-                                       ByVal IsNewFile  As BOOLEAN, _     
-                                       ByVal IsTemplate As BOOLEAN = False, _
-                                       Byref wszFile    As WString = "" _
-                                       ) As HWnd   
+function clsDocument.CreateCodeWindow( _
+            byval hWndParent as HWnd, _
+            byval IsNewFile  as boolean, _     
+            byval IsTemplate as boolean = false, _
+            byref wszFile    as wstring = "" _
+            ) as HWnd   
 
    ' Creates a Scintilla editing window (initially not visible). Optionally, load a diskfile
    ' into the window and apply properties to it.
    for i as long = lbound(this.hWindow) to ubound(this.hWindow)
       this.hWindow(i) = CreateWindowEx( 0, "Scintilla", "", _
-                        WS_CHILD Or WS_TABSTOP Or WS_CLIPCHILDREN, _
+                        WS_CHILD or WS_TABSTOP or WS_CLIPCHILDREN, _
                         0,0,0,0,hWndParent, _
-                        Cast(HMENU, IDC_SCINTILLA+i), GetModuleHandle(Null), Null)
+                        cast(HMENU, IDC_SCINTILLA+i), GetModuleHandle(null), null)
+
+       SendMessage( this.hWindow(i), SCI_SETMODEVENTMASK, _
+                      SC_MOD_INSERTTEXT or SC_MOD_DELETETEXT, 0 )
    
       ' Initialize our direct access to the Scintilla code windows. This is much faster than
       ' using SendMessage to the window. Only need to initialize once no matter how many
       ' code windows that are eventually opened.
-      If IsWindow(this.hWindow(i)) Then
-         If SciMsg = 0 Then
-            SciMsg = Cast( Scintilla_DirectFunction, SendMessage( this.hWindow(0), SCI_GETDIRECTFUNCTION, 0, 0 ) )
-         End If
+      if IsWindow(this.hWindow(i)) then
+         ' NOTE: In my testing, need to only set the Scintilla lexer to the base editing
+         ' window only and NOT both split windows. Also need to do this immediately after
+         ' the window is created and do not send the message again afterwards.
+         ' Also, every window must have a separate new call to CreateLexer. We can not
+         ' just get one lexer and then try to share it amongst multiple new windows. When
+         ' a window is destroyed then the pointer would be as well causing other existing
+         ' windows to GPF.
+         if i = 0 then
+            ' Load the FB lexer from Lexilla and feed it into Scintilla
+            dim as any ptr pLexer = gApp.pfnCreateLexerfn( "winfbe" )
+            SendMessage( this.hWindow(i), SCI_SETILEXER, 0, cast(LPARAM, pLexer) )
+         end if
+         if SciMsg = 0 then
+            SciMsg = cast( Scintilla_Directfunction, SendMessage( this.hWindow(0), SCI_GETDIRECTfunction, 0, 0 ) )
+         end if
          ' Call the direct function for speed purposes rather than relying on the traditional SendMessage method.
-         m_pSci(i) = Cast(Any Ptr, SendMessage( this.hWindow(i), SCI_GETDIRECTPOINTER, 0, 0 )) 
-      End If
+         m_pSci(i) = cast(any ptr, SendMessage( this.hWindow(i), SCI_GETDIRECTPOINTER, 0, 0 )) 
+      end if
    next
    
    ' Disable main scintilla control's vertical scroll bar (wParam = 1 to enable)
@@ -250,103 +280,114 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    ShowWindow(this.hScrollbar, SW_HIDE)
    
    ' Initialize scroll bar information
-   this.ScrInfo.cbSize  = SizeOf(SCROLLINFO)
+   this.ScrInfo.cbSize  = sizeof(SCROLLINFO)
    this.ScrInfo.fMask   = SIF_ALL
 
 
    ' Get the document pointer from our main control and assign it to the other split windows
    dim as any ptr pDoc = cast(any ptr, SciMsg(m_pSci(0), SCI_GETDOCPOINTER, 0, 0))
-   If pDoc Then SciMsg( m_pSci(1), SCI_SETDOCPOINTER, 0, cast(LPARAM, pDoc)) 
+   if pDoc then SciMsg( m_pSci(1), SCI_SETDOCPOINTER, 0, cast(LPARAM, pDoc)) 
    
-   Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
+   dim nResult as long = IS_TEXT_UNICODE_SIGNATURE
       
-   ' If a disk file was specified then open it and load it into the editor
+   ' if a disk file was specified then open it and load it into the editor
    this.IsNewFlag = IsNewFile
-   If (IsNewFile = true) orelse (IsTemplate = true) Then
-      this.NextFileNum = this.NextFileNum + 1
-      this.DiskFilename = "Untitled" & this.NextFileNum
+   if (IsNewFile = true) orelse (IsTemplate = true) then
+      this.nextFileNum = this.nextFileNum + 1
+      this.DiskFilename = "Untitled" & this.nextFileNum
       if this.IsDesigner then
          this.CreateDesignerWindow(hWndParent)  ' Create the new visual designer window
       end if   
-   End If
+   end if
    this.ProjectFileType = FILETYPE_UNDEFINED
    
-   If len(wszFile) Then   
-      ' Do not use Dir() > "" here b/c if incoming file originated from a Do/Loop 
+   if len(wszFile) then   
+      ' do not use Dir() > "" here b/c if incoming file originated from a Do/loop 
       ' of files using Dir() then there will be problems.
 
-      If AfxFileExists(wszFile) Then     
-         Dim As String st, sText
-         Dim As Long f = Freefile
-         Dim As Long idx
+      if AfxFileExists(wszFile) then     
+         dim as string st, sText
+         dim as long f = Freefile
+         dim as long idx
          
-         If IsTemplate Then
+         if IsTemplate then
             dim pStream as CTextStream
             if pStream.Open(wszFile) = S_OK then
                ' Look at the first 4 lines
                ' Line 3 tells us the file type (bas or xml)
-               Do Until pStream.EOS
+               do until pStream.EOS
                   st = pStream.ReadLine
                   idx = idx + 1
-                  Select Case idx
-                     Case 1
-                     Case 2
-                     Case 3: this.DiskFilename = this.DiskFilename & Trim(st)    
-                     Case 4 
-                     Case Else
+                  select case idx
+                     case 1
+                     case 2
+                     case 3: this.DiskFilename = this.DiskFilename & trim(st)    
+                     case 4 
+                     case else
                         sText = sText & st & vbCrLf
-                  End Select   
-               Loop
+                  end select   
+               loop
                pStream.Close
-               If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
-                  sText = Mid(sText, 3)
-                  sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
-               End If   
+               if IsTextUnicode(strptr(sText), 2, cast(LPINT, @nResult) ) then
+                  sText = mid(sText, 3)
+                  sText = AfxACode( cast(wstring ptr, strptr(sText)) )
+               end if   
                this.SetText( sText ) 
-            End If
+            end if
             ' Force the template file to be considered "new" so it will be saved.
             this.IsNewFlag = true
             ' Search for "|", replace it with an empty space "" and position the caret in that place
             this.FindReplace( "|", "" )
             ' don't set SAVEPOINT for newly loaded Template files because we want the document to display as dirty
 
-         Else
+         else
 
             ' Set a flag that we are loading code from a file. This is important because if the file
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
-            this.DiskFilename = wszFile   ' assign before GetFileToString because needed for RelativeFile calculation.
+            this.DiskFilename = wszFile   ' assign before GetFileTostring because needed for RelativeFile calculation.
             this.LoadingFromFile = true
             dim sText as string  ' this will be an UTF-8 encoded string
-            ' GetFileToString has a call to pDoc->ParseFormMetaData which will create/recreate the designer form.
-            if GetFileToString(wszFile, sText, @this) = false then
+            ' GetFileTostring has a call to pDoc->ParseFormMetaData which will create/recreate the designer form.
+            if GetFileTostring(wszFile, sText, @this) = false then
+               ' Take this opportunity to determine the text line endings
+               if instr(sText, chr(13,10)) then
+                  SciMsg( m_pSci(0), SCI_SETEOLMODE, SC_EOL_CRLF, 0)
+               elseif instr(sText, chr(10)) then
+                  SciMsg( m_pSci(0), SCI_SETEOLMODE, SC_EOL_LF, 0)
+               elseif instr(sText, chr(13)) then
+                  SciMsg( m_pSci(0), SCI_SETEOLMODE, SC_EOL_CR, 0)
+               end if
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( wszFile )
             else
                print "Error opening: "; wszFile
-            End If
+            end if
             this.LoadingFromFile = false
             SciMsg( m_pSci(0), SCI_SETSAVEPOINT, 0, 0)
             SciMsg( m_pSci(0), SCI_EMPTYUNDOBUFFER, 0, 0)
+            this.UserModified = false
+            this.AutoSaveRequired = false
+            this.AutoSaveFilename = OnCommand_FileAutoSaveGenerateFilename(wszFile)
             ' Update the most recently used file list (only for non-IsNewFlag files)
             ' Only add file to MRU list if it is not part of an active Project.
-            If gApp.IsProjectActive = false Then 
+            if gApp.IsProjectActive = false then 
                UpdateMRUList(wszFile)
             end if
-         End If
-      End If   
-   End If
+         end if
+      end if   
+   end if
 
    if this.IsDesigner then
-      ' Select the Form as the default focus control
+      ' select the Form as the default focus control
       this.Controls.SelectControl( this.hWndForm )
       this.Controls.SetActiveControl( this.hWndForm )
 
-      ' If the data that was read contained anything that caused the form to have
+      ' if the data that was read contained anything that caused the form to have
       ' to be code regenerated then we need to save the file back to disk with the
       ' new meta data and code generation.
       if this.bRegenerateCode then 
-         If this.IsNewFlag = false then this.SaveFile
+         if this.IsNewFlag = false then this.SaveFile
       end if   
 
       ' In any event, regenerate code for the visual designer 
@@ -357,18 +398,22 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    ' Apply code editor properties to the edit window
    this.ApplyProperties()
 
-   Function = this.hWindow(0)
-End Function
+   function = this.hWindow(0)
+end function
 
 ''
 ''
-Function clsDocument.FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
-   ' Return Value: New position if successful; -1 if text not found.
+function clsDocument.FindReplace( _
+            byval strFindText as string, _
+            byval strReplaceText as string _
+            ) as long
+
+   ' return Value: new position if successful; -1 if text not found.
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim As Long findFlags = SCFIND_MATCHCASE Or SCFIND_WHOLEWORD
-   Dim As Long startPos  = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
-   Dim As Long endPos    = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
-   Dim As Long newPos
+   dim as long findFlags = SCFIND_MATCHcase or SCFIND_WHOLEWORD
+   dim as long startPos  = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
+   dim as long endPos    = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
+   dim as long newPos
 
    ' Set the start and end positions, and search flags, and finally do the search
    SciMsg( pSci, SCI_SETTARGETSTART, startPos, 0)
@@ -376,58 +421,59 @@ Function clsDocument.FindReplace( ByVal strFindText As String, ByVal strReplaceT
    SciMsg( pSci, SCI_SETSEARCHFLAGS, findFlags, 0)
 
    ' Search the text to replace
-   newPos = SciMsg( pSci, SCI_SEARCHINTARGET, Len(strFindText), Cast(LPARAM, Strptr(strFindText)) )
+   newPos = SciMsg( pSci, SCI_SEARCHINTARGET, len(strFindText), cast(LPARAM, strptr(strFindText)) )
    
-   ' Return -1 if not found
-   If newPos = - 1 Then Return -1
+   ' return -1 if not found
+   if newPos = - 1 then return -1
    
    gApp.SuppressNotify = true
    ' Position the caret and select the text
    SciMsg( pSci, SCI_SETCURRENTPOS, newPos, 0)
    SciMsg( pSci, SCI_GOTOPOS, newPos, 0)
    SciMsg( pSci, SCI_SETSELECTIONSTART, newPos, 0)
-   SciMsg( pSci, SCI_SETSELECTIONEND, newPos + Len(strFindText), 0)
+   SciMsg( pSci, SCI_SETSELECTIONEND, newPos + len(strFindText), 0)
 
    ' Replace the selection (SCI_REPLACESEL fails if text is "" so use Cut instead for that scenario)                                
-   If Len(strReplaceText) = 0 Then
+   if len(strReplaceText) = 0 then
       SciMsg( pSci, SCI_CUT, 0, 0 )
-   Else
-      SciMsg( pSci, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(strReplaceText)) )
-   End If
+   else
+      SciMsg( pSci, SCI_REPLACESEL, 0, cast(LPARAM, strptr(strReplaceText)) )
+   end if
    gApp.SuppressNotify = false
    
-   ' Return the new position
-   Function = newPos
+   ' return the new position
+   function = newPos
 
-End Function
+end function
 
 ''
 ''
-Function clsDocument.InsertFile() As BOOLEAN
+function clsDocument.InsertFile() as boolean
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Display the Open File Dialog
-   Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWND_FRMMAIN, IDM_INSERTFILE)
-   If pwszName Then
-      ' save the main file encoding because GetFileToString may change it
-      Dim As String sText
-      GetFileToString(*pwszName, sText, @this)
-      SciMsg( pSci, SCI_INSERTTEXT, -1, Cast(LPARAM, Strptr(sText)) )
+   dim pwszName as wstring ptr = AfxIFileOpenDialogW(HWND_FRMMAIN, IDM_INSERTFILE)
+   if pwszName then
+      ' save the main file encoding because GetFileTostring may change it
+      dim as string sText
+      GetFileTostring(*pwszName, sText, @this)
+      SciMsg( pSci, SCI_INSERTTEXT, -1, cast(LPARAM, strptr(sText)) )
       CoTaskMemFree pwszName
       this.ApplyProperties()
-   End If
+   end if
    
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ' ========================================================================================
 ' Parse all of the file's code to remove and process any visual designer specific code.
 ' Returns a string representing just the code only (visual designer metastatements removed).
 ' ========================================================================================
-function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
-                                        byref wszAllText as wstring, _
-                                        byval bLoadOnly  as Boolean = false _
-                                        ) as CWSTR
+function clsDocument.ParseFormMetaData( _
+            byval hWndParent as HWnd, _
+            byref wszAllText as wstring, _
+            byval bLoadOnly  as boolean = false _
+            ) as CWSTR
    
    ' NOTE: The incoming wszAllText string is UTF-16 encoded. The resulting string that
    ' is returned from this function is also UTF-16 encoded. All WinFBE form files
@@ -445,8 +491,8 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
    dim as RECT rc, rcCtrl
    dim as CWSTR wszControlType, wszPropName, wszPropValue, wszEventName
    dim as CWSTR wst
-   dim as Long nControlType, numLines, numOffsetLines
-   dim as Boolean bIsValidControl = true
+   dim as long nControlType, numLines, numOffsetLines
+   dim as boolean bIsValidControl = true
    
    ' The first line MUST contain the identifier that this is a form file.
 
@@ -466,20 +512,20 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
       ' This is just a regular code file with no visual designer
       this.IsDesigner = false
       return wszAllText   
-   END IF
+   end if
    
 
    ' Iterate all of the lines related to the visual designer
    dim as long iLineStart = 1
-   dim as long iLineEnd, NextMenuItem, NextToolBarItem, NextPanelItem, NextImageItem
+   dim as long iLineEnd, nextMenuItem, nextToolBarItem, nextPanelItem, nextImageItem
 
    dim as boolean bReadingMenuItem, bReadingToolBarItem, bReadingPanelItem, bReadingImageItem
 
    do until iLineStart >= len(wszAllText)
       
-      iLineEnd = instr(iLineStart, wszAllText, vbcrlf)
-      if iLineEnd = 0 then iLineEnd = len(wszAllText)  ' cr/lf not found
-      wst = mid(wszAllText, iLineStart, iLineEnd - iLineStart)   
+      iLineend = instr(iLineStart, wszAllText, vbcrlf)
+      if iLineend = 0 then iLineend = len(wszAllText)  ' cr/lf not found
+      wst = mid(wszAllText, iLineStart, iLineend - iLineStart)   
       iLineStart = iLineStart + len(wst) + len(vbcrlf)
       
       numOffsetLines = numOffsetLines + 1
@@ -492,69 +538,65 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
          end if
          
       elseif left(wst, 15) = "' LOCKCONTROLS=" then
-         wszPropValue = mid(wst, 16)  ' default is False
-         if wszPropValue = "True" then this.bLockControls = true
+         wszPropValue = mid(wst, 16)  ' default is false
+         if wszPropValue = "true" then this.bLockControls = true
 
       elseif left(wst, 12) = "' SNAPLINES=" then
-         wszPropValue = mid(wst, 13)  ' default is True
+         wszPropValue = mid(wst, 13)  ' default is true
          if wszPropValue = "False" then this.bSnapLines = false
 
       elseif left(wst, 17) = "' WINFBE FORM_END" then
          this.ErrorOffset = numOffsetLines 
       
-      'elseif left(wst, 23) = "' WINFBE MAINMENU_START" then
-      'elseif left(wst, 21) = "' WINFBE IMAGES_START" then
-      
       elseif left(wst, 18) = "'   MENUITEM_START" then
          dim as long ub = ubound(this.MenuItems)
          redim preserve this.MenuItems(ub + 1)
-         NextMenuItem = ub + 1
+         nextMenuItem = ub + 1
          bReadingMenuItem = true
       elseif left(wst, 21) = "'   MAINMENU_DISPLAY=" then
          this.GenerateMenu = val(mid(wst, 22))
       elseif left(wst, 11) = "'     NAME=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszName = mid(wst, 12)
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszName = mid(wst, 12)
       elseif left(wst, 14) = "'     CAPTION=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszCaption = mid(wst, 15)
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszCaption = mid(wst, 15)
       elseif left(wst, 13) = "'     INDENT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).nIndent = val(mid(wst, 14))
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).nIndent = val(mid(wst, 14))
       elseif left(wst, 10) = "'     ALT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkAlt = val(mid(wst, 11))
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkAlt = val(mid(wst, 11))
       elseif left(wst, 12) = "'     SHIFT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkShift = val(mid(wst, 13))
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkShift = val(mid(wst, 13))
       elseif left(wst, 11) = "'     CTRL=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkCtrl = val(mid(wst, 12))
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkCtrl = val(mid(wst, 12))
       elseif left(wst, 15) = "'     SHORTCUT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszShortcut = mid(wst, 16)
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszShortcut = mid(wst, 16)
       elseif left(wst, 14) = "'     CHECKED=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkChecked = val(mid(wst, 15))
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkChecked = val(mid(wst, 15))
       elseif left(wst, 13) = "'     GRAYED=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkGrayed = val(mid(wst, 14))
+         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkGrayed = val(mid(wst, 14))
       elseif left(wst, 16) = "'   MENUITEM_END" then
          bReadingMenuItem = false   
-      
       
       elseif left(wst, 21) = "'   TOOLBARITEM_START" then
          dim as long ub = ubound(this.ToolBarItems)
          redim preserve this.ToolBarItems(ub + 1)
-         NextToolBarItem = ub + 1
+         nextToolBarItem = ub + 1
          bReadingToolBarItem = true
       elseif left(wst, 20) = "'   TOOLBAR_DISPLAY=" then
          this.GenerateToolBar = val(mid(wst, 21))
       elseif left(wst, 17) = "'   TOOLBAR_SIZE=" then
          this.wszToolBarSize = mid(wst, 18)
       elseif left(wst, 17) = "'     BUTTONNAME=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszName = mid(wst, 18)
+         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszName = mid(wst, 18)
       elseif left(wst, 17) = "'     BUTTONTYPE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszButtonType = mid(wst, 18)
+         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszButtonType = mid(wst, 18)
       elseif left(wst, 20) = "'     BUTTONTOOLTIP=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszTooltip = mid(wst, 21)
+         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszTooltip = mid(wst, 21)
       elseif left(wst, 24) = "'     BUTTONNORMALIMAGE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropNormalImage.wszPropValue = mid(wst, 25)
+         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropNormalImage.wszPropValue = mid(wst, 25)
       elseif left(wst, 21) = "'     BUTTONHOTIMAGE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropHotImage.wszPropValue = mid(wst, 22)
+         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropHotImage.wszPropValue = mid(wst, 22)
       elseif left(wst, 26) = "'     BUTTONDISABLEDIMAGE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropDisabledImage.wszPropValue = mid(wst, 27)
+         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropDisabledImage.wszPropValue = mid(wst, 27)
       elseif left(wst, 19) = "'   TOOLBARITEM_END" then
          bReadingToolBarItem = false   
 
@@ -562,68 +604,62 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
       elseif left(wst, 19) = "'   PANELITEM_START" then
          dim as long ub = ubound(this.PanelItems)
          redim preserve this.PanelItems(ub + 1)
-         NextPanelItem = ub + 1
+         nextPanelItem = ub + 1
          bReadingPanelItem = true
       elseif left(wst, 22) = "'   STATUSBAR_DISPLAY=" then
          this.GenerateStatusBar = val(mid(wst, 23))
       elseif left(wst, 16) = "'     PANELNAME=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszName = mid(wst, 17)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszName = mid(wst, 17)
       elseif left(wst, 16) = "'     PANELTEXT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszText = mid(wst, 17)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszText = mid(wst, 17)
       elseif left(wst, 19) = "'     PANELTOOLTIP=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszTooltip = mid(wst, 20)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszTooltip = mid(wst, 20)
       elseif left(wst, 21) = "'     PANELALIGNMENT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAlignment = mid(wst, 22)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszAlignment = mid(wst, 22)
       ' BorderStyle is deprecated as of v2.0.4 as it has no effect
       ' in WinFBE programs where Windows Themes are enabled.
       'elseif left(wst, 23) = "'     PANELBORDERSTYLE=" then
-      '   if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBorderStyle = mid(wst, 24)
+      '   if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBorderStyle = mid(wst, 24)
       elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAutoSize = mid(wst, 21)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszAutoSize = mid(wst, 21)
       elseif left(wst, 17) = "'     PANELWIDTH=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszWidth = mid(wst, 18)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszWidth = mid(wst, 18)
       elseif left(wst, 20) = "'     PANELMINWIDTH=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszMinWidth = mid(wst, 21)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszMinWidth = mid(wst, 21)
       elseif left(wst, 17) = "'     PANELIMAGE=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).pProp.wszPropValue = mid(wst, 18)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).pProp.wszPropValue = mid(wst, 18)
       elseif left(wst, 21) = "'     PANELBACKCOLOR=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColor = mid(wst, 22)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBackColor = mid(wst, 22)
       elseif left(wst, 24) = "'     PANELBACKCOLORHOT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColorHot = mid(wst, 25)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBackColorHot = mid(wst, 25)
       elseif left(wst, 21) = "'     PANELFORECOLOR=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColor = mid(wst, 22)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszForeColor = mid(wst, 22)
       elseif left(wst, 24) = "'     PANELFORECOLORHOT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColorHot = mid(wst, 25)
+         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszForeColorHot = mid(wst, 25)
       elseif left(wst, 17) = "'   PANELITEM_END" then
          bReadingPanelItem = false   
-
       
       elseif left(wst, 15) = "'   IMAGE_START" then
          dim as long ub = ubound(this.AllImages)
          redim preserve this.AllImages(ub + 1)
-         NextImageItem = ub + 1
-         this.AllImages(NextImageItem).pDoc = @this
+         nextImageItem = ub + 1
+         this.AllImages(nextImageItem).pDoc = @this
          bReadingImageItem = true
       elseif left(wst, 16) = "'     IMAGENAME=" then
-         if bReadingImageItem then this.AllImages(NextImageItem).wszImageName = mid(wst, 17)
+         if bReadingImageItem then this.AllImages(nextImageItem).wszImageName = mid(wst, 17)
       elseif left(wst, 15) = "'     FILENAME=" then
          if bReadingImageItem then 
-            ' If this is a relative filename then convert it back.
+            ' if this is a relative filename then convert it back.
             dim as CWSTR wszImageFilename = ProcessFromCurdriveProject(mid(wst, 16))
             if AfxPathIsRelative(wszImageFilename) then 
                wszImageFilename = AfxPathCombine( AfxStrPathName("PATH", this.DiskFilename), wszImageFilename)
             end if
-            this.AllImages(NextImageItem).wszFileName = wszImageFilename
+            this.AllImages(nextImageItem).wszFileName = wszImageFilename
          end if
       elseif left(wst, 19) = "'     RESOURCETYPE=" then
-         if bReadingImageItem then this.AllImages(NextImageItem).wszFormat = mid(wst, 20)
+         if bReadingImageItem then this.AllImages(nextImageItem).wszFormat = mid(wst, 20)
       elseif left(wst, 13) = "'   IMAGE_END" then
          bReadingImageItem = false   
-
-      'elseif left(wst, 16) = "'   EVENTS_START" then
-      'elseif left(wst, 14) = "'   EVENTS_END" then
-      'elseif left(wst, 19) = "' WINFBE IMAGES_END" then
-      'elseif left(wst, 21) = "' WINFBE MAINMENU_END" then
 
       elseif left(wst, 20) = "' WINFBE_CODEGEN_END" then
          this.ErrorOffset = numOffsetLines 
@@ -657,8 +693,6 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
                pCtrl->SuspendLayout = false
             end if
          end if
-      'elseif left(sLine, 20) = "'   PROPERTIES_START" then
-      'elseif left(sLine, 18) = "'   PROPERTIES_END" then
 
       elseif left(wst, 16) = "'     PROP_NAME=" then
          if bIsValidControl then
@@ -680,9 +714,6 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
             end if
          end if
          
-      'elseif left(sLine, 16) = "'   EVENTS_START" then
-      'elseif left(sLine, 14) = "'   EVENTS_END" then
-
       elseif left(wst, 17) = "'     EVENT_NAME=" then
          if bIsValidControl then
             wszEventName = mid(wst, 18)
@@ -699,22 +730,37 @@ end function
 
 ''
 ''
-Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
+function clsDocument.SaveFile( _
+            byval bSaveAs as boolean = false, _
+            byval bAutoSaveOnly as boolean = false _
+            ) as boolean
 
-   Dim sText        As String
-   Dim wszFilename  As WString * MAX_PATH
-   Dim wszExtension As WString * MAX_PATH
-   Dim wszText      As WString * MAX_PATH  
-   Dim wst          as CWSTR
+   dim sText        as string
+   dim wszFilename  as wstring * MAX_PATH
+   dim wszAutoSaveFilename  as wstring * MAX_PATH
+   dim wszExtension as wstring * MAX_PATH
+   dim wszText      as wstring * MAX_PATH  
+   dim wst          as CWSTR
    
+   ' don't allow the AutoSave timer to be re-entrant on this function
+   ' while a save is currently taking place.
+   static bAutoSaveIsActive as boolean
+   if bAutoSaveOnly andalso bAutoSaveIsActive then exit function
+   bAutoSaveIsActive = true
    
-   ' If this is a new Untitled document then set flag to display SaveAs dialog.
-   If this.IsNewFlag Then bSaveAs = true
+   ' if this is a new Untitled document then set flag to display SaveAs dialog.
+   if this.IsNewFlag then bSaveAs = true
       
+' TODO: How does autoSave respond to IsNew files Untitled
+
+   ' Don't let AutoSave allow bSaveas
+   if bAutoSaveOnly then bSaveAs = false
+
    wszFilename = this.Diskfilename
-   
-   If bSaveAs Then
-      ' If this is a new Form being saved for the first time then the extension should
+   wszAutoSaveFilename = this.AutoSaveFilename
+      
+   if bSaveAs then
+      ' if this is a new Form being saved for the first time then the extension should
       ' be .bas if no project is active, and .inc if a project is active.
       if this.IsNewFlag then
          if this.IsDesigner then
@@ -722,21 +768,21 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
          end if   
       end if   
       ' Display the Save File Dialog
-      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wszFilename, @wszExtension, IDM_FILESAVEAS)
-      If pwszName Then
+      dim pwszName as wstring ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wszFilename, @wszExtension, IDM_FILESAVEAS)
+      if pwszName then
          wszFilename = *pwszName
          CoTaskMemFree(pwszName)
-      Else
-         Return False
-      End If
-   End If
+      else
+         return false
+      end if
+   end if
 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    
-   ' If this is a FORM document then we need to create the string of controls and properties that gets
+   ' if this is a FORM document then we need to create the string of controls and properties that gets
    ' saved at the start of the file before any of the code is displayed.
    if this.IsDesigner then
-      ' We also need to find out how many vbcrlf's exist until the end of the WINFBE_CODEGEN_END tag
+      ' We also need to find out how many vbcrlf's exist until the end of the WINFBE_CODEGEN_end tag
       ' in order to properly calculate the file error offset.
       this.bRegenerateCode = true
       GenerateFormMetaData(@this)     ' recreate the metadata
@@ -744,25 +790,35 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       this.ErrorOffset = 0
       this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormMetaData, vbcrlf) 
       this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormCodegen, vbcrlf) 
-   END IF
+   end if
 
-   ' If pSci does not exist then this file exists in the Explorer but has not yet been
+   ' if pSci does not exist then this file exists in the Explorer but has not yet been
    ' displayed in order to create a Scintilla window. Simply need to exit.
    if pSci = 0 then return true
    
    ' Save text buffer to disk by directly accessing buffer rather
    ' saving it to an intermediary string variable first.
-   Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
+   dim as zstring ptr psz = cast( zstring ptr, SciExec(this.hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
    dim as long sciCodePage = SciMsg(pSci, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
    
-   if AfxFileExists(wszFilename) THEN AfxDeleteFile(wszFilename)
+   dim as CWSTR wszSaveFilename
+   if bAutoSaveOnly then 
+      if AfxFileExists(wszAutoSaveFilename) then AfxDeleteFile(wszAutoSaveFilename)
+      wszSaveFilename = wszAutoSaveFilename
+   else   
+      ' ensure any previously created AutoSave files are delete should the 
+      ' the user had chosen a new filename
+      if AfxFileExists(wszFilename) then AfxDeleteFile(wszFilename)
+      if AfxFileExists(wszAutoSaveFilename) then AfxDeleteFile(wszAutoSaveFilename)
+      wszSaveFilename = wszFilename
+   end if   
       
    dim pStream as CFileStream
-   if pStream.Open(wszFilename, STGM_CREATE or STGM_WRITE) = S_OK then
+   if pStream.Open(wszSaveFilename, STGM_CREATE or STGM_WRITE) = S_OK then
       dim as string st
-      select CASE this.FileEncoding
+      select case this.FileEncoding
          case FILE_ENCODING_ANSI
-            if sciCodePage = 0 THEN    
+            if sciCodePage = 0 then    
                pStream.Write psz, len(*psz)     ' no conversion necessary
             else
                ' need to convert
@@ -774,7 +830,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             ' Output the BOM first
             st = chr(&HEF, &HBB, &HBF)
             pStream.Write strptr(st), len(st)
-            if sciCodePage = SC_CP_UTF8 THEN    
+            if sciCodePage = SC_CP_UTF8 then    
                ' no conversion necessary
                pStream.Write psz, len(*psz)     ' no conversion necessary
             else
@@ -787,7 +843,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             ' Output the BOM first
             st = chr(&HFF, &HFE)
             pStream.Write strptr(st), len(st)
-            if sciCodePage = SC_CP_UTF8 THEN    
+            if sciCodePage = SC_CP_UTF8 then    
                pStream.Write this.wszFormMetaData.m_pBuffer, this.wszFormMetaData.m_BufferLen
                pStream.Write this.wszFormCodeGen.m_pBuffer, this.wszFormCodeGen.m_BufferLen
                ' convert utf8 to utf16
@@ -797,95 +853,102 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
                pStream.Write this.wszFormMetaData.m_pBuffer, this.wszFormMetaData.m_BufferLen
                pStream.Write this.wszFormCodeGen.m_pBuffer, this.wszFormCodeGen.m_BufferLen
                ' need to convert ansi to unicode
-               dim as CWSTR wst = WStr(*psz)
+               dim as CWSTR wst = Wstr(*psz)
                pStream.Write wst.m_pBuffer, wst.m_BufferLen
             end if    
             
-      END SELECT
+      end SELECT
    end if
    pStream.Close
 
    this.DiskFilename = wszFilename
+   this.AutoSaveFilename = OnCommand_FileAutoSaveGenerateFilename(wszFilename)
    this.DateFileTime = AfxGetFileLastWriteTime( wszFilename )
-   this.UserModified = false
+   this.UserModified = false   ' this also resets the AutoSaveRequired flag
    
-   ' If this was a new document then it needs to be saved to Recent File list.
-   If this.IsNewFlag Then 
-      If gApp.IsProjectActive = false Then 
+   ' if this was a new document then it needs to be saved to Recent File list.
+   if this.IsNewFlag then 
+      if gApp.IsProjectActive = false then 
          UpdateMRUList(wszFilename)
       end if
    end if
-   this.IsNewFlag = False
+   this.IsNewFlag = false
    
    ' Set the current state of the document to unmodified
-   SciMsg( pSci, SCI_SETSAVEPOINT, 0, 0)
+   if bAutoSaveOnly = false then 
+      SciMsg( pSci, SCI_SETSAVEPOINT, 0, 0)
+   end if
    
-   Function = True
-End Function
+   bAutoSaveIsActive = false
+   
+   function = true
+end function
 
 
 ''
 ''
-Function clsDocument.GetTextRange( ByVal cpMin As Long, ByVal cpMax As Long) As String
+function clsDocument.GetTextRange( _
+            byval cpMin as long, _
+            byval cpMax as long _
+            ) as string
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim p      As Long
-   Dim buffer As String
-   Dim txtrg  As SCI_TEXTRANGE
+   dim p      as long
+   dim buffer as string
+   dim txtrg  as SCI_TEXTRANGE
    txtrg.chrg.cpMin = cpMin
    txtrg.chrg.cpMax = cpMax
-   buffer = Space(cpMax - cpMin + 1)
-   txtrg.lpstrText = Strptr(buffer)
+   buffer = space(cpMax - cpMin + 1)
+   txtrg.lpstrText = strptr(buffer)
    SciMsg(pSci, SCI_GETTEXTRANGE, 0, cast(LPARAM, @txtrg))
-   p = Instr(buffer, Chr(0))
-   If p Then buffer = Left(buffer, p - 1)
-   Function = buffer
-End Function
+   p = instr(buffer, chr(0))
+   if p then buffer = left(buffer, p - 1)
+   function = buffer
+end function
 
 ''
 ''
-Function clsDocument.ChangeSelectionCase( ByVal fCase As Long) As Long 
-
+function clsDocument.ChangeSelectionCase( byval fcase as long) as long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim startSelPos As Long     ' Starting position
-   Dim endSelPos   As Long     ' Ending position
-   Dim strText     As String   ' Selected text
-   Dim i           As Long 
+   dim startSelPos as long     ' Starting position
+   dim endSelPos   as long     ' Ending position
+   dim strText     as string   ' Selected text
+   dim i           as long 
 
-   ' fCase = 1 (upper case), 2 (lower case), 3 (mixed case)
-   If (fCase < 1) Or (fCase > 3) Then Exit Function
+   ' fcase = 1 (upper case), 2 (lower case), 3 (mixed case)
+   if (fcase < 1) or (fcase > 3) then exit function
    
-   ' If startSelPos and endSelPos are the same there is not selection,
+   ' if startSelPos and endSelPos are the same there is not selection,
    startSelPos = SciMsg( pSci, SCI_GETSELECTIONSTART, 0, 0)
    endSelPos   = SciMsg( pSci, SCI_GETSELECTIONEND, 0, 0)
-   If startSelPos = endSelPos Then Exit Function
+   if startSelPos = endSelPos then exit function
    
    ' Retrieve the text
    strText = this.GetTextRange(startSelPos, endSelPos)
    
    ' Convert it to upper or lower case
-   If fCase = 1 Then
-      strText = Ucase(strText)
-   ElseIf fCase = 2 Then
+   if fcase = 1 then
+      strText = ucase(strText)
+   elseif fcase = 2 then
       strText = LCase(strText)
-   ElseIf fCase = 3 Then
+   elseif fcase = 3 then
       ' Always uppercase the first character regardless
-      Mid(strText,1,1) = Ucase(Left(strText,1))
+      mid(strText,1,1) = ucase(left(strText,1))
       Do
-          i = Instr(i+1, strText, " ")
-          If i = 0 Then Exit Do
-          Mid(strText,i+1,1) = Ucase(Mid(strText,i+1,1))
-      Loop
-   End If
+          i = instr(i+1, strText, " ")
+          if i = 0 then Exit Do
+          mid(strText,i+1,1) = ucase(mid(strText,i+1,1))
+      loop
+   end if
    
    ' Replace the selected text
-   SciMsg( pSci, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(strText)))
+   SciMsg( pSci, SCI_REPLACESEL, 0, cast(LPARAM, strptr(strText)))
 
-   Function = 0
-End Function
+   function = 0
+end function
 
 ''
 ''
-Function clsDocument.SetMarkerHighlight() As Long
+function clsDocument.SetMarkerHighlight() as long
    ' Set a marker that will highlight the background of the current selection. This
    ' is used when we are attempting to search a selection. We want the current search
    ' area to be a different color than the regular highlighted text because any
@@ -893,151 +956,154 @@ Function clsDocument.SetMarkerHighlight() As Long
    ' to stand out from the selected range.
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    SciMsg( pSci, SCI_MARKERDELETEALL, 10, 0) ' Remove any existing before drawing the new highlight
-   Dim As Long startPos, endPos, startLine, endLine
+   dim as long startPos, endPos, startLine, endLine
    this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
-   if endLine <> startLine THEN
+   if endLine <> startLine then
       SciMsg( pSci, SCI_MARKERDEFINE, 10, SC_MARK_BACKGROUND )  ' define as marker #10
       SciMsg( pSci, SCI_SETMARGINMASKN, 4, &H400 )   ' set margin mask to allow SC_MARK_BACKGROUND 
       for i as long = startLine to endLine
          function = SciMsg( pSci, SCI_MARKERADD, i, 10)    ' add defined marker #10 to each line
-      NEXT
-      SciMsg( pSci, SCI_MARKERSETBACK, 10, BGR(220,220,220)) ' set backcolor of marker #10 
-   END IF
-End Function
+      next
+      ' set backcolor of marker #10 
+      dim pTheme as THEME_TYPE ptr = getThemePtr("editor.selection")
+      dim as COLORREF clr = pTheme->background 
+      SciMsg( pSci, SCI_MARKERSETBACK, 10, clr) 
+   end if
+end function
 
 ''
 ''
-Function clsDocument.RemoveMarkerHighlight() As Long
+function clsDocument.RemoveMarkerHighlight() as long
    ' Remove any markers that were set in the document that signify a highlighted range.
    ' This is used when we are attempting to search a selection. 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    function = SciMsg( pSci, SCI_MARKERDELETEALL, 10, 0)  ' delete all marker #10
-End Function
+end function
 
 ''
 ''
-Function clsDocument.FirstMarkerHighlight() As long
+function clsDocument.FirstMarkerHighlight() as long
    ' Get the first line with marker #10 highlight
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    dim as long markerMask 
-   markerMask = Bitset(markerMask, 10)
-   function = SciMsg( pSci, SCI_MARKERNEXT, 0, markerMask)
-End Function
+   markerMask = bitset(markerMask, 10)
+   function = SciMsg( pSci, SCI_MARKERnext, 0, markerMask)
+end function
 
 ''
 ''
-Function clsDocument.LastMarkerHighlight() As long
+function clsDocument.LastMarkerHighlight() as long
    ' Get the first line with marker #10 highlight
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    dim as long nLastPos = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
    dim as long nLastLine = SciMsg( pSci, SCI_LINEFROMPOSITION, nLastPos, 0)
    dim as long markerMask 
-   markerMask = Bitset(markerMask, 10)
+   markerMask = bitset(markerMask, 10)
    function = SciMsg( pSci, SCI_MARKERPREVIOUS, nLastLine, markerMask)
-End Function
+end function
 
 ''
 ''
-Function clsDocument.HasMarkerHighlight() As BOOLEAN
-   ' True/False if selection markers exist in the document search for marker #10
+function clsDocument.HasMarkerHighlight() as boolean
+   ' true/False if selection markers exist in the document search for marker #10
    function = iif(this.FirstMarkerHighlight = -1, false, true)
-End Function
+end function
 
 ''
 ''
-Function clsDocument.GetCurrentLineNumber() As Long
+function clsDocument.GetCurrentLineNumber() as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim nPos As Long = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
-   Function = SciMsg( pSci, SCI_LINEFROMPOSITION, nPos, 0)
-End Function
+   dim nPos as long = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
+   function = SciMsg( pSci, SCI_LINEFROMPOSITION, nPos, 0)
+end function
 
 ''
 ''
-Function clsDocument.SelectLine( ByVal nLineNum As Long ) As Long
-   ' Select the incoming nLineNum. If nLineNum is negative then select the current line
+function clsDocument.SelectLine( byval nLineNum as long ) as long
+   ' select the incoming nLineNum. if nLineNum is negative then select the current line
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   nLineNum = Iif( nLineNum < 0, this.GetCurrentLineNumber, nLineNum)
-   Dim nStartPos As Long = SciMsg( pSci, SCI_POSITIONFROMLINE, nLineNum, 0)
-   Dim nEndPos   As Long = SciMsg( pSci, SCI_GETLINEENDPOSITION, nLineNum, 0)
+   nLineNum = iif( nLineNum < 0, this.GetCurrentLineNumber, nLineNum)
+   dim nStartPos as long = SciMsg( pSci, SCI_POSITIONFROMLINE, nLineNum, 0)
+   dim nEndPos   as long = SciMsg( pSci, SCI_GETLINEENDPOSITION, nLineNum, 0)
    SciMsg( pSci, SCI_SETSELECTIONSTART, nStartPos, 0)
    SciMsg( pSci, SCI_SETSELECTIONEND, nEndPos, 0)
-   Function = 0
-End Function
+   function = 0
+end function
 
 ''
 ''
-Function clsDocument.GetLine( ByVal nLine As Long) As String
+function clsDocument.GetLine( byval nLine as long ) as string
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim nLen   As Long
-   Dim buffer As String
+   dim nLen   as long
+   dim buffer as string
    nLen = SciMsg( pSci, SCI_LINELENGTH, nLine , 0)
-   If nLen < 1 Then Exit Function
-   buffer = Space(nLen)
-   SciMsg( pSci, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
-   Function = Rtrim(buffer, Any Chr(13,10,0))
-End Function
+   if nLen < 1 then exit function
+   buffer = space(nLen)
+   SciMsg( pSci, SCI_GETLINE, nLine, cast(LPARAM, strptr(buffer)))
+   function = rtrim(buffer, any chr(13,10,0))
+end function
 
 ''
 ''
-Function clsDocument.SetLine( ByVal nLineNum As Long, byval sText as string) As long
+function clsDocument.SetLine( byval nLineNum as long, byval sText as string) as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim nStartPos As Long = SciMsg( pSci, SCI_POSITIONFROMLINE, nLineNum, 0)
-   Dim nEndPos   As Long = SciMsg( pSci, SCI_GETLINEENDPOSITION, nLineNum, 0)
+   dim nStartPos as long = SciMsg( pSci, SCI_POSITIONFROMLINE, nLineNum, 0)
+   dim nEndPos   as long = SciMsg( pSci, SCI_GETLINEENDPOSITION, nLineNum, 0)
    SciMsg( pSci, SCI_SETTARGETSTART, nStartPos, 0)
    SciMsg( pSci, SCI_SETTARGETEND, nEndPos, 0)
-   SciMsg( pSci, SCI_REPLACETARGET, Len(sText), Cast(LPARAM, Strptr(sText))) 
+   SciMsg( pSci, SCI_REPLACETARGET, len(sText), cast(LPARAM, strptr(sText))) 
    function = 0
-End Function
+end function
 
 ''
 ''
-Function clsDocument.GetSelText() As String
+function clsDocument.GetSelText() as string
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim nLen As Long
-   Dim buffer As String
+   dim nLen as long
+   dim buffer as string
    nLen = SciMsg( pSci, SCI_GETSELTEXT, 0, 0)
-   If nLen < 1 Then Exit Function
-   buffer = Space(nLen)
-   SciMsg( pSci, SCI_GETSELTEXT, 0, Cast(LPARAM, Strptr(buffer)))
-   Function = Trim(buffer, Chr(0))
-End Function
+   if nLen < 1 then exit function
+   buffer = space(nLen)
+   SciMsg( pSci, SCI_GETSELTEXT, 0, cast(LPARAM, strptr(buffer)))
+   function = trim(buffer, chr(0))
+end function
 
 ''
 ''
-Function clsDocument.GetText() As String
+function clsDocument.GetText() as string
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim nLen   As Long
-   Dim buffer As String
+   dim nLen   as long
+   dim buffer as string
    nLen = SciMsg( pSci, SCI_GETLENGTH, 0 , 0)
-   If nLen < 1 Then Exit Function
-   buffer = Space(nLen+1)
-   SciMsg( pSci, SCI_GETTEXT, nLen+1, Cast(LPARAM, Strptr(buffer)) )
-   Function = Trim(buffer, Chr(0))
-End Function
+   if nLen < 1 then exit function
+   buffer = space(nLen+1)
+   SciMsg( pSci, SCI_GETTEXT, nLen+1, cast(LPARAM, strptr(buffer)) )
+   function = trim(buffer, chr(0))
+end function
 
 ''
 ''
-Function clsDocument.SetText( ByRef sText As Const String ) As Long 
+function clsDocument.SetText( byref sText as const string ) as long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   SciMsg( pSci, SCI_SETTEXT, 0, Cast(LPARAM, Strptr(sText)) )
+   SciMsg( pSci, SCI_SETTEXT, 0, cast(LPARAM, strptr(sText)) )
    SciMsg( pSci, SCI_COLOURISE, 0, -1 )
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.AppendText( ByRef sText As Const String ) As Long 
+function clsDocument.AppendText( byref sText as const string ) as long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   SciMsg( pSci, SCI_APPENDTEXT, len(sText), Cast(LPARAM, Strptr(sText)) )
+   SciMsg( pSci, SCI_APPENDTEXT, len(sText), cast(LPARAM, strptr(sText)) )
    SciMsg( pSci, SCI_COLOURISE, 0, -1 )
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.CenterCurrentLine() As Long 
+function clsDocument.CenterCurrentLine() as long 
    ' Center the current line to the middle of the visible screen. This is useful
    ' when searching and finding text. The found text will always display in the 
    ' middle of the screen. 
@@ -1046,8 +1112,8 @@ Function clsDocument.CenterCurrentLine() As Long
    dim as long numLinesOnScreen = SciMsg( pSci, SCI_LINESONSCREEN, 0, 0)
    dim as long nMiddle = (this.GetCurrentLineNumber - (numLinesOnScreen / 2) + 1)
    SciMsg( pSci, SCI_SETFIRSTVISIBLELINE, nMiddle, 0)
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 
@@ -1073,58 +1139,59 @@ function clsDocument.IsFunctionLine( byval lineNum as long ) as long
    lineText = ltrim(ucase( AfxStrShrink(lineText, chr(32,9)) ))
    if len( lineText ) < 4 then exit function
       
-   If Left( lineText, 9 ) = "FUNCTION " then
-      ' bypass any line with = that is a "FUNCTION = " line.
+   if left( lineText, 9 ) = "FUNCTION " then
+      ' bypass any line with = that is a "function = " line.
       dim as string subText = ltrim( mid(lineText, 9) )
       if left( subText, 1 ) <> "=" then position = 10
-   elseif Left(lineText, 17) = "PRIVATE FUNCTION " then
+   elseif left(lineText, 17) = "PRIVATE FUNCTION " then
       position = 18   
-   elseif Left(lineText, 16) = "PUBLIC FUNCTION " then
+   elseif left(lineText, 16) = "PUBLIC FUNCTION " then
       position = 17
-   elseif Left(lineText, 4)  = "SUB " then
+   elseif left(lineText, 4)  = "SUB " then
       position = 5
-   elseif Left(lineText, 12) = "PRIVATE SUB " Then
+   elseif left(lineText, 12) = "PRIVATE SUB " then
       position = 13
-   elseif Left(lineText, 11) = "PUBLIC SUB " then
+   elseif left(lineText, 11) = "PUBLIC SUB " then
       position = 12
-   ElseIf Left(lineText, 9)  = "PROPERTY " Then
+   elseif left(lineText, 9)  = "PROPERTY " then
       ' bypass any line with = that is a "PROPERTY = " line.
       dim as string subText = ltrim( mid(lineText, 9) )
       if left( subText, 1 ) <> "=" then position = 10
-   ElseIf Left(lineText, 17) = "PRIVATE PROPERTY " Then
+   elseif left(lineText, 17) = "PRIVATE PROPERTY " then
       position = 18
-   ElseIf Left(lineText, 12) = "CONSTRUCTOR " Then
+   elseif left(lineText, 12) = "CONSTRUCTOR " then
       position = 13
-   ElseIf Left(lineText, 11) = "DESTRUCTOR " Then
+   elseif left(lineText, 11) = "DESTRUCTOR " then
       position = 12
       
-   ' If we encounter one of these END statements then our cursor must 
+   ' if we encounter one of these end statements then our cursor must 
    ' be positioned between functions (ie we're at the module level).   
-   ElseIf Left(lineText, 12) = "END FUNCTION" Then
+   elseif left(lineText, 12) = "END FUNCTION" then
       position = -1
-   ElseIf Left(lineText, 7)  = "END SUB" Then
+   elseif left(lineText, 7)  = "END SUB" then
       position = -1
-   ElseIf Left(lineText, 15) = "END CONSTRUCTOR" Then
+   elseif left(lineText, 15) = "END CONSTRUCTOR" then
       position = -1
-   ElseIf Left(lineText, 14) = "END DESTRUCTOR" Then
+   elseif left(lineText, 14) = "END DESTRUCTOR" then
       position = -1
-   ElseIf Left(lineText, 12) = "END PROPERTY" Then
+   elseif left(lineText, 12) = "END PROPERTY" then
       position = -1
 
-   End If
+   end if
 
    function = position
-End Function
+end function
 
 
 ' ========================================================================================
 ' Determine the sub/function name based on the current editing position 
 ' within the file. This is needed by CodeTips (DereferenceLine) and for code navigation
-' in the editor to set the Functions ComboBox to the correct item.
+' in the editor to set the functions ComboBox to the correct item.
 ' ========================================================================================
-Function clsDocument.GetCurrentFunctionName( byref sFunctionName as string, _
-                                             byref nGetSet as ClassProperty _
-                                             ) As long
+function clsDocument.GetCurrentfunctionName( _
+            byref sfunctionName as string, _
+            byref nGetSet as ClassProperty _
+            ) as long
     
    dim as string lineText
    dim as string funcName 
@@ -1138,11 +1205,11 @@ Function clsDocument.GetCurrentFunctionName( byref sFunctionName as string, _
    nGetSet = ClassProperty.None
    
    for i as long = curLine to 0 step -1
-      position = this.IsFunctionLine( i )
+      position = this.IsfunctionLine( i )
       
       if position = -1 then 
-         ' We found an "END SUB", "END FUNCTION", "END PROPERTY" line. Keep looking for 
-         ' the very next instance of SUB/FUNCTION and then break out of loop
+         ' We found an "end SUB", "end function", "end PROPERTY" line. Keep looking for 
+         ' the very next instance of SUB/function and then break out of loop
          ' with that function name.
          if i = this.GetCurrentLineNumber then 
             continue for
@@ -1154,21 +1221,21 @@ Function clsDocument.GetCurrentFunctionName( byref sFunctionName as string, _
          ' Just a regular line... keep looking...
       
       elseif position > 0 then
-         ' We found a valid SUB/FUNCTION line so process it
+         ' We found a valid SUB/function line so process it
          ' trim and remove double spaces and replace TABs with single space
          lineText = ltrim(ucase( AfxStrShrink(this.GetLine(i), chr(32,9)) ))
          funcName = ltrim(mid(lineText, position))
          funcName = AfxStrParseAny( funcName, 1, " (" )
          
-         ' If this is a Property then we need to differentiate between a Get/Set
-         If ( Left(lineText, 9)  = "PROPERTY " ) orelse _
-            ( Left(lineText, 17) = "PRIVATE PROPERTY " ) Then
+         ' if this is a Property then we need to differentiate between a Get/Set
+         if ( left(lineText, 9)  = "PROPERTY " ) orelse _
+            ( left(lineText, 17) = "PRIVATE PROPERTY " ) then
             ' if funcParams exist then this must be a Set property. Need to sanitize the
             ' property parameters first. Need to get the starting ( and the ending ) and
             ' evaluate the text between it. Not as easy as using Parse because there could
             ' be embedded array() parameters and the property could end in something like 
-            ' AS LONG, etc.
-            dim as String st
+            ' as long, etc.
+            dim as string st
             dim as string sFuncParams = lineText
             dim as long p1, p2
             p1 = instr( sFuncParams, "(" )
@@ -1185,37 +1252,36 @@ Function clsDocument.GetCurrentFunctionName( byref sFunctionName as string, _
                nGetSet = ClassProperty.Getter
             end if
 
-         elseIf ( Left(lineText, 12)  = "CONSTRUCTOR " ) then
+         elseif ( left(lineText, 12)  = "CONSTRUCTOR " ) then
             nGetSet = ClassProperty.ctor
             
-         elseIf ( Left(lineText, 11)  = "DESTRUCTOR " ) then
+         elseif ( left(lineText, 11)  = "DESTRUCTOR " ) then
             nGetSet = ClassProperty.dtor
          end if   
 
          exit for
       end if
-   NEXT
+   next
 
-   sFunctionName = funcName
+   sfunctionName = funcName
    nGetSet = nGetSet
    
    function = 0
-End Function
+end function
 
 
 ''
-''  GotoNextFunction
+''  Gotonextfunction
 ''
 ''  Go to the next sub/function in the document
 ''
 function clsDocument.GotoNextFunction() as long
-   
    dim as long curLine  = this.GetCurrentLineNumber
    dim as long maxLines = this.GetLineCount - 1
    dim as long newLine  = curLine
    
    for i as long = curLine + 1 to maxLines
-      if this.IsFunctionLine( i ) > 0 then
+      if this.IsfunctionLine( i ) > 0 then
          newLine = i
          exit for
       end if
@@ -1233,12 +1299,11 @@ end function
 
 
 ''
-''  GotoPrevFunction
+''  GotoPrevfunction
 ''
 ''  Go to the previous sub/function in the document
 ''
 function clsDocument.GotoPrevFunction() as long
-   
    dim as long curLine  = this.GetCurrentLineNumber
    dim as long newLine  = curLine
    
@@ -1262,11 +1327,12 @@ end function
 
 ''
 ''
-Function clsDocument.GetSelectedLineRange( ByRef startLine As Long, _
-                                           ByRef endLine   As Long, _
-                                           ByRef startPos  As Long, _
-                                           ByRef endPos    As Long _
-                                           ) As Long 
+function clsDocument.GetSelectedLineRange( _
+            byref startLine as long, _
+            byref endLine   as long, _
+            byref startPos  as long, _
+            byref endPos    as long _
+            ) as long 
    
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    startPos  = SciMsg( pSci, SCI_GETSELECTIONSTART, 0, 0) 
@@ -1274,93 +1340,92 @@ Function clsDocument.GetSelectedLineRange( ByRef startLine As Long, _
    startLine = SciMsg( pSci, SCI_LINEFROMPOSITION, startPos, 0) 
    endLine   = SciMsg( pSci, SCI_LINEFROMPOSITION, endPos, 0) 
 
-   Dim nCol As Long = SciMsg( pSci, SCI_GETCOLUMN, endPos, 0)
-   If (nCol = 0) And (endLine > startLine) Then endLine = endLine - 1
+   dim nCol as long = SciMsg( pSci, SCI_GETCOLUMN, endPos, 0)
+   if (nCol = 0) and (endLine > startLine) then endLine = endLine - 1
 
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
-
-   Dim i           As Long        ' Loop counter
-   Dim firstPos    As Long        ' Starting position of the line
-   Dim startPos    As Long        ' Starting position of selection
-   Dim endPos      As Long        ' Ending position of selection
-   Dim startLine   As Long        ' Starting line number
-   Dim endLine     As Long        ' Ending line number
-   Dim nPos        As Long        ' Position
-   Dim strText     As String      ' Portion of the line to replace
-   Dim strNewText  As String      ' New text to insert or delete
-   Dim nCount      As Long        ' Number of "'" added or removed
+function clsDocument.BlockComment( byval flagBlock as boolean ) as long
+   dim i           as long        ' loop counter
+   dim firstPos    as long        ' Starting position of the line
+   dim startPos    as long        ' Starting position of selection
+   dim endPos      as long        ' Ending position of selection
+   dim startLine   as long        ' Starting line number
+   dim endLine     as long        ' Ending line number
+   dim nPos        as long        ' Position
+   dim strText     as string      ' Portion of the line to replace
+   dim strNewText  as string      ' new text to insert or delete
+   dim nCount      as long        ' Number of "'" added or removed
    
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   ' flagBlock = True for Blocking comment, False for UnBlocking comment
+   ' flagBlock = true for Blocking comment, false for UnBlocking comment
    this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
    
-   gApp.SuppressNotify = True
+   gApp.SuppressNotify = true
    SetWindowRedraw( this.hWndActiveScintilla, false )
    SciMsg( pSci, SCI_BEGINUNDOACTION, 0, 0)
-   For i = startLine To endLine
+   for i = startLine to endLine
       strText = this.GetLine(i)   
-      If flagBlock = False Then   
+      if flagBlock = false then   
          ' unblock comment
-         If Left(strText, 1) <> "'" Then
-            Continue For
-         Else   
+         if left(strText, 1) <> "'" then
+            continue For
+         else   
             firstpos = SciMsg( pSci, SCI_POSITIONFROMLINE, i, 0 )
-            SciMsg( pSci, SCI_DELETERANGE, firstpos, Cast(LPARAM, 1) )
-         End If
+            SciMsg( pSci, SCI_DELETERANGE, firstpos, cast(LPARAM, 1) )
+         end if
          nCount += 1
-      Else
+      else
          ' block comment
-         If Len(rtrim(strText)) Then
+         if len(rtrim(strText)) then
             strNewText = "'"
             firstpos = SciMsg( pSci, SCI_POSITIONFROMLINE, i, 0 )
-            SciMsg( pSci, SCI_INSERTTEXT, firstpos, Cast(LPARAM, Strptr(strNewText)) )
+            SciMsg( pSci, SCI_INSERTTEXT, firstpos, cast(LPARAM, strptr(strNewText)) )
             nCount += 1
          end if   
-      End If
-   Next
+      end if
+   next
    SciMsg( pSci, SCI_ENDUNDOACTION, 0, 0)
 
-   If startPos <> endPos Then
+   if startPos <> endPos then
       SciMsg( pSci, SCI_SETSELECTIONSTART, startPos, 0)
-      SciMsg( pSci, SCI_SETSELECTIONEND, endPos + Iif(flagBlock, nCount, -nCount), 0)
-   Else
-      SciMsg( pSci, SCI_SETSELECTIONSTART, endPos + Iif(flagBlock, nCount, -nCount), 0)
-      SciMsg( pSci, SCI_SETSELECTIONEND, endPos + Iif(flagBlock, nCount, -nCount), 0)
-   End If
+      SciMsg( pSci, SCI_SETSELECTIONEND, endPos + iif(flagBlock, nCount, -nCount), 0)
+   else
+      SciMsg( pSci, SCI_SETSELECTIONSTART, endPos + iif(flagBlock, nCount, -nCount), 0)
+      SciMsg( pSci, SCI_SETSELECTIONEND, endPos + iif(flagBlock, nCount, -nCount), 0)
+   end if
 
    SetWindowRedraw( this.hWndActiveScintilla, true )
-   gApp.SuppressNotify = False
+   gApp.SuppressNotify = false
    AfxRedrawWindow( this.hWndActiveScintilla )
    
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.CurrentLineUp() As Long
+function clsDocument.CurrentLineUp() as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim currentLine As Long = this.GetCurrentLineNumber()
-   If (currentLine <> 0) Then
+   dim currentLine as long = this.GetCurrentLineNumber()
+   if (currentLine <> 0) then
       SciMsg( pSci, SCI_BEGINUNDOACTION, 0, 0)
       currentLine = currentLine -1
       SciMsg( pSci, SCI_LINETRANSPOSE, 0, 0)
       SciMsg( pSci, SCI_GOTOLINE, currentLine, 0)
       SciMsg( pSci, SCI_ENDUNDOACTION, 0, 0)
-   End If
-   Function = 0
-End Function
+   end if
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.GetLineCount() As Long
+function clsDocument.GetLineCount() as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    function = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
 end function
@@ -1368,123 +1433,123 @@ end function
 
 ''
 ''
-Function clsDocument.CurrentLineDown() As Long
+function clsDocument.CurrentLineDown() as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim currentLine As Long = this.GetCurrentLineNumber()
-   If currentLine <> SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) - 1 Then
+   dim currentLine as long = this.GetCurrentLineNumber()
+   if currentLine <> SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) - 1 then
       SciMsg( pSci, SCI_BEGINUNDOACTION, 0, 0)
       currentLine = currentLine + 1
       SciMsg( pSci, SCI_GOTOLINE, currentLine, 0)
       SciMsg( pSci, SCI_LINETRANSPOSE, 0, 0)
       SciMsg( pSci, SCI_ENDUNDOACTION, 0, 0)
-   End If
-   Function = 0
-End Function
+   end if
+   function = 0
+end function
   
 ''
 ''
-Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
+function clsDocument.MoveCurrentLines( byval flagMoveDown as boolean ) as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   If flagMoveDown Then
+   if flagMoveDown then
       SciMsg( pSci, SCI_MOVESELECTEDLINESDOWN, 0, 0)
    else   
       SciMsg( pSci, SCI_MOVESELECTEDLINESUP, 0, 0)
    end if
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.NewLineBelowCurrent() As Long
+function clsDocument.NewLineBelowCurrent() as long
    ' From anywhere on the current line creates a new line immediately
    ' below the current line and positions the cursor to the start of
    ' that new line.
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    SciMsg( pSci, SCI_LINEEND, 0, 0)
    SciMsg( pSci, SCI_NEWLINE, 0, 0)
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.ToggleBookmark( ByVal nLine As Long ) As Long
+function clsDocument.ToggleBookmark( byval nLine as long ) as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim fMark As Long  ' must be a 32 bit value
+   dim fMark as long  ' must be a 32 bit value
    fMark = SciMsg( pSci, SCI_MARKERGET, nLine, 0) 
-   If Bit(fMark, 0) = -1 Then
+   if bit(fMark, 0) = -1 then
       SciMsg( pSci, SCI_MARKERDELETE, nLine, 0)
-   Else
+   else
       SciMsg( pSci, SCI_MARKERADD, nLine, 0)
-   End If
-   Function = 0
-End Function
+   end if
+   function = 0
+end function
 
 ''
 ''
-Function clsDocument.NextBookmark() As Long 
+function clsDocument.nextBookmark() as long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim fMark As Long  ' 32 bit value
-   Dim nLine As Long = this.GetCurrentLineNumber() + 1
-   fMark = BitSet(fMark, 0)
-   nLine = SciMsg( pSci, SCI_MARKERNEXT, nLine, fMark)
-   If nLine > -1 Then
+   dim fMark as long  ' 32 bit value
+   dim nLine as long = this.GetCurrentLineNumber() + 1
+   fMark = bitset(fMark, 0)
+   nLine = SciMsg( pSci, SCI_MARKERnext, nLine, fMark)
+   if nLine > -1 then
       SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
-   Else
-      nLine = SciMsg( pSci, SCI_MARKERNEXT, nLine, fMark)
-      If nLine > -1 Then
+   else
+      nLine = SciMsg( pSci, SCI_MARKERnext, nLine, fMark)
+      if nLine > -1 then
          SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
-      End If
-   End If
-   Function = 0 
-End Function
+      end if
+   end if
+   function = 0 
+end function
 
 ''
 ''
-Function clsDocument.PrevBookmark() As Long 
+function clsDocument.PrevBookmark() as long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim fMark  As Long  ' 32 bit value
-   Dim nLine  As Long = this.GetCurrentLineNumber() - 1
-   Dim nLines As Long = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) - 1
-   fMark = BitSet(fMark, 0)
+   dim fMark  as long  ' 32 bit value
+   dim nLine  as long = this.GetCurrentLineNumber() - 1
+   dim nLines as long = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) - 1
+   fMark = bitset(fMark, 0)
    nLine = SciMsg( pSci, SCI_MARKERPREVIOUS, nLine, fMark)
-   If nLine > -1 Then
+   if nLine > -1 then
       SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
-   Else
+   else
       nLine = SciMsg( pSci, SCI_MARKERPREVIOUS, nLines, fMark)
-      If nLine > -1 Then
+      if nLine > -1 then
          SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
-      End If
-   End If
-   Function = 0 
-End Function
+      end if
+   end if
+   function = 0 
+end function
 
 ''
 ''   
-Function clsDocument.FoldToggle( ByVal nLine As Long ) As Long
+function clsDocument.FoldToggle( byval nLine as long ) as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim nFoldLevel As Long = SciMsg( pSci, SCI_GETFOLDLEVEL, nLine, 0)
+   dim nFoldLevel as long = SciMsg( pSci, SCI_GETFOLDLEVEL, nLine, 0)
 
-   If (nFoldLevel And SC_FOLDLEVELHEADERFLAG) = 0 Then
+   if (nFoldLevel and SC_FOLDLEVELHEADERFLAG) = 0 then
       ' Get the number of the head line of the procedure or function
       nLine = SciMsg( pSci, SCI_GETFOLDPARENT, nLine, 0) 
-   End If
-   If nLine > -1 Then
+   end if
+   if nLine > -1 then
       SciMsg( pSci, SCI_TOGGLEFOLD, nLine, 0) 
       SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
-   End If
+   end if
 
-   Function = nLine
-End Function
+   function = nLine
+end function
 
 ''
 ''
-Function clsDocument.FoldAll() As Long
+function clsDocument.FoldAll() as long
 
-   Dim i          As Long    
-   Dim nLines     As Long    
-   Dim nFoldLevel As Long
+   dim i          as long    
+   dim nLines     as long    
+   dim nFoldLevel as long
    
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Force the lexer to style the whole document
@@ -1492,26 +1557,25 @@ Function clsDocument.FoldAll() As Long
 
    nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
 
-   For i = 0 To nLines
-      ' If we are in the head line ...
+   for i = 0 to nLines
+      ' if we are in the head line ...
       nFoldLevel = SciMsg( pSci, SCI_GETFOLDLEVEL, i, 0)
-      If (nFoldLevel And SC_FOLDLEVELNUMBERMASK) = SC_FOLDLEVELBASE Then
-         If SciMsg( pSci, SCI_GETFOLDEXPANDED, i, 0) Then
+      if (nFoldLevel and SC_FOLDLEVELNUMBERMASK) = SC_FOLDLEVELBASE then
+         if SciMsg( pSci, SCI_GETFOLDEXPANDED, i, 0) then
             SciMsg( pSci, SCI_TOGGLEFOLD, i, 0) 
-         End If
-      End If
-   Next
+         end if
+      end if
+   next
 
-   Function = 0
-End Function
+   function = 0
+end function
 
 ''
 ''
-Function clsDocument.UnFoldAll() As Long
-
-   Dim i          As Long    
-   Dim nLines     As Long    
-   Dim nFoldLevel As Long
+function clsDocument.UnFoldAll() as long
+   dim i          as long    
+   dim nLines     as long    
+   dim nFoldLevel as long
    
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Force the lexer to style the whole document
@@ -1519,28 +1583,28 @@ Function clsDocument.UnFoldAll() As Long
 
    nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
 
-   For i = 0 To nLines
-      ' If we are in the head line ...
+   for i = 0 to nLines
+      ' if we are in the head line ...
       nFoldLevel = SciMsg( pSci, SCI_GETFOLDLEVEL, i, 0)
-      If (nFoldLevel And SC_FOLDLEVELNUMBERMASK) = SC_FOLDLEVELBASE Then
-         If SciMsg( pSci, SCI_GETFOLDEXPANDED, i, 0) = 0 Then
+      if (nFoldLevel and SC_FOLDLEVELNUMBERMASK) = SC_FOLDLEVELBASE then
+         if SciMsg( pSci, SCI_GETFOLDEXPANDED, i, 0) = 0 then
             SciMsg( pSci, SCI_TOGGLEFOLD, i, 0) 
-         End If
-      End If
-   Next
+         end if
+      end if
+   next
 
-   Function = 0
-End Function
+   function = 0
+end function
 
 ''
 ''
-Function clsDocument.FoldToggleOnwards( ByVal nLine As Long) As Long
-
-   ' Toggles the curent fold point and, if it is a base level, all the base level fold points below.
-   Dim i          As Long    
-   Dim nLines     As Long    
-   Dim nFoldLevel As Long
-   Dim FoldState  As Long
+function clsDocument.FoldToggleOnwards( byval nLine as long) as long
+   ' Toggles the curent fold point and all folds below it that are of greater depth
+   dim i          as long    
+   dim nLines     as long    
+   dim nFoldLevel as long
+   dim nFoldLevelBase as long
+   dim FoldState  as long
    
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Force the lexer to style the whole document
@@ -1550,184 +1614,188 @@ Function clsDocument.FoldToggleOnwards( ByVal nLine As Long) As Long
 
    ' Toggle the first sub or function
    nLine = this.FoldToggle(nLine)
+   nFoldLevelBase = SciMsg( pSci, SCI_GETFOLDLEVEL, nLine, 0)
    
    ' Determine whether the fold is expanded or not
    FoldState = SciMsg( pSci, SCI_GETFOLDEXPANDED, nLine, 0)
 
-   For i = nLine To nLines
-      ' If we are in the head line
+   for i = nLine to nLines
       nFoldLevel = SciMsg( pSci, SCI_GETFOLDLEVEL, i, 0)
-      If (nFoldLevel And SC_FOLDLEVELNUMBERMASK) = SC_FOLDLEVELBASE Then
-         ' If the state is different ...
-         If SciMsg( pSci, SCI_GETFOLDEXPANDED, i, 0) <> FoldState Then
+      if nFoldLevel > nFoldLevelBase then
+         ' if the state is different ...
+         if SciMsg( pSci, SCI_GETFOLDEXPANDED, i, 0) <> FoldState then
             SciMsg( pSci, SCI_TOGGLEFOLD, i, 0) 
-         End If
-      End If
-   Next
+         end if
+      end if
+   next
 
-   Function = 0
-End Function
+   function = 0
+end function
 
 ''
 ''
-Function clsDocument.ConvertEOL( ByVal nMode As Long) As Long
+function clsDocument.ConvertEOL( byval nMode as long) as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Function = SciMsg( pSci, SCI_CONVERTEOLS, nMode, 0)
-End Function
+   function = SciMsg( pSci, SCI_CONVERTEOLS, nMode, 0)
+   SciMsg( pSci, SCI_SETEOLMODE, nMode, 0)
+end function
 
 ''
 ''
-Function clsDocument.TabsToSpaces() As Long
-
+function clsDocument.TabsToSpaces() as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   Dim As Long i, n, nLen, nLines, TabSize, nLineNumber 
-   Dim As String strText, strBuffer
+   dim as long i, n, nLen, nLines, TabSize, nLineNumber 
+   dim as string strText, strBuffer
 
    ' Get the current line
    nLineNumber = this.GetCurrentLineNumber
    ' Get the tab size
    TabSize = SciMsg( pSci, SCI_GETTABWIDTH, 0, 0)
-   If TabSize < 1 Then Exit Function
+   if TabSize < 1 then exit function
    ' Get the length of the text
    nLen  = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0) 
    ' Get the number of lines
    nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
    ' Remove tabs, line by line
-   For i = 0 To nLines - 1
+   for i = 0 to nLines - 1
       strText = this.GetLine(i)
       n = 1
       Do
-         n = Instr(n, strText, Chr(9))
-         If n > 0 Then 
-            strText = Left(strText, n - 1) & Space(TabSize) & Mid(strText, n + 1)
+         n = instr(n, strText, chr(9))
+         if n > 0 then 
+            strText = left(strText, n - 1) & space(TabSize) & mid(strText, n + 1)
             n += 1
-         End If   
-      Loop Until n = 0
-      strBuffer = strBuffer & strText & Chr(13,10)
-   Next
+         end if   
+      loop until n = 0
+      strBuffer = strBuffer & strText & chr(13,10)
+   next
    ' Set the new text
    this.SetText(strBuffer)
    ' Set the caret position
    SciMsg( pSci, SCI_GOTOLINE, nLineNumber, 0) 
 
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.IsMultiLineSelection() As boolean
+function clsDocument.IsMultiLineSelection() as boolean
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    dim as long startPos, endPos, startLine, endLine
    startPos  = SciMsg( pSci, SCI_GETSELECTIONSTART, 0, 0) 
    endPos    = SciMsg( pSci, SCI_GETSELECTIONEND, 0, 0) 
    startLine = SciMsg( pSci, SCI_LINEFROMPOSITION, startPos, 0) 
    endLine   = SciMsg( pSci, SCI_LINEFROMPOSITION, endPos, 0) 
-   if endLine <> startLine THEN return true
+   if endLine <> startLine then return true
 end function
 
 
 ''
 ''
-Function clsDocument.ApplyProperties() As Long
-
-   Dim nCount      As Long 
-   Dim i           As Long
-   Dim nPixels     As Long  
-   Dim bitsNeeded  As Long 
-   Dim wFileExt    As WString * MAX_PATH
-   Dim strFontName As String 
-   Dim nFontSize   As Long  
-   Dim nFontCase   As Long 
-   Dim rxRatio     As Single = 1
-   Dim ryRatio     As Single = 1
-   dim pTheme      as TYPE_THEMES ptr
+function clsDocument.ApplyProperties() as long
+   dim nCount      as long 
+   dim i           as long
+   dim nPixels     as long  
+   dim bitsNeeded  as long 
+   dim wFileExt    as wstring * MAX_PATH
+   dim strFontName as string 
+   dim nFontExtraSpace as long  
+   dim nFontSize   as long  
+   dim nFontcase   as long 
+   dim rxRatio     as single = 1
+   dim ryRatio     as single = 1
    
-   If m_pSci(0) = 0 Then Exit Function
+   if m_pSci(0) = 0 then exit function
 
    ' Determine the pWindow parent of the Scintilla window in order
    ' to ensure that DPI ratios are correctly used.
-   Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(this.hWindow(0))
-   If pWindow Then
+   dim pWindow as CWindow ptr = AfxCWindowOwnerPtr(this.hWindow(0))
+   if pWindow then
       rxRatio = pWindow->rxRatio
       ryRatio = pWindow->ryRatio
-   End If   
+   end if   
    
-   ' If this is a read-only file then set the flag so that the document can not be edited.
+   ' if this is a read-only file then set the flag so that the document can not be edited.
    if AfxIsReadOnlyFile( this.DiskFilename ) then
       SciMsg( m_pSci(0), SCI_SETREADONLY, 1, 0)
    else
       SciMsg( m_pSci(0), SCI_SETREADONLY, 0, 0)
    end if
 
-   strFontName = Str(gConfig.EditorFontname)
-   nFontSize   = Val(gConfig.EditorFontsize)
+   strFontName = str(gConfig.EditorFontname)
+   nFontSize   = val(gConfig.EditorFontsize)
+   nFontExtraSpace = val(gConfig.FontExtraSpace)
    
-   Select Case gConfig.KeywordCase
-      Case 0:  nFontCase = SC_CASE_LOWER
-      Case 1:  nFontCase = SC_CASE_UPPER
-      Case 2:  nFontCase = SC_CASE_CAMEL   
-      Case 3:  nFontCase = SC_CASE_MIXED    ' original case
-   End Select            
+   select case gConfig.KeywordCase
+      case 0:  nFontcase = SC_CASE_LOWER
+      case 1:  nFontcase = SC_CASE_UPPER
+      case 2:  nFontcase = SC_CASE_CAMEL   
+      case 3:  nFontcase = SC_CASE_MIXED    ' original case
+   end select            
    
-
-   pTheme = gConfig.GetThemePtr
    
-
    ' Must apply all settings/styles to each Scintilla split window to ensure that
-   ' they all appear and act the same.
+   ' they all appear and act the same. 
+   dim pTheme as THEME_TYPE ptr
+   
    for i as long = lbound(m_pSci) to ubound(m_pSci)
-                         
-      ' Add Brace Highlighting Functionality:
+
+      ' Add Brace Highlighting functionality:
       ' First, we set the style of the indicator number we want to use to the Box style
       SciMsg( m_pSci(i), SCI_INDICSETSTYLE, 9, INDIC_STRAIGHTBOX )
-      ' Then, we make that indicator the current one
+      ' then, we make that indicator the current one
       SciMsg( m_pSci(i), SCI_SETINDICATORCURRENT, 9, 0 )
       ' Lastly, we apply the indicator (in this case), to a single char
       SciMsg( m_pSci(i), SCI_BRACEHIGHLIGHTINDICATOR, 1, 9 )  ' use indicator for SCI_BRACEHIGHLIGHTINDICATOR...
       SciMsg( m_pSci(i), SCI_BRACEBADLIGHTINDICATOR, 1, 9 )   ' and SCI_BRACEBADLIGHTINDICATOR
 
-      SciMsg( m_pSci(i), SCI_STYLESETFONT, STYLE_DEFAULT, Cast(LPARAM, Strptr(strFontName)) )
+      SciMsg( m_pSci(i), SCI_STYLESETFONT, STYLE_DEFAULT, cast(LPARAM, strptr(strFontName)) )
       SciMsg( m_pSci(i), SCI_STYLESETSIZE, STYLE_DEFAULT, nFontSize )
+      SciMsg( m_pSci(i), SCI_SETEXTRAASCENT, nFontExtraSpace, 0 )
+      SciMsg( m_pSci(i), SCI_SETEXTRADESCENT, nFontExtraSpace, 0 )
       SciMsg( m_pSci(i), SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, GetFontCharSetID(gConfig.EditorFontCharset) )
 
-      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).nFg)
-      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_DEFAULT, pTheme->colors(CLR_WINDOW).nFg)
-      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).bFontBold )
-      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).bFontItalic )
-      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).bFontUnderline )
+      pTheme = getThemePtr("editor.text")
+      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_DEFAULT, pTheme->foreground)
+      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_DEFAULT, pTheme->background)
+      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_DEFAULT, pTheme->bold )
+      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_DEFAULT, pTheme->italic )
+      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_DEFAULT, pTheme->underline )
       SciMsg( m_pSci(i), SCI_STYLECLEARALL, 0, 0 )  ' Copies global style to all others
           
       ' Set the style for the AutoComplete popup list
-      SciMsg( m_pSci(i), SCI_STYLESETFONT, STYLE_AUTOCOMPLETE, Cast(LPARAM, pWindow->DefaultFontName) )
+      SciMsg( m_pSci(i), SCI_STYLESETFONT, STYLE_AUTOCOMPLETE, cast(LPARAM, pWindow->DefaultFontName) )
       SciMsg( m_pSci(i), SCI_STYLESETSIZE, STYLE_AUTOCOMPLETE, pWindow->DefaultFontSize)
       SciMsg( m_pSci(i), SCI_STYLESETCHARACTERSET, STYLE_AUTOCOMPLETE, GetFontCharSetID(gConfig.EditorFontCharset) )
 
       ''
       ''  MARGIN 0: Line Numbering (defaults to width 0)
-      nPixels = SciMsg( m_pSci(i), SCI_TEXTWIDTH, 0, Cast(LPARAM, @"_99999"))
+      pTheme = getThemePtr("editor.linenumbers")
+      nPixels = SciMsg( m_pSci(i), SCI_TEXTWIDTH, 0, cast(LPARAM, @"_99999"))
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER )
-      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).nFg )
-      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).nBg )
-      SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 0, Iif(gConfig.LineNumbering, nPixels, 0) )
-      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).bFontBold )
-      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).bFontItalic )
-      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).bFontUnderline )
+      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_LINENUMBER, pTheme->foreground )
+      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_LINENUMBER, pTheme->background )
+      SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 0, iif(gConfig.LineNumbering, nPixels, 0) )
+      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_LINENUMBER, pTheme->bold )
+      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_LINENUMBER, pTheme->italic )
+      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_LINENUMBER, pTheme->underline )
    
       ''
       ''  MARGIN 1: Non-Folding symbols (defaults to width 16) (Bookmark symbol, etc) (will be same color as line numbering)
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 1, SC_MARGIN_TEXT )
       SciMsg( m_pSci(i), SCI_SETMARGINSENSITIVEN, 1, 1 )
-      SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 1, Iif(gConfig.LeftMargin, 16 * rxRatio, 0) )
+      SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 1, iif(gConfig.LeftMargin, 16 * rxRatio, 0) )
                  
       ''
       ''  MARGIN 2: Folding symbols (defaults to width 0)
+      pTheme = getThemePtr("editor.foldmargin")
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 2, SC_MARGIN_SYMBOL )
       SciMsg( m_pSci(i), SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS )
-      SciMsg( m_pSci(i), SCI_SETFOLDMARGINCOLOUR, CTRUE, pTheme->colors(CLR_FOLDMARGIN).nFg )
-      SciMsg( m_pSci(i), SCI_SETFOLDMARGINHICOLOUR, CTRUE, pTheme->colors(CLR_FOLDMARGIN).nFg )
+      SciMsg( m_pSci(i), SCI_SETFOLDMARGINCOLOUR, Ctrue, pTheme->foreground )
+      SciMsg( m_pSci(i), SCI_SETFOLDMARGINHICOLOUR, Ctrue, pTheme->foreground )
       SciMsg( m_pSci(i), SCI_SETMARGINSENSITIVEN, 2, 1 )
-      SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 2, Iif(gConfig.FoldMargin, 16 * rxRatio, 0) )
+      SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 2, iif(gConfig.FoldMargin, 16 * rxRatio, 0) )
 
       ''
       ''  MARGIN 3: Small margin to offset left margins from actual text (4 pixels)
@@ -1736,103 +1804,91 @@ Function clsDocument.ApplyProperties() As Long
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 3, SC_MARGIN_FORE )
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 3, SC_MARGIN_BACK )
              
-      '' 
-      ''  FONT QUALITY
-      ' Commented out v1.7.4 to see if bitmap .fon fonts will now work
-      'SciMsg( m_pSci(i), SCI_SETFONTQUALITY, SC_EFF_QUALITY_DEFAULT, 0 )
-      'SC_EFF_QUALITY_DEFAULT (backward compatible), SC_EFF_QUALITY_NON_ANTIALIASED, 
-      'SC_EFF_QUALITY_ANTIALIASED, SC_EFF_QUALITY_LCD_OPTIMIZED
-      
-      ' Commented out v1.7.4 to see if bitmap .fon fonts will now work
-      'SciMsg( m_pSci(i), SCI_SETTECHNOLOGY, SC_TECHNOLOGY_DIRECTWRITE, 0 )
-      'SciMsg( m_pSci(i), SCI_SETBUFFEREDDRAW, 0, 0 ) ' turn off b/c we are using Vista+ Direct Draw
-      
-      'SC_TECHNOLOGY_DEFAULT (0). 
-      'On Windows Vista or later, 
-      'SC_TECHNOLOGY_DIRECTWRITE (1), 
-      'SC_TECHNOLOGY_DIRECTWRITERETAIN (2), or 
-      'SC_TECHNOLOGY_DIRECTWRITEDC (3) 
-      
       ''
-      ''  CONFINE CARET TO TEXT
-      If gConfig.ConfineCaret Then
+      ''  CONFINE CARET to TEXT
+      if gConfig.ConfineCaret then
          SciMsg( m_pSci(i), SCI_SETVIRTUALSPACEOPTIONS, SCVS_RECTANGULARSELECTION, 0 )
-      Else
-         SciMsg( m_pSci(i), SCI_SETVIRTUALSPACEOPTIONS, SCVS_RECTANGULARSELECTION Or SCVS_USERACCESSIBLE, 0 )
-      End If
+      else
+         SciMsg( m_pSci(i), SCI_SETVIRTUALSPACEOPTIONS, SCVS_RECTANGULARSELECTION or SCVS_USERACCESSIBLE, 0 )
+      end if
    
       ''
-      ''  TABS AS SPACES
-      If gConfig.TabIndentSpaces Then
-         SciMsg( m_pSci(i), SCI_SETUSETABS, False, 0 )
-      Else
-         SciMsg( m_pSci(i), SCI_SETUSETABS, CTRUE, 0 )
-      End If
+      ''  TABS as SPACES
+      if gConfig.TabIndentSpaces then
+         SciMsg( m_pSci(i), SCI_SETUSETABS, false, 0 )
+      else
+         SciMsg( m_pSci(i), SCI_SETUSETABS, Ctrue, 0 )
+      end if
+
 
       ''
       ''  SELECTIONS FILL ENTIRE SCREEN SPACE
-      SciMsg( m_pSci(i), SCI_SETSELEOLFILLED, CTRUE, 0 )
+      SciMsg( m_pSci(i), SCI_SETSELEOLFILLED, Ctrue, 0 )
           
       ''
       ''  TAB WIDTH 
-      SciMsg( m_pSci(i), SCI_SETTABWIDTH, Val(gConfig.TabSize), 0 )
-      SciMsg( m_pSci(i), SCI_SETINDENT, Val(gConfig.TabSize), 0 )
+      SciMsg( m_pSci(i), SCI_SETTABWIDTH, val(gConfig.TabSize), 0 )
+      SciMsg( m_pSci(i), SCI_SETINDENT, val(gConfig.TabSize), 0 )
  
       ''
       ''  INDENTATION GUIDES
-      If gConfig.IndentGuides Then
-         SciMsg( m_pSci(i), SCI_SETINDENTATIONGUIDES, CTRUE, 0)
-      Else
-         SciMsg( m_pSci(i), SCI_SETINDENTATIONGUIDES, False, 0)
-      End If
-      SciMsg( m_pSci(i), SCI_SETSELFORE, STYLE_INDENTGUIDE, pTheme->colors(CLR_INDENTGUIDES).nFg )
-      SciMsg( m_pSci(i), SCI_SETSELBACK, STYLE_INDENTGUIDE, pTheme->colors(CLR_FOLDMARGIN).nBg )
+      if gConfig.IndentGuides then
+         SciMsg( m_pSci(i), SCI_SETINDENTATIONGUIDES, Ctrue, 0)
+      else
+         SciMsg( m_pSci(i), SCI_SETINDENTATIONGUIDES, false, 0)
+      end if
+      pTheme = getThemePtr("editor.indentguides")
+      SciMsg( m_pSci(i), SCI_SETSELFORE, STYLE_INDENTGUIDE, pTheme->foreground )
+      SciMsg( m_pSci(i), SCI_SETSELBACK, STYLE_INDENTGUIDE, pTheme->background )
       
       ''
       ''  CARET
-      SciMsg( m_pSci(i), SCI_SETCARETFORE, pTheme->colors(CLR_CARET).nFg, 0 )
+      pTheme = getThemePtr("editor.caret")
+      SciMsg( m_pSci(i), SCI_SETCARETFORE, pTheme->foreground, 0 )
       SciMsg( m_pSci(i), SCI_SETCARETWIDTH, 2, 0 )       ' 2 pixels
 
       ''
       ''  SHOW CARET LINE
-      If gConfig.HighlightCurrentLine Then
-         SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLE, CTRUE, 0 )
-      Else
-         SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLE, False, 0 )
-      End If
+      if gConfig.HighlightCurrentLine then
+         SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLE, Ctrue, 0 )
+      else
+         SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLE, false, 0 )
+      end if
 
       ''
       ''  CARET LINE COLOR
-      SciMsg( m_pSci(i), SCI_SETCARETLINEBACK, pTheme->colors(CLR_HIGHLIGHTED).nFg, 0 )
+      pTheme = getThemePtr("editor.currentline")
+      SciMsg( m_pSci(i), SCI_SETCARETLINEBACK, pTheme->background, 0 )
       
       ''
       ''  SELECTION COLORS
-      SciMsg( m_pSci(i), SCI_SETSELFORE, CTRUE, pTheme->colors(CLR_SELECTION).nFg)
-      SciMsg( m_pSci(i), SCI_SETSELBACK, CTRUE, pTheme->colors(CLR_SELECTION).nBg)
+      pTheme = getThemePtr("editor.selection")
+      SciMsg( m_pSci(i), SCI_SETSELFORE, Ctrue, pTheme->foreground)
+      SciMsg( m_pSci(i), SCI_SETSELBACK, Ctrue, pTheme->background)
    
       ''
       ''  MULTIPLE SELECTIONS
-      SciMsg( m_pSci(i), SCI_SETMULTIPLESELECTION, FALSE, 0 ) 
+      SciMsg( m_pSci(i), SCI_SETMULTIPLESELECTION, Ctrue, 0 ) 
                
       ''
       ''  ALWAYS KEEP THE CARET LINE VISIBLE
-      SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLEALWAYS, CTRUE, 0 )
+      SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLEALWAYS, Ctrue, 0 )
       
       ''
       ''  DISABLE RIGHT CLICK POPUP MENU
-      SciMsg( m_pSci(i), SCI_USEPOPUP, False, 0 )
+      SciMsg( m_pSci(i), SCI_USEPOPUP, false, 0 )
 
       ''
-      ''  IDENTIFY CHARACTERS TO BE USED IN WORDS
-      SciMsg( m_pSci(i), SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~_:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
+      ''  IDENTIFY CHARACTERS to BE USED IN WORDS
+      SciMsg( m_pSci(i), SCI_SETWORDCHARS, 0, cast(LPARAM, @"~_\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
 
       ''  UNICODE (UTF-8 encoding)
-      IF this.FileEncoding = FILE_ENCODING_ANSI THEN
+      if this.FileEncoding = FILE_ENCODING_ANSI then
          SciMsg( m_pSci(i), SCI_SETCODEPAGE, 0, 0 )
-      ELSE
+      else
          ' UTF8 or UTF16 would have been converted to UTF8 in order to display in the editor.
          SciMsg( m_pSci(i), SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
-      END IF
+      end if
    
       '' RIGHT EDGE COLUMN
       SciMsg( m_pSci(i), SCI_SETEDGEMODE, iif(gConfig.RightEdge, EDGE_LINE, EDGE_NONE), 0 )
@@ -1841,88 +1897,114 @@ Function clsDocument.ApplyProperties() As Long
 
       ''
       ''  OTHER
-      SciMsg( m_pSci(i), SCI_SETADDITIONALSELECTIONTYPING, True, 0 )
+      SciMsg( m_pSci(i), SCI_SETADDITIONALSELECTIONTYPING, true, 0 )
    
 
       ''
       ''  APPLY ALL LANGUAGE SPECIFIC SYNTAX COLORING
       wFileExt = AfxStrPathname( "EXTN", this.DiskFilename )
-      wFileExt = Ucase(wFileExt)
+      wFileExt = ucase(wFileExt)
 
-      If cbool(wFileExt = ".BAS") OrElse cbool(wFileExt = ".INC") _
-            OrElse cbool(wFileExt = ".BI") OrElse (this.IsNewFlag = True) _
-            orelse cbool(wFileExt = ".FBTPL") Then
+      if cbool(wFileExt = ".BAS") orelse cbool(wFileExt = ".INC") _
+            orelse cbool(wFileExt = ".BI") orelse (this.IsNewFlag = true) _
+            orelse cbool(wFileExt = ".FBTPL") then
 
-         SciMsg( m_pSci(i), SCI_SETLEXER, SCLEX_VB, 0 )
          bitsNeeded = SciMsg( m_pSci(i), SCI_GETSTYLEBITSNEEDED, 0, 0)
          SciMsg( m_pSci(i), SCI_SETSTYLEBITS, bitsNeeded, 0 )
 
          ' Set FreeBASIC Keywords
-         If Len(gConfig.FBKeywords) Then
-            SciMsg( m_pSci(i), SCI_SETKEYWORDS, 0, Cast(LPARAM, Strptr(gConfig.FBKeywords)) )
-         End If
+         if len(gConfig.FBKeywords) then
+            SciMsg( m_pSci(i), SCI_SETKEYWORDS, 0, cast(LPARAM, strptr(gConfig.FBKeywords)) )
+         end if
+
+         ' Set Windows Api Keywords
+         if len(gConfig.WinApiKeywords) then
+            SciMsg( m_pSci(i), SCI_SETKEYWORDS, 1, cast(LPARAM, strptr(gConfig.WinApiKeywords)) )
+         end if
          
-         If gConfig.SyntaxHighlighting Then
+         if gConfig.SyntaxHighlighting then
             ' Set the Multiline Comments style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_MULTILINECOMMENT, pTheme->colors(CLR_COMMENTS).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_MULTILINECOMMENT, pTheme->colors(CLR_COMMENTS).nBg)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_MULTILINECOMMENT, pTheme->colors(CLR_COMMENTS).bFontBold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_MULTILINECOMMENT, pTheme->colors(CLR_COMMENTS).bFontItalic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_MULTILINECOMMENT, pTheme->colors(CLR_COMMENTS).bFontUnderline )
+            pTheme = getThemePtr("editor.comments")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_MULTILINECOMMENT, pTheme->foreground )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_MULTILINECOMMENT, pTheme->background )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_MULTILINECOMMENT, pTheme->bold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_MULTILINECOMMENT, pTheme->italic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_MULTILINECOMMENT, pTheme->underline )
 
             ' Set the Comments style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).nBg)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).bFontBold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).bFontItalic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).bFontUnderline )
+            pTheme = getThemePtr("editor.comments")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_COMMENT, pTheme->foreground )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_COMMENT, pTheme->background )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_COMMENT, pTheme->bold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_COMMENT, pTheme->italic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_COMMENT, pTheme->underline )
 
-            ' Set the Keywords style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).nBg)
-            SciMsg( m_pSci(i), SCI_STYLESETCASE, SCE_B_KEYWORD, nFontCase )
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).bFontBold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).bFontItalic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).bFontUnderline )
+            ' Set the Keywords style (FreeBasic)
+            pTheme = getThemePtr("editor.keyword")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_KEYWORD, pTheme->foreground)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_KEYWORD, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETCASE, SCE_B_KEYWORD, nFontcase )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_KEYWORD, pTheme->bold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD, pTheme->italic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD, pTheme->underline )
+
+            ' Set the Keywords style (Windows Api)
+            pTheme = getThemePtr("editor.keyword2")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_KEYWORD2, pTheme->foreground)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_KEYWORD2, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETCASE, SCE_B_KEYWORD2, nFontcase )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_KEYWORD2, pTheme->bold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD2, pTheme->italic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD2, pTheme->underline )
 
             ' Set the Identifiers style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_IDENTIFIER, pTheme->colors(CLR_TEXT).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_IDENTIFIER, pTheme->colors(CLR_TEXT).nBg)
+            pTheme = getThemePtr("editor.identifiers")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_IDENTIFIER, pTheme->foreground)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_IDENTIFIER, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_IDENTIFIER, pTheme->bold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_IDENTIFIER, pTheme->italic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_IDENTIFIER, pTheme->underline )
 
             ' Set the Numbers style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_NUMBER, pTheme->colors(CLR_TEXT).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_NUMBER, pTheme->colors(CLR_TEXT).nBg)
+            pTheme = getThemePtr("editor.numbers")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_NUMBER, pTheme->foreground)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_NUMBER, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_NUMBER, pTheme->bold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_NUMBER, pTheme->italic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_NUMBER, pTheme->underline)
 
             ' Set the Operators style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).nBg)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).bFontBold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).bFontItalic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).bFontUnderline )
+            pTheme = getThemePtr("editor.operators")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_OPERATOR, pTheme->foreground)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_OPERATOR, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_OPERATOR, pTheme->bold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_OPERATOR, pTheme->italic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_OPERATOR, pTheme->underline)
 
             ' Set the Preprocessor style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).nBg)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).bFontBold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).bFontItalic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).bFontUnderline )
+            pTheme = getThemePtr("editor.preprocessor")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_PREPROCESSOR, pTheme->foreground)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_PREPROCESSOR, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_PREPROCESSOR, pTheme->bold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_PREPROCESSOR, pTheme->italic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_PREPROCESSOR, pTheme->underline)
 
-            ' Set the Strings style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_STRING, pTheme->colors(CLR_STRINGS).nFg)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_STRING, pTheme->colors(CLR_STRINGS).nBg)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_STRING, pTheme->colors(CLR_STRINGS).bFontBold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_STRING, pTheme->colors(CLR_STRINGS).bFontItalic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_STRING, pTheme->colors(CLR_STRINGS).bFontUnderline )
+            ' Set the strings style
+            pTheme = getThemePtr("editor.strings")
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_string, pTheme->foreground)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_string, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_string, pTheme->bold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_string, pTheme->Italic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_string, pTheme->underline)
 
-         End If
-
-      End If
+         end if
+      end if
 
       ''
       ''  CODE FOLDING
-      If gConfig.FoldMargin Then
+      if gConfig.FoldMargin then
          ' Enable folding of the procedures and functions
-         SciMsg( m_pSci(i), SCI_SETPROPERTY, Cast(WPARAM, @"fold"), Cast(LPARAM, @"1") )
+         SciMsg( m_pSci(i), SCI_SETPROPERTY, cast(WPARAM, @"fold"), cast(LPARAM, @"1") )
 
          ' Initialize fold symbols for folding - Box tree
          SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPEN,    SC_MARK_BOXMINUS )
@@ -1930,126 +2012,145 @@ Function clsDocument.ApplyProperties() As Long
          SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDERSUB,     SC_MARK_VLINE)
          SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDERTAIL,    SC_MARK_LCORNER)
          SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDEREND,     SC_MARK_BOXPLUSCONNECTED)
-         SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID, SC_MARK_EMPTY)   ' SC_MARK_BOXMINUSCONNECTED
+         'SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID, SC_MARK_EMPTY)   ' SC_MARK_BOXMINUSCONNECTED
+         SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID, SC_MARK_BOXMINUSCONNECTED)
          SciMsg( m_pSci(i), SCI_MARKERDEFINE, SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_TCORNER)
 
          ' Draw line below if not expanded
          SciMsg( m_pSci(i), SCI_SETFOLDFLAGS, 16, 0 )
 
          ' Colors for folders closed and folders opened
-         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDER,     pTheme->colors(CLR_FOLDSYMBOL).nFg)
-         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDER,     pTheme->colors(CLR_FOLDSYMBOL).nBg)
-         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDEROPEN, pTheme->colors(CLR_FOLDSYMBOL).nFg)
-         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDEROPEN, pTheme->colors(CLR_FOLDSYMBOL).nBg)
+         pTheme = getThemePtr("editor.foldsymbol")
+         dim as COLORREF clrFore = pTheme->foreground   
+         dim as COLORREF clrBack = pTheme->background  
+
+         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDER, clrBack)
+         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDER, clrFore)
+
+         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDEROPEN, clrBack)
+         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDEROPEN, clrFore)
+
+         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDERSUB, clrBack)
+         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDERSUB, clrFore)
+
+         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDERTAIL, clrBack)
+         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDERTAIL, clrFore)
+
+         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDEREND, clrBack)
+         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDEREND, clrFore)
+
+         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDEROPENMID, clrBack)
+         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDEROPENMID, clrFore)
+
+         SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDERMIDTAIL, clrBack)
+         SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDERMIDTAIL, clrFore)
+
+         SciMsg( m_pSci(i), SCI_MARKERENABLEHIGHLIGHT, false, 0)
       
-      Else
+      else
          ' Disable folding of the procedures and functions
-         SciMsg( m_pSci(i), SCI_SETPROPERTY, Cast(WPARAM, @"fold"), Cast(LPARAM, @"0") )
-      End If
+         SciMsg( m_pSci(i), SCI_SETPROPERTY, cast(WPARAM, @"fold"), cast(LPARAM, @"0") )
+      end if
    
    next
    
-   Function = 0
-End Function
-
+   function = 0
+end function
 
 
 ''
 ''
-Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
-
+function clsDocument.GetWord( byval curPos as long = -1 ) as string
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Get word at the specified location or under the cursor
-   Dim As Long x, y, p
-   Dim As String buffer 
+   dim as long x, y, p
+   dim as string buffer 
 
    ' Retrieve the current position
-   If curPos = -1 Then curPos = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
+   if curPos = -1 then curPos = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
    ' Retrieve the starting and ending position of the word
-   x = SciMsg( pSci, SCI_WORDSTARTPOSITION, curPos, True)
-   y = SciMsg( pSci, SCI_WORDENDPOSITION, curPos, False)
-   If y > x Then
+   x = SciMsg( pSci, SCI_WORDSTARTPOSITION, curPos, true)
+   y = SciMsg( pSci, SCI_WORDENDPOSITION, curPos, false)
+   if y > x then
       ' Text range
       buffer = this.GetTextRange(x, y)
       ' Remove the $NUL
-      p = Instr(buffer, Chr(0))
-      If p Then buffer = Left(buffer, p - 1)
-   End If
-   buffer = AfxStrRemoveAny( buffer, Chr(13, 10, 34) & "()%," )
-   Function = buffer
+      p = instr(buffer, chr(0))
+      if p then buffer = left(buffer, p - 1)
+   end if
+   buffer = AfxStrRemoveAny( buffer, chr(13, 10, 34) & "()%," )
+   function = buffer
 
-End Function
+end function
 
 ''
 ''
-Function clsDocument.GetBookmarks() As String
-
+function clsDocument.GetBookmarks() as string
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Retrieve all bookmark positions in the document and return it
    ' as a comma delimited string to be saved to project file.
-   Dim As String buffer
-   Dim As Long fMark  ' 32 bit value
-   Dim As Long nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) 
+   dim as string buffer
+   dim as long fMark  ' 32 bit value
+   dim as long nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) 
 
-   For i As Long = 0 To nLines - 1
+   for i as long = 0 to nLines - 1
       fMark = SciMsg( pSci, SCI_MARKERGET, i, 0)
-      If Bit(fMark, 0) Then
+      if bit(fMark, 0) then
          buffer = buffer & i & ","
-      End If
-   Next
+      end if
+   next
 
-   Function = RTrim(buffer, ",")
+   function = rtrim(buffer, ",")
 
-End Function
+end function
 
 ''
 ''
-Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
-
+function clsDocument.SetBookmarks( byval sBookmarks as string ) as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Set all bookmark positions in the document and based on the 
    ' incoming comma delimited string retrieved from a project file.
    sBookmarks = trim(sBookmarks)
-   If Len(sBookmarks) = 0 Then Exit Function
+   if len(sBookmarks) = 0 then exit function
    
-   Dim As Long nCount = AfxStrParseCount(sBookmarks, ",")
-   Dim As Long nLine
+   dim as long nCount = AfxStrParseCount(sBookmarks, ",")
+   dim as long nLine
    
-   For i As Long = 1 To nCount
-      nLine = Val( AfxStrParse(sBookmarks, i, ",") )
+   for i as long = 1 to nCount
+      nLine = val( AfxStrParse(sBookmarks, i, ",") )
       SciMsg( pSci, SCI_MARKERADD, nLine, 0)
-   Next
+   next
 
-   Function = 0
+   function = 0
 
-End Function
+end function
 
 ''
 ''
-Function clsDocument.LineDuplicate() As Long
+function clsDocument.LineDuplicate() as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Duplicate the current caret line, or an entire block of
    ' code should a selection be active.
    dim as long startSelPos = SciMsg( pSci, SCI_GETSELECTIONSTART, 0, 0)
    dim as long endSelPos   = SciMsg( pSci, SCI_GETSELECTIONEND, 0, 0)
-   If startSelPos = endSelPos Then   ' no selection
+   if startSelPos = endSelPos then   ' no selection
       ' Simply duplicate the line that the caret is on.
       SciMsg( pSci, SCI_LINEDUPLICATE, 0, 0)
    else
       SciMsg( pSci, SCI_SELECTIONDUPLICATE, 0, 0)
    end if
-   Function = 0
-End Function
+   function = 0
+end function
 
 
 ''
 ''
-function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as Long
+function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as long
    ' Search the source code for any user embedded compiler directives.
-   Dim ub     As Long    
-   Dim i      As Long    
-   Dim nLines As Long    
-   dim st     as String
+   dim ub     as long    
+   dim i      as long    
+   dim nLines as long    
+   dim st     as string
    
    dim sText as string  ' this will be an UTF-8 encoded string
    
@@ -2059,47 +2160,47 @@ function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as 
 
    if pSci = 0 then
       ' The document has not been loaded into a Scintilla window
-      GetFileToString( this.DiskFilename, sText, @this)
-      nLines = GetStringToArray( sText, txtArray() )
+      GetFileTostring( this.DiskFilename, sText, @this)
+      nLines = GetstringToArray( sText, txtArray() )
    else
       nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
    end if
 
-   For i = 0 To nLines - 1
+   for i = 0 to nLines - 1
       if pSci then
          st = ltrim(this.GetLine(i))
       else
          st = ltrim(txtArray(i + 1))
       end if
          
-      if left(st, 1) <> "'" THEN continue for
+      if left(st, 1) <> "'" then continue for
       st = ltrim(mid(st, 2))
 
-      if len(st) < 11 THEN continue for
+      if len(st) < 11 then continue for
       st = ucase(st)
       
       ub = ubound(Directives)
       
       ' '#CONSOLE ON|OFF
-      if left(st, 11) = "#CONSOLE ON" THEN
+      if left(st, 11) = "#CONSOLE ON" then
          redim preserve Directives(ub+1)
          Directives(ub+1).DirectiveFlag = IDM_CONSOLE
-      elseif left(st, 12) = "#CONSOLE OFF" THEN   
+      elseif left(st, 12) = "#CONSOLE OFF" then   
          redim preserve Directives(ub+1)
          Directives(ub+1).DirectiveFlag = IDM_GUI
-      END IF
+      end if
 
       ' '#RESOURCE "filename.rc"
-      if left(st, 10) = "#RESOURCE " THEN
+      if left(st, 10) = "#RESOURCE " then
          redim preserve Directives(ub+1)
          Directives(ub+1).DirectiveFlag = IDM_RESOURCE
          st = mid(st, 11)
          Directives(ub+1).DirectiveText = AfxStrExtract(st, chr(34), chr(34))
       end if
          
-   Next
+   next
 
    function = 0
-END FUNCTION
+end function
 
 

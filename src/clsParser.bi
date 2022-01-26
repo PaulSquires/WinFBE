@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -40,10 +40,10 @@ type clsParser
    public:
       fileName        as CWSTR
       nFileType       as long          ' Refer to DB_FILETYPE_*
-      action          as Long          ' current active action
+      action          as long          ' current active action
       lineNum         as long
-      st              as String        ' full line, comments and double spaces removed
-      st_ucase        as String        ' full line (UCASE), comments and double spaces removed
+      st              as string        ' full line, comments and double spaces removed
+      st_ucase        as string        ' full line (UCASE), comments and double spaces removed
       funcName        as string        ' Name of function being parsed
       funcParams      as string        ' Parameters to a function identifed in sFuncName
       funcLineNum     as long          ' The line where the sub/function started. This is different than lineNum.
@@ -53,21 +53,22 @@ type clsParser
       varType         as string        ' Type of variable identified in sVarName
       bIsAlias        as boolean       ' T/F if the stored TYPE name is an ALIAS for another TYPE.
       todoText        as string        ' text description associated with a TODO item
-      bInTypePublic   as Boolean       ' PRIVATE/PUBLIC sections of a TYPE
+      bInTypePublic   as boolean       ' PRIVATE/PUBLIC sections of a TYPE
       Description     as string        ' Text from '#Description: tag
-      IsEnum          as Boolean       ' The TYPE is treated as an ENUM
+      IsEnum          as boolean       ' The TYPE is treated as an ENUM
       GetSet          as ClassProperty ' 0=sub/function, 1=propertyGet, 2=propertySet
-      TypeExtends     as String        ' The TYPE is extended from this TYPE
-      bParsingCodeGen as Boolean       ' flag to parser to properly mark codegen sub/function/properties
+      TypeExtends     as string        ' The TYPE is extended from this TYPE
+      bParsingCodeGen as boolean       ' flag to parser to properly mark codegen sub/function/properties
       bInMultiLineComment as boolean   ' flag that we are currently inside a multiline comment block
       
       declare function parseToDoItem(byval sText as string) as boolean
-      declare function IsMultilineComment(byval sLine as String) as boolean
+      declare function IsMultilineComment(byval sLine as string) as boolean
       declare function NormalizeLine() as boolean
       declare function InspectLine() as boolean
       declare function parseVariableDefinitions() as boolean
       declare function parseTYPE() as boolean
       declare function parseENUM() as boolean
-      declare function IsStandardDataType( byref sVarType as string ) as Boolean
-END TYPE   
+      declare function IsStandardDataType( byref sVarType as string ) as boolean
+end type
+
 

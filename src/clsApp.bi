@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,52 +13,51 @@
 
 #pragma once
 
-Type clsApp
-   Private: 
-      m_arrQuickRun(Any) As WSTRING * MAX_PATH
+type clsApp
+   private: 
+      m_arrQuickRun(any) as wstring * MAX_PATH
       
-   Public:
-      pDocList                   As clsDocument Ptr   ' Single linked list of loaded files
-      IsWindowIncludes           as Boolean           ' T/F that Windows includes have already been loaded
-      SuppressNotify             As BOOLEAN           ' temporarily suppress Scintilla notifications
-      hRecentFilesRootNode       As HTREEITEM
-      hRecentProjectsRootNode    As HTREEITEM
-      hExplorerRootNode          As HTREEITEM
-      hExplorerNormalNode        As HTREEITEM
-      hExplorerMainNode          As HTREEITEM
-      hExplorerResourceNode      As HTREEITEM
-      hExplorerHeaderNode        As HTREEITEM
-      hExplorerModuleNode        As HTREEITEM
-      bDragTabActive             as BOOLEAN           ' a tab in the top tabcontrol is being dragged
-      bDragActive                As BOOLEAN           ' splitter drag is currently active 
-      hWndPanel                  As HWND              ' the panel being split left/right or up/down
-      IncludeFilename            As CWSTR
+   public:
+      pDocList                   as clsDocument ptr   ' Single linked list of loaded files
+      isWineActive               as boolean
+      pfnCreateLexerfn           as CreateLexerFn
+      IsWindowIncludes           as boolean           ' T/F that Windows includes have already been loaded
+      SuppressNotify             as boolean           ' temporarily suppress Scintilla notifications
+      hRecentFilesRootNode       as HTREEITEM
+      hRecentProjectsRootNode    as HTREEITEM
+      hExplorerRootNode          as HTREEITEM
+      hExplorerFilesNode         as HTREEITEM
+      hExplorerNormalNode        as HTREEITEM
+      hExplorerMainNode          as HTREEITEM
+      hExplorerResourceNode      as HTREEITEM
+      hExplorerHeaderNode        as HTREEITEM
+      hExplorerModuleNode        as HTREEITEM
+      bDragTabActive             as boolean           ' a tab in the top tabcontrol is being dragged
+      bDragActive                as boolean           ' splitter drag is currently active 
+      hWndPanel                  as HWND              ' the panel being split left/right or up/down
+      IncludeFilename            as CWSTR
       NonProjectNotes            as CWSTR             ' Save/load from config file
       wszPanelText               as CWSTR             ' Current file loading or being compiled (for statusbar updating)
-      hIconPanel                 as HANDLE            ' Success/failure of most previous compile (for Statusbar updating)
+      hIconPanel                 as long              ' Success/failure of most previous compile (for Statusbar updating)
       FileLoadingCount           as long              ' Track count of files loading for statusbar display
-      NewProjectTemplateType     as long              ' IDC of the new project type to create.
-      IsNewProjectFlag           As BOOLEAN
-      IsProjectLoading           as Boolean           ' Project loading. Disable some screen updating.
-      IsProjectCacheLoaded       as Boolean           ' The project codetip cache was successfully load. Bypass ParseDocument on load.
-      IsFunctionListSorted       as Boolean = true    ' Will be false if IsProjectCacheLoaded is True.
-      IsFileLoading              as Boolean           ' File loading. Disable some screen updating.
-      IsCompiling                as Boolean           ' File/Project currently being compiled (spinning mouse cursor).
+      NewProjectTemplatetype     as long              ' IDC of the new project type to create.
+      IsNewProjectFlag           as boolean
+      IsProjectLoading           as boolean           ' Project loading. Disable some screen updating.
+      IsProjectCacheLoaded       as boolean           ' The project codetip cache was successfully load. Bypass ParseDocument on load.
+      IsFileLoading              as boolean           ' File loading. Disable some screen updating.
+      IsCompiling                as boolean           ' File/Project currently being compiled (spinning mouse cursor).
       IsShutDown                 as boolean           ' App is currently closing
       wszCommandLine             as CWSTR             ' non-project commandline (not saved to file)
+      wszLastOpenFolder          as CWSTR             ' remembers the last opened folder for the Open Dialog
       
-      pImageAutocompleteBaseType as any ptr           ' image used in scintilla popup autocomplete
-      pImageAutocompleteClass    as any ptr           ' image used in scintilla popup autocomplete
-      pImageAutocompleteMethod   as any ptr           ' image used in scintilla popup autocomplete
-      pImageAutocompleteProperty as any ptr           ' image used in scintilla popup autocomplete
       hWndAutoCListBox           as hwnd              ' handle of popup autocomplete ListBox window
             
-      IsProjectActive            As boolean
-      ProjectBuild               As string            ' default build configuration for the project (GUID)
-      ProjectName                As CWSTR
-      ProjectFilename            As CWSTR
-      ProjectOther32             As CWSTR             ' compile flags 32 bit compiler
-      ProjectOther64             As CWSTR             ' compile flags 64 bit compiler
+      IsProjectActive            as boolean
+      ProjectBuild               as string            ' default build configuration for the project (GUID)
+      ProjectName                as CWSTR
+      ProjectFilename            as CWSTR
+      ProjectOther32             as CWSTR             ' compile flags 32 bit compiler
+      ProjectOther64             as CWSTR             ' compile flags 64 bit compiler
       ProjectNotes               as CWSTR             ' Save/Load from project file
       ProjectCommandLine         as CWSTR
       ProjectManifest            as long              ' T/F create a generic resource and manifest file
@@ -68,22 +67,22 @@ Type clsApp
       PreviousPropName           as CWSTR
       PreviousEventName          as CWSTR
 
-      declare function AddQuickRunEXE( byref sFilename as wstring ) as Long
-      declare function CheckQuickRunEXE() as Long
-      declare Function RemoveAllSelectionAttributes() As long
-      Declare Function AddNewDocument() As clsDocument Ptr 
-      Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
-      declare Function RemoveAllDocuments() As Long
-      Declare Function GetDocumentCount() As Long
-      declare Function GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
-      Declare Function GetDocumentPtrByFilename( Byref wszName As WString ) As clsDocument Ptr
-      Declare Function GetMainDocumentPtr() As clsDocument Ptr
-      Declare Function GetResourceDocumentPtr() As clsDocument Ptr
-      declare function GetSourceDocumentPtr( byval pDocIn as clsDocument ptr ) As clsDocument Ptr
-      declare function GetHeaderDocumentPtr( byval pDocIn as clsDocument ptr ) As clsDocument Ptr
-      Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
-      Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
-      declare Function GetProjectCompiler() As long
+      declare function AddQuickRunEXE( byref sFilename as wstring ) as long
+      declare function CheckQuickRunEXE() as long
+      declare function RemoveAllSelectionAttributes() as long
+      Declare function AddNewDocument() as clsDocument ptr 
+      Declare function RemoveDocument( byval pDoc as clsDocument ptr ) as long
+      declare function RemoveAllDocuments() as long
+      Declare function GetDocumentCount() as long
+      declare function GetDocumentPtrByWindow( byval hWindow as hwnd) as clsDocument ptr
+      Declare function GetDocumentPtrByFilename( Byref wszName as wstring ) as clsDocument ptr
+      Declare function GetMainDocumentPtr() as clsDocument ptr
+      Declare function GetResourceDocumentPtr() as clsDocument ptr
+      declare function GetSourceDocumentPtr( byval pDocIn as clsDocument ptr ) as clsDocument ptr
+      declare function GetHeaderDocumentPtr( byval pDocIn as clsDocument ptr ) as clsDocument ptr
+      Declare function SaveProject( byval bSaveas as boolean = False ) as boolean
+      Declare function ProjectSetFileType( byval pDoc as clsDocument ptr, byval nFiletype as long ) as LRESULT
+      declare function GetProjectCompiler() as long
       
-End Type
+end type
 

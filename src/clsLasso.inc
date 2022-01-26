@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -17,41 +17,42 @@
 ' ========================================================================================
 ' Lasso window callback procedure
 ' ========================================================================================
-private FUNCTION clsLasso_WndProc( BYVAL hwnd AS HWND, _
-                                   BYVAL uMsg AS UINT, _
-                                   BYVAL wParam AS WPARAM, _
-                                   BYVAL lParam AS LPARAM _
-                                   ) AS LRESULT
+function clsLasso_WndProc( _
+            byval hwnd as HWND, _
+            byval uMsg as UINT, _
+            byval wParam as WPARAM, _
+            byval lParam as LPARAM _
+            ) as LRESULT
    
    ' Default processing of Windows messages
-   FUNCTION = DefWindowProc(hWnd, uMsg, wParam, lParam)
+   function = DefWindowProc(hWnd, uMsg, wParam, lParam)
 
-END FUNCTION
+end function
 
 
-Destructor clsLasso
-   if pWindow THEN this.Destroy
+destructor clsLasso
+   if pWindow then this.Destroy
 end destructor
 
-function clsLasso.IsActive() as Boolean
+function clsLasso.IsActive() as boolean
    function = this.bLasso
-END FUNCTION
+end function
 
 function clsLasso.GetLassoRect() as RECT
    dim as RECT rc = (this.ptStart.x, this.ptStart.y, this.ptEnd.x, this.ptEnd.y)
    ' Normalize the rect
-   If rc.Left > rc.Right   Then Swap rc.Right, rc.Left
-   If rc.Top  > rc.Bottom  Then Swap rc.Top, rc.Bottom
+   If rc.Left > rc.Right   then swap rc.Right, rc.Left
+   If rc.Top  > rc.Bottom  then swap rc.Top, rc.Bottom
    return rc
 end function
 
-function clsLasso.SetStartPoint( byval x as long, byval y as Long) as Long
+function clsLasso.SetStartPoint( byval x as long, byval y as Long ) as Long
    this.ptStart.x = x 
    this.ptStart.y = y
    function = 0
 end function
    
-function clsLasso.SetEndPoint( byval x as long, byval y as Long) as Long
+function clsLasso.SetEndPoint( byval x as long, byval y as Long ) as Long
    this.ptEnd.x = x 
    this.ptEnd.y = y
    function = 0
@@ -66,13 +67,13 @@ function clsLasso.GetEndPoint() as POINT
 end function
 
 function clsLasso.Create( byval hWndParent as hwnd ) as boolean
-   dim as Boolean bResult = false
+   dim as boolean bResult = false
    dim as RECT rc
    
    this.pWindow = new CWindow
-   if this.pWindow THEN
+   if this.pWindow then
       GetClientRect(hWndParent, @rc)
-      MapWindowPoints(hWndParent, 0, cast( POINT Ptr, @rc), 2)
+      MapWindowPoints(hWndParent, 0, cast( POINT ptr, @rc), 2)
       this.hWindow = this.pWindow->Create( hWndParent, "", @clsLasso_WndProc, _
                                            rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, _
                                            WS_POPUP or WS_VISIBLE, WS_EX_LAYERED)
@@ -86,12 +87,11 @@ function clsLasso.Create( byval hWndParent as hwnd ) as boolean
    end if
   
    function = bResult
-END function
+end function
 
 
-function clsLasso.FillAlpha(byval hBmp as HBITMAP) as Boolean
-
-   dim as Boolean bResult = false
+function clsLasso.FillAlpha( byval hBmp as HBITMAP ) as boolean
+   dim as boolean bResult = false
 
    if (hBmp) then 
       dim as BITMAP bmp
@@ -122,7 +122,7 @@ end function
 
 
 function clsLasso.Show() as Long
-   if this.bLasso THEN 
+   if this.bLasso then 
 
       dim as RECT rcPos = this.GetLassoRect()
       
@@ -139,24 +139,12 @@ function clsLasso.Show() as Long
       sBI.bmiHeader.biBitCount    = 32 
       sBI.bmiHeader.biCompression = BI_RGB
 
-      dim as HBITMAP hBmp = CreateDIBSection(hDC, @sBI, DIB_RGB_COLORS, NULL, NULL, 0)
+      dim as HBITMAP hBmp = CreateDIBSection(hDC, @sBI, DIB_RGB_COLORS, null, null, 0)
       dim as HBITMAP hBmpOld = SelectObject(hDC, hBmp)
 
-      dim as Boolean bFillAlphaOK = FillAlpha(hBmp)
-      if (not bFillAlphaOK) then 
-      '  dim as Boolean bFillAlphaOK = false
-      '  dim as HPEN hPen1 = CreatePen(PS_INSIDEFRAME, 2, &HFF0080FF) 'sm_clrPen)
-      '  dim as HBRUSH hBrush1 = CreateSolidBrush(&H400020FF) 'sm_clrBrush);
-      '  dim as HPEN hOldPen = SelectObject(hDC, hPen1)
-      '  dim as HBRUSH hOldBrush = SelectObject(hDC, hBrush1)
-      '  Rectangle(hDC, 0, 0, iWidth, iHeight)
-      '  SelectObject(hDC, hOldPen)
-      '  SelectObject(hDC, hOldBrush)
-      '  DeleteObject(hPen1)
-      '  DeleteObject(hBrush1)
-      end if
+      dim as boolean bFillAlphaOK = FillAlpha(hBmp)
 
-      dim as BLENDFUNCTION blend
+      dim as BLENDfunction blend
       blend.BlendOp             = AC_SRC_OVER
       blend.SourceConstantAlpha = iif(bFillAlphaOK, 160, 64)
       blend.AlphaFormat         = iif(bFillAlphaOK, AC_SRC_ALPHA, 0)
@@ -187,7 +175,7 @@ function clsLasso.Show() as Long
       '    __in_opt HDC hdcSrc,             // source (memory) DC of prepainting
       '    __in_opt POINT *pptSrc,          // source position for the surface bits transfer
       '    __in COLORREF crKey,             // color to be fully transparent (not our case)
-      '    __in_opt BLENDFUNCTION *pblend,  // blending parameters
+      '    __in_opt BLENDfunction *pblend,  // blending parameters
       '    __in DWORD dwFlags);             // kind of the transfer 
       '                                     // (in our case ULW_ALPHA - for alpha blending)
       UpdateLayeredWindow(this.hWindow, hdcScreen, @ptPos, @sizeWnd, hDC, @ptSrc, 0, @blend, ULW_ALPHA) 
@@ -204,14 +192,14 @@ end function
 
 
 function clsLasso.Destroy() as boolean
-   if this.pWindow THEN 
+   if this.pWindow then 
       this.bLasso = false
       DestroyWindow( pWindow->hWindow)
       delete this.pWindow
       this.pWindow = 0
    end if   
    function = true
-END FUNCTION
+end function
 
 
 

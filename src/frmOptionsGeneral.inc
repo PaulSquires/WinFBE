@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -56,16 +56,13 @@ public Function frmOptionsGeneral_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKASKEXIT, L(274,"Ask before exiting the editor"), 0, 63, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR, L(339,"Hide main toolbar"), 0, 84, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKRESTORESESSION, L(423,"Restore previous session files on startup"), 0, 84, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR, L(340,"Hide main statusbar"), 0, 105, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKUPDATES, L(166,"Check for update at startup (once per day)"), 0, 105, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKUPDATES, L(166,"Check for update at startup (once per day)"), 0, 126, 400, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKPROJECTCACHE, L(406,"Enable fast project cache"), 0, 147, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKPROJECTCACHE, L(406,"Enable fast project cache"), 0, 126, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -76,8 +73,7 @@ public Function frmOptionsGeneral_Show( ByVal hWndParent As HWnd ) as LRESULT
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST),      gConfig.CloseFuncList)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE),    gConfig.CompileAutoSave)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT),            gConfig.AskExit)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR),        gConfig.HideToolbar)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR),      gConfig.HideStatusbar)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKRESTORESESSION),     gConfig.RestoreSession)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKUPDATES),            gConfig.CheckForUpdates)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKPROJECTCACHE),       gConfig.EnableProjectCache)
 

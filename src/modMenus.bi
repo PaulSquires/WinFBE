@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,11 +13,14 @@
 
 #pragma once
 
-declare Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
+declare Function frmMain_BuildAcceleratorTable( ByVal pWindow As CWindow Ptr ) As long
 declare Function frmMain_ChangeTopMenuStates() As Long
 declare Function CreateStatusBarFileTypeContextMenu() As HMENU
 declare Function CreateStatusBarFileEncodingContextMenu() As HMENU
 declare function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
 declare Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
 declare Function CreateScintillaContextMenu() As HMENU
+declare Function CreateStatusBarSpacesContextMenu() As HMENU
+declare Function CreateStatusBarLineEndingsContextMenu() As HMENU
+declare function getTopMenuPtr( byval nID as long ) as TOPMENU_TYPE ptr
 

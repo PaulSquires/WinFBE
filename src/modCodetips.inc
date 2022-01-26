@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -328,11 +328,6 @@ private function ShowAutoCompletePopup( byval hEdit as hwnd, _
    SciExec(hEdit, SCI_RGBAIMAGESETWIDTH, 16, 0)
    SciExec(hEdit, SCI_RGBAIMAGESETHEIGHT, 16, 0)
                                           
-   SciExec(hEdit, SCI_REGISTERRGBAIMAGE, IMAGE_AUTOC_BASETYPE, gApp.pImageAutocompleteBaseType)
-   SciExec(hEdit, SCI_REGISTERRGBAIMAGE, IMAGE_AUTOC_CLASS,    gApp.pImageAutocompleteClass)
-   SciExec(hEdit, SCI_REGISTERRGBAIMAGE, IMAGE_AUTOC_METHOD,   gApp.pImageAutocompleteMethod)
-   SciExec(hEdit, SCI_REGISTERRGBAIMAGE, IMAGE_AUTOC_PROPERTY, gApp.pImageAutocompleteProperty)
-                          
    SciExec(hEdit, SCI_AUTOCSETFILLUPS, 0, strptr(sFillups))  ' characters that also select and close the popup
    SciExec(hEdit, SCI_AUTOCSETSEPARATOR, 124, 0)             ' Pipe symbol as separator
    SciExec(hEdit, SCI_AUTOCSETORDER, 1, 0)                   ' List must be sorted alphabetically

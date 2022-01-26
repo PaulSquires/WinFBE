@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -20,438 +20,98 @@
 #include once "frmExplorer.bi"
 #include once "modMRU.bi"
 #include once "modAutoInsert.bi"
-#include once "modToolbar.bi"
 #include once "modMenus.bi"
 #include once "modCompile.bi"
 
-
-' Global array to hold cut/copy/paste controls
-dim shared gCopyControls(any) as clsControl
-
-
-' ========================================================================================
-' Load the Files combobox
-' ========================================================================================
-public Function frmMain_RemoveFromComboFiles( byval pDoc as clsDocument ptr ) As Long
-   if pDoc = 0 then exit function
-   
-   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
-   dim as long nCount = ComboBox_GetCount( hComboFiles )
-
-   for i as long = 0 to nCount - 1
-      if ComboBox_GetItemData( hComboFiles, i ) = pDoc then
-         ComboBox_DeleteString( hComboFiles, i )
-         exit for
-      end if
-   next
-   
-   function = 0
-end function
-
-
-' ========================================================================================
-' Add a file to the Files combobox
-' ========================================================================================
-public Function frmMain_AddToComboFiles( byval pDoc as clsDocument ptr ) As Long
-   if pDoc = 0 then exit function
-   
-   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
-   
-   dim as long idx = ComboBox_AddString( hComboFiles, AfxStrPathname( "NAMEX", pDoc->DiskFilename ).sptr )
-   ' Save the pDoc in the itemData in order to quickly load the file later when
-   ' selected from the Files combobox.
-   ComboBox_SetItemData( hComboFiles, idx, cast(LPARAM, pDoc) )
-   
-   function = 0
-end function
-
-
-' ========================================================================================
-' Load the Files combobox
-' ========================================================================================
-public Function frmMain_LoadComboFiles() As Long
-   
-   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
-   ComboBox_ResetContent( hComboFiles )
-   
-   dim pDoc as clsDocument ptr = gApp.pDocList
-   do until pDoc = 0
-      frmMain_AddToComboFiles( pDoc )
-      pDoc = pDoc->pDocNext
-   loop
-
-   function = 0
-end function
-
-
-' ========================================================================================
-' Load the Functions combobox
-' ========================================================================================
-public Function frmMain_LoadComboFunctions() As Long
-   
-   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
-   ComboBox_ResetContent( hComboFunctions )
-
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc = 0 then exit function
-   
-   dim wszText as wstring * MAX_PATH
-   
-   ' Add a default entry for when not positioned within a function.
-   wszText = L(218,"(Module level)")
-   ComboBox_AddString( hComboFunctions, @wszText )
-
-   ' Get all functions in the file
-   Dim As HTREEITEM hChild = Treeview_GetChild( hTree, pDoc->hNodeExplorer )
-   do until hChild = 0 
-      Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
-      ComboBox_AddString( hComboFunctions, @wszText )
-      hChild = Treeview_GetNextSibling(hTree, hChild)
-   loop
-
-   function = 0
-end function
-
-
-' ========================================================================================
-' Select the Files combobox item based on incoming filename
-' ========================================================================================
-public Function frmMain_SelectComboFiles() As Long
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc = 0 then exit function
-   
-   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
-   dim as CWSTR wszFilename = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-   dim as long idx = ComboBox_FindStringExact( hComboFiles, -1, wszFilename.sptr )
-   ComboBox_SetCurSel( hComboFiles, idx )
-   
-   function = 0
-end function
-
-
-' ========================================================================================
-' Select the Files combobox item based on incoming filename
-' ========================================================================================
-private Function frmMain_ComboFunctionsFindString( byval sFunctionName as string, _
-                                                   byval nGetSet as long _
-                                                   ) As Long
-   
-   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
-   dim as long nCount = ComboBox_GetCount( hComboFunctions )
-   dim as long nResult = -1
-   
-   dim wszText as WString * MAX_PATH
-   dim as string sLookFor = ucase( sFunctionName )
-   
-   select case nGetSet 
-      case ClassProperty.Getter: sLookFor = sLookFor & " (GET)"
-      case ClassProperty.Setter: sLookFor = sLookFor & " (SET)"
-      case ClassProperty.ctor:   sLookFor = sLookFor & " (CTOR)"
-      case ClassProperty.dtor:   sLookFor = sLookFor & " (DTOR)"
-   end select
-   
-   for i as long = 0 to nCount - 1
-      ComboBox_GetLBText( hComboFunctions, i, @wszText )
-      if ucase( wszText ) = sLookFor then
-         nResult = i
-         exit for
-      end if
-   next
-
-   function = nResult
-end function
-
-
-' ========================================================================================
-' Select the Functions combobox item based on current editing position
-' ========================================================================================
-public Function frmMain_SelectComboFunctions() As Long
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc = 0 then exit function
-   
-   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
-   dim as string sFunctionName 
-   dim as ClassProperty nGetSet
-   
-   pDoc->GetCurrentFunctionName( sFunctionName, nGetSet )
-   
-   ' If no Functions exist in the Functions combo then it obviously has not been loaded yet.
-   if ComboBox_GetCount( hComboFunctions ) = 0 then frmMain_LoadComboFunctions
-   dim as long idx = frmMain_ComboFunctionsFindString( sFunctionName, nGetSet )
-
-   ' If the function name is not found then check to see if the file is dirty
-   ' and do a reparse and second check of the function list. If still not found
-   ' then we must be between functions. Set the index to 0 so that the "(Module level)" 
-   ' entry is selected.
-   if idx = -1 then 
-      if pDoc->bNeedsParsing then
-         ParseDocument( pDoc )
-         frmMain_LoadComboFunctions
-         idx = frmMain_ComboFunctionsFindString( sFunctionName, nGetSet )
-      end if
-   end if
-   if idx = -1 then idx = 0
-   ComboBox_SetCurSel( hComboFunctions, idx ) 
-   
-   function = 0
-end function
-
-
-' ========================================================================================
-' Position editor to document/function/variable under the current caret position
-' ========================================================================================
-private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
-
-   If pDoc = 0 Then Exit Function
-   
-   dim pData as DB2_DATA ptr
-   dim as CWSTR wszFilename
-   dim as string sFunctionName, sTrigger
-   dim as long nLineNum = 0
-   
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   
-   ' Version 1.8.8 added ability to open an underlying #Include file if such
-   ' a file exists on the current editing line.
-   if IsCurrentLineIncludeFilename() then
-      wszFilename = gApp.IncludeFilename 
-   else
-
-      ' Determine the word at the current caret position if nothing is selected.
-      sFunctionName = trim(pDoc->GetSelText)
-      if len(sFunctionName) = 0 then sFunctionName = trim(pDoc->GetWord)
-
-      if len(sFunctionName) then
-         ' Determine if the function name is part of a class. This would be identified
-         ' by a preceeding "." or "->" symbol.  eg  pDoc->GetCurrentLineNumber
-         dim as long curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
-         dim as long wordStartPos = SciExec( hEdit, SCI_WORDSTARTPOSITION, curPos, True)
-         sTrigger = right( pDoc->GetWord( wordStartPos - 1 ), 1 )
-         if sTrigger = ">" then sTrigger = "->"
-         if ( sTrigger = "." ) orelse ( sTrigger = "->" ) then
-            ' In the DereferenceLine function any "->" are converted to "." for simplicity.
-            pData = DereferenceLine( pDoc, sTrigger, wordStartPos - 1 )
-            if pData then 
-               sFunctionName = pData->VariableType & "." & sFunctionName
-               ' Set pData to null because it currently points at the TYPE definition and
-               ' we the gdb2 searches below to actually find the sub/function.
-               pData = 0
-            end if
-         end if   
-
-         ' Search the list of Function names
-         if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-         if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
-         if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
-         ' Search for variable definitions
-         if pData = 0 then pData = gdb2.dbFindVariable( sFunctionName )
-         ' Search for the TYPE definition
-         if pData = 0 then pData = gdb2.dbFindType( sFunctionName )
-      
-         ' Maybe this is a class sub/function inside of a class method that is
-         ' not prefixed by the "this" keyword.
-         dim sClassFunction as String
-         pDoc->GetCurrentFunctionName( sClassFunction, 0 )
-         dim as long f = instr( sClassFunction, "." )
-         if f then
-            sFunctionName = left( sClassFunction, f ) & sFunctionName
-            if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-            if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
-            if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
-         end if   
-      
-      end if
-      
-      IF pData = 0 then
-         MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
-         exit function
-      end if
-      wszFilename = pData->filename
-      nLineNum = pData->nLineNum
-   end if
-   
-   ' Save our current position in case user invokes "Last Position" option,   
-   gLastPosition.pDoc       = pDoc
-   gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-   gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-   OpenSelectedDocument( wszFilename, sFunctionName, nLineNum )
-
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Return to most previous position (invoked when "Last Position" is selected
-' ========================================================================================
-private Function frmMain_GotoLastPosition() As Long
-
-   ' Is the pDoc pointer still valid
-   If gLastPosition.pDoc = 0 Then Exit Function
-   
-   ' Position ourselves to the correct previous position.
-   frmMain_OpenFileSafely(HWND_FRMMAIN, _
-            False, _    ' bIsNewFile
-            False, _    ' bIsTemplate
-            True,  _    ' bShowInTab
-            false, _    ' bIsInclude
-            gLastPosition.pDoc->DiskFilename, _ ' wszFileName
-            gLastPosition.pDoc )  ' pDocIn
-   SciExec( GetFocus, SCI_SETFIRSTVISIBLELINE, gLastPosition.nFirstLine, 0) 
-   SciExec( GetFocus, SCI_GOTOPOS, gLastPosition.nPosition, 0) 
-   
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Position editor to Header/Source/Main/Resource document
-' ========================================================================================
-private Function frmMain_GotoFile( ByVal pDoc As clsDocument Ptr, _
-                                   byval nMenuId as long _
-                                   ) As Long
-
-   If pDoc = 0 Then Exit Function
-   
-   dim pDocFile as clsDocument ptr
-   dim as CWSTR wszFilename
-   
-   select case nMenuId
-      case IDM_GOTOMAINFILE
-         pDocFile = gApp.GetMainDocumentPtr
-         if pDocFile then wszFilename = pDocFile->DiskFilename
-         
-      case IDM_GOTORESOURCEFILE
-         pDocFile = gApp.GetResourceDocumentPtr
-         if pDocFile then wszFilename = pDocFile->DiskFilename
-
-      case IDM_GOTOHEADERFILE
-         pDocFile = gApp.GetHeaderDocumentPtr( pDoc )
-         if pDocFile then wszFilename = pDocFile->DiskFilename
-
-      case IDM_GOTOSOURCEFILE
-         pDocFile = gApp.GetSourceDocumentPtr( pDoc )
-         if pDocFile then wszFilename = pDocFile->DiskFilename
-   end select
-
-   
-   ' If the document when going to is the same as the one that we are 
-   ' already in then no need to execute the movement.
-   if pDocFile = pDoc then exit function
-   
-   ' Save our current position in case user invokes "Last Position" option,   
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   gLastPosition.pDoc       = pDoc
-   gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-   gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-
-   OpenSelectedDocument( wszFilename )
-   
-   Function = 0
-End Function
-
-
+  
 ' ========================================================================================
 ' Update the main form statusbar. This is the only routine that updates
 ' the statusbar in the entire program.
 ' ========================================================================================
-public Function frmMain_SetStatusbar() as long
-
-   Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
+function frmMain_SetStatusbar() as long
 
    ' Update the statusbar with the current Line/Col position
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    
    dim wszText as wstring * MAX_PATH
+   
+   ' PANEL (0) Build Configuration
+   ' PANEL (1) Compiling Results -or- Filename being parsed
+   ' PANEL (2) Line/Col/Sel -or- VD coordinates
+   ' PANEL (3) Filetype (Normal/Main/Resource/Module)
+   ' PANEL (4) Spacing
+   ' PANEL (5) File Encoding (Ansi, UTF-8, etc)
+   ' PANEL (6) Line Endings
+
+   ' blank out the current statusbar values  
+   for i as long = lbound(gSBPanels) to ubound(gSBPanels)
+      gSBPanels(i).wszText = ""
+   next
 
    ' PANEL (0) Build Configuration
-   ' PANEL (1) Line/Col/Sel -or- VD coordinates
-   ' PANEL (2) Filetype (Normal/Main/Resource/Module)
-   ' PANEL (3) File Encoding (Unicode/Ansi) -or- "Parsing:"
-   ' PANEL (4) Compiling Results -or- Filename being parsed
-   dim wszPanel(4) As WString * MAX_PATH
-   dim hIconPanel4 as HANDLE
-   for i as long = lbound(wszPanel) to ubound(wszPanel)
-      StatusBar_GetText( hStatusbar, i, wszPanel(i) )
-   next
-   
-   ' Default Panel4 text to be whatever is stored in gApp. That string will always hold
-   ' the latest file being parsed or the latest compile success/failure message. We will
-   ' reset the value when files are finished loading but we always what to keep the latest
-   ' compiled message.
-   wszPanel(4) = gApp.wszPanelText
-   hIconPanel4 = gApp.hIconPanel
+   if gApp.GetDocumentCount then
+      gSBPanels(0).wszText = frmBuildConfig_GetSelectedBuildDescription()
+   end if
+
+   ' PANEL (1) Compiling Results -or- Filename being parsed
+   gSBPanels(1).wszText = gApp.wszPanelText
+   'hIconPanel4 = gApp.hIconPanel
 
    if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then
-      wszPanel(1) = ""
-      wszPanel(2) = ""
-      wszPanel(3) = L(66,"Parsing") & ": "
-      wszPanel(4) = "(" & gApp.FileLoadingCount & ")  " & gApp.wszPanelText 
-   
-   elseif gApp.IsCompiling then
-      ' The gApp info is set in modCompile
+      gSBPanels(1).wszText = L(66,"Parsing") & ": (" & gApp.FileLoadingCount & ")  " & gApp.wszPanelText
       
    elseif pDoc <> 0 then
       dim as HWND hEdit = pDoc->hWndActiveScintilla
       wszText = ""
-      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) THEN 
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then 
          dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
-         if pCtrl THEN
+         if pCtrl then
             wszText = "L:" & GetControlProperty(pCtrl, "LEFT") & ", T:" & GetControlProperty(pCtrl, "TOP") & "  ::  " & _
                       "W:" & GetControlProperty(pCtrl, "WIDTH") & " x H:" & GetControlProperty(pCtrl, "HEIGHT")
-         END IF
+         end if
       else
-         Dim As Long curPos, nLine, nCol
-         Dim As Long startPos, endPos, startLine, endLine, nLines 
+         dim as long curPos, nLine, nCol
+         dim as long startPos, endPos, startLine, endLine, nLines 
          ' Retrieve the information and show it in the status bar
          curPos    = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
          nLine     = SciExec( hEdit, SCI_LINEFROMPOSITION, curPos, 0) 
          nCol      = SciExec( hEdit, SCI_GETCOLUMN, curPos, 0) 
-         nLines    = SciExec( hEdit, SCI_GETLINECOUNT, 0, 0) 
          pDoc->GetSelectedLineRange(startLine, endLine, startPos, endPos )
 
-         wszText = " Ln " & Str(nLine + 1) & ", Col " & Str(nCol + 1) 
-         If endPos - startPos Then  ' there is selected text
-            wszText = wszText + " (" + Str(endPos - startPos) + " selected)"
-            ' Update whether Selection icon should be highlighted
-            if IsWindowVisible(HWND_FRMFINDREPLACE) then frmFindReplace_ShowControls()
-         else
-            wszText = wszText + ", Lines " + Str(nLines)
-         End If 
+         wszText = " Ln " & str(nLine + 1) & ", Col " & str(nCol + 1) 
+         if endPos - startPos then  ' there is selected text
+            wszText = wszText + " (" + str(endPos - startPos) + " selected)"
+         end if 
          pDoc->ScrInfo.nMax = SciExec(hEdit, SCI_GETLINECOUNT, 0, 0) - 1    
          pDoc->ScrInfo.nPos = SciExec(hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
-         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE) 
+         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, true) 
 
-         ' Only search for the current sub/function if the pDoc or linenumber has changed
-         ' from the last time we checked. This ensures that we are not constantly checking lines
-         ' every time a character is entered.
-         static pDocLast as clsDocument ptr
-         static nLineLast as long
-         if ( pDocLast <> pDoc ) orelse ( nLineLast <> nLine ) then
-            frmMain_SelectComboFiles
-            frmMain_SelectComboFunctions
-         end if
-         pDocLast = pDoc
-         nLineLast = nLine
-         
+         ' Should we display the "shadow" under the tabcontrol
+         frmTopTabs_ShowShadow()
+
       end if
-      wszPanel(1) = wszText
+      ' PANEL (2) Line/Col/Sel -or- VD coordinates
+      gSBPanels(2).wszText = wszText
    
       
+      ' PANEL (3) Filetype (Normal/Main/Resource/Module)
       wszText = ""
-      Select Case pDoc->ProjectFileType
-         Case FILETYPE_HEADER:    wszText = ucase(L(175,"Header")) 
-         Case FILETYPE_NORMAL:    wszText = ucase(L(210,"Normal")) 
-         Case FILETYPE_MODULE:    wszText = ucase(L(211,"Module"))
-         Case FILETYPE_MAIN:      wszText = ucase(L(212,"Main"))
-         Case FILETYPE_RESOURCE:  wszText = ucase(L(213,"Resource"))
-      End Select
-      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) THEN 
+      select case pDoc->ProjectFileType
+         case FILETYPE_HEADER:    wszText = L(175,"Header") 
+         case FILETYPE_NORMAL:    wszText = L(210,"Normal") 
+         case FILETYPE_MODULE:    wszText = L(211,"Module")
+         case FILETYPE_MAIN:      wszText = L(212,"Main")
+         case FILETYPE_RESOURCE:  wszText = L(213,"Resource")
+      end select 
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then 
          wszText = "FORM"
       end if
-      wszPanel(2) = wszText
+      gSBPanels(3).wszText = wszText
       
+      ' PANEL (4) Spacing
+      gSBPanels(4).wszText = "Spaces: " & gConfig.TabSize
       
+      ' PANEL (5) File Encoding (Ansi, UTF-8, etc)
       wszText = ""
       select case pDoc->FileEncoding
          case FILE_ENCODING_UTF8_BOM
@@ -463,27 +123,27 @@ public Function frmMain_SetStatusbar() as long
          case else
             wszText = "ANSI"  
             SciExec( hEdit, SCI_SETCODEPAGE, 0, 0 )
-      END select
-      wszPanel(3) = wszText
+      end select 
+      gSBPanels(5).wszText = wszText
+
+      ' PANEL (6) Line Endings
+      select case SciExec( hEdit, SCI_GETEOLMODE, 0, 0 )
+         case SC_EOL_CRLF: wszText = "CRLF"  '(0)
+         case SC_EOL_CR:   wszText = "CR"    '(1)
+         case SC_EOL_LF:   wszText = "LF"    '(2)
+      end select 
+      gSBPanels(6).wszText = wszText
       
       if SciExec( hEdit, SCI_GETREADONLY, 0, 0 ) then
-         wszPanel(4) = L(222,"Read Only")
-         hIconPanel4 = ghIconBad
+         gSBPanels(1).wszText = L(222,"Read Only")
       end if
 
-   else      
-      ' No document must be active and nothing else happening so blank out the statusbar.
-      wszPanel(1) = ""
-      wszPanel(2) = ""
-      wszPanel(3) = "" 
-      wszPanel(4) = "" 
-      hIconPanel4 = 0
-   END IF
+   end if
    
 
    ' MAIN WINDOW CAPTION 
    wszText = iif( gApp.GetDocumentCount, APPNAMESHORT, APPNAME )
-   If (gApp.IsProjectActive = true) or (gApp.IsProjectLoading = true) Then 
+   if (gApp.IsProjectActive = true) or (gApp.IsProjectLoading = true) then 
       wszText = wszText & " - [" & gApp.ProjectName & "]"
    end if
    if pDoc then 
@@ -492,39 +152,24 @@ public Function frmMain_SetStatusbar() as long
          wszText = wszText & " - [" & L(222,"Read Only") & "]"
       end if
    end if
-   If wszText <> AfxGetWindowText( HWND_FRMMAIN ) Then AfxSetWindowText( HWND_FRMMAIN, wszText )
-
+   if wszText <> AfxGetWindowText( HWND_FRMMAIN ) then AfxSetWindowText( HWND_FRMMAIN, wszText )
 
    ' TAB CONTROL FILENAME ( * modified flag )
-   gTTabCtl.SetTabText(-1)
+   gTTabCtl.SetTabText(-1)  ' this will only repaint if text has changed
+   ' repaint the tab to ensure that the unsaved indicator changes
+   AfxRedrawWindow( HWND_FRMMAIN_TOPTABS )
 
+   ' Call function to calculate the size/position of the panels and also paint the statusbar
+   frmStatusBar_PositionWindows()
 
-   ' BUILD CONFIGURATION
-   wszText = ""
-   if gApp.GetDocumentCount THEN
-      dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
-      if nCurSel > -1 THEN wszText = " " & gConfig.Builds(nCurSel).wszDescription
-   END IF
-   wszPanel(0) = wszText
-   
-
-   ' UPDATE THE PANELS THAT HAVE CHANGED
-   for i as long = lbound(wszPanel) to ubound(wszPanel)
-      StatusBar_GetText( hStatusbar, i, @wszText )
-      if wszText <> wszPanel(i) then StatusBar_SetText( hStatusbar, i, wszPanel(i) )
-   next
-   if StatusBar_GetIcon( hStatusBar, 4 ) <> hIconPanel4 then StatusBar_SetIcon( hStatusBar, 4, hIconPanel4 )
-
-   frmMain_ChangeToolbarButtonsState
-   
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process any command line that was passed to the editor
 ' ========================================================================================
-private Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd ) As Long
+function frmMain_ProcessCommandLine( byval HWnd as HWnd ) as long
 
    ' The incoming command line may contain a regular file to open or a project file.
    
@@ -535,59 +180,62 @@ private Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd ) As Long
    '          A value of zero (0) returns the name of the executable; and values of 
    '          one (1) and greater return each command-line argument.
 
-   ' As of v1.7.4 start to use AfxCommand which is a unicode aware replacement for FB's
+   ' as of v1.7.4 start to use AfxCommand which is a unicode aware replacement for FB's
    ' built in COMMAND function (that is not unicode compliant).
    
-   If Len(AfxCommand(1)) = 0 Then Exit Function
+   if len(AfxCommand(1)) = 0 then exit function
    
-   Dim wszPath As WString * MAX_PATH
-   Dim wszArg  As WString * MAX_PATH
-   dim DataToSend AS COPYDATASTRUCT   
+   dim wszPath as wstring * MAX_PATH
+   dim wszArg  as wstring * MAX_PATH
+   dim DataToSend as COPYDATASTRUCT   
    
-   IF IsIconic(hwnd) THEN 
-      Dim WinPla As WINDOWPLACEMENT
-      With WinPla
-         .Length = Sizeof(WinPla)
+   if IsIconic(hwnd) then 
+      dim WinPla as WINDOWPLACEMENT
+      with WinPla
+         .Length = sizeof(WinPla)
          .rcNormalPosition.Left   = gConfig.StartupLeft
          .rcNormalPosition.Top    = gConfig.StartupTop
          .rcNormalPosition.Right  = gConfig.StartupRight
          .rcNormalPosition.Bottom = gConfig.StartupBottom
-         .showCmd = Iif( gConfig.StartupMaximized, SW_MAXIMIZE, SW_SHOWNORMAL )
-      End With
+         .showCmd = iif( gConfig.StartupMaximized, SW_MAXIMIZE, SW_SHOWNORMAL )
+      end with
       SetWindowPlacement(HWND, @WinPla)
    end if
    SetForegroundWindow(hwnd)
    
-   Dim As Long i = 1
+   dim as long i = 1
    Do
       wszArg = AfxCommand(i)
-      If Len(wszArg) = 0 Then Exit Do
+      if len(wszArg) = 0 then exit do
        
       ' Remove any double quotes from the argument.
-      wszPath = AfxStrRemove( wszArg, WChr(34) )
+      wszPath = AfxStrRemove( wszArg, wchr(34) )
        
-      ' If no path exists for the file then add the current folder
+      ' if no path exists for the file then add the current folder
       wszPath = AfxStrPathname( "PATH", wszArg )
-      If Len(wszPath) = 0 Then wszArg = AfxGetExePathName & wszArg 
+      if len(wszPath) = 0 then wszArg = AfxGetExePathName & wszArg 
        
-      If AfxFileExists(wszArg) Then
+      if AfxFileExists(wszArg) then
          DataToSend.lpData  = @wszArg
-         DataToSend.cbdata  = (LEN(wszArg)*2) + 1
-         SendMessage(hwnd, WM_COPYDATA, LEN(DataToSend), cast(lParam, @DataToSend))
-      End If
+         DataToSend.cbdata  = (len(wszArg)*2) + 1
+         SendMessage(hwnd, WM_COPYDATA, len(DataToSend), cast(lParam, @DataToSend))
+      end if
        
       i += 1
    Loop
 
-   Function = 0
-End Function   
+   function = 0
+end function   
 
 
 
 ' ========================================================================================
 ' Determine if the incoming character is a brace character
 ' ========================================================================================
-function frmMain_HighlightWord( byval pDoc as clsDocument ptr, byref text as string ) as long
+function frmMain_HighlightWord( _
+            byval pDoc as clsDocument ptr, _
+            byref text as string _
+            ) as long
 
    if pDoc = 0 then exit function
    
@@ -608,12 +256,9 @@ function frmMain_HighlightWord( byval pDoc as clsDocument ptr, byref text as str
    if len(ltrim(text)) = 0 then exit function
 
    '// Update indicator appearance
-   dim pTheme as TYPE_THEMES ptr
-   pTheme = gConfig.GetThemePtr
-   if pTheme = 0 then exit function
-    
    SciMsg( pSci, SCI_INDICSETSTYLE, NUM, INDIC_STRAIGHTBOX )
-   SciMsg( pSci, SCI_INDICSETFORE, NUM, pTheme->colors(CLR_OCCURRENCE).nFg) 
+   dim pTheme as THEME_TYPE ptr = getThemePtr("editor.occurrence")
+   SciMsg( pSci, SCI_INDICSETFORE, NUM, pTheme->foreground) 
    SciMsg( pSci, SCI_INDICSETOUTLINEALPHA, NUM, 50 )
    SciMsg( pSci, SCI_INDICSETALPHA, NUM, 80 )   
 
@@ -625,8 +270,8 @@ function frmMain_HighlightWord( byval pDoc as clsDocument ptr, byref text as str
 	dim as long startPos = 0
    dim as long r
    do 
-      r = SciMsg( pSci, SCI_SEARCHINTARGET, Len(text), cast(LPARAM, Strptr(text)))
-      if r = -1 THEN exit do
+      r = SciMsg( pSci, SCI_SEARCHINTARGET, len(text), cast(LPARAM, strptr(text)))
+      if r = -1 then exit do
       
       numfound = numfound + 1
 		
@@ -639,7 +284,7 @@ function frmMain_HighlightWord( byval pDoc as clsDocument ptr, byref text as str
       SciMsg( pSci, SCI_SETTARGETEND, nLength, 0)
    loop
 
-   '// If only the current word was found then we don't want any highlighting
+   '// if only the current word was found then we don't want any highlighting
 	'// because the effect would be that the current word highlights as we type.
 	'// Remove all uses of our indicator
    if numfound <= 1 then
@@ -655,12 +300,12 @@ end function
 ' ========================================================================================
 ' Determine if the incoming character is a brace character
 ' ========================================================================================
-private function frmMain_IsBrace( byval c as integer ) as Boolean
+function frmMain_IsBrace( byval c as integer ) as boolean
 
    select case chr(c)
       case "(", ")", "[", "]", "{", "}"
          return true
-   end select       
+   end select        
 
    return false
 end function
@@ -669,7 +314,11 @@ end function
 ' ========================================================================================
 ' Handle Character Autocompletion if that editor option is active
 ' ========================================================================================
-private function frmMain_InsertMatchedChars( byval pDoc as clsDocument ptr, byval ch as long ) as Boolean
+function frmMain_InsertMatchedChars( _
+            byval pDoc as clsDocument ptr, _
+            byval ch as long _
+            ) as boolean
+   
    if gConfig.CharacterAutoComplete = 0 then exit function
   
    if pDoc = 0 then exit function
@@ -679,14 +328,14 @@ private function frmMain_InsertMatchedChars( byval pDoc as clsDocument ptr, byva
    
    dim as long caretPos = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
    dim as long docStart = caretPos = 1
-   dim as long docEnd   = caretPos = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
+   dim as long docend   = caretPos = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
 
    ' Get the styling of the current line to determine if we are in a 
    ' multiline or single line comment block then abort the autoinsert.
    select case SciMsg( pSci, SCI_GETSTYLEAT, caretPos, 0)
       case SCE_B_MULTILINECOMMENT, SCE_B_COMMENT
          exit function
-   end select
+   end select 
 
    dim as long nCharPrev = iif( docStart, _
                        SciMsg( pSci, SCI_GETCHARAT, caretPos, 0), _
@@ -697,7 +346,7 @@ private function frmMain_InsertMatchedChars( byval pDoc as clsDocument ptr, byva
    dim as boolean isCharPrevBlank = iif( instr(chr(nCharPrev), any chr(32, 9, 10, 13)), true, false )
 
    dim as boolean isCharNextBlank = iif( instr(chr(nCharNext), any chr(32, 9, 10, 13)), true, false ) 
-   if nCharNext = docEnd then isCharNextBlank = true
+   if nCharNext = docend then isCharNextBlank = true
 
    dim as boolean isEnclosed = false
    if (nCharPrev = asc("(") and nCharNext = asc(")") ) or _
@@ -723,7 +372,7 @@ private function frmMain_InsertMatchedChars( byval pDoc as clsDocument ptr, byva
 
    dim as boolean charNextIsCharOrString = iif( instr(chr(nCharNext), any chr(34,92)), true, false )
 
-   dim as WString * 10 wszText
+   dim as wstring * 10 wszText
      
    select case chr(ch)
       case "("
@@ -754,7 +403,7 @@ private function frmMain_InsertMatchedChars( byval pDoc as clsDocument ptr, byva
             SciMsg( pSci, SCI_INSERTTEXT, caretPos, cast(LPARAM, @wszText) )
          end if    
       
-   end select
+   end select 
 
    function = true
 end function
@@ -763,39 +412,39 @@ end function
 ' ========================================================================================
 ' Process Scintilla Notifications
 ' ========================================================================================
-private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
-                                     ByVal pNSC As SCNOTIFICATION Ptr _
-                                     ) As Long
+function Scintilla_OnNotify( _
+            byval HWnd as HWnd, _
+            byval pNSC as SCNOTIFICATION ptr _
+            ) as long
 
-   If pNSC = 0 Then Exit Function
+   if pNSC = 0 then exit function
    
-   Dim pDoc As clsDocument Ptr 
+   dim pDoc as clsDocument ptr 
 
-   Dim as HWND hEdit
-   Dim as long nLine, nFoldLevel
-    
+   dim as HWND hEdit
+   dim as long nLine, nFoldLevel
 
-   Select Case pNSC->hdr.code
+   select case pNSC->hdr.code
          
-      Case SCN_UPDATEUI    
+      case SCN_UPDATEUI    
          if gApp.SuppressNotify then return true
          pDoc = gTTabCtl.GetActiveDocumentPtr()
-         If pDoc Then 
-            If pDoc->IsValidScintillaID( pNSC->hdr.idFrom ) Then
+         if pDoc then 
+            if pDoc->IsValidScintillaID( pNSC->hdr.idFrom ) then
                ' This code will position our substitute scrollbar thumbs only when the 
                ' caret position crosses a page boundry via keyboard input
-               If pNSC->updated And SC_UPDATE_SELECTION then 'And pNSC->updated > SC_UPDATE_SELECTION Then
+               if pNSC->updated and SC_UPDATE_SELECTION then 'And pNSC->updated > SC_UPDATE_SELECTION then
                   pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
-                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
-               End If
+                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, true)
+               end if
 
-               Select Case pNSC->updated
-               Case SC_UPDATE_V_SCROLL
-                  ' If there's only a V scroll update w/no selection update, then mousewheel was used - adj thumb pos.
+               select case pNSC->updated
+               case SC_UPDATE_V_SCROLL
+                  ' if there's only a V scroll update w/no selection update, then mousewheel was used - adj thumb pos.
                   ' Scintilla eats the WM_VSCROLL msg from a mousewheel so we never get one to process. We do it here.
                   pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
-                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
-               end select
+                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, true)
+               end select 
                frmMain_SetStatusbar
  
                               
@@ -804,7 +453,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
 
                if pDoc->lastCaretPos <> caretPos then
                   pDoc->lastCaretPos = caretPos
-
+                  
                   if gConfig.OccurrenceHighlight then
                      static as string sCurWord, sPrevWord
                      sCurWord = pDoc->GetWord()
@@ -826,28 +475,26 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                         bracePos1 = caretPos
                      end if
                      
-                     dim pTheme as TYPE_THEMES ptr
-                     pTheme = gConfig.GetThemePtr
-                  
-                     if pTheme then 
-                        if bracePos1 >= 0 then
-                           '// Find the matching brace
-                           bracePos2 = SciExec( pDoc->hWndActiveScintilla, SCI_BRACEMATCH, bracePos1, 0)
-                           if bracePos2 = -1 then
-                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->colors(CLR_BRACEBAD).nFg )  ' red
-                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEBADLIGHT, bracePos1, 0 )
-                           else
-                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->colors(CLR_BRACEGOOD).nFg )  ' green
-                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, bracePos1, bracePos2 )
-                           end if
-                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 255 ) ' transparency of outline
-                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 127 )        ' transparency of interior      
-                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 50 ) ' transparency of outline
-                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 30 )        ' transparency of interior      
+                     if bracePos1 >= 0 then
+                        dim pTheme as THEME_TYPE ptr 
+                        '// Find the matching brace
+                        bracePos2 = SciExec( pDoc->hWndActiveScintilla, SCI_BRACEMATCH, bracePos1, 0)
+                        if bracePos2 = -1 then
+                           pTheme = getThemePtr("editor.bracebad")
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->foreground )
+                           SciExec( pDoc->hWndActiveScintilla, SCI_BRACEBADLIGHT, bracePos1, 0 )
                         else
-                           '// Turn off brace matching
-                           SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, -1, -1 )
+                           pTheme = getThemePtr("editor.bracegood")
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->foreground )
+                           SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, bracePos1, bracePos2 )
                         end if
+                        'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 255 ) ' transparency of outline
+                        'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 127 )        ' transparency of interior      
+                        SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 50 ) ' transparency of outline
+                        SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 30 )        ' transparency of interior      
+                     else
+                        '// Turn off brace matching
+                        SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, -1, -1 )
                      end if
                      
                   else
@@ -861,33 +508,40 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          
       
       case SCN_MODIFYATTEMPTRO
-         
          ' Attempting to modify a read-only document.
          MessageBeep(MB_ICONWARNING)
                   
                   
-      Case SCN_MODIFIED
-         
+      case SCN_MODIFIED
          if gApp.SuppressNotify then return true
+
          ' Show line and column. Only do on modification of text otherwise we will have
          ' a huge slowdown when notifications sent for UI updates.
          
-         If (pNSC->modificationType And SC_MOD_INSERTTEXT) orelse _
-            (pNSC->modificationType And SC_MOD_DELETETEXT) Then
-            
+         if (pNSC->modificationType and SC_MOD_INSERTTEXT) orelse _
+            (pNSC->modificationType and SC_MOD_DELETETEXT) then
+
             ' Set parsing flag to true. We use a parse flag rather than depending on the dirty
             ' flags because the file could stay dirty for a long time before it gets saved and 
             ' every call to the parser would happen even in cases where only directional 
             ' movement has occured with no text modifications at all.
-            pDoc = gTTabCtl.GetActiveDocumentPtr()
-            If pDoc Then 
+            
+            ' Get the pDoc from the Scintilla HWND because this is the most reliable
+            ' method of knowing which scintilla window sent the notification (rather than
+            ' using gTTabCtl.GetActiveDocumentPtr. Possible that a control is sending the message
+            ' as it is loading and is not yet the active document ptr.
+            pDoc = gApp.GetDocumentPtrByWindow( pNSC->hdr.hwndFrom )
+            if pDoc then 
+               if pDoc->LoadingFromFile = false then
+                  pDoc->AutoSaveRequired = true
+               end if   
                frmMain_SetStatusbar
 
 					pDoc->bNeedsParsing = true
-					If (pNSC->modificationType And SC_MOD_DELETETEXT) Then
+					if (pNSC->modificationType and SC_MOD_DELETETEXT) then
 						' Do a check to see if we have backspaced to a point where there is a
 						' period to try to popup an autocomplete or codetip.
-						Dim as long nPos, nChar
+						dim as long nPos, nChar
 						hEdit = pDoc->hWndActiveScintilla
 						nPos  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0 ) - 1
 						nChar = SciExec( hEdit, SCI_GETCHARAT, nPos, 0 )
@@ -895,41 +549,41 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
 							case ".", ">"    '  Show autocomplete list for TYPE variables
 								' dot "." or ">"  part of a pointer
 								' Need to PostMessage in order to give time for notification to complete. The "."
-								' is also used as a character that selects and closes the popup list. If no
+								' is also used as a character that selects and closes the popup list. if no
 								' PostMessage then the "." will automatically select the first entry in the list
 								' and close.
 								pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
 								PostMessage( HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, nChar, 0 )
-						end select
+						end select 
 					end if
 
             end if
          end if
          return true
          
-      Case SCN_MARGINCLICK
+      case SCN_MARGINCLICK
          ' Folder margin
          pDoc = gTTabCtl.GetActiveDocumentPtr()
-         If pDoc Then 
+         if pDoc then 
             hEdit      = pDoc->hWndActiveScintilla
             nLine      = SciExec(hEdit, SCI_LINEFROMPOSITION, pNSC->position, 0)
             nFoldLevel = SciExec(hEdit, SCI_GETFOLDLEVEL, nLine, 0)
-            Select Case pNSC->margin 
-               Case 1   ' left margin (bookmarks)
+            select case pNSC->margin 
+               case 1   ' left margin (bookmarks)
                   pDoc->ToggleBookmark(nLine)
-               Case 2   ' fold margin
-                  ' If is the head line...
-                  If (nFoldLevel And SC_FOLDLEVELHEADERFLAG) <> 0 Then
+               case 2   ' fold margin
+                  ' if is the head line...
+                  if (nFoldLevel and SC_FOLDLEVELHEADERFLAG) <> 0 then
                      pDoc->FoldToggle(nLine) 
-                  End If   
-            End Select
-         End If           
+                  end if   
+            end select 
+         end if           
                      
                
       case SCN_AUTOCCANCELLED
          ' Destroy the popup information window
          pDoc = gTTabCtl.GetActiveDocumentPtr()
-         If pDoc Then 
+         if pDoc then 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
          end if
          
@@ -940,21 +594,21 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          ' used by the autocomplete listbox (because we are doing incremental searches).
          pDoc = gTTabCtl.GetActiveDocumentPtr()
          
-         If pDoc Then 
+         if pDoc then 
             
             hEdit = pDoc->hWndActiveScintilla
             
             ' Get the position where the listbox was opened.
             dim as long nStartPos = pDoc->AutoCStartPos
-            Dim as long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            dim as long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
             
             ' Get the match word that existed when the listbox was displayed
             dim as long nLenMatchWord = len(pDoc->sMatchWord)
             
             ' Set the word that was selected in the listbox
-            dim as String sText = *cast(zstring ptr, pNSC->lpText)
+            dim as string sText = *cast(zstring ptr, pNSC->lpText)
             SciExec( hEdit, SCI_SETSEL, nStartPos-nLenMatchWord, nPos)
-            SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, strptr(sText)))
+            SciExec( hEdit, SCI_REPLACESEL, 0, cast(LPARAM, strptr(sText)))
             nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
             SciExec( hEdit, SCI_SETSEL, nPos, nPos)
             
@@ -969,7 +623,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                PostMessage(HWND, MSG_USER_APPENDEQUALSSIGN, 0, 0)
             end if
             
-            ' If a CodeTip was displayed prior to the autocomplete popup list then
+            ' if a CodeTip was displayed prior to the autocomplete popup list then
             ' redisplay that CodeTip now.
             ShowCodetip( pDoc )
             
@@ -985,10 +639,10 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          end if
                                     
       
-      CASE SCN_CHARADDED
+      case SCN_CHARADDED
          if gApp.SuppressNotify then exit function
          pDoc = gTTabCtl.GetActiveDocumentPtr()
-         If pDoc = 0 Then exit function
+         if pDoc = 0 then exit function
          hEdit = pDoc->hWndActiveScintilla
        
 			pDoc->bNeedsParsing = true
@@ -996,15 +650,15 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          ' Attempt to do a Character Autocompletion if that editor option is active.
          frmMain_InsertMatchedChars( pDoc, pNSC->ch )
          
-         select CASE chr(pNSC->ch)
+         select case chr(pNSC->ch)
          case ".", ">"    '  Show autocomplete list for TYPE variables
             ' dot "." or ">"  part of a pointer
             ' Need to PostMessage in order to give time for notification to complete. The "."
-            ' is also used as a character that selects and closes the popup list. If no
+            ' is also used as a character that selects and closes the popup list. if no
             ' PostMessage then the "." will automatically select the first entry in the list
             ' and close.
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
+            if PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
           
          case ")"      ' Close and active code tip 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
@@ -1016,7 +670,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
             pDoc->wszLastCallTip = ""
             pDoc->nLastCallTipLine = -1
-            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
+            if PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
 
          case chr(13)  ' ENTER KEY PRESSED
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
@@ -1029,197 +683,156 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          case else   ' all other letters
             if ShowAutocompleteList() then exit function
              
-         END SELECT
+         end select 
          
-   End Select
+   end select 
 
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Set focus to currently active Scintilla window
 ' ========================================================================================
-public Function frmMain_SetFocusToCurrentCodeWindow() As Long
+function frmMain_SetFocusToCurrentCodeWindow() as long
    ' Post a message to the main form CUSTOM handler that will
    ' set focus to the currently active Scintilla code window. We
    ' use PostMessage to ensure that all all other windows 
    ' messages are finished processing.
    PostMessage( HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0 )
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_PAINT message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnPaint( ByVal HWnd As HWnd ) As LRESULT
+function frmMain_OnPaint( byval HWnd as HWnd ) as LRESULT
             
-   Dim As PAINTSTRUCT ps
-   Dim As HPEN hPen
-   Dim As HDC hDc
+   dim as PAINTSTRUCT ps
+   dim as HPEN hPen
+   dim as HDC hDc
    dim as RECT rc
    
    hDC = BeginPaint(hWnd, @ps)
 
    SaveDC hDC
+   
+   FillRect( hDC, @ps.rcPaint, ghBrushMainBackground )
 
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-   if pDoc THEN
+   if pDoc then
       ' Get location of vertical scrollbar and draw splitter button right above it.
       if IsWindowVisible(pDoc->hScrollbar) then
          GetWindowRect(pDoc->hScrollbar, @rc)
          rc.top = rc.top - SPLITSIZE: rc.bottom = rc.top + SPLITSIZE
          MapWindowPoints(0, HWND_FRMMAIN, cast(POINT ptr, @rc), 2)
          pDoc->rcSplitButton = rc
-         if IsWindowVisible(pDoc->hWindow(1)) THEN 
-            ' If the window is visible then we need to extend the splitter hit
+         if IsWindowVisible(pDoc->hWindow(1)) then 
+            ' if the window is visible then we need to extend the splitter hit
             ' area to include all the way to left edge of the client area.
-            if IsWindowVisible(HWND_FRMEXPLORER) THEN 
+            if IsWindowVisible(HWND_FRMEXPLORER) then 
                rc.left = AfxGetWindowWidth( HWND_FRMEXPLORER )
                pDoc->rcSplitButton.left = rc.left
             end if   
-         End If
+         end if
          DrawFrameControl( hDC, @rc, DFC_BUTTON, DFCS_BUTTONPUSH)
       end if
 
-      ' Paint under the Files/Functions comboboxes because the boxes do not
-      ' cover the entire width fo the client area.
-      Dim pWindow As CWindow Ptr = AfxCWindowPtr( HWND_FRMMAIN )
-      if pWindow then
-         dim as hwnd hEdit = iif( IsWindowVisible( pDoc->hWindow(1)), pDoc->hWindow(1), pDoc->hWindow(0) )
-         dim as long nLeft, nTop
-         AfxGetWindowLocation( hEdit, nLeft, nTop )
-         GetClientRect( HWND_FRMMAIN, @rc )
-         rc.left = nLeft
-         rc.right = nLeft + AfxGetWindowWidth( hEdit ) + AfxGetWindowWidth( pDoc->hScrollbar )
-         rc.bottom = nTop
-         FillRect( hDC, @rc, GetSysColorBrush( COLOR_BTNFACE ) )
-         rc.top = rc.bottom - pWindow->ScaleY(1)
-         FillRect( hDC, @rc, GetSysColorBrush( COLOR_WINDOWFRAME ) )
-      end if
-         
    end if
    
    RestoreDC hDC, -1 
    
    EndPaint hWnd, @ps
    
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-public Function frmMain_PositionWindows() As LRESULT
+function frmMain_PositionWindows() as LRESULT
    
-   Dim As HWnd hEdit, hTabCtl, hComboFiles, hComboFunctions
-   dim as long nHeightTabControl, nLeft
-   Dim As Rect rc
+   dim as HWnd hEdit
+   dim as long nHeightTabControl, nLeft, nTop
+   dim as Rect rc
    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr( HWND_FRMMAIN )
+   dim pWindow as CWindow ptr = AfxCWindowPtr( HWND_FRMMAIN )
    if pWindow = 0 then exit function
    
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    
    ' Get the entire client area
    GetClientRect( HWND_FRMMAIN, @rc )
   
-   hTabCtl = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_TOPTABCONTROL )
-   hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
-   hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
+   dim as long nHeightMenuBar   = AfxGetWindowHeight( HWND_FRMMAIN_MENUBAR )
+   dim as long nHeightStatusBar = AfxGetWindowHeight( HWND_FRMMAIN_STATUSBAR )
+   dim as long nHeightOutput    = AfxGetWindowHeight( HWND_FRMOUTPUT )
+   dim as long nWidthExplorer   = AfxGetWindowWidth( HWND_FRMEXPLORER )
 
-   Dim As Long nHeightRebar     = AfxGetWindowHeight( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_REBAR) )
-   dim as long nHeightStatusBar = AfxGetWindowHeight( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR) )
-   Dim As Long nHeightOutput    = AfxGetWindowHeight( HWND_FRMOUTPUT)
-   Dim As Long nWidthExplorer   = AfxGetWindowWidth( HWND_FRMEXPLORER )
-   Dim As Long nHeightCombo     = AfxGetWindowHeight( hComboFiles )
+   ' Set the top menu menubar into place 
+   SetWindowPos( HWND_FRMMAIN_MENUBAR, 0, _
+                 0, 0, rc.right - rc.left, nHeightMenuBar, _
+                 SWP_NOZORDER or SWP_SHOWWINDOW ) 
 
-   ShowWindow( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_REBAR), iif(gConfig.HideToolbar, SW_HIDE, SW_SHOW) )
-   ShowWindow( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR), iif(gConfig.HideStatusbar, SW_HIDE, SW_SHOW) )
-   if gConfig.HideToolbar THEN nHeightRebar = 0
-   if gConfig.HideStatusbar THEN nHeightStatusBar = 0
+   ' Set the statusbar into place 
+   SetWindowPos( HWND_FRMMAIN_STATUSBAR, 0, _
+                 0, rc.bottom - nHeightStatusBar, rc.right - rc.left, nHeightStatusBar, _
+                 SWP_NOZORDER or SWP_SHOWWINDOW ) 
    
-      
    nLeft = rc.Left 
+   nTop = rc.top + nHeightMenuBar
    
    ' Set the Explorer pane into place if applicable
-   If IsWindowVisible(HWND_FRMEXPLORER) Then
+   if IsWindowVisible(HWND_FRMEXPLORER) then
       SetWindowPos( HWND_FRMEXPLORER, 0, _
-                    nLeft, rc.Top + nHeightRebar, _
+                    nLeft, nTop, _
                     nWidthExplorer, _
-                    rc.Bottom - nHeightStatusBar - nHeightRebar, _
-                    SWP_NOZORDER Or SWP_SHOWWINDOW ) 
+                    rc.Bottom - nHeightStatusBar - nHeightMenuBar, _
+                    SWP_NOZORDER or SWP_SHOWWINDOW ) 
       frmExplorer_PositionWindows
       nLeft = nWidthExplorer
    Else
       nWidthExplorer = 0
-   End If
+   end if
 
 
-   ' If items exist in the top tabcontrol then show the tab control and account for its height
-   If TabCtrl_GetItemCount(hTabCtl) = 0 Then
-      ShowWindow(hTabCtl, SW_HIDE)
+   ' if items exist in the top tabcontrol then show the tab control and account for its height
+   if gTTabCtl.GetItemCount = 0 then
+      ShowWindow( HWND_FRMMAIN_TOPTABS, SW_HIDE )
       nHeightTabControl = 0
-      ShowWindow( hComboFiles, SW_HIDE )
-      ShowWindow( hComboFunctions, SW_HIDE )
-      nHeightCombo = 0
+      
    Else
-      nHeightTabControl = AfxGetWindowHeight(hTabCtl)
-      SetWindowPos( hTabCtl, 0, _
-                    nLeft, rc.Top + nHeightRebar, _
+      nHeightTabControl = AfxGetWindowHeight(HWND_FRMMAIN_TOPTABS)
+      SetWindowPos( HWND_FRMMAIN_TOPTABS, 0, _
+                    nLeft, nTop, _
                     rc.Right - nWidthExplorer, nHeightTabControl, _
-                    SWP_SHOWWINDOW Or SWP_NOZORDER )
-      ShowWindow( hComboFiles, SW_SHOW )
-      ShowWindow( hComboFunctions, SW_SHOW )
-   End If
-   
-   
-   ' If the visual designer is being shown then we will hide the files and functions combos
-   If pDoc Then 
-      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) THEN
-         ShowWindow( hComboFiles, SW_HIDE )
-         ShowWindow( hComboFunctions, SW_HIDE )
-         nHeightCombo = 0
-      else
-         ' Position the Files and Functions comboboxes just after the top tab control
-         dim as long nWidthCombo = (rc.Right - nWidthExplorer - pWindow->ScaleX(10)) * .5
-          
-         SetWindowPos( hComboFiles, 0, _
-                       nleft, _
-                       rc.Top + nHeightRebar + nHeightTabControl + pWindow->ScaleY(2), _
-                       nWidthCombo, nHeightCombo, _
-                       SWP_SHOWWINDOW or SWP_NOZORDER )
-
-         SetWindowPos( hComboFunctions, 0, _
-                       nleft + nWidthCombo + pWindow->ScaleX(10), _
-                       rc.Top + nHeightRebar + nHeightTabControl + pWindow->ScaleY(2), _
-                       nWidthCombo, nHeightCombo, _
-                       SWP_SHOWWINDOW or SWP_NOZORDER )
-      end if
+                    SWP_SHOWWINDOW or SWP_NOZORDER )
+      frmTopTabs_PositionWindows()
+      
    end if
    
-   
+
    ' Set the Output pane into place if applicable
-   If IsWindowVisible(HWND_FRMOUTPUT) Then
+   if IsWindowVisible(HWND_FRMOUTPUT) then
       SetWindowPos( HWND_FRMOUTPUT, 0, _
                     nLeft, rc.Bottom - nHeightStatusbar - nHeightOutput, _
                     rc.Right - nLeft, _
                     nHeightOutput, _
-                    SWP_NOZORDER Or SWP_SHOWWINDOW ) 
+                    SWP_NOZORDER or SWP_SHOWWINDOW ) 
    Else
       nHeightOutput = 0
-   End If
+   end if
 
 
-   If pDoc Then 
+   if pDoc then 
       ' Position the Scintilla child edit windows
       dim as RECT rcClient
-      ' Reduce the height of the client area by the size of the rebar and statusbar.
+      ' Reduce the height of the client area by the size of the statusbar and menubar.
       rcClient.left = nLeft
-      rcClient.top = rc.Top + nHeightRebar + nHeightTabControl + nHeightCombo 
+      rcClient.top = nTop + nHeightTabControl 
       rcClient.right = rc.Right - nWidthExplorer
       rcClient.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
       
@@ -1233,9 +846,9 @@ public Function frmMain_PositionWindows() As LRESULT
          nDesignCodeTabHeight = pWindow->ScaleY(24)
       end if
       
-      dim as long lStyle = SWP_SHOWWINDOW or SWP_NOZORDER Or SWP_NOOWNERZORDER Or SWP_NOACTIVATE Or SWP_NOCOPYBITS
+      dim as long lStyle = SWP_SHOWWINDOW or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_NOACTIVATE or SWP_NOCOPYBITS
       
-      if pDoc->IsDesigner THEN
+      if pDoc->IsDesigner then
          SetWindowPos( pDoc->hDesignTabCtrl, 0, _
                        rcClient.left, rcClient.bottom - nDesignCodeTabHeight, _
                        rcClient.right, rcClient.bottom - nDesignCodeTabHeight, _
@@ -1244,8 +857,8 @@ public Function frmMain_PositionWindows() As LRESULT
          ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
       end if
       
-      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) THEN
-         ' If the DesignView has been set to show the visual designer rather than the code
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
+         ' if the DesignView has been set to show the visual designer rather than the code
          ' window then ensure that DesignMain is shown.
          SetWindowPos( pDoc->hWndDesigner, 0, _
                        rcClient.left, rcClient.top, _
@@ -1269,7 +882,7 @@ public Function frmMain_PositionWindows() As LRESULT
          dim as long nSplitSize 
          
          ' Position top (optional) edit window
-         if pDoc->SplitY - rcClient.top <= 0 THEN 
+         if pDoc->SplitY - rcClient.top <= 0 then 
             ShowWindow( pDoc->hWindow(1), SW_HIDE )      
             nSplitSize = 0              
          Else
@@ -1300,33 +913,33 @@ public Function frmMain_PositionWindows() As LRESULT
          pDoc->ScrInfo.nPage = SciExec( pDoc->hWindow(0), SCI_LINESONSCREEN, 0, 0 )
          pDoc->ScrInfo.nMax  = SciExec( pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0 ) - 1    
          pDoc->ScrInfo.nPos  = SciExec( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0 )
-         SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE )
+         SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, true )
          
-         ' If the FiND/REPLACE window is open then ensure that it is positioned correctly
+         ' if the FIND/REPLACE window is open then ensure that it is positioned correctly
          ' especially important if the Main window is resized.
-         frmFindReplace_PositionWindow
+         frmFindReplace_PositionWindows
          
       end if
       AfxRedrawWindow(HWND_FRMMAIN)
    end if
    
-   
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
    
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 
 ' ========================================================================================
 ' Attempt to open specified project. 
 ' ========================================================================================
-public Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
-                                           byref wszProjectFileName as const WString _
-                                           ) as Boolean
+function frmMain_OpenProjectSafely( _
+            byval HWnd as HWnd, _
+            byref wszProjectFileName as const wstring _
+            ) as boolean
 
-   ' If a Project is not active then we need to save the current non-project notes
+   ' if a Project is not active then we need to save the current non-project notes
    ' when this file is closed. It is possible that this file is being closed and
    ' a project is being opened.
    if gApp.IsProjectActive = false then
@@ -1334,12 +947,12 @@ public Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
       gConfig.SaveConfigFile
    end if
 
-   ' If a project is open then close any files that may be open in the editor. No need to
+   ' if a project is open then close any files that may be open in the editor. No need to
    ' do this if a new project is being created/opened because that function has already
    ' performed this operation. Doing so again will cause the Recent Files/Projects panel
    ' to flash on the screen.
    if gApp.IsNewProjectFlag = false then
-      If gApp.IsProjectActive Then 
+      if gApp.IsProjectActive then 
          if OnCommand_ProjectClose(hwnd) = false then exit function
       else   
          if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = false then exit function
@@ -1349,10 +962,10 @@ public Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
    end if
          
    ' Open the project
-   If gConfig.ProjectLoadFromFile(wszProjectFileName) Then
+   if gConfig.ProjectLoadFromFile(wszProjectFileName) then
       ' Update the most recently used project list 
       UpdateMRUProjectList(wszProjectFileName)
-   End If
+   end if
    gApp.IsProjectActive = true
    
    ' Position all of the controls into place
@@ -1364,22 +977,23 @@ end function
 
 
 ' ========================================================================================
-' Attempt to open specified file. If it exists then position to Tab if applicable
+' Attempt to open specified file. if it exists then position to Tab if applicable
 ' ========================================================================================
-public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
-                                        ByVal bIsNewFile  As BOOLEAN, _ 
-                                        ByVal bIsTemplate As BOOLEAN, _
-                                        ByVal bShowInTab  As BOOLEAN, _
-                                        byval bIsInclude  as BOOLEAN, _
-                                        Byref wszName     As WString, _
-                                        ByVal pDocIn      As clsDocument Ptr, _
-                                        byval bIsDesigner as Boolean = false, _
-                                        byval nFileType   as long = FILETYPE_UNDEFINED _
-                                        ) As clsDocument Ptr
+function frmMain_OpenFileSafely( _
+            byval HWnd        as HWnd, _
+            byval bIsNewFile  as boolean, _ 
+            byval bIsTemplate as boolean, _
+            byval bShowInTab  as boolean, _
+            byval bIsInclude  as boolean, _
+            byref wszName     as wstring, _
+            byval pDocIn      as clsDocument ptr, _
+            byval bIsDesigner as boolean = false, _
+            byval nFileType   as long = FILETYPE_UNDEFINED _
+            ) as clsDocument ptr
      
-   Dim As Long iTab = -1
-   Dim pDoc As clsDocument Ptr 
-   Dim As Hwnd hTree = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
+   dim as long iTab = -1
+   dim pDoc as clsDocument ptr 
+   dim as Hwnd hTree = GetDlgItem( HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE )
    
    ' This function opens/creates various types of files depending on the situation. 
    ' - New documents
@@ -1387,27 +1001,27 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    ' - Display document that is already loaded and has valid Scintilla loaded control.
    ' - Display document that is already loaded but does not have a valid Scintilla loaded control.
 
-   ' If the incoming pDocIn is null then we need to create a new pDoc and add it to the collection. 
-   If pDocIn = 0 Then   
+   ' if the incoming pDocIn is null then we need to create a new pDoc and add it to the collection. 
+   if pDocIn = 0 then   
       ' Create a new pDoc 
       pDoc = gApp.AddNewDocument() 
       pDoc->IsDesigner = bIsDesigner 
-      If bIsNewFile Then
-         pDoc->CreateCodeWindow( HWnd, True )  ' Create the new Scintilla window
+      if bIsNewFile then
+         pDoc->CreateCodeWindow( HWnd, true )  ' Create the new Scintilla window
       Else
+         wszName = OnCommand_FileAutoSaveFileCheck( wszName )
          pDoc->CreateCodeWindow( HWnd, false, bIsTemplate, wszName )
          pDoc->bNeedsParsing = true
          ParseDocument( pDoc )
-      End If
+      end if
       pDoc->ProjectFileType = nFileType
-      frmMain_AddToComboFiles( pDoc )
       ' Add the document data to the Explorer treeview   
-      pDoc->hNodeExplorer = frmExplorer_AddParentNode( pDoc )
-      frmExplorer_AddChildNodes( pDoc )
+      pDoc->hNodeExplorer = frmFunctionList_AddParentNode( pDoc )
+      frmFunctionList_AddChildNodes( pDoc )
    end if
 
    
-   ' If incoming pDocIn existed but did not have a valid Scintilla control then this
+   ' if incoming pDocIn existed but did not have a valid Scintilla control then this
    ' was a document created during a mass project load. In that situation, the creation
    ' of the Scintilla control and loading of the actual code text is delayed until the
    ' document actually has to be displayed.
@@ -1424,27 +1038,29 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    end if
 
 
-   ' Set the default build configuration for this document. If no IsDefault option
+   ' Set the default build configuration for this document. if no IsDefault option
    ' has been checked then we simply use whatever the current selected build is.
-   if pDoc->DocumentBuild = "" THEN 
+   if pDoc->DocumentBuild = "" then 
       pDoc->DocumentBuild = frmBuildConfig_GetDefaultBuildGUID()
-      if pDoc->DocumentBuild = "" THEN 
+      if pDoc->DocumentBuild = "" then 
          pDoc->DocumentBuild = frmBuildConfig_GetSelectedBuildGUID()
       end if
    end if      
    
    
-   If bShowInTab Then
-      ' If the document is already open and loaded then simply switch to
-      ' that document in the top tabcontrol.
+   if bShowInTab then
+      ' if the document is already open and loaded then simply switch to
+      ' that document in the top tabcontrol, otherwise load the Explorer 
+      ' files list, create a new tab, and switch to it.
       iTab = gTTabCtl.GetTabIndexFromFilename( pDoc->DiskFilename )
-      If iTab = -1 Then iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
+      if iTab = -1 then 
+         LoadExplorerFiles()
+         iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
+      end if   
       gTTabCtl.SetFocusTab(iTab)
-      Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
-                           pDoc->hNodeExplorer )
-   End If
+   end if
 
-   ' If a Menu, ToolBar or StatusBar exists on the Form then ensure that it
+   ' if a Menu, ToolBar or StatusBar exists on the Form then ensure that it
    ' resizes to the new Form width.
    if pDoc->IsDesigner then
       frmMenuEditor_CreateFakeMainMenu(pDoc)
@@ -1452,1117 +1068,124 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       frmStatusBarEditor_CreateFakeStatusBar(pDoc)
    end if
 
-   ' Position all of the controls into place and set focus to the document
    frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
    
-   Function = pDoc
-End Function
+   function = pDoc
+end Function
 
 
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnCreate( ByVal HWnd As HWnd, _
-                                   ByVal lpCreateStructPtr As LPCREATESTRUCT _
-                                   ) As BOOLEAN
+function frmMain_OnCreate( _
+            byval HWnd as HWnd, _
+            byval lpCreateStructPtr as LPCREATESTRUCT _
+            ) as boolean
    ' Enable drag and drop files
    DragAcceptFiles HWnd, CTRUE
    
-   '  Message cracker macro expects a True to be returned for a successful
+   '  Message cracker macro expects a true to be returned for a successful
    '  OnCreate handler even though returning -1 from a standard WM_CREATE
    '  call would stop creating the window. This is just one of those Windows
    '  inconsistencies.
-   Return True
-End Function
+   return true
+end Function
 
 
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnSize( ByVal HWnd As HWnd, _
-                                 ByVal state As UINT, _
-                                 ByVal cx As Long, _
-                                 ByVal cy As Long _
-                                 ) As LRESULT
-   If state <> SIZE_MINIMIZED Then
-      ' Update the size of the Rebar control
-      SendMessage GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), WM_SIZE, cx, cy
-      
-      ' Resize the status bar
-      Dim As HWnd hStatusBar = GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR)
-      SendMessage hStatusBar, WM_SIZE, cx, cy
-      InvalidateRect hStatusBar, Null, True
-      
+function frmMain_OnSize( _
+            byval HWnd as HWnd, _
+            byval state as UINT, _
+            byval cx as long, _
+            byval cy as long _
+            ) as LRESULT
+   if state <> SIZE_MINIMIZED then
       ' Position all of the child windows
       frmMain_PositionWindows
-   End If
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Process WM_COMMAND message for window/dialog: frmMain
-' ========================================================================================
-private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
-                                    ByVal id As Long, _
-                                    ByVal hwndCtl As HWnd, _
-                                    ByVal codeNotify As UINT _
-                                    ) As LRESULT
-   Dim As HWnd hEdit 
-
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc Then 
-      select case codeNotify
-         case SCEN_SETFOCUS
-            pDoc->hWndActiveScintilla = hwndCtl
-
-            ' Remove any markers set in the document that highlights
-            ' entire lines (used for Selected text searching).
-            pDoc->RemoveMarkerHighlight
- 
-
-'         case SCEN_KILLFOCUS
-'            pDoc->hWndActiveScintilla = 0
-'            *** DO NOT SET hwndActiveScintilla = 0 because if split window in effect
-'            *** then if sub/function selected from combobox then incorrect pane will
-'            *** be used to display the code.
-      end select      
-      hEdit = pDoc->hWndActiveScintilla
-      frmMain_ChangeToolbarButtonsState
-   End If   
-
-   ' If the popup Help Viewer window has focus then exit function because we don't
-   ' want accelerator keys to act on the code editor.
-   if IsWindow( HWND_FRMHELPVIEWER ) then
-      if GetForegroundWindow() = HWND_FRMHELPVIEWER then 
-         if id = IDM_FIND then
-            frmHelpViewer_OnCommand(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_FIND, 0, BN_CLICKED)
-         end if   
-         exit function
-      end if
    end if
-   
-   
-   Select Case id
-      
-      case IDC_FRMMAIN_COMBOFILES
-         if codeNotify = CBN_CLOSEUP THEN
-            frmMain_SetFocusToCurrentCodeWindow
-         
-         elseif codeNotify = CBN_SELCHANGE THEN
-            ' Load the pDoc that is held in the itemData 
-            dim as long nCurSel = ComboBox_GetCurSel( hwndCtl )
-            if nCurSel = -1 then exit function
-            dim pDocSelected as clsDocument ptr 
-            pDocSelected = cast( clsDocument ptr, ComboBox_GetItemData(hwndCtl, nCurSel) ) 
-            if pDocSelected <> pDoc then
-               OpenSelectedDocument( pDocSelected->DiskFilename )
-            end if   
-            frmMain_SetFocusToCurrentCodeWindow
-         end if
-
-      
-      case IDC_FRMMAIN_COMBOFUNCTIONS
-         if codeNotify = CBN_CLOSEUP THEN
-            frmMain_SetFocusToCurrentCodeWindow
-         
-         elseif codeNotify = CBN_SELCHANGE THEN
-            ' Load the pDoc that is held in the itemData of the Files combobox
-            dim pDocSelected as clsDocument ptr 
-            dim wszFilename as wstring * MAX_PATH
-            dim wszFunctionName as wstring * MAX_PATH
-            dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
-            dim as long nCurSel = ComboBox_GetCurSel( hComboFiles )
-            if nCurSel = -1 then exit function
-            
-            ' Get the File name
-            pDocSelected = cast( clsDocument ptr, ComboBox_GetItemData(hComboFiles, nCurSel) ) 
-            wszFilename = pDocSelected->DiskFilename
-            ' Get the Function name
-            ' If the pDoc is dirty then we will need to reparse to the document otherwise
-            ' the line numbers will not be correct in the DB2 database.
-            ' If we have selected "(Module level)" then simply reposition to start of file.
-            nCurSel = ComboBox_GetCurSel( hwndCtl )
-            if nCurSel = 0 then
-               OpenSelectedDocument( wszFilename, "", 0 )
-            else   
-               If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-                  ParseDocument( pDoc )
-               end if
-               ComboBox_GetText( hwndCtl, wszFunctionName, MAX_PATH )
-               OpenSelectedDocument( wszFilename, wszFunctionName )
-            end if
-            frmMain_SetFocusToCurrentCodeWindow
-         end if
-         
-         
-      case IDC_FRMMAIN_COMBOBUILDS
-         if codeNotify = CBN_CLOSEUP THEN
-            frmMain_SetFocusToCurrentCodeWindow
-         elseif codeNotify = CBN_SELCHANGE THEN
-            dim as long nCurSel = ComboBox_GetCurSel(hwndCtl)
-            if nCurSel = -1 THEN exit function
-            If gApp.IsProjectActive Then
-               gApp.ProjectBuild = gConfig.Builds(nCurSel).Id
-            Else
-               Dim pDocMain As clsDocument Ptr 
-               pDocMain = gTTabCtl.GetActiveDocumentPtr()
-               If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
-            end if
-            frmMain_SetFocusToCurrentCodeWindow()
-         END IF  
-      
-      
-      Case IDM_GOTONEXTTAB
-         gTTabCtl.NextTab
-         
-      Case IDM_GOTOPREVTAB
-         gTTabCtl.PrevTab
-         
-      Case IDM_CLOSETAB
-         gTTabCtl.CloseTab
-
-      ''  FILE MENU
-      Case IDM_FILENEW
-         OnCommand_FileNew( HWnd )
-      
-      Case IDM_FILEOPEN
-         OnCommand_FileOpen( HWnd, true )
-      
-      Case IDM_FILEOPENTEMPLATES
-         dim as RECT rc
-         SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
-         MapWindowPoints(hwnd, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
-         frmTemplates_Show(HWnd, rc.Left, rc.Bottom)
-
-      Case IDM_FILESAVE
-         OnCommand_FileSave( HWnd, pDoc, False )
-      
-      Case IDM_FILESAVEAS
-         OnCommand_FileSave( HWnd, pDoc, True )
-
-      case IDM_FILEOPEN_EXPLORERTREEVIEW, _
-           IDM_FILESAVE_EXPLORERTREEVIEW, IDM_FILESAVEAS_EXPLORERTREEVIEW, _
-           IDM_FILECLOSE_EXPLORERTREEVIEW
-         dim as hwnd hTV = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
-         dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
-         dim as long ItemLParam = TreeView_GetlParam( hTV, hItem )
-         ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
-         pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
-         if id = IDM_FILEOPEN_EXPLORERTREEVIEW then
-            dim as CWSTR wszFilename, wszFunctionName
-            frmExplorer_GetFileNameFunctionName( hItem, wszFilename, wszFunctionName )
-            OpenSelectedDocument( wszFilename, wszFunctionName )
-            TreeView_SelectItem( hTV, hItem )
-         elseif id = IDM_FILESAVE_EXPLORERTREEVIEW then
-            OnCommand_FileSave( HWnd, pDoc, False )
-         elseif id = IDM_FILESAVEAS_EXPLORERTREEVIEW then
-            OnCommand_FileSave( HWnd, pDoc, true )
-         elseif IDM_FILECLOSE_EXPLORERTREEVIEW then
-            dim as long nCurSel = gTTabCtl.GetTabIndexByDocumentPtr( pDoc )
-            if nCurSel <> -1 then
-               OnCommand_FileClose( HWnd, EFC_CLOSECURRENT, nCurSel )
-            end if   
-         end if   
-         
-      Case IDM_FILECLOSE
-         OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
-      
-      Case IDM_FILESAVEALL:        OnCommand_FileSaveAll( HWnd ) 
-      
-      Case IDM_FILECLOSEALL:       OnCommand_FileClose( HWnd, EFC_CLOSEALL )
-      Case IDM_FILECLOSEALLOTHERS: OnCommand_FileClose( HWnd, EFC_CLOSEALLOTHERS )
-      Case IDM_CLOSEALLFORWARD:    OnCommand_FileClose( HWnd, EFC_CLOSEALLFORWARD )
-      Case IDM_CLOSEALLBACKWARD:   OnCommand_FileClose( HWnd, EFC_CLOSEALLBACKWARD )
-      
-      Case IDC_MRUBASE To (IDC_MRUBASE + 10)
-         OpenMRUFile( HWnd, id )
-      
-      Case IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
-         ClearMRUlist( id )
-      
-      Case IDM_OPENINCLUDE
-         OpenSelectedDocument( gApp.IncludeFilename )
-
-      Case IDM_COMMAND
-         Shell(Environ("COMSPEC"))
-         
-      Case IDM_EXIT
-         SendMessage( HWnd, WM_CLOSE, 0, 0 )
-
-      ''  EDIT MENU
-      Case IDM_REDO:               SciExec( hEdit, SCI_REDO, 0, 0)
-      Case IDM_UNDO, WM_UNDO:      SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
-      
-      Case IDM_CUT, WM_CUT
-         ' Check if the Compiler log file or Notes windows or Snippets have
-         ' input focus. If they do then select that text rather than Scintilla.
-         select case GetFocus()
-            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
-                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
-                 HWND_PROPLIST_EDIT
-               SendMessage( GetFocus, WM_CUT, 0, 0 )
-            case else     
-               if IsDesignerView(pDoc) then
-                  SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_COPY, 0), 0)
-                  SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
-               else
-                  SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
-               end if   
-         end select
-      
-      Case IDM_COPY, WM_COPY
-         ' Check if the Compiler log file or Notes windows or Snippets have
-         ' input focus. If they do then select that text rather than Scintilla.
-         select case GetFocus()
-            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
-                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
-                 HWND_PROPLIST_EDIT
-               SendMessage( GetFocus, WM_COPY, 0, 0 )
-            case else     
-               if IsDesignerView(pDoc) then
-                  dim as long NumControls = pDoc->Controls.SelectedControlsCount
-                  if NumControls = 0 THEN exit function
-                  redim gCopyControls(NumControls-1) as clsControl
-
-                  dim as long NextControl = 0
-                  dim pCtrl as clsControl ptr
-                  for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-                     pCtrl = pDoc->Controls.ItemAt(i)
-                     if pCtrl->IsSelected THEN 
-                        gCopyControls(NextControl) = *pCtrl
-                        NextControl = NextControl + 1
-                     END IF
-                  NEXT
-               else
-                  SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
-               end if
-         end select
-
-            
-      Case IDM_PASTE, WM_PASTE
-         ' Check if the Compiler log file or Notes windows or Snippets have
-         ' input focus. If they do then select that text rather than Scintilla.
-         select case GetFocus()
-            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
-                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
-                 HWND_PROPLIST_EDIT
-               SendMessage( GetFocus, WM_PASTE, 0, 0 )
-            case else     
-               if IsDesignerView(pDoc) then
-                  dim pCtrl as clsControl ptr
-                  dim rc as RECT
-                  dim as long nLeft, nTop, nLeftActive = 99999, nTopActive = 99999
-                  dim as long nCurLeft, nCurTop
-                  
-                  ' Need to get the Left/Top properties for least top/left in the copy group
-                  for i as long = lbound(gCopyControls) to ubound(gCopyControls)
-                     nCurLeft = val(GetControlProperty(@gCopyControls(i), "LEFT"))
-                     nCurTop  = val(GetControlProperty(@gCopyControls(i), "TOP"))
-                     if nCurLeft < nLeftActive then nLeftActive = nCurLeft
-                     if nCurTop < nTopActive then nTopActive = nCurTop 
-                     exit for
-                  next
-                     
-                  ' Create the control and copy the properties to it
-                  for i as long = lbound(gCopyControls) to ubound(gCopyControls)
-                     pCtrl = CreateToolboxControl(pDoc, gCopyControls(i).ControlType, rc)
-                     gCopyControls(i).hWindow = pCtrl->hWindow
-                     
-                     for ii as long = lbound(gCopyControls(i).Properties) to ubound(gCopyControls(i).Properties)
-                        select case ucase(gCopyControls(i).Properties(ii).wszPropName)
-                           case "NAME"  ' don't copy b/c we will then have duplicate control names
-                              continue for
-                           case "LEFT": nLeft = val(gCopyControls(i).Properties(ii).wszPropValue)
-                           case "TOP":  nTop  = val(gCopyControls(i).Properties(ii).wszPropValue) 
-                           case "GROUPNAME"
-                              ' Copy the GroupName and then increment the Index property
-                              pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
-                              continue for
-                           CASE "TABINDEX"
-                              continue for    
-                        END select
-                        pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
-                     NEXT
-                     
-                     ' Set the left/top properties relative to the current insert position
-                     dim pt as point
-                     GetCursorPos(@pt)
-                     ' Map the point to the client area coordinates
-                     MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pt), 1)
-
-                     ' Ensure that the point is within the client area
-                     dim rc as RECT
-                     GetWindowRect(pDoc->hWndForm, @rc)
-                     MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
-                     if PtInRect(@rc, pt) = 0 then
-                        pt.x = 10: pt.y = 10
-                     end if
-
-                     Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
-                     if pWindow then
-                        pt.x = pWindow->UnScaleX(pt.x)
-                        pt.y = pWindow->UnScaleY(pt.y)
-                     end if
-                     SetControlProperty(pCtrl, "LEFT", str(pt.x + (nLeft-nLeftActive)))
-                     SetControlProperty(pCtrl, "TOP", str(pt.y + (nTop-nTopActive)))
-                     
-                     pCtrl->SuspendLayout = true
-                     ApplyControlProperties( pDoc, pCtrl )
-                     pCtrl->SuspendLayout = false
-                  NEXT
-
-                  ' Select all of the newly created controls
-                  for i as long = lbound(gCopyControls) to ubound(gCopyControls)
-                     pDoc->Controls.SelectControl( gCopyControls(i).hWindow )
-                  next 
-
-                  pDoc->bRegenerateCode = true
-                  pDoc->UserModified = true
-                  AfxRedrawWindow(pDoc->hWndFrame)
-                  AfxRedrawWindow(pDoc->hWndForm)
-                  frmMain_SetStatusbar
-                  DisplayPropertyList(pDoc)
-               else
-                  SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
-               end if   
-         end select
-         
-      case IDM_DELETE
-         dim pCtrl as clsControl ptr
-         ' Need to test if any of the selected controls are locked. If any of them are then
-         ' we need to abort the deleting process.
-         for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-            pCtrl = pDoc->Controls.ItemAt(i)
-            if pCtrl->IsSelected THEN 
-               ' Test to ensure that the specific control Locked property is not set, or
-               ' the global Locked setting for the entire form is not set.
-               if IsControlLocked(pDoc, pCtrl) then 
-                  ' Maybe put a messagebox here indicating that can not delete because locked?
-                  exit function
-               end if
-            end if         
-         next
-
-         ' Delete selected controls
-         do until pDoc->Controls.SelectedControlsCount = 0
-            for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-               pCtrl = pDoc->Controls.ItemAt(i)
-               if pCtrl->IsSelected THEN 
-                  ' If this was a BUTTON control then we need to potentially update the form ACCEPTBUTTON 
-                  ' or CANCELBUTTON properties that depend on this button name.
-                  if pCtrl->ControlType = CTRL_BUTTON then
-                     dim as CWSTR wszCtrlName = GetControlProperty(pCtrl, "NAME")
-                     dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
-                     if pCtrlForm then
-                        If GetControlProperty(pCtrlForm, "ACCEPTBUTTON") = wszCtrlName then
-                           SetControlProperty(pCtrlForm, "ACCEPTBUTTON", "")
-                        end if    
-                        If GetControlProperty(pCtrlForm, "CANCELBUTTON") = wszCtrlName then
-                           SetControlProperty(pCtrlForm, "CANCELBUTTON", "")
-                        end if    
-                     end if
-                  end if
-                  pDoc->Controls.Remove(pCtrl)
-                  pDoc->bRegenerateCode = true
-                  pDoc->UserModified = true
-                  exit for
-               END IF
-            NEXT
-         loop
-         ' Ensure the grab handles of form and controls are redrawn or hidden
-         pDoc->Controls.SetActiveControl(pDoc->hWndForm)
-         AfxRedrawWindow(pDoc->hWndFrame)
-         AfxRedrawWindow(pDoc->hWndForm)
-         frmMain_SetStatusbar
-         DisplayPropertyList(pDoc)
-        
-      Case IDM_DELETELINE:  SciExec(hEdit, SCI_LINECUT, 0, 0)
-      Case IDM_INSERTFILE:  pDoc->InsertFile()
-      
-      Case IDM_INDENTBLOCK
-         ' If a TAB was pressed then manually terminate any active autocomplete.
-         if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
-            SciExec(hEdit, SCI_AUTOCCOMPLETE, 0, 0) 
-         end if
-         if GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
-            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
-         elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
-            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
-         elseif AfxGetFormHandle(GetFocus) = HWND_FRMFINDINFILES then
-            Dim As HWnd hCtrl = GetNextDlgTabItem( HWND_FRMFINDINFILES, GetFocus, false )
-            SetFocus(hCtrl)
-         else
-            ' Determine if a Snippet can be inserted. This takes precedence over doing a block indent.
-            if frmSnippets_DoInsertSnippet( pDoc ) = false then
-               ' No snippet to insert, do a block indent instead.
-               gApp.SuppressNotify = true
-               SetWindowRedraw( hEdit, false )
-               Function = SciExec(hEdit, SCI_TAB, 0, 0)
-               SetWindowRedraw( hEdit, true )
-               gApp.SuppressNotify = false
-               AfxRedrawWindow( hEdit )
-            end if
-            frmMain_SetStatusbar
-         end if
-      
-      Case IDM_UNINDENTBLOCK
-         if GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
-            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
-         elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
-            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
-         elseif AfxGetFormHandle(GetFocus) = HWND_FRMFINDINFILES then
-            Dim As HWnd hCtrl = GetNextDlgTabItem( HWND_FRMFINDINFILES, GetFocus, true )
-            SetFocus(hCtrl)
-         else
-            gApp.SuppressNotify = true
-            SetWindowRedraw( hEdit, false )
-            Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
-            SetWindowRedraw( hEdit, true )
-            gApp.SuppressNotify = false
-            AfxRedrawWindow( hEdit )
-            frmMain_SetStatusbar
-         end if
-         
-      Case IDM_COMMENTBLOCK:        pDoc->BlockComment(True) 
-      Case IDM_UNCOMMENTBLOCK:      pDoc->BlockComment(False) 
-      Case IDM_DUPLICATELINE:       pDoc->LineDuplicate()
-      Case IDM_MOVELINEUP:          pDoc->MoveCurrentLines(False) 
-      Case IDM_MOVELINEDOWN:        pDoc->MoveCurrentLines(True)  
-      Case IDM_NEWLINEBELOWCURRENT: pDoc->NewLineBelowCurrent()  
-      Case IDM_TOUPPERCASE:         pDoc->ChangeSelectionCase(1)
-      Case IDM_TOLOWERCASE:         pDoc->ChangeSelectionCase(2)
-      Case IDM_TOMIXEDCASE:         pDoc->ChangeSelectionCase(3)
-      Case IDM_EOLTOCRLF:           pDoc->ConvertEOL(SC_EOL_CRLF)
-      Case IDM_EOLTOCR:             pDoc->ConvertEOL(SC_EOL_CR)
-      Case IDM_EOLTOLF:             pDoc->ConvertEOL(SC_EOL_LF)
-      Case IDM_TABSTOSPACES:        pDoc->TabsToSpaces()
-      Case IDM_SELECTLINE:          pDoc->SelectLine(-1)
-
-      Case IDM_SELECTALL
-         ' Check if the Compiler log file or Notes windows or Snippets have
-         ' input focus. If they do then select that text rather than Scintilla.
-         select case GetFocus()
-            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
-                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
-                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
-                 HWND_PROPLIST_EDIT
-               Edit_SetSel( GetFocus, 0, -1 )
-            case else     
-               if IsDesignerView(pDoc) THEN
-                  pDoc->Controls.SelectAllControls
-                  ' Ensure the grab handles of form and controls are redrawn or hidden
-                  AfxRedrawWindow(pDoc->hWndFrame)
-                  AfxRedrawWindow(pDoc->hWndForm)
-               else
-                  SciExec(hEdit, SCI_SELECTALL, 0, 0)
-               END IF
-         end select
-                                   
-      case IDM_ANSI
-         if pDoc->FileEncoding <> FILE_ENCODING_ANSI THEN 
-            pDoc->UserModified = true
-            ' Convert buffer to ANSI and redisplay the text in the editor
-            ConvertTextBuffer(pDoc, FILE_ENCODING_ANSI)
-         end if   
-         pDoc->FileEncoding = FILE_ENCODING_ANSI 
-         frmMain_SetStatusbar
-      
-      case IDM_UTF8BOM
-         if pDoc->FileEncoding <> FILE_ENCODING_UTF8_BOM THEN 
-            pDoc->UserModified = true
-            ConvertTextBuffer(pDoc, FILE_ENCODING_UTF8_BOM)
-         end if   
-         pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM 
-         frmMain_SetStatusbar
-      
-      case IDM_UTF16BOM
-         if pDoc->FileEncoding <> FILE_ENCODING_UTF16_BOM THEN 
-            pDoc->UserModified = true
-            ConvertTextBuffer(pDoc, FILE_ENCODING_UTF16_BOM)
-         end if   
-         frmMain_SetStatusbar
-
-
-      ''  SEARCH MENU              
-      Case IDM_FIND, IDM_REPLACE
-         frmFindReplace_Show( HWND_FRMMAIN, iif(id = IDM_FIND, false, true) )
-      
-      Case IDM_FINDINFILES
-         if hEdit = 0 then hEdit = HWND_FRMMAIN   ' possible no files are open
-         frmFindInFiles_Show( hEdit )
-
-      Case IDM_FINDNEXT, IDM_FINDPREV
-         Dim As String sFindText = pDoc->GetSelText()
-         if (GetForeGroundWindow = HWND_FRMFINDREPLACE) or (Len(sFindText) = 0) then
-            id = iif(id = IDM_FINDNEXT, IDC_FRMFINDREPLACE_BTNRIGHT, IDC_FRMFINDREPLACE_BTNLEFT)
-            SendMessage( HWND_FRMFINDREPLACE, WM_COMMAND, MAKELONG(id, 0), Cast(LPARAM, GetDlgItem(HWND_FRMFINDREPLACE, id)) )
-         end if
-         
-      Case IDM_FINDNEXTACCEL, IDM_FINDPREVACCEL   ' F3/Shift+F3
-         if pDoc = 0 then exit function
-
-         dim as long startPos, endPos, curPos, mainSel, r
-         Dim As String sFindText = pDoc->GetSelText
-         
-         ' Use a static string variable to keep track of the F3/Shift F3 information
-         ' We use the static value if there is no currently selected word/phrase.
-         static as string sFindTextStatic
-         if (len(sFindText) = 0) and (len(sFindTextStatic) <> 0) then 
-            sFindText = sFindTextStatic
-         end if
-         sFindTextStatic = sFindText
-         
-         if len(sFindText) then
-            curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-            if id = IDM_FINDNEXTACCEL then
-               startPos = curPos + 1
-               endPos = SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0)
-               SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-               SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-               ' Search for the text to find
-               r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
-               If r = -1 Then
-                  ' No match found. Do search starting from the beginning of the file.
-                  SciExec( hEdit, SCI_SETTARGETSTART, 0, 0)
-                  r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
-               end if
-               If r <> -1 Then 
-                  SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
-                  pDoc->CenterCurrentLine
-               end if
-               
-            elseif id = IDM_FINDPREVACCEL then
-               startPos = curPos - 1
-               endPos = 0
-               SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-               SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-               ' Search for the text to find
-               r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
-               If r = -1 Then
-                  ' No match found. Do search starting from the end of the file.
-                  startPos = SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0)
-                  SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-                  r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
-               end if
-               If r <> -1 Then 
-                  SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
-                  pDoc->CenterCurrentLine
-               end if
-            end if
-         end if
-
-      Case IDM_GOTO
-         frmGoto_Show( hEdit )
-
-      Case IDM_DEFINITION
-         frmMain_GotoDefinition( pDoc )
-         
-      Case IDM_LASTPOSITION
-         frmMain_GotoLastPosition()
-      
-      case IDM_GOTONEXTFUNCTION
-         pDoc->GotoNextFunction
-         
-      case IDM_GOTOPREVFUNCTION
-         pDoc->GotoPrevFunction
-
-      case IDM_GOTONEXTTAB
-         gTTabCtl.NextTab
-      
-      case IDM_GOTOPREVTAB
-         gTTabCtl.PrevTab
-      
-      case IDM_GOTOHEADERFILE, _
-           IDM_GOTOSOURCEFILE, _ 
-           IDM_GOTOMAINFILE, _ 
-           IDM_GOTORESOURCEFILE 
-         frmMain_GotoFile( pDoc, id )
-         
-      Case IDM_BOOKMARKTOGGLE
-         pDoc->ToggleBookmark( pDoc->GetCurrentLineNumber )
-      
-      Case IDM_BOOKMARKNEXT
-         pDoc->NextBookmark
-      
-      Case IDM_BOOKMARKPREV
-         pDoc->PrevBookmark
-      
-      Case IDM_BOOKMARKCLEARALL
-         SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
-      
-      
-      ''  VIEW MENU
-      Case IDM_FOLDTOGGLE:         pDoc->FoldToggle( pDoc->GetCurrentLineNumber() )
-      Case IDM_FOLDBELOW:          pDoc->FoldToggleOnwards( pDoc->GetCurrentLineNumber() )
-      Case IDM_FOLDALL:            pDoc->FoldAll()
-      Case IDM_UNFOLDALL:          pDoc->UnFoldAll()
-      Case IDM_ZOOMIN:             SciExec(hEdit, SCI_ZOOMIN, 0, 0)
-      Case IDM_ZOOMOUT:            SciExec(hEdit, SCI_ZOOMOUT, 0, 0)
-
-      Case IDM_FUNCTIONLIST
-         ' this will also toggle visibility 
-         frmFunctionList_Show( HWnd )
-
-      Case IDM_VIEWEXPLORER
-         ShowWindow HWND_FRMEXPLORER, Iif(IsWindowVisible(HWND_FRMEXPLORER), SW_HIDE, SW_SHOW)
-         frmMain_PositionWindows
-
-      Case IDM_VIEWOUTPUT
-         ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
-         frmMain_PositionWindows
-
-      Case IDM_RESTOREMAIN
-         Dim rc As Rect
-         SystemParametersInfo SPI_GETWORKAREA, 0, @rc, 0
-         MoveWindow HWnd, 0, 0, rc.Right - rc.Left, rc.Bottom - rc.Top, CTRUE
-               
-      
-      ''  PROJECT MENU
-      Case IDM_PROJECTNEW:            OnCommand_ProjectNew( HWnd )
-      Case IDM_PROJECTSAVE:           OnCommand_ProjectSave( HWnd, False )
-      Case IDM_PROJECTSAVEAS:         OnCommand_ProjectSave( HWnd, True )
-      Case IDM_PROJECTOPEN:           OnCommand_ProjectOpen( HWnd )
-      Case IDM_PROJECTFILESADD:       OnCommand_FileOpen( HWnd, false )
-      Case IDM_PROJECTCLOSE:          OnCommand_ProjectClose( HWnd )
-      Case IDM_PROJECTOPTIONS:        frmProjectOptions_Show( HWnd, false ) 
-      
-      Case IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, _
-           IDM_SETFILERESOURCE, IDM_SETFILEHEADER, _
-           IDM_SETFILEMAIN_EXPLORERTREEVIEW, _
-           IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
-           IDM_SETFILEHEADER_EXPLORERTREEVIEW, _
-           IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
-           IDM_SETFILENORMAL_EXPLORERTREEVIEW 
-         
-         dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-         dim as long nFileType
-         
-         ' This code also handles right click messages from the Explorer Treeview. In
-         ' that case the pDoc needs to be taken from the Treeview rather than the 
-         ' currently active document in the editor.
-         select case id
-            case IDM_SETFILENORMAL_EXPLORERTREEVIEW, IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
-                 IDM_SETFILEMAIN_EXPLORERTREEVIEW, IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
-                 IDM_SETFILEHEADER_EXPLORERTREEVIEW
-               dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
-               dim as long ItemLParam = TreeView_GetlParam( hTV, hItem )
-               ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
-               pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
-         end select
-
-         select case id
-            case IDM_SETFILENORMAL, IDM_SETFILENORMAL_EXPLORERTREEVIEW 
-               nFileType = FILETYPE_NORMAL
-            case IDM_SETFILEMODULE, IDM_SETFILEMODULE_EXPLORERTREEVIEW
-               nFileType = FILETYPE_MODULE
-            case IDM_SETFILEMAIN, IDM_SETFILEMAIN_EXPLORERTREEVIEW
-               nFileType = FILETYPE_MAIN
-            case IDM_SETFILERESOURCE, IDM_SETFILERESOURCE_EXPLORERTREEVIEW
-               nFileType = FILETYPE_RESOURCE
-            case IDM_SETFILEHEADER, IDM_SETFILEHEADER_EXPLORERTREEVIEW
-               nFileType = FILETYPE_HEADER
-         end select
-
-         ' This code is also used for treeview drag/drop operation. For a drag/drop
-         ' the pDoc is not necessarily the current active document. Therefore, if
-         ' dragging is active then we need to get the pDoc from the drag node lParam.
-         if treedragger.dragging then pDoc = treedragger.pDoc
-         if pDoc = 0 then exit function
-         
-         if pDoc->ProjectFileType <> nFileType then
-            ' If attempting to set MAIN or RESOURCE then we need to move any existing
-            ' pDoc that have that filetype over to the NORMAL branch.
-            if (nFileType = FILETYPE_MAIN) or (nFileType = FILETYPE_RESOURCE) then
-               dim pDoc2 as clsDocument ptr = iif(nFileType = FILETYPE_MAIN, gApp.GetMainDocumentPtr, gApp.GetResourceDocumentPtr)
-               if pDoc2 then
-                  Treeview_DeleteItem( hTV, pDoc2->hNodeExplorer )
-                  pDoc2->hNodeExplorer = 0
-                  pDoc2->ProjectFileType = FILETYPE_NORMAL
-                  pDoc2->hNodeExplorer = frmExplorer_AddParentNode( pDoc2 )
-                  frmExplorer_AddChildNodes( pDoc2 )
-               end if   
-            end if
-            ' Set the new FileType for the currently selected document
-            gApp.ProjectSetFileType( pDoc, nFileType )
-            Treeview_DeleteItem( hTV, pDoc->hNodeExplorer )
-            pDoc->hNodeExplorer = 0
-            pDoc->hNodeExplorer = frmExplorer_AddParentNode( pDoc )
-            frmExplorer_AddChildNodes( pDoc )
-            Treeview_SortChildren( hTV, TreeView_GetParent( hTV, pDoc->hNodeExplorer ), 0 )
-            Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
-            frmMain_SetStatusbar
-         end if
-   
-
-      Case IDC_MRUPROJECTBASE To (IDC_MRUPROJECTBASE + 10)
-         OpenMRUProjectFile( HWnd, id )
-
-      Case IDM_REMOVEFILEFROMPROJECT, IDM_REMOVEFILEFROMPROJECT_EXPLORERTREEVIEW
-         ' These messages will already have the correct node selected in the Explorer
-         ' treeview. If the document is open in a tab then we do need to set that
-         ' tab as current and issue a EFC_CLOSECURRENT. 
-         dim as hwnd hTV = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
-         dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
-         dim as long ItemLParam = TreeView_GetlParam( hTV, hItem )
-         ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
-         pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
-         if pDoc = 0 then exit function
-         if gTTabCtl.SetTabIndexByDocumentPtr( pDoc ) <> -1 then
-           if OnCommand_FileClose( HWnd, EFC_CLOSECURRENT ) = false then exit function
-         end if  
-         ' File close succeeded. Remove this document from the project collection and remove treeview node. 
-         gdb2.dbDelete( pDoc->DiskFilename )
-         Treeview_DeleteItem( hTV, hItem)
-         frmMain_RemoveFromComboFiles( pDoc )
-         gApp.RemoveDocument( pDoc )
-         
-           
-      ''  COMPILE MENU          
-      Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_QUICKRUN
-         code_Compile( id )
-      
-      Case IDM_RUNEXE
-         RunExe( _
-             GetRunExecutableFilename, _
-             iif( gApp.IsProjectActive, gApp.ProjectCommandLine, gApp.wszCommandLine ) _
-             )
-      
-      Case IDM_COMMANDLINE
-         frmCommandLine_Show( HWnd )
-
-
-      ''  OPTIONS MENU
-      Case IDM_OPTIONS
-         frmOptions_Show( HWnd )
-         ' Repaint the File/Functions and Build comboboxes because the Theme may have changed.
-         AfxRedrawWindow( GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES ) )
-         AfxRedrawWindow( GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS ) )
-         AfxRedrawWindow( GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOBUILDS ) )
-         
-      case IDM_BUILDCONFIG
-         frmBuildConfig_Show( HWND ) 
-      
-      case IDM_USERTOOLSDIALOG
-         frmUserTools_Show( HWND ) 
-         
-      case IDM_USERSNIPPETS
-         frmSnippets_Show( HWND ) 
-      
-      
-      ''   DESIGNER MENU
-      case IDM_NEWFORM
-         OnCommand_DesignerNewForm(HWND)
-
-      case IDM_VIEWTOOLBOX
-         frmVDToolbox_Show(HWND)   ' toggle show/hide
-
-      case IDM_TOGGLEVIEWCODE
-         if pDoc then
-            dim as long idx = TabCtrl_GetCurSel( pDoc->hDesignTabCtrl )
-            if idx = 0 then
-               ' Designer is active, switch to code
-               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
-            else
-               ' Code is active, switch to designer
-               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
-            end if
-            frmMain_PositionWindows
-         end if
-            
-      case IDM_MENUEDITOR            
-         frmMenuEditor_Show( HWND )
-         if pDoc then frmMenuEditor_CreateFakeMainMenu( pDoc )
-
-      case IDM_TOOLBAREDITOR            
-         frmToolBarEditor_Show( HWND )
-         if pDoc then frmToolBarEditor_CreateFakeToolBar( pDoc )
-
-      case IDM_STATUSBAREDITOR            
-         ' If a Panel was clicked on then WPARAM would have been set to the
-         ' ControlID and panel index. When message cracked, that value would show as the
-         ' incoming codeNotify for this message.
-         ' Do a check to ensure that the panel click index is within the
-         ' acceptable ranges.
-         if pDoc then 
-            dim as long nIndex = cast(long, codeNotify)
-            if (nIndex < lbound(pDoc->PanelItems)) or _
-               (nIndex > ubound(pDoc->PanelItems)) then
-               nIndex = 0
-            end if   
-            frmStatusBarEditor_Show( HWND, nIndex )
-            frmStatusBarEditor_CreateFakeStatusBar( pDoc )
-         end if
-
-      case IDM_IMAGEMANAGER
-         frmImageManager_Show( HWND, 0 )
-         
-      case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
-           IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
-           IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH            
-         OnCommand_DesignerAlign( HWND, id )
-
-      case IDM_CENTERHORIZ, IDM_CENTERVERT, IDM_CENTERBOTH
-         OnCommand_DesignerCenter( HWND, id )
-         
-      case IDM_HORIZEQUAL, IDM_HORIZINCREASE, IDM_HORIZDECREASE, IDM_HORIZREMOVE
-         OnCommand_DesignerHorizSpacing( hwnd, id )
-
-      case IDM_VERTEQUAL, IDM_VERTINCREASE, IDM_VERTDECREASE, IDM_VERTREMOVE
-         OnCommand_DesignerVertSpacing( hwnd, id )
-      
-      case IDM_SNAPLINES
-         if pDoc then 
-            pDoc->bSnapLines = not pDoc->bSnapLines
-            pDoc->UserModified = true
-            frmMain_SetStatusbar
-         end if
-
-      case IDM_LOCKCONTROLS
-         if pDoc then 
-            pDoc->bLockControls = not pDoc->bLockControls
-            pDoc->UserModified = true
-            AfxRedrawWindow(pDoc->hWndFrame)
-            AfxRedrawWindow(pDoc->hWndForm)
-            frmMain_SetStatusbar
-         end if
-      
-      ''   TOOLS MENU
-      Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
-         frmUserTools_ExecuteUserTool( id - IDM_USERTOOL )
-
-      Case IDM_HELP, IDM_HELPSHORTCUTS, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
-         ShowContextHelp(id) 
-  
-      case IDM_CHECKFORUPDATES
-         DisableAllModeless()
-         DoCheckForUpdates( hwnd, false )
-         EnableAllModeless()
-         
-      Case IDM_ABOUT
-         DisableAllModeless()
-         frmAbout_Show( hwnd )
-         EnableAllModeless()
-         frmMain_SetFocusToCurrentCodeWindow()
-        
-   End Select
-
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
-                                   ByVal id As Long, _
-                                   ByVal pNMHDR As NMHDR Ptr _
-                                   ) As LRESULT
+function frmMain_OnNotify( _
+            byval HWnd as HWnd, _
+            byval id as long, _
+            byval pNMHDR as NMHDR ptr _
+            ) as LRESULT
 
-   Dim ptttdi As NMTTDISPINFOW Ptr    ' Tooltip notification message information
-   Dim wszText As WString * MAX_PATH  
-   Dim nCurSel As Long
-   Dim hPopUpMenu As HMENU
-   Dim pt As Point   
-   Dim rc As Rect      
-   
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc Then 
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc then 
       if pDoc->IsValidScintillaID(id) then
          ' Process Scintilla control notification messages. First, check to see if the notifications
          ' have been suppressed by a bulk modification activity that should only update the screen
          ' at the end of its process (eg. moving large numbers of selected lines up or down).
-         If gApp.SuppressNotify Then Exit Function
-         Scintilla_OnNotify HWnd, Cast(SCNOTIFICATION Ptr, pNMHDR)
-         Exit Function
-      End If
+         if gApp.SuppressNotify then exit function
+         Scintilla_OnNotify HWnd, cast(SCNOTIFICATION ptr, pNMHDR)
+         exit function
+      end if
    end if
         
 
-   Select Case pNMHDR->code 
-   
-      Case NM_CLICK
-         ' Process clicking on the panels in the statusbar
-         If id = IDC_FRMMAIN_STATUSBAR Then   
-            Dim lpnm As NMMOUSE Ptr
-            lpnm = Cast(NMMOUSE Ptr, pNMHDR)
-            If lpnm->dwItemSpec = 0 Then   ' compiler panel is panel 0
-               frmBuildConfig_Show( HWND ) 
-            End If
-            If lpnm->dwItemSpec = 1 Then   ' line/column panel 
-               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-               if pDoc THEN Function = frmGoto_Show(pDoc->hWindow(0))
-            end if
-            If lpnm->dwItemSpec = 2 Then   ' ProjectFiletype 
-               hPopupMenu = CreateStatusBarFileTypeContextMenu
-               GetCursorPos @pt
-               TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
-               DestroyMenu hPopUpMenu
-            end if
-            If lpnm->dwItemSpec = 3 Then   ' Ansi/Unicode 
-               hPopupMenu = CreateStatusBarFileEncodingContextMenu
-               GetCursorPos @pt
-               TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
-               DestroyMenu hPopUpMenu
-            end if   
-            If lpnm->dwItemSpec = 4 Then   ' Compile results is 
-               ' Toggle show/hide compile results
-               ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
-               frmMain_PositionWindows
-            End If   
-         End If
+   select case pNMHDR->code 
 
-      Case TBN_DROPDOWN
-         If id = IDC_FRMMAIN_TOOLBAR Then
-            Dim ptbn As TBNOTIFY Ptr = Cast(TBNOTIFY Ptr, pNMHDR)
-            Select Case ptbn->iItem
-               Case IDM_FILENEW    ' Dropdown new file menu
-                  SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
-                  MapWindowPoints(ptbn->hdr.hwndFrom, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
-                  frmTemplates_Show(HWnd, rc.Left, rc.Bottom)
-               
-               Case IDM_FILEOPEN    ' Dropdown most recently used files
-                  SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
-                  MapWindowPoints(ptbn->hdr.hwndFrom, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
-                  Dim As Long nBtnWidth = Toolbar_GetButtonWidth(HWND_FRMMAIN_TOOLBAR)
-                  hPopupMenu = CreateMRUpopup()
-                  TrackPopupMenu hPopupMenu, 0, rc.Left + nBtnWidth, rc.bottom, 0, HWnd, 0
-                  DestroyMenu hPopupMenu
-               
-            End Select
-         End If
-
-      Case TCN_SELCHANGING
+      case TCN_SELCHANGING
          select case id 
-            case IDC_FRMMAIN_TOPTABCONTROL 
-               ' Hide the current tab
-               nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
-               gTTabCtl.DisplayScintilla(nCurSel, False)
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows
-         END SELECT
+         end select 
          
-      Case TCN_SELCHANGE
+      case TCN_SELCHANGE
          select case id 
-            case IDC_FRMMAIN_TOPTABCONTROL 
-               ' Show the new tab
-               nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
-               gTTabCtl.DisplayScintilla(nCurSel, True)
-               frmMain_PositionWindows
-               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
-               If pDoc Then
-                  ' Prevent Treeview flickering during the selection movement. This
-                  ' is necessary because for large treeview we will see noticable flicker
-                  ' as the new selection scrolls into view.
-                  dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-                  SetWindowRedraw( hTree, false )
-                  Treeview_SortChildren( hTree, TreeView_GetParent(hTree, pDoc->hNodeExplorer), 0 )
-                  Treeview_SelectItem( hTree, pDoc->hNodeExplorer )
-                  Treeview_EnsureVisible( hTree, pDoc->hNodeExplorer )
-                  SetWindowRedraw( hTree, true )
-                  AfxRedrawWindow( hTree )
-                  
-                  ' Load the Functions combobox based on the selected Explorer treeview node
-                  frmMain_LoadComboFunctions
-                  frmMain_SelectComboFunctions
-                
-                  if pDoc->IsDesigner THEN
-                     if IsDesignerView(pDoc) then
-                        DisplayPropertyList( pDoc )
-                     end if   
-                  end if   
-               end if
-               
-               ' Set the focus to the Scintilla window. This will call frmMain_SetStatusbar
-               ' which also calls frmMain_SelectComboFiles and frmMain_SelectComboFunctions.
-               frmMain_SetFocusToCurrentCodeWindow
-
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows
                PostMessage(hwnd, MSG_USER_GENERATECODE, 0, 0)
-         END SELECT  
+         end select   
 
-         
-      Case TTN_GETDISPINFO
-         ptttdi = Cast(NMTTDISPINFOW Ptr, pNMHDR)
-         ptttdi->hinst = Null
-         wszText = ""
-         Select Case ptttdi->hdr.hwndFrom
-            Case SendMessage(GetDlgItem(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), IDC_FRMMAIN_TOOLBAR), TB_GETTOOLTIPS, 0, 0)
-               Select Case ptttdi->hdr.idFrom
-                  Case IDM_FILENEW         : wszText = L(03,"New")     & " (Ctrl+N)"
-                  Case IDM_FILEOPEN        : wszText = L(04,"Open")    & " (Ctrl+O)"
-                  Case IDM_FILESAVE        : wszText = L(07,"Save")    & " (Ctrl+S)"
-                  Case IDM_CUT             : wszText = L(17,"Cut")     & " (Ctrl+X)"
-                  Case IDM_COPY            : wszText = L(18,"Copy")    & " (Ctrl+C)"
-                  Case IDM_PASTE           : wszText = L(19,"Paste")   & " (Ctrl+V)"
-                  Case IDM_FIND            : wszText = L(43,"Find")    & " (Ctrl+F)"
-                  Case IDM_REPLACE         : wszText = L(46,"Replace") & " (Ctrl+R)"
-                  Case IDM_UNDO            : wszText = L(15,"Undo")    & " (Ctrl+Z)"
-                  Case IDM_REDO            : wszText = L(16,"Redo")    & " (Ctrl+E)"
-                  Case IDM_INDENTBLOCK     : wszText = L(23,"Indent Block")      & " (TAB)"
-                  Case IDM_UNINDENTBLOCK   : wszText = L(24,"UnIndent Block")    & " (Shift+TAB)"
-                  Case IDM_COMMENTBLOCK    : wszText = L(25,"Comment Block")     & " (Ctrl+B)"
-                  Case IDM_UNCOMMENTBLOCK  : wszText = L(26,"UnComment Block")   & " (Ctrl+Shift+B)"
-                  Case IDM_FUNCTIONLIST    : wszText = L(223,"Function List")    & " (F4)"
-                  Case IDM_COMPILE         : wszText = L(64,"Compile")           & " (Ctrl+F5)"
-                  Case IDM_BUILDEXECUTE    : wszText = L(65,"Build and Execute") & " (F5)"
-                  Case IDM_QUICKRUN        : wszText = L(285,"Quick Run")        & " (Ctrl+Shift+F5)"
-                  Case IDM_RUNEXE          : wszText = L(67,"Run Executable")    & " (Shift+F5)"
-                  Case IDM_HELP            : wszText = L(73,"Help")              & " (F1)"
-               End Select
-               If Len(wszText) Then ptttdi->lpszText = @wszText
-         End Select
-   End Select
+   end select 
 
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_ACTIVATEAPP message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
-                                        ByVal fActivate As BOOLEAN, _
-                                        ByVal dwThreadId As DWORD _
-                                        ) As LRESULT
-   Dim pDoc As clsDocument Ptr
+function frmMain_OnActivateApp( _
+            byval HWnd as HWnd, _
+            byval fActivate as boolean, _
+            byval dwThreadId as DWORD _
+            ) as LRESULT
+   dim pDoc as clsDocument ptr
    
-   ' If the application is losing focus then validate any currently editing property
-   ' in the ToolBox PropertyList.
-   If fActivate = false Then
+   ' if the application is losing focus then validate any currently editing property
+   ' in the ToolBox PropertyList and destroy any popup topmenus.
+   if fActivate = false then
+      killAllPopupMenus()
       pDoc = gTTabCtl.GetActiveDocumentPtr()
       if pDoc then DisplayPropertyList(pDoc)
       exit function
    end if
-
       
-   static bInActivateApp as Boolean
+   static bInActivateApp as boolean
    if bInActivateApp then exit function
    
-   ' If the application is gaining focus then determine if any of the loaded
-   ' documents have been modified by an external application. If yes, then ask
+   ' if the application is gaining focus then determine if any of the loaded
+   ' documents have been modified by an external application. if yes, then ask
    ' the user if wish to reload.
-   If fActivate = true Then
+   if fActivate = true then
       if gApp.GetDocumentCount = 0 then exit function
       
       ' Search all loaded documents
-      Dim As FILETIME ft
-      Dim As Long i, idx, nDocumentCount
-      Dim As Double nSerial
-      Dim As String sText
+      dim as FILETIME ft
+      dim as long i, idx, nDocumentCount
+      dim as double nSerial
+      dim as string sText
       
       bInActivateApp = true
       
@@ -2573,7 +1196,7 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
       idx = 0
       pDoc = gApp.pDocList
       do until pDoc = 0
-         if AfxFileExists(pDoc->DiskFilename) THEN
+         if AfxFileExists(pDoc->DiskFilename) then
             pDoc->DeletedButKeep = false
          end if
          pDocs(idx) = pDoc
@@ -2592,25 +1215,25 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
          pDoc = pDocs(idx)
          
          ' Bypass any 'new' untitled files.
-         If pDoc->IsNewFlag Then 
+         if pDoc->IsNewFlag then 
             pDocs(idx) = 0: continue do
          end if
 
          ' Has the external file been deleted or is now not available
-         if AfxFileExists(pDoc->DiskFilename) = false THEN
+         if AfxFileExists(pDoc->DiskFilename) = false then
             if pDoc->DeletedButKeep = false then
                ' Ensure that the file is open and displayed
                frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                       False, _    ' bIsNewFile
-                                       False, _    ' bIsTemplate
-                                       True,  _    ' bShowInTab
+                                       false, _    ' bIsNewFile
+                                       false, _    ' bIsTemplate
+                                       true,  _    ' bShowInTab
                                        false, _    ' bIsInclude
                                        "", _       ' wszName
                                        pDoc )      ' pDocIn
-               If MessageBox( HWND_FRMMAIN, _
+               if MessageBox( HWND_FRMMAIN, _
                                pDoc->DiskFilename & vbCrLf & _ 
                                L(286, "This document has been deleted...?"), _
-                               L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                               L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
                   ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
                   pDoc->UserModified = true                
                else
@@ -2627,12 +1250,12 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
             ' Compare the disk file date time to the value currently
             ' stored in document class.
             ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
-            If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
+            if AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) then
                OpenSelectedDocument( pDoc->DiskFilename, "" )
-               If MessageBox( HWND_FRMMAIN, _
+               if MessageBox( HWND_FRMMAIN, _
                                pDoc->DiskFilename & vbCrLf & _ 
                                L(266, "File was changed by another application. Reload it?"), _
-                               L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                               L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
                   
                   dim as CWSTR wszFilename = pDoc->DiskFilename
                   dim as long nFileType = pDoc->ProjectFileType
@@ -2643,20 +1266,19 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
                   ' Ensure that the file is open and displayed
                   dim as clsDocument ptr pDocLoad = _
                   frmMain_OpenFileSafely( HWND_FRMMAIN, _
-                                          False, _    ' bIsNewFile
-                                          False, _    ' bIsTemplate
-                                          True,  _    ' bShowInTab
+                                          false, _    ' bIsNewFile
+                                          false, _    ' bIsTemplate
+                                          true,  _    ' bShowInTab
                                           false, _    ' bIsInclude
                                           wszFilename, _ ' wszName
                                           0 )         ' pDocIn
                   
                   pDocLoad->ProjectFileType = nFileType
-                  pDocLoad->hNodeExplorer = frmExplorer_AddParentNode( pDocLoad )
-                  frmExplorer_AddChildNodes( pDocLoad )
-                  TreeView_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), pDocLoad->hNodeExplorer )
+                  pDocLoad->hNodeExplorer = frmFunctionList_AddParentNode( pDocLoad )
+                  frmFunctionList_AddChildNodes( pDocLoad )
                   
-               End If                
-            End If
+               end if                
+            end if
             pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
          end if
 
@@ -2666,73 +1288,75 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
       bInActivateApp = false
             
    end if
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_CONTEXTMENU message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnContextMenu( ByVal HWnd As HWnd, _
-                                        ByVal hwndContext As HWnd, _
-                                        ByVal xPos As Long, _  
-                                        ByVal yPos As Long _
-                                        ) As LRESULT
-   Dim hPopupMenu as HMENU 
-   Dim pt         As Point 
+function frmMain_OnContextMenu( _
+            byval HWnd as HWnd, _
+            byval hwndContext as HWnd, _
+            byval xPos as long, _  
+            byval yPos as long _
+            ) as LRESULT
+   dim hPopupMenu as HMENU 
+   dim pt         as POINT 
    
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc = 0 Then Return 0
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc = 0 then return 0
 
    SetFocus hWndContext
    pt.x = xPos
    pt.y = yPos
    ScreenToClient hWndContext, @pt
-   if IsDesignerView(pDoc) THEN
+   if IsDesignerView(pDoc) then
       ' Right-click popup menu for visual design form is 
       ' handled in the HandleDesignerRButtonDown function.
    else
       hPopupMenu = CreateScintillaContextMenu()
-   END IF
+   end if
    GetCursorPos @pt
    TrackPopupMenu hPopupMenu, 0, pt.x, pt.y, 0, HWnd, 0
    DestroyMenu hPopupMenu
 
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_DROPFILES message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnDropFiles( ByVal HWnd As HWnd, _
-                                      ByVal hDrop As HDROP _
-                                      ) As LRESULT
+function frmMain_OnDropFiles( _
+            byval HWnd as HWnd, _
+            byval hDrop as HDROP _
+            ) as LRESULT
 
    ' Get the number of dropped files
-   Dim As Long nCount = DragQueryFile(hDrop, &HFFFFFFFF, Null, 0)
-   If nCount = 0 Then Exit Function
+   dim as long nCount = DragQueryFile(hDrop, &HFFFFFFFF, Null, 0)
+   if nCount = 0 then exit function
    
-   Dim As Long i, nLen
-   Dim wszPath As WString * MAX_PATH
-   Dim wFileExt As WString * MAX_PATH
+   dim as long i, nLen
+   dim wszPath as wstring * MAX_PATH
+   dim wFileExt as wstring * MAX_PATH
    
    For i = 0 To nCount - 1
       nLen = DragQueryFile(hDrop, i, @wszPath, MAX_PATH)
       ' Make sure it's a file, not a folder
-      Dim fd As WIN32_FIND_DATAW
-      Dim hFind As HANDLE = FindFirstFileW(@wszPath, @fd)
-      If hFind <> INVALID_HANDLE_VALUE Then
+      dim fd as WIN32_FIND_DATAW
+      dim hFind as HANDLE = FindFirstFileW(@wszPath, @fd)
+      if hFind <> INVALID_HANDLE_VALUE then
          FindClose hFind
-         If (fd.dwFileAttributes And FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY Then
-            ' Determine what type of file is being dropped. If it is a project file .wfbe then
+         if (fd.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY then
+            ' Determine what type of file is being dropped. if it is a project file .wfbe then
             ' use the OpenProject routines, otherwise open it as a regular file.
             wFileExt = AfxStrPathname( "EXTN", wszPath)
             wFileExt = Ucase(wFileExt)
             if wFileExt = ".WFBE" then
                frmMain_OpenProjectSafely(HWND_FRMMAIN, wszPath) 
             Else   
-               ' Test to see if the file is already loaded in the editor. If it is, then
+               ' Test to see if the file is already loaded in the editor. if it is, then
                ' bypass loading it again thereby creating multiple ghost instances.
                dim pDoc as clsDocument ptr
                dim pDocIn as clsDocument ptr
@@ -2742,36 +1366,36 @@ private Function frmMain_OnDropFiles( ByVal HWnd As HWnd, _
                end if   
                if (pDoc = 0) orelse (pDocIn <> 0) then 
                   frmMain_OpenFileSafely(HWnd, _
-                                          False, _    ' bIsNewFile
-                                          False, _    ' bIsTemplate
-                                          True,  _    ' bShowInTab
+                                          false, _    ' bIsNewFile
+                                          false, _    ' bIsTemplate
+                                          true,  _    ' bShowInTab
                                           false, _    ' bIsInclude
                                           wszPath, _  ' wszName
                                           pDocIn )    ' pDocIn
                end if
             end if                           
-         End If
-      End If
+         end if
+      end if
    Next
    
    DragFinish hDrop
    
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnClose( ByVal HWnd As HWnd ) As LRESULT
+function frmMain_OnClose( byval HWnd as HWnd ) as LRESULT
 
-   ' If configuration option to confirm closing editor is active then ask now.
-   if gConfig.AskExit THEN
+   ' if configuration option to confirm closing editor is active then ask now.
+   if gConfig.AskExit then
       if MessageBox( HWND_FRMMAIN, L(275,"Are you sure you want to exit?"), L(276,"Confirm"), _
-                  MB_YESNOCANCEL or MB_ICONQUESTION Or MB_DEFBUTTON1 ) <> IDYES then
+                  MB_YESNOCANCEL or MB_ICONQUESTION or MB_DEFBUTTON1 ) <> IDYES then
          return true
       end if            
-   END IF
+   end if
    
    ' Set global shutdown flag that will bypass removing nodes from project
    ' treeview, etc. Those tasks simply slow down the exiting of the program.
@@ -2779,12 +1403,12 @@ private Function frmMain_OnClose( ByVal HWnd As HWnd ) As LRESULT
 
    ' Save whether the Explorer should be shown the next time the program is run.
    ' Also save the Explorer panel width. 
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+   dim pWindow as CWindow ptr = AfxCWindowPtr(HWND)
    gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
    gConfig.ShowExplorerWidth = pWindow->UnScaleX(AfxGetWindowWidth( HWND_FRMEXPLORER ))
    
-   ' If a project(s) is already open then save/close it.
-   If gApp.IsProjectActive Then 
+   ' if a project(s) is already open then save/close it.
+   if gApp.IsProjectActive then 
       if OnCommand_ProjectClose(HWnd) = 0 then return 0
    end if
    
@@ -2793,21 +1417,18 @@ private Function frmMain_OnClose( ByVal HWnd As HWnd ) As LRESULT
    
    DestroyWindow(HWnd)
    
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnDestroy( byval HWnd As HWnd ) As LRESULT
-   ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETIMAGELIST, 0, 0))
-   ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETHOTIMAGELIST, 0, 0))
-   ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETDISABLEDIMAGELIST, 0, 0))
+function frmMain_OnDestroy( byval HWnd as HWnd ) as LRESULT
 
-   ImageList_Destroy TabCtrl_GetImageList(gTTabCtl.hWindow) 
-   ImageList_Destroy TreeView_GetImageList( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), TVSIL_NORMAL )
-   
+   ' Kill any existing AutoSave timer
+   OnCommand_FileAutoSaveKillTimer()
+
    ' Output the config settings to disk file
    gConfig.SaveConfigFile
 
@@ -2815,271 +1436,46 @@ private Function frmMain_OnDestroy( byval HWnd As HWnd ) As LRESULT
    DragAcceptFiles HWnd, False
    
    PostQuitMessage(0)
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Processes messages for the subclassed frmMain TabControl control.
-' ========================================================================================
-private Function frmMain_TabCtl_SubclassProc ( _
-                  ByVal HWnd   As HWnd, _                 ' // Control window handle
-                  ByVal uMsg   As UINT, _                 ' // Type of message
-                  ByVal wParam As WPARAM, _               ' // First message parameter
-                  ByVal lParam As LPARAM, _               ' // Second message parameter
-                  ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
-                  ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
-                  ) As LRESULT
-
-   Dim pInfo As TCHITTESTINFO
-   dim as long nCurSel
-
-
-   ' Convert our ENTER key presses into LBUTTONDBLCLK to process them similarly
-   If (uMsg = WM_KEYUP) And (Loword(wParam) = VK_RETURN) Then uMsg = WM_LBUTTONDBLCLK
-      
-   Select Case uMsg
-
-      Case WM_LBUTTONDBLCLK 
-         ' Process double clicking on a tab in the top tab control (which between code and visual designer)
-         ' Get the tab number
-         GetCursorPos( @pInfo.pt )
-         ScreenToClient gTTabCtl.hWindow, @pInfo.pt
-         nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-         if nCurSel = -1 then exit function
-         
-         ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
-         ' initiate the toggle between the code editor and visual designer.
-         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-         if pDoc then
-            if pDoc->IsDesigner then
-               nCurSel = TabCtrl_GetCurSel(pDoc->hDesignTabCtrl)
-               nCurSel = iif(nCurSel = 0, 1, 0)
-               TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, nCurSel)
-               frmMain_PositionWindows
-            END IF
-         END IF
-         
-      Case WM_RBUTTONDOWN
-         ' Get the tab number
-         GetCursorPos( @pInfo.pt )
-         ScreenToClient gTTabCtl.hWindow, @pInfo.pt
-         nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-         gTTabCtl.SetFocusTab(nCurSel)
-         ' Create the popup menu
-         Dim As POINT pt
-         dim as HMENU hPopupMenu = CreateTopTabCtlContextMenu(nCurSel)
-         GetCursorPos @pt
-         TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd_FRMMAIN, ByVal Null)
-         DestroyMenu hPopUpMenu
-         Return True   ' prevent further processing that leads to WM_CONTEXTMENU
-
-      Case WM_LBUTTONDOWN
-         ' Get the position of the hit and determine if the CLOSE icon was clicked.
-         GetCursorPos( @pInfo.pt )
-         ScreenToClient( gTTabCtl.hWindow, @pInfo.pt )
-         nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-         ' Was the close icon pressed
-         If pInfo.flags = TCHT_ONITEMICON Then 
-            OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT, nCurSel )
-         else
-            gTTabCtl.SetFocusTab(nCurSel)
-            if (wParam and MK_SHIFT) then
-               gApp.bDragTabActive = true
-               SetCursor( LoadCursor(0, MAKEINTRESOURCE(OCR_SIZEALL)) )
-            end if
-         end if
-         SetCapture(hWnd)
-            
-      Case WM_MOUSEMOVE
-         if gApp.bDragTabActive then
-            SetCursor( LoadCursor(0, MAKEINTRESOURCE(OCR_SIZEALL)) )
-
-            dim as long idx, iCurTab, iDropTab, nCount
-            dim As TC_HITTESTINFO HT
-            Dim AS TCITEM TB_CURRENT, TB_TEMP 
-            
-            nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
-            iCurTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
-            GetCursorPos(@HT.pt): ScreenToClient( gTTabCtl.hWindow, @HT.pt)
-            ' Get the tab that is under the cursor drop location
-            iDropTab = SendMessage(gTTabCtl.hWindow, TCM_HITTEST, 0, cast(LPARAM, @HT)) 
-            If (iCurTab = iDropTab) Or (iDropTab = -1) Then Exit function
-
-            ' Save the current TCITEM so it can be set to the new position
-            TB_CURRENT.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
-            TabCtrl_GetItem( gTTabCtl.hWindow, iCurTab, @TB_CURRENT )
-
-            ' Move all of the TCITEM's up or down dependng on the drop point in
-            ' relation to the current point.
-            TB_TEMP.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
-            if iDropTab < iCurTab THEN
-               for idx = iCurTab to iDropTab + 1 step -1
-                  TabCtrl_GetItem( gTTabCtl.hWindow, idx-1, @TB_TEMP )
-                  TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
-                  gTTabCtl.SetTabText(idx)
-               NEXT
-            elseif iDropTab > iCurTab THEN
-               for idx = iCurTab to iDropTab - 1 
-                  TabCtrl_GetItem( gTTabCtl.hWindow, idx+1, @TB_TEMP )
-                  TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
-                  gTTabCtl.SetTabText(idx)
-               NEXT
-            END IF
-
-            ' Finally, set to the current tab (ie. the drop tab)
-            TabCtrl_SetItem( gTTabCtl.hWindow, iDropTab, @TB_CURRENT )
-            gTTabCtl.SetTabText(iDropTab)
-            gTTabCtl.SetFocusTab(iDropTab)
-
-         end if
-
-      Case WM_LBUTTONUP
-         ' Reset the mouse pointer
-         SetCursor( LoadCursor( null, IDC_ARROW ))
-         ReleaseCapture
-         gApp.bDragTabActive = false
-
-         
-      Case WM_DESTROY
-         ' REQUIRED: Remove control subclassing
-         RemoveWindowSubclass HWnd, @frmOutput_Listview_SubclassProc, uIdSubclass
-
-   End Select
-
-   ' Default processing of Windows messages
-   Function = DefSubclassProc(HWnd, uMsg, wParam, lParam)
-
-End Function
-
-
-
-' ========================================================================================
-' Process WM_MEASUREITEM message for window/dialog: frmMain
-' ========================================================================================
-private Function frmMain_OnMeasureItem( ByVal HWnd As HWnd, _
-                                        ByVal lpmis As MEASUREITEMSTRUCT Ptr _
-                                        ) As Long
-   ' Set the height of the List box items. 
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-   lpmis->itemHeight = pWindow->ScaleY(FRMVDTOOLBOX_LISTBOX_LINEHEIGHT)
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Process WM_DRAWITEM message for window/dialog: frmMain
-' ========================================================================================
-private Function frmMain_OnDrawItem( ByVal HWnd As HWnd, _
-                                     ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
-                                     ) As Long
-
-   If lpdis->itemID = -1 Then Exit Function
-   
-   Dim As HBRUSH hBrush 
-   dim as HFONT hFontNormal, hFontBold 
-   Dim As RECT rc
-   Dim wszText As WString * MAX_PATH
-   
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-   if pWindow = 0 THEN exit function
-      
-   dim pTheme as TYPE_THEMES ptr = gConfig.GetThemePtr
-   
-
-   Select Case lpdis->itemAction
-      Case ODA_DRAWENTIRE, ODA_SELECT
-         
-         SaveDC(lpdis->hDC)
-         
-         if (lpdis->CtlID = IDC_FRMMAIN_COMBOFILES) orelse _
-            (lpdis->CtlID = IDC_FRMMAIN_COMBOFUNCTIONS) orelse _
-            (lpdis->CtlID = IDC_FRMMAIN_COMBOBUILDS) then
-            
-            ' CLEAR BACKGROUND
-            ' The following code uses the theme as definied for the Scintilla
-            ' code editing component. We could use those colors so that a dark
-            ' code editing window would also give us dark comboboxes. I am not
-            ' convinced that is the best route to go. Maybe. Propbably later
-            ' add an option to customize the color settings or toggle the 
-            ' visibility of these comboxes altogether.
-            'If (lpdis->itemState And ODS_SELECTED) Then     
-            '   SetTextColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nFg )
-            '   SetBkColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nBg )
-            '   hBrush = CreateSolidBrush( pTheme->colors(CLR_SELECTION).nBg )
-            'else
-            '   SetTextColor( lpdis->hDC, pTheme->colors(CLR_TEXT).nFg )
-            '   SetBkColor( lpdis->hDC, pTheme->colors(CLR_WINDOW).nFg )
-            '   hBrush = CreateSolidBrush( pTheme->colors(CLR_WINDOW).nFg )
-            'end if
-            If (lpdis->itemState And ODS_SELECTED) Then     
-               SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
-               SetTextColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT))
-               hBrush = GetSysColorBrush(COLOR_HIGHLIGHT) 
-            else
-               SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
-               SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
-               hBrush = GetSysColorBrush(COLOR_WINDOW) 
-            end if
-            SelectObject(lpdis->hDC, hBrush)      
-            FillRect(lpdis->hDC, @lpdis->rcItem, hBrush)  
-
-            rc = lpdis->rcItem
-            rc.left = rc.left + pWindow->ScaleX( iif(lpdis->CtlID = IDC_FRMMAIN_COMBOBUILDS, 8, 16) )
-            ComboBox_GetLBText( lpdis->hwndItem, lpdis->itemID, @wszText ) 
-            DrawText( lpdis->hDC, _
-                      wszText, _
-                      -1, Cast(lpRect, @rc), _
-                      DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
-                
-         end if
-
-         RestoreDC(lpdis->hDC, -1)
-         If hBrush then DeleteObject( hBrush )
-         
-         Function = True : Exit Function
-   
-   End Select
-
-   Function = 0
-End Function
+   function = 0
+end Function
 
 
 ' ========================================================================================
 ' Process WM_MOUSEMOVE message for window/dialog: frmMain
 ' ========================================================================================
-public Function frmMain_OnMouseMove( ByVal HWnd As HWnd, _
-                                     ByVal x as long, _
-                                     byval y as long, _
-                                     byval keyflags as UINT _
-                                     ) As Long
+function frmMain_OnMouseMove( _
+            byval HWnd as HWnd, _
+            byval x as long, _
+            byval y as long, _
+            byval keyflags as UINT _
+            ) as long
 
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr( HWND_FRMMAIN )
+   dim pWindow as CWindow ptr = AfxCWindowPtr( HWND_FRMMAIN )
    if pWindow = 0 then exit function
    
    dim as RECT rcClient
    GetClientRect( hwnd, @rcClient )
    
    ' HITTEST (DOCUMENT SPLITTER)
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN 
-      Dim As Rect rc
-      Dim As Point pt = (x, y)
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc then 
+      dim as Rect rc
+      dim as Point pt = (x, y)
       if pDoc->bSizing then
          if pt.y <> pDoc->ptPrev.y then
             pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
             ' Don't let the split go all the way to the bottom of the edit window
-            if pDoc->SplitY + pWindow->ScaleY(40) >= rcClient.bottom THEN 
+            if pDoc->SplitY + pWindow->ScaleY(40) >= rcClient.bottom then 
             else
                frmMain_PositionWindows
                pDoc->ptPrev.y = pt.y
             end if   
          end if   
       else   
-         if PtInRect(@pDoc->rcSplitButton, pt) THEN 
-            SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         if PtInRect(@pDoc->rcSplitButton, pt) then 
+            SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
          end if   
-      END if
+      end if
    end if
          
    function = 0
@@ -3089,25 +1485,29 @@ end function
 ' ========================================================================================
 ' Process WM_LBUTTONDOWN message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnLButtonDown( ByVal HWnd As HWnd, _
-                                        byval fDoubleClick as Boolean, _
-                                        ByVal x as long, _
-                                        byval y as long, _
-                                        byval keyflags as UINT _
-                                        ) As Long
+function frmMain_OnLButtonDown( _
+            byval HWnd as HWnd, _
+            byval fDoubleClick as boolean, _
+            byval x as long, _
+            byval y as long, _
+            byval keyflags as UINT _
+            ) as long
                                         
+   ' if main window area clicked then close any active top menus
+   killAllPopupMenus()
+   
    ' HITTEST (DOCUMENT SPLITTER)
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN 
-      Dim As Rect rc 
-      Dim As Point pt = (x, y)
-      if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc then 
+      dim as Rect rc 
+      dim as POINT pt = (x, y)
+      if PtInRect(@pDoc->rcSplitButton, pt) then 
          pDoc->bSizing = true
          pDoc->SplitY = pDoc->rcSplitButton.top  
          pDoc->ptPrev.y = pt.y
-         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
          SetCapture( HWND_FRMMAIN )
-      END IF
+      end if
    end if
 
    function = 0
@@ -3117,15 +1517,16 @@ end function
 ' ========================================================================================
 ' Process WM_LBUTTONUP message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnLButtonUp( ByVal HWnd As HWnd, _
-                                      ByVal x as long, _
-                                      byval y as long, _
-                                      byval keyflags as UINT _
-                                      ) As Long
+function frmMain_OnLButtonUp( _
+            byval HWnd as HWnd, _
+            byval x as long, _
+            byval y as long, _
+            byval keyflags as UINT _
+            ) as long
 
    ' HITTEST (DOCUMENT SPLITTER)
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN 
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc then 
       if pDoc->bSizing then
          pDoc->bSizing = false
          ReleaseCapture
@@ -3140,24 +1541,25 @@ end function
 ' ========================================================================================
 ' Process WM_LBUTTONDOWN message for window/dialog: frmMain
 ' ========================================================================================
-private Function frmMain_OnLButtonDblClk( ByVal HWnd As HWnd, _
-                                          byval fDoubleClick as Boolean, _
-                                          ByVal x as long, _
-                                          byval y as long, _
-                                          byval keyflags as UINT _
-                                          ) As Long
+function frmMain_OnLButtonDblClk( _
+            byval HWnd as HWnd, _
+            byval fDoubleClick as boolean, _
+            byval x as long, _
+            byval y as long, _
+            byval keyflags as UINT _
+            ) as long
 
    if gApp.bDragActive = false then
       ' Are we over a split edit area (toggle off the split)
       dim as POINT pt = (x, y)
-      Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-      if pDoc THEN 
-         if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+      dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+      if pDoc then 
+         if PtInRect(@pDoc->rcSplitButton, pt) then 
             pDoc->bSizing = false
             pDoc->SplitY = 0
             ReleaseCapture
             frmMain_PositionWindows
-         END IF
+         end if
       end if
    end if
    
@@ -3168,13 +1570,14 @@ end function
 ' ========================================================================================
 ' frmMain Window procedure
 ' ========================================================================================
-private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
-                                  ByVal uMsg   As UINT, _
-                                  ByVal wParam As WPARAM, _
-                                  ByVal lParam As LPARAM _
-                                  ) As LRESULT
+function frmMain_WndProc( _
+            byval HWnd   as HWnd, _
+            byval uMsg   as UINT, _
+            byval wParam as WPARAM, _
+            byval lParam as LPARAM _
+            ) as LRESULT
 
-   Select Case uMsg
+   select case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,        frmMain_OnCreate)
       HANDLE_MSG (HWnd, WM_PAINT,         frmMain_OnPaint)
       HANDLE_MSG (HWnd, WM_SIZE,          frmMain_OnSize)
@@ -3185,44 +1588,51 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_ACTIVATEAPP,   frmMain_OnActivateApp)
       HANDLE_MSG (HWnd, WM_CONTEXTMENU,   frmMain_OnContextMenu)
       HANDLE_MSG (HWnd, WM_DROPFILES,     frmMain_OnDropFiles)
-      HANDLE_MSG (HWnd, WM_MEASUREITEM,   frmMain_OnMeasureItem)
-      HANDLE_MSG (HWnd, WM_DRAWITEM,      frmMain_OnDrawItem)
       HANDLE_MSG (HWnd, WM_LBUTTONDOWN,   frmMain_OnLButtonDown)
       HANDLE_MSG (HWnd, WM_LBUTTONUP,     frmMain_OnLButtonUp)
       HANDLE_MSG (HWnd, WM_MOUSEMOVE,     frmMain_OnMouseMove)
       HANDLE_MSG (HWnd, WM_LBUTTONDBLCLK, frmMain_OnLButtonDblClk)
 
+      case WM_ERASEBKGND
+         return true      ' prevents painting the background
+         
       case WM_MOVE
          ' Ensure that if the Find/Replace dialog is open that it moves with
          ' underlying main WinFBE window.     
-         frmFindReplace_PositionWindow
+         frmFindReplace_PositionWindows
       
-      Case WM_NCACTIVATE
+      case WM_NCACTIVATE
          ' Ensure that the caption bar for any DesignerForm retains its active 
          ' state. This looks better than having it lose and gain active colors. 
-         If wParam Then
+         if wParam then
             ' The DesignerForm never receives the WM_NCACTIVATE message because it
             ' is a child form. We need to manually send it the message whenever the
             ' focus of the Designer form changes (i.e. whenever we switch back and
             ' forth away from the main application window).
             PostMessage HWND, MSG_USER_SETFOCUS, 0, 0
-         End If
+         end if
+         
+         ' if wParam is false then the system wants to draw an inactive title bar. we
+         ' will prevent this action if a popup menu from the menubar is active.
+         if wParam = false then
+            if gPrevent_WM_NCACTIVATE then return false
+         end if
           
-      Case WM_SYSCOMMAND
-         If (wParam And &HFFF0) = SC_CLOSE Then
+      case WM_SYSCOMMAND
+         if (wParam and &HFFF0) = SC_CLOSE then
             SendMessage( HWND, WM_CLOSE, wParam, lParam )
-            Exit Function
-         End If
+            exit function
+         end if
             
       case WM_SETCURSOR
-         If gApp.bDragActive = true Then
+         if gApp.bDragActive = true then
             ' Either the horiz or vert splitter bar is being resized. We handle
             ' setting the mouse cursor in the splitter_mousemove function.
             return true
             
-         elseif gApp.bDragTabActive = true Then 
+         elseif gApp.bDragTabActive = true then 
             ' We handle the cursor in the TabControl subclass. Don't allow the
-            ' main window to change our cursor. Return True.
+            ' main window to change our cursor. return true.
             return true
 
          elseif (gApp.IsCompiling = true) or _
@@ -3232,72 +1642,87 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             return true
          end if
             
-      Case WM_ERASEBKGND
-         ' Code to prevent main application space flickering. Only brush the
-         ' background if no tabs are open.
-         If TabCtrl_GetItemCount(gTTabCtl.hWindow) > 0 Then 
-            Return True      ' prevents painting the background
-         End If
-         
       case WM_CAPTURECHANGED
          gApp.bDragTabActive = false
          
-      Case WM_SETFOCUS
+      case WM_SETFOCUS
          frmMain_SetFocusToCurrentCodeWindow
 
-      Case WM_INITMENUPOPUP
-         ' A top menu is about to be displayed. Determine what menu items to enable/disable. We
-         ' do all of the topmenu items here rather than deal with individual popup submenus.
-         UpdateMRUMenu( Cast(HMENU, wParam) )
-         UpdateMRUProjectMenu( Cast(HMENU, wParam) )
-         frmMain_ChangeTopMenuStates()
-
-      CASE WM_COPYDATA      ' used during processing of commandline
-         dim pDataToGet AS COPYDATASTRUCT ptr
-         Dim pwszArg As WString ptr 
-         Dim wszExt As WString * MAX_PATH
+      case WM_COPYDATA      ' used during processing of commandline
+         dim pDataToGet as COPYDATASTRUCT ptr
+         dim pwszArg as wstring ptr 
+         dim wszExt as wstring * MAX_PATH
 
          pDataToGet = cast(COPYDATASTRUCT ptr, lParam)
          pwszArg = pDataToGet->lpData
 
          ' We have a valid filename so determine what type it is.
          wszExt = AfxStrPathname( "EXTN", *pwszArg )
-         wszExt = Ucase(wszExt)
+         wszExt = ucase(wszExt)
           
-         Select Case wszExt
-            Case ".WFBE"    ' project file
+         select case wszExt
+            case ".WFBE"    ' project file
                ' Pass the info to our generic project open function to handle everything.
                frmMain_OpenProjectSafely(HWND_FRMMAIN, *pwszArg) 
              
-            Case Else   ' .bas, .bi, .rc, etc...
-               frmMain_OpenFileSafely( HWND, _
-                                       False, _    ' bIsNewFile
-                                       False, _    ' bIsTemplate
-                                       True,  _    ' bShowInTab
+            case else   ' .bas, .bi, .rc, etc...
+               dim pDoc as clsDocument ptr
+               pDoc = frmMain_OpenFileSafely( HWND, _
+                                       false, _    ' bIsNewFile
+                                       false, _    ' bIsTemplate
+                                       true,  _    ' bShowInTab
                                        false, _    ' bIsInclude
                                        *pwszArg, _  ' pwszName
                                        0 )         ' pDocIn
-         End Select   
+               if pDoc then UpdateMRUList(pDoc->DiskFilename) 
+         end select    
           
 
       ''  CUSTOM MESSAGES
-      Case MSG_USER_SETFOCUS
+
+      case MSG_USER_TOPTABS_CHANGING
+         ' Hide the current tab
+         gTTabCtl.DisplayScintilla( gTTabCtl.CurSel, false )
+         
+      case MSG_USER_TOPTABS_CHANGED
+         ' Show the new tab
+         gTTabCtl.DisplayScintilla( gTTabCtl.CurSel, true )
+         frmMain_PositionWindows
+         dim pDoc as clsDocument ptr = gTTabCtl.tabs(gTTabCtl.CurSel).pDoc
+         if pDoc then
+            if pDoc->IsDesigner andalso IsDesignerView(pDoc) then
+               DisplayPropertyList( pDoc )
+            end if   
+         end if   
+         ' Set the focus to the Scintilla window. This will call frmMain_SetStatusbar
+         ' which also calls frmMain_SelectComboFiles and frmMain_SelectComboFunctions.
+         frmMain_SetFocusToCurrentCodeWindow
+               
+      case MSG_USER_DESIGNTAB_CHANGING
+         frmMain_PositionWindows
+
+      case MSG_USER_DESIGNTAB_CHANGED
+         frmMain_PositionWindows
+         PostMessage( hwnd, MSG_USER_GENERATECODE, 0, 0 )
+
+
+      case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document
          ' display such as Line#, Col#, Filename, etc.
          frmMain_SetStatusbar
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc THEN
-            if pDoc->IsDesigner THEN
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc then
+            if pDoc->IsDesigner then
                SendMessage pDoc->hWndForm, WM_NCACTIVATE, true, 0
-            END IF
-            SetFocus(pDoc->hWndActiveScintilla)
-         END IF
+            end if
+            SetFocus( pDoc->hWndActiveScintilla )
+         end if
 
-      Case MSG_USER_PROCESS_COMMANDLINE 
+      case MSG_USER_PROCESS_COMMANDLINE 
          ' process any command line arguments that may have been passed to the program.
          frmMain_ProcessCommandLine(HWnd)
 
-      Case MSG_USER_PROCESS_UPDATECHECK
+      case MSG_USER_PROCESS_UPDATECHECK
          ' perform an update check one per day if the option has been set by the user.
          if gConfig.CheckForUpdates then
             dim as long curJulian = JulianDateNow
@@ -3318,13 +1743,13 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          dim as double nStartTime = timer
          do
             if IsWindowVisible( HWND_FRMMAIN ) then exit do
-            ' If we've waited more than 5 seconds then break out to avoid 
+            ' if we've waited more than 5 seconds then break out to avoid 
             ' an infite loop.
             if (timer - nStartTime) > 5 then exit do
          loop
 
          ' Only invoke any User Tools that have action for startup
-         for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
+         for y as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
             if gConfig.Tools(y).Action = USERTOOL_ACTION_WINFBESTARTUP then
                frmUserTools_ExecuteUserTool(y)
             end if   
@@ -3332,11 +1757,11 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          
          
       case MSG_USER_GENERATECODE
-         Dim pDoc As clsDocument Ptr 
+         dim pDoc as clsDocument ptr 
          if lParam = 0 then
             pDoc = gTTabCtl.GetActiveDocumentPtr()
          else
-            pDoc = cast(clsDocument Ptr, lParam)
+            pDoc = cast(clsDocument ptr, lParam)
          end if   
          if pDoc then
             if IsDesignerView(pDoc) = false then  ' clicked on the code window
@@ -3348,7 +1773,7 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
                if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
             else
                GenerateFormCode(pDoc)
-            END IF
+            end if
          end if
 
       case MSG_USER_SHOWAUTOCOMPLETE
@@ -3357,13 +1782,13 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       case MSG_USER_APPENDEQUALSSIGN
          ' The = key was used to terminate a popup autocomplete. Take that
          ' character and format it with a space before and a space after.
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc THEN
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc then
             dim as hwnd hEdit = pDoc->hWndActiveScintilla
-            Dim As Long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            dim as long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
             dim as string sWord = " = "
             SciExec( hEdit, SCI_SETSEL, nPos-1, nPos)
-            SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(sWord)))
+            SciExec( hEdit, SCI_REPLACESEL, 0, cast(LPARAM, Strptr(sWord)))
             nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
             SciExec( hEdit, SCI_SETSEL, nPos, nPos)
          end if   
@@ -3372,137 +1797,89 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       '-------------------------------------------------------------------------------
       '                        Scrollbar Handler
       '-------------------------------------------------------------------------------
-      Case WM_VSCROLL
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         If pDoc = 0 Then Return 0
+      case WM_VSCROLL
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc = 0 then return 0
 
          dim as long OldPos = pDoc->ScrInfo.nPos
 
-         Select Case Loword(wParam)
-            Case SB_THUMBTRACK
+         select case loword(wParam)
+            case SB_THUMBTRACK
                GetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo)
                pDoc->ScrInfo.nPos = pDoc->ScrInfo.nTrackPos
-            Case SB_LINEDOWN:   pDoc->ScrInfo.nPos += 1
-            Case SB_LINEUP:     pDoc->ScrInfo.nPos -= 1
-            Case SB_PAGEDOWN:   pDoc->ScrInfo.nPos += pDoc->ScrInfo.nPage - 1  
-            Case SB_PAGEUP:     pDoc->ScrInfo.nPos -= pDoc->ScrInfo.nPage - 1  
-         End Select 
+            case SB_LINEDOWN:   pDoc->ScrInfo.nPos += 1
+            case SB_LINEUP:     pDoc->ScrInfo.nPos -= 1
+            case SB_PAGEDOWN:   pDoc->ScrInfo.nPos += pDoc->ScrInfo.nPage - 1  
+            case SB_PAGEUP:     pDoc->ScrInfo.nPos -= pDoc->ScrInfo.nPage - 1  
+         end select  
           
-         ' If the current position hasn't changed, do nothing.
-         If pDoc->ScrInfo.nPos = oldPos Then return true
+         ' if the current position hasn't changed, do nothing.
+         if pDoc->ScrInfo.nPos = oldPos then return true
 
          ' Don't exceed range boundries
          if pDoc->ScrInfo.nPos < pDoc->ScrInfo.nMin then
             pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMin         
-         END IF
+         end if
          if pDoc->ScrInfo.nPos > pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1 then
             pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1        
-         END IF
+         end if
 
          dim as long lParm = pDoc->ScrInfo.nPos - oldPos        ' Amount/direction to V scroll
          SciExec(pDoc->hWindow(0), SCI_LINESCROLL, 0, lParm)
-         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE)
+         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, true)
 
-   End Select
+   end select 
 
    ' for messages that we don't deal with
-   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
+   function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
-End Function
+end Function
 
 
 ' ========================================================================================
 ' frmMain_Show
 ' ========================================================================================
-public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
+function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
 
    '  Create the main window and child controls
-   Dim pWindow As CWindow Ptr = New CWindow("WinFBE_Class")
+   dim pWindow as CWindow ptr = new CWindow("WinFBE_Class")
    ' Comment out the next line to let WinFBE use the current active system DPI setting.
    'pWindow->DPI = 144   ' eg. 144 or any other value (96 is default)
    
-   ' Disable background erasing by only assigning the one style
-   pWindow->ClassStyle = CS_DBLCLKS
+   HWND_FRMMAIN = pWindow->Create( null, APPNAME, @frmMain_WndProc )
+
+   ' Load the currently selected theme (this needs a valid pWindow HWND_FRMMAIN to exists)
+   LoadThemeFile()
    
-   HWND_FRMMAIN = pWindow->Create(Null, APPNAME, @frmMain_WndProc )
-
    ' Set the small and large icon for the main window (must be set after main window is created)
-   pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
-   pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
+   pWindow->BigIcon   = LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
+   pWindow->SmallIcon = LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
-   ' Load the good and bad compile icons
-   Dim cx As Long 
-   cx = 16 * (pWindow->DPI \ 96)
-   ghIconGood = LoadImage( pWindow->InstanceHandle, "IMAGE_GOODCOMPILE", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR)
-   ghIconBad  = LoadImage( pWindow->InstanceHandle, "IMAGE_BADCOMPILE", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR)
+   ' Load the good and bad compile "icons"
+   ghIconGood = 1  
+   ghIconBad  = 2 
    
    ' Load the tick and untick icons
+   dim cx as long =  16 * (pWindow->DPI \ 96)
    ghIconTick   = LoadImage( pWindow->InstanceHandle, "IMAGE_TICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
    ghIconNoTick = LoadImage( pWindow->InstanceHandle, "IMAGE_NOTICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
 
-   ' Create the main application topmenu
-   HWND_FRMMAIN_TOPMENU = frmMain_BuildMenu(pWindow)
-   SetMenu pWindow->hWindow, HWND_FRMMAIN_TOPMENU
+   ' Build the keyboard accelerators
+   frmKeyboard_BuildAcceleratorTable
 
-   ' Create the main application toolbar
-   frmMain_CreateToolbar(pWindow)
-   frmMain_ChangeToolbarButtonsState
+   ' Create the main application topmenu menubar
+   frmMenuBar_Show( HWND_FRMMAIN )
 
-   ' Load the build configurations into the toolbar
-   frmBuildConfig_LoadBuildComboBox()
+   ' Create the main application top tabs control
+   frmTopTabs_Show( HWND_FRMMAIN )
 
-   
-   ' Add a status bar
-   Dim As HWnd hStatusbar = pWindow->AddControl("Statusbar", pWindow->hWindow, IDC_FRMMAIN_STATUSBAR)
-   Dim As Long rgParts(5)
-   rgParts(0) = pWindow->ScaleX(200)   ' Build configuration
-   rgParts(1) = pWindow->ScaleX(400)   ' Line/Col
-   rgParts(2) = pWindow->ScaleX(500)   ' Normal/Module/Main/Resource
-   rgParts(3) = pWindow->ScaleX(600)   ' Unicode/ANSI
-   rgParts(4) = -1
-   If SendMessage( hStatusBar, SB_SETPARTS, 5, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
-      SendMessage( hStatusBar, SB_SIMPLE, False, 0 )
-   End If
-
-
-   ' Add the top tabcontrol (initially not visible)
-   gTTabCtl.hWindow = pWindow->AddControl("TABCONTROL", pWindow->hWindow, _
-      IDC_FRMMAIN_TOPTABCONTROL, "", 0, 0, 0, 24, _
-      WS_CHILD Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
-      TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING, , _
-      Cast(SUBCLASSPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
-    
-   ' Create the imagelist for the TopTabControl tabs
-   cx = 16 * (pWindow->DPI \ 96)
-   Dim As HANDLE hImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 1, 0)
-   Dim As HICON hIcon = LoadIcon( pWindow->InstanceHandle, "IMAGE_TABCLOSE" )
-   ImageList_AddIcon( hImageList, hIcon )
-   TabCtrl_SetImageList( gTTabCtl.hWindow, hImageList )
-                                                        
-   
-   ' Add the file list navigation combo box
-   pWindow->AddControl("COMBOBOX", pWindow->hWindow, _
-      IDC_FRMMAIN_COMBOFILES, "", 0, 0, 0, 20, _
-      WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR CBS_OWNERDRAWFIXED or _
-      CBS_DROPDOWNLIST OR CBS_HASSTRINGS OR CBS_SORT, WS_EX_CLIENTEDGE )
-   
-   ' Add the functions list navigation combo box
-   pWindow->AddControl("COMBOBOX", pWindow->hWindow, _
-      IDC_FRMMAIN_COMBOFUNCTIONS, "", 0, 0, 0, 20, _
-      WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR CBS_OWNERDRAWFIXED or  _
-      CBS_DROPDOWNLIST OR CBS_HASSTRINGS OR CBS_SORT, WS_EX_CLIENTEDGE )
-
-   
-   ' Load the graphisc PNG pointers for the scintilla popup autocomplete listbox.
-   gApp.pImageAutocompleteBaseType = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_BASETYPE" )      
-   gApp.pImageAutocompleteClass    = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_CLASS" )     
-   gApp.pImageAutocompleteMethod   = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_METHOD" )     
-   gApp.pImageAutocompleteProperty = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_PROPERTY" )  
-
-
+   ' Create the main application statusbar
+   frmStatusBar_Show( HWND_FRMMAIN )
+  
    ' Create the various child windows
+   frmFunctionList_Show( HWND_FRMMAIN )
    frmExplorer_Show( HWND_FRMMAIN )
-   frmRecent_Show( HWND_FRMEXPLORER )     ' child of frmExplorer
+   frmExplorerVScroll_Show( HWND_FRMMAIN )
    frmOutput_Show( HWND_FRMMAIN )
 
 
@@ -3511,23 +1888,23 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    
 
    ' SET STARTUP POSITION
-   ' If no valid window size exists then set to the default working area of the screen
-   If (gConfig.StartupRight = 0) OrElse (gConfig.StartupBottom = 0) Then
+   ' if no valid window size exists then set to the default working area of the screen
+   if (gConfig.StartupRight = 0) orelse (gConfig.StartupBottom = 0) then
       ' Retrieve the size of the working area
-      Dim rc As Rect = pWindow->GetWorkArea                
+      dim rc as Rect = pWindow->GetWorkArea                
       gConfig.StartupRight  = rc.Right
       gConfig.StartupBottom = rc.Bottom
-   End If
+   end if
    
-   Dim WinPla As WINDOWPLACEMENT
-   With WinPla
-      .Length = Sizeof(WinPla)
+   dim WinPla as WINDOWPLACEMENT
+   with WinPla
+      .Length = sizeof(WinPla)
       .rcNormalPosition.Left   = gConfig.StartupLeft
       .rcNormalPosition.Top    = gConfig.StartupTop
       .rcNormalPosition.Right  = gConfig.StartupRight
       .rcNormalPosition.Bottom = gConfig.StartupBottom
-      .showCmd = Iif( gConfig.StartupMaximized, SW_MAXIMIZE, SW_SHOWNORMAL )
-   End With
+      .showCmd = iif( gConfig.StartupMaximized, SW_MAXIMIZE, SW_SHOWNORMAL )
+   end with
    SetWindowPlacement(pWindow->hWindow, @WinPla)
      
    ' Ensure the window is placed on screen should the user had changed 
@@ -3539,110 +1916,59 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Post a message to process the application's command line as applicable.
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE, 0, 0 )
 
+   ' Only restore session if that option is active. The session file may contain
+   ' a reference to a project if the last session was a project.
+   if gConfig.RestoreSession then 
+      if AfxFileExists( gConfig.wszLastActiveSession ) then
+         gConfig.LoadSessionFile( gConfig.wszLastActiveSession )
+      end if   
+   end if
+
    ' Post a message to process any User Tools that must start after WinFBE displays.
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_STARTUPUSERTOOLS, 0, 0 )
 
    ' Post a message to do an update check (if applicable)
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_UPDATECHECK, 0, 0 )
 
+   ' Start AutoSave timer if that option is enables
+   OnCommand_FileAutoSaveStartTimer()
+
    ' Process windows events
-   Dim uMsg As MSG
+   dim uMsg as MSG
    
    ' Message loop
-   Do While GetMessage(@uMsg, Null, 0, 0)
+   do while GetMessage(@uMsg, null, 0, 0)
+
+      if handleMouseScrollBar(uMsg) then continue do
+      if handleMouseShowScrollBar(uMsg) then continue do
+      if handleMouseTopMenu(uMsg) then continue do
+      if handleAltKeyMenuBar(uMsg) then continue do
 
       ' Processes accelerator keys for menu commands
-      If (pWindow->AccelHandle = 0) Orelse (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg) = 0) then
+      if (pWindow->AccelHandle = 0) orelse (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg) = 0) then
           
-         if (ghAccelUserTools = 0) orelse (TranslateAccelerator(pWindow->hWindow, ghAccelUserTools, @uMsg) = 0) Then 
+         if (ghAccelUserTools = 0) orelse (TranslateAccelerator(pWindow->hWindow, ghAccelUserTools, @uMsg) = 0) then 
 
-            ' Close any open Find/Replace window with ESC key
-            ' Close any open FindInFiles window with ESC key
-            ' Close any open FunctionList window
-            if (uMsg.message = WM_KEYDOWN) andAlso (uMsg.wParam = VK_ESCAPE) THEN
-               if IsWindowVisible( HWND_FRMFINDREPLACE ) THEN SendMessage( HWND_FRMFINDREPLACE, WM_CLOSE, 0, 0 )
-               if IsWindowVisible( HWND_FRMFINDINFILES ) THEN SendMessage( HWND_FRMFINDINFILES, WM_CLOSE, 0, 0 )
-               if IsWindowVisible( HWND_FRMFUNCTIONLIST ) THEN SendMessage( HWND_FRMFUNCTIONLIST, WM_CLOSE, 0, 0 )
-            END IF
+            ' Prevent any < asc(32) characters from making their way to Scintilla where they 
+            ' get shown as an embedded control graphic.
+            if (uMsg.message = WM_CHAR) and (uMsg.wParam < 32) then continue do
+
+            ' if topmenus or menubar are active then process all keyboard input for them rather than 
+            ' passing it off to the system to process.
+            if handleKeysTopMenu(uMsg) then continue do
+
+            ' Was ENTER key pressed while scrolling the Explorer listbox via keyboard
+            if handleKeysExplorerListBox(uMsg) then continue do
+            
+            ' Close with ESC key: Find/Replace, FindInFiles, FunctionList window
+            if handleEscKeyModeless(uMsg) then continue do
 
             ' Handle any keypress that would move or resize control(s) on a Designer Form.
-            if uMsg.message = WM_KEYDOWN THEN
-               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-               if pDoc THEN
-                  ' We don't want keystrokes going into the scintilla control if the
-                  ' visual designer form is active.
-                  if pDoc->IsDesigner THEN
-                     if IsDesignerView(pDoc) then
-                        ' Don't allow keys to the scintilla control
-                        if pDoc->IsValidScintillaID(GetDlgCtrlID(GetFocus)) then 
-                           if uMsg.wParam = VK_DELETE then
-                              frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
-                              continue do
-                           end if   
-                        end if
-                     end if
-                  end if
-               end if         
-
-               ' Ensure that an arrow key was pressed
-               select CASE uMsg.wParam
-
-                  case VK_SPACE
-                     dim as HWND hEventList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS)
-                     if pDoc andalso GetFocus() = hEventList then
-                        ' Toggle the selected Event listbox item
-                        dim as long nCurSel = ListBox_GetCurSel(hEventList)
-                        if nCurSel > -1 then 
-                           dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-                           dim pCtrl as clsControl ptr 
-                           if pDoc then
-                              pCtrl = pDoc->Controls.GetActiveControl
-                              if pCtrl THEN
-                                 pCtrl->Events(nCurSel).bIsSelected = not pCtrl->Events(nCurSel).bIsSelected
-                                 AfxRedrawWindow(hEventList)
-                                 pDoc->UserModified = true
-                                 pDoc->bRegenerateCode = true
-                                 frmMain_SetStatusbar
-                              end if
-                           end if
-                        end if   
-                     END IF
-
-                  case VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN
-                     if pDoc THEN
-                        if pDoc->IsDesigner THEN
-                           select case GetFocus
-                              ' Allow arrows to move selected item in a listbox or edit textbox
-                              case GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX), _
-                                   GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES), _
-                                   GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS), _
-                                   GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
-                                   HWND_PROPLIST_EDIT
-                              CASE ELSE
-                                 ' Allow arrows to move/resize selected controls
-                                 if IsDesignerView(pDoc) then
-                                    if pDoc->Controls.SelectedControlsCount > 0 then
-                                       ' Move control(s)
-                                       if (GetAsyncKeyState(VK_CONTROL) and &H8000) then
-                                          KeyboardMoveControls(pDoc, uMsg.wParam)
-                                          continue do
-                                       end if
-                                       ' Resize control(s)   
-                                       if (GetAsyncKeyState(VK_SHIFT) and &H8000) THEN
-                                          KeyboardResizeControls(pDoc, uMsg.wParam)
-                                          continue do
-                                       end if   
-                                       ' Move active selected control focus within group of controls
-                                       KeyboardCycleActiveControls(pDoc, uMsg.wParam)
-                                       continue do
-                                    end if   
-                                 end if
-                           END SELECT
-                        END IF
-                     END IF
-               END SELECT
-            end if
-             
+            if handleKeysVisualDesigner(uMsg) then continue do
+            
+            ' Handle ENTER key for active FindReplace dialog
+            if handleKeysFindReplace(uMsg) then continue do
+            
             ' Check for any QuickRun exes that can be deleted.
             gApp.CheckQuickRunExe
              
@@ -3651,43 +1977,38 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
             ' the application started (for example, changing the compiler path).
             gConfig.ReloadConfigFileTest()
             
-            
             ' Determines whether a message is intended for the specified
             ' dialog box and, if it is, processes the message.
             ' Ensure keystrokes like TAB are properly handled by the modeless dialogs
-            IF AfxCAxHostForwardMessage(GetFocus, @uMsg) = FALSE THEN
-               If IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) Then Continue Do
-               If IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) Then Continue Do
-               IF IsDialogMessageW(HWND_FRMHELPVIEWER, @uMsg) Then Continue Do
+            if AfxCAxHostForwardMessage(GetFocus, @uMsg) = false then
+               if IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) then Continue Do
+               if IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) then Continue Do
+               if IsDialogMessage( HWND_FRMHELPVIEWER, @uMsg ) then Continue Do
 
-               If IsDialogMessage(pWindow->hWindow, @uMsg) = 0 Then
+               if IsDialogMessage(pWindow->hWindow, @uMsg) = 0 then
                   TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
                   DispatchMessage @uMsg     ' Dispatches a message to a window procedure.
                end if
-            End If
-         end if
-         
-      End If
-   Loop
-   Function = uMsg.wParam
+            end if
 
-   If ghIconGood       Then DestroyIcon( ghIconGood ) 
-   If ghIconBad        Then DestroyIcon( ghIconBad )
-   if ghAccelUserTools THEN DestroyAcceleratorTable( ghAccelUserTools )
+         end if  'accelerator user tools    
+      end if  ' accelerators
+   loop  ' message loop
    
-   if gApp.pImageAutocompleteBaseType then deallocate( gApp.pImageAutocompleteBaseType )
-   if gApp.pImageAutocompleteClass    then deallocate( gApp.pImageAutocompleteClass )
-   if gApp.pImageAutocompleteMethod   then deallocate( gApp.pImageAutocompleteMethod )
-   if gApp.pImageAutocompleteProperty then deallocate( gApp.pImageAutocompleteProperty )
+   function = uMsg.wParam
 
-   ' Delete the allocated memory for the various child windows
-   pWindow = AfxCWindowPtr( HWND_FRMHELPVIEWER ): Delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER ):   Delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMRECENT ):     Delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ):     Delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMMAIN ):       Delete pWindow
+   if ghIconTick           then DestroyIcon( ghIconTick )
+   if ghIconNoTick         then DestroyIcon( ghIconNoTick )
+   
+   if ghAccelUserTools then DestroyAcceleratorTable( ghAccelUserTools )
+   
+   ' delete the allocated memory for the various child windows
+   pWindow = AfxCWindowPtr( HWND_FRMHELPVIEWER ):   delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER ):     delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER_VSCROLLBAR ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ):       delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMFUNCTIONLIST ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMMAIN ):         delete pWindow
 
-End Function
-
-
+end function
 

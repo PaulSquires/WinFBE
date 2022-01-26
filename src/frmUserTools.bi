@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -55,6 +55,8 @@ common shared as HACCEL ghAccelUserTools
 declare Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long            
 declare Function frmUserTools_CreateAcceleratorTable() As Long
 declare Function frmUserTools_Show( ByVal hWndParent As HWnd ) as LRESULT
+declare Function updateUserToolsMenuItems() as long
+declare function createToolsMenuShortcut( byval nCtrlID as long ) as CWSTR
 
 
 

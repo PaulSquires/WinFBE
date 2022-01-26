@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -16,9 +16,10 @@
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmAbout
 ' ========================================================================================
-private Function frmAbout_OnCreate( ByVal HWnd As HWnd, _
-                                    ByVal lpCreateStructPtr As LPCREATESTRUCT _
-                                    ) As BOOLEAN
+Function frmAbout_OnCreate( _
+            ByVal HWnd As HWnd, _
+            ByVal lpCreateStructPtr As LPCREATESTRUCT _
+            ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -34,11 +35,12 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmAbout
 ' ========================================================================================
-private Function frmAbout_OnCommand( ByVal HWnd As HWnd, _
-                                     ByVal id As Long, _
-                                     ByVal hwndCtl As HWnd, _
-                                     ByVal codeNotify As UINT _
-                                     ) As LRESULT
+Function frmAbout_OnCommand( _
+            ByVal HWnd As HWnd, _
+            ByVal id As Long, _
+            ByVal hwndCtl As HWnd, _
+            ByVal codeNotify As UINT _
+            ) As LRESULT
 
    Select Case id
       Case IDC_FRMABOUT_CMDUPDATES
@@ -54,7 +56,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmAbout
 ' ========================================================================================
-private Function frmAbout_OnClose( byval HWnd As HWnd) As LRESULT
+Function frmAbout_OnClose( byval HWnd As HWnd) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
@@ -65,7 +67,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmAbout
 ' ========================================================================================
-private Function frmAbout_OnDestroy( byval HWnd As HWnd) As LRESULT
+Function frmAbout_OnDestroy( byval HWnd As HWnd) As LRESULT
    Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMABOUT_LBLAPPNAME))
    DeleteFont(hFont)
    PostQuitMessage(0)
@@ -76,11 +78,12 @@ End Function
 ' ========================================================================================
 ' frmAbout Window procedure
 ' ========================================================================================
-private Function frmAbout_WndProc( ByVal HWnd   As HWnd, _
-                                   ByVal uMsg   As UINT, _
-                                   ByVal wParam As WPARAM, _
-                                   ByVal lParam As LPARAM _
-                                   ) As LRESULT
+Function frmAbout_WndProc( _
+            ByVal HWnd   As HWnd, _
+            ByVal uMsg   As UINT, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,  frmAbout_OnCreate)
@@ -98,7 +101,7 @@ End Function
 ' ========================================================================================
 ' frmAbout_Show
 ' ========================================================================================
-public Function frmAbout_Show( ByVal hWndParent As HWnd ) as LRESULT
+Function frmAbout_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

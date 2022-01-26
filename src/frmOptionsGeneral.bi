@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #Define IDC_FRMOPTIONSGENERAL_CHKCLOSEPROJMGR       1003
 #Define IDC_FRMOPTIONSGENERAL_CHKASKEXIT            1004
 #Define IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR        1005
-#Define IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR      1006
+#Define IDC_FRMOPTIONSGENERAL_CHKRESTORESESSION     1006
 #Define IDC_FRMOPTIONSGENERAL_CHKUPDATES            1007
 #Define IDC_FRMOPTIONSGENERAL_CHKPROJECTCACHE       1008
 

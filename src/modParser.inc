@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -269,12 +269,6 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
    ' Document has now been fully parsed
    pDoc->bNeedsParsing = false
 
-   ' Update the Explorer treeview nodes to ensure that any new nodes are added
-   ' and any old nodes are deleted.
-   if pDoc->hNodeExplorer then
-      frmExplorer_AddChildNodes( pDoc )
-   end if
-   
    ' Update the TODO listview in the frmOutput form
    frmOutput_UpdateToDoListview
    

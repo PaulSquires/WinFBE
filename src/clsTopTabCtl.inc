@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -12,9 +12,67 @@
 '    GNU General Public License for more details.
 
 #include once "clsTopTabCtl.bi"
-#include once "frmFindReplace.bi"
-#include once "frmMainOnCommand.bi"
-#include once "modVDDesignForm.bi"
+
+''
+''
+function clsTopTabCtl.IsSafeIndex( byval idx as long ) as boolean
+   ' test to see if the incoming idx is valid based on the boundaries
+   ' of the global tab array
+   if (idx >= lbound(this.tabs)) andalso (idx <= ubound(this.tabs)) then
+      return true
+   else   
+      return false   
+   end if
+end function
+
+''
+''
+function clsTopTabCtl.GetItemCount() as long
+   ' get the number tabs in the global tab array
+   return ubound(this.tabs) - lbound(this.tabs) + 1
+end function
+
+''
+''
+Function clsTopTabCtl.AddTab( ByVal pDoc As clsDocument Ptr ) As Long
+   ' Return the index of the added tab. we attempt to add it immediately
+   ' after the current active tab.
+   Dim idx As Long
+   redim preserve this.tabs(ubound(this.tabs) + 1) as TOPTABS_TYPE
+   
+   if (this.CurSel = -1) orelse (this.CurSel = this.GetItemCount - 1) then
+      ' add the tab at the end of the array
+      idx = ubound(this.tabs)
+   else
+      ' insert the tab after the current tab
+      for i as long = ubound(this.tabs) to this.CurSel + 1 step -1
+         this.tabs(i) = this.tabs(i - 1)
+      next
+      idx = this.CurSel + 1
+   end if
+   
+   this.tabs(idx).pDoc = pDoc
+   this.SetTabText(idx)
+   Function = idx
+End Function
+
+''
+''
+function clsTopTabCtl.RemoveElement( byval idx as long ) as long
+   ' remove an element from the this.tabs array
+   if this.IsSafeIndex(idx) = false then exit function
+   ' if this is the last element being removed then we need
+   ' to erase the global array
+   if this.GetItemCount() = 1 then
+      erase this.tabs
+   else
+      for i as long = idx to ubound(this.tabs) - 1
+         this.tabs(i) = this.tabs(i+1)
+      next   
+      redim preserve this.tabs(ubound(this.tabs)-1)
+   end if
+   function = 0
+end function
 
 
 ''
@@ -25,22 +83,14 @@ Function clsTopTabCtl.GetTabIndexFromFilename( Byref wszName As WString ) As Lon
    ' error occurs during compiling. 
    ' Returns -1 if not found, otherwise zero based index of tab.
    
-   If TabCtrl_GetItemCount(this.hWindow) = 0 Then Return -1 
+   Dim As Long nCount = this.GetItemCount()
+   If nCount = 0 Then Return -1 
    If len(wszName) = 0 Then Return -1
    
-   Dim As Long i
-   Dim pDoc As clsDocument Ptr 
-   Dim As Long nCount = TabCtrl_GetItemCount(this.hWindow) 
-
-   Dim TB As TC_ITEM 
-   TB.Mask = TCIF_PARAM
-   
-   For i = 0 To nCount - 1
-      TabCtrl_GetItem( this.hWindow, i, @TB )
-      pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If pDoc Then 
-         If Ucase(pDoc->DiskFilename) = Ucase(wszName) Then Return i
-      End If   
+   for i as long = 0 To nCount - 1
+      if this.tabs(i).pDoc then
+         If Ucase(this.tabs(i).pDoc->DiskFilename) = Ucase(wszName) Then Return i
+      end if   
    Next
 
    Function = -1  ' if not found
@@ -50,22 +100,16 @@ End Function
 ''
 ''
 Function clsTopTabCtl.GetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
-   ' Returns the index that holds the incoming pDocIn ptr.
-   If TabCtrl_GetItemCount(this.hWindow) = 0 Then Return -1 
-   If pDocIn = 0 Then Return -1
-   
-   Dim As Long i
-   Dim pDoc As clsDocument Ptr 
-   Dim As Long nCount = TabCtrl_GetItemCount(this.hWindow) 
 
-   Dim TB As TC_ITEM 
-   TB.Mask = TCIF_PARAM
-   
-   For i = 0 To nCount - 1
-      TabCtrl_GetItem( this.hWindow, i, @TB )
-      pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If pDoc = pDocIn Then Return i
-   Next
+   Dim As Long nCount = this.GetItemCount()
+   If nCount = 0 Then Return -1 
+   If pDocIn = 0 Then Return -1
+
+   for i as long = 0 To nCount - 1
+      if this.tabs(i).pDoc then
+         If this.tabs(i).pDoc = pDocIn Then Return i
+      end if   
+   next
 
    Function = -1  ' if not found
 End Function
@@ -74,26 +118,15 @@ End Function
 ''
 ''
 Function clsTopTabCtl.SetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
-   ' Sets to tab that holds the incoming pDocIn ptr.
-   If TabCtrl_GetItemCount(this.hWindow) = 0 Then Return -1 
+   Dim As Long nCount = this.GetItemCount()
+   If nCount = 0 Then Return -1 
    If pDocIn = 0 Then Return -1
-   
-   Dim As Long i
-   Dim pDoc As clsDocument Ptr 
-   Dim As Long nCount = TabCtrl_GetItemCount(this.hWindow) 
-
-   Dim TB As TC_ITEM 
-   TB.Mask = TCIF_PARAM
-   
-   For i = 0 To nCount - 1
-      TabCtrl_GetItem( this.hWindow, i, @TB )
-      pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If pDoc = pDocIn Then 
-         this.SetFocusTab(i)
+   for i as long = 0 To nCount - 1
+      If this.tabs(i).pDoc = pDocIn Then 
+         function = this.SetFocusTab(i)
          Exit Function
-      End If   
-   Next
-
+      end if   
+   next
    Function = -1  ' if not found
 End Function
 
@@ -101,16 +134,24 @@ End Function
 ''
 ''
 Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
-   ' Set the tab with focus (this sends the TCN_SELCHANGING and TCN_SELCHANGE 
-   ' notification codes to its parent window). 
-   Dim As Long nCount = TabCtrl_GetItemCount(this.hWindow) 
-   If idx < 0 Then idx = nCount - 1
-   If TabCtrl_GetCurSel(this.hWindow) <> idx Then
-      Function = TabCtrl_SetCurFocus(this.hWindow, idx)
-      if IsWindowVisible(HWND_FRMFINDREPLACE) THEN
+
+   Dim As Long nCount = this.GetItemCount()
+   If nCount = 0 Then Return -1 
+   if idx < 0 then idx = nCount - 1
+   if this.IsSafeIndex(idx) = false then exit function
+   if this.CurSel <> idx then
+      ' Send a user message to accomplish the same thing as TCN_SELCHANGING and TCN_SELCHANGE 
+      SendMessage( HWND_FRMMAIN, MSG_USER_TOPTABS_CHANGING, 0, 0 )
+      this.CurSel = idx
+      SendMessage( HWND_FRMMAIN, MSG_USER_TOPTABS_CHANGED, 0, 0 )
+      if IsWindowVisible(HWND_FRMFINDREPLACE) then
          frmFindReplace_HighlightSearches
-      END IF
-   End If
+      end if
+      ' Highlight the selected tab file in the Explorer listbox
+      frmExplorer_SelectItemData( this.tabs(idx).pDoc )
+   end if
+
+   function = this.CurSel
 End Function
 
 
@@ -120,12 +161,12 @@ Function clsTopTabCtl.NextTab() As Long
    ' Invoked by Ctl+TAB
    ' Set the tab with focus (this sends the TCN_SELCHANGING and TCN_SELCHANGE 
    ' notification codes to its parent window). 
-   Dim As Long nCount = TabCtrl_GetItemCount(this.hWindow) 
-   Dim As Long idx = TabCtrl_GetCurSel(this.hWindow)
+   Dim As Long nCount = this.GetItemCount
+   Dim As Long idx = this.CurSel
    If nCount = 0 Then Exit Function
    idx += 1
    If idx > nCount - 1 Then idx = 0
-   Function = TabCtrl_SetCurFocus(this.hWindow, idx)
+   Function = this.SetFocusTab(idx)
 End Function
 
 ''
@@ -134,19 +175,19 @@ Function clsTopTabCtl.PrevTab() As Long
    ' Invoked by Ctl+Shift+TAB
    ' Set the tab with focus (this sends the TCN_SELCHANGING and TCN_SELCHANGE 
    ' notification codes to its parent window). 
-   Dim As Long nCount = TabCtrl_GetItemCount(this.hWindow) 
-   Dim As Long idx = TabCtrl_GetCurSel(this.hWindow)
+   Dim As Long nCount = this.GetItemCount 
+   Dim As Long idx = this.CurSel
    If nCount = 0 Then Exit Function
    idx -= 1
    If idx < 0 Then idx = nCount - 1 
-   Function = TabCtrl_SetCurFocus(this.hWindow, idx)
+   Function = this.SetFocusTab(idx)
 End Function
 
 ''
 ''
-Function clsTopTabCtl.CloseTab() As Long
-   ' Invoked by Ctl+W or by clicking "X" on tab
-   OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT )
+Function clsTopTabCtl.CloseTab( byval nTabIdx as long = -1) As Long
+   ' Invoked by clicking "X" on tab
+   OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT, nTabIdx )
    Function = 0
 End Function
 
@@ -155,40 +196,29 @@ End Function
 ''
 Function clsTopTabCtl.GetActiveDocumentPtr() As clsDocument Ptr
    ' Return pointer to clsDocument class for the current active tab
-   If TabCtrl_GetItemCount(this.hWindow) = 0 Then Return 0 
-      
-   Dim TB As TC_ITEM 
-   TB.Mask = TCIF_PARAM
-   
-   Dim As Long idx = TabCtrl_GetCurSel(this.hWindow)
-   TabCtrl_GetItem( this.hWindow, idx, @TB )
-   
-   Function = Cast(clsDocument Ptr, TB.lParam)
+   If this.GetItemCount() = 0 Then Return 0 
+   if this.IsSafeIndex(this.CurSel) = false then exit function
+   function = this.tabs(this.CurSel).pDoc   
 End Function
 
 ''
 ''
 Function clsTopTabCtl.GetDocumentPtr( ByVal idx As Long ) As clsDocument Ptr
    ' Return pointer to clsDocument class for the current active tab
-   Dim TB As TC_ITEM 
-   TB.Mask = TCIF_PARAM
-   
-   TabCtrl_GetItem( this.hWindow, idx, @TB )
-   
-   Function = Cast(clsDocument Ptr, TB.lParam)
+   if this.IsSafeIndex(idx) = false then exit function
+   function = this.tabs(idx).pDoc
 End Function
 
 ''
 ''
 Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEAN ) As Long
    ' Show/Hide the Scintilla editing window (or visual designer window) for the incoming tab index
-   Dim TB As TC_ITEM 
-   TB.Mask = TCIF_PARAM
-   TabCtrl_GetItem( this.hWindow, idx, @TB )
-   
-   Dim pDocShow As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
+   Dim pDocShow As clsDocument Ptr
+
+   if this.IsSafeIndex(idx) = false then exit function
+   pDocShow = this.tabs(idx).pDoc
    If pDocShow = 0 Then exit function
-   
+
    ' Hide all documents and their associated scrollbars
    Dim pDoc As clsDocument Ptr = gApp.pDocList
    
@@ -220,52 +250,31 @@ End Function
    
 ''
 ''
-Function clsTopTabCtl.AddTab( ByVal pDoc As clsDocument Ptr ) As Long
-   Dim idx As Long
-   ' Return the index of the added tab
-   idx = TabCtrl_AddTab( this.hWindow, 0, "", Cast(LPARAM, pDoc) ) 
-   this.SetTabText(idx)
-   Function = idx
-End Function
-
-''
-''
 Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    ' Set the text for the incoming tab index. If the index
    ' is -1 then set the text of the current tab.
    Dim wszText As WString * MAX_PATH  
    Dim wszTemp As WString * MAX_PATH  
+   Dim pDoc As clsDocument Ptr
 
-   If idx = -1 Then idx = TabCtrl_GetCurSel(this.hWindow)
+   If idx = -1 Then idx = gTTabCtl.CurSel
+   if this.IsSafeIndex(idx) = false then exit function
    
-   ' Get the pointer to the clsDocument stored in lParam and also retrieve the existing text. 
-   Dim TB As TC_ITEM 
-   TB.Mask       = TCIF_PARAM Or TCIF_TEXT
-   TB.pszText    = @wszTemp
-   TB.cchTextMax = MAX_PATH
-   TabCtrl_GetItem( this.hWindow, idx, @TB )
-   
-   Dim pDoc As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
+   pDoc = this.tabs(idx).pDoc
    If pDoc Then 
-      
       ' Set the text that displays on the tab
       wszText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         wszText = wszText & "*"
-      End If   
             
       ' We only update the text if it has changed in order to prevent flicker.
-      If wszText <> wszTemp Then
-         TabCtrl_SetText( this.hWindow, idx, @wszText )
-         ' Also update the Explorer node's filename
+      If wszText <> this.tabs(idx).wszText Then
+         this.tabs(idx).wszText = wszText
+         frmTopTabs_PositionWindows()
+         ' Also update the hidden FunctionList node's filename
          if pDoc->hNodeExplorer then
-            Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-            ' We don't want any * modififer to show
-            wszText = rtrim(wszText, "*")
+            Dim As Hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
             TreeView_SetItemText( hTree, pDoc->hNodeExplorer, @wszText )
          end if   
       End If
-
    End If
    
    function = idx

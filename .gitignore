@@ -2,3 +2,5 @@ _compilelog.txt
 WinFBE.jfp
 WinFBE_db_data.ini
 winfbe_version.txt
+_compile32bit.bat
+_compile64bit.bat

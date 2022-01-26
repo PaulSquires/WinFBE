@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -54,15 +54,55 @@ end function
 
 
 ' ========================================================================================
+' Determine the current active build index
+' ========================================================================================
+public function frmBuildConfig_getActiveBuildIndex() as long
+   ' determine the default build in case no other build overrides it
+   dim as long nDefault
+   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+      if gConfig.Builds(i).IsDefault then
+         nDefault = i: exit for
+      end if
+   next
+
+   ' determine if a project or previous config selection overrides the default
+   dim as long idx = -1
+   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+      if gApp.IsProjectActive then
+         if gConfig.Builds(i).id = gApp.ProjectBuild then
+            idx = i: exit for
+         end if
+      else
+         if gConfig.CompilerBuild = gConfig.Builds(i).id then
+            idx = i: exit for
+         end if
+      end if
+   next
+
+   if idx = -1 then idx = nDefault
+   function = idx
+end function
+
+
+' ========================================================================================
+' Return the string description of the currently selected build configuration
+' ========================================================================================
+public function frmBuildConfig_GetSelectedBuildDescription() as CWSTR
+   dim as long nCurSel = frmBuildConfig_getActiveBuildIndex()
+   if nCurSel > -1 THEN
+      function = gConfig.Builds(nCurSel).wszDescription
+   END IF
+end function
+
+
+' ========================================================================================
 ' Return the string GUID of the currently selected build configuration
 ' ========================================================================================
 public function frmBuildConfig_GetSelectedBuildGUID() as String
-
-   dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   dim as long nCurSel = frmBuildConfig_getActiveBuildIndex()
    if nCurSel > -1 THEN
       function = gConfig.Builds(nCurSel).Id
    END IF
-
 end function
 
 
@@ -70,50 +110,12 @@ end function
 ' Return the string GUID of the default (if any) build configuration
 ' ========================================================================================
 private function frmBuildConfig_GetDefaultBuildGUID() as String
-
    for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
       if gConfig.Builds(i).IsDefault then 
          return gConfig.Builds(i).Id
       end if   
    NEXT
    function = ""
-   
-end function
-
-
-' ========================================================================================
-' Load all of the build descriptions into the toolbar combobox and set to selected
-' ========================================================================================
-public function frmBuildConfig_LoadBuildComboBox() as Long
-
-   Dim pDocMain As clsDocument Ptr 
-   dim as long nCurSel = 0
-   dim as string sBuildId
-
-   ComboBox_ResetContent(HWND_FRMMAIN_COMBOBUILDS)
-   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
-      ComboBox_AddString(HWND_FRMMAIN_COMBOBUILDS, gConfig.Builds(i).wszDescription.sptr)
-   NEXT
-
-   ' 1) If project is active then set using the selected build for the project.
-   If gApp.IsProjectActive Then
-      sBuildId = gApp.ProjectBuild
-   Else
-   ' 2) If no project is active, set using the selected build for the active document.
-      pDocMain = gTTabCtl.GetActiveDocumentPtr()
-      If pDocMain Then sBuildId = pDocMain->DocumentBuild
-   End If
-
-   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
-      if gConfig.Builds(i).Id = sBuildId then
-         nCurSel = i: exit for
-      end if   
-      if gConfig.Builds(i).IsDefault then nCurSel = i
-   NEXT
-
-   ComboBox_SetCurSel(HWND_FRMMAIN_COMBOBUILDS, nCurSel)
-   
-   function = 0
 end function
 
 
@@ -367,6 +369,9 @@ private Function frmBuildConfig_ListBox_SubclassProc ( _
                dim as long nCurSel = ListBox_GetCurSel(hwnd)
                frmBuildConfig_ProcessListboxClick(hwnd, nCurSel)
                Exit Function
+            case VK_ESCAPE
+               PostMessage( GetParent(HWnd), WM_CLOSE, 0, 0 )
+               Exit Function
          End Select
 
       case WM_MOUSEMOVE
@@ -588,8 +593,8 @@ private Function frmBuildConfig_OnCommand( ByVal HWnd As HWnd, _
                   Dim pDocMain As clsDocument Ptr 
                   pDocMain = gTTabCtl.GetActiveDocumentPtr()
                   If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
+                  gConfig.CompilerBuild = gConfig.Builds(nCurSel).Id
                end if
-               frmBuildConfig_LoadBuildComboBox()
                frmMain_SetStatusbar
             end if
             
@@ -757,8 +762,8 @@ public Function frmBuildConfig_Show( ByVal hWndParent As HWnd ) As LRESULT
    next
 
    
-   ' Set the current selection to the same selection as the combobox builds in the toolbar
-   dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   ' Set the current build selection 
+   dim as long nCurSel = frmBuildConfig_getActiveBuildIndex()
    dim hList as hwnd = GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LIST1)
    if nCurSel = -1 then nCurSel = 0 
    ListBox_SetCurSel(hList, nCurSel)
@@ -773,8 +778,4 @@ public Function frmBuildConfig_Show( ByVal hWndParent As HWnd ) As LRESULT
    Delete pWindow
 
 End Function
-
-
-
-
 

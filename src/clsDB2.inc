@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -43,13 +43,13 @@
 '         ' The incoming nDollars would be discarded by the parser
 '         ' MyTypeVar would be stored as:
 '         '    ElementName = MyType.CalculateAmount.myTypeVar   ElementValue = MYTYPE
-'         Dim n As Long        ' This would be discarded by the parser
+'         Dim n As long        ' This would be discarded by the parser
 '         Dim rc As RECT       ' ElementName = MyType.CalculateAmount.rc  ElementValue = RECT
 '      End Function
 '
 ' eg. (Standalone Function)
-'      Function MyFunction( ByVal p As MyType Ptr ) As Long   ' ElementName = .MyFunction.p   ElementValue = MyType
-'         Dim n As Long        ' This would be discarded by the parser
+'      Function MyFunction( ByVal p As MyType Ptr ) As long   ' ElementName = .MyFunction.p   ElementValue = MyType
+'         Dim n As long        ' This would be discarded by the parser
 '         Dim m As MyType      ' ElementName = .MyFunction.m   ElementValue = MyType
 '      End Function
 '
@@ -111,22 +111,22 @@ end constructor
 
 ''
 ''
-function clsDB2.dbGetFreeSlot() as Long
+function clsDB2.dbGetFreeSlot() as long
    
    dim as long nSlot = -1
    
    ' Find a slot to put the data in
    for i as long = lbound(m_arrData) to ubound(m_arrData)
-      if m_arrData(i).deleted THEN
+      if m_arrData(i).deleted then
          nSlot = i: exit for
-      END IF   
-   NEXT
+      end if   
+   next
    
    ' If no slot found then resize the array to make room
-   if nSlot = -1 THEN
+   if nSlot = -1 then
       nSlot = ubound(m_arrData) + 1
       redim preserve m_arrData( nSlot + 10000 ) as DB2_DATA
-   END IF
+   end if
    
    function = nSlot
 end function
@@ -134,9 +134,10 @@ end function
 
 ''
 ''
-function clsDB2.dbAdd( byval parser as clsParser ptr, _
-                       byval id as long _
-                       ) as DB2_DATA ptr
+function clsDB2.dbAdd( _
+            byval parser as clsParser ptr, _
+            byval id as long _
+            ) as DB2_DATA ptr
    
    dim db as DB2_DATA
    
@@ -202,7 +203,7 @@ end function
 
 ''
 ''
-function clsDB2.dbAddDirect( byval pData as DB2_DATA ptr ) as Long
+function clsDB2.dbAddDirect( byval pData as DB2_DATA ptr ) as long
    ' Thsi function is used when loading data directly from the external 
    ' cache file database. It loads the record directly into the memory array.
    if pData = 0 then exit function
@@ -214,16 +215,16 @@ end function
 
 ''
 ''
-function clsDB2.dbDelete( byref wszFilename as WString ) as long
+function clsDB2.dbDelete( byref wszFilename as wstring ) as long
    dim nCount as long 
    dim as CWSTR wszFile = ucase(wszFilename)
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).deleted = true then continue for
-      if ucase(m_arrData(i).fileName) = wszFile THEN
+      if ucase(m_arrData(i).fileName) = wszFile then
          m_arrData(i).deleted = true
          nCount = nCount + 1
-      END IF   
-   NEXT
+      end if   
+   next
    function = nCount
 end function
 
@@ -233,7 +234,7 @@ function clsDB2.dbDeleteAll() as boolean
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       m_arrData(i).deleted = true
       function = true
-   NEXT
+   next
 end function
 
 ''
@@ -245,7 +246,7 @@ function clsDB2.dbDeleteByFileType( byval nFileType as long ) as boolean
          m_arrData(i).deleted = true
       end if
       function = true
-   NEXT
+   next
 end function
 
 ''
@@ -258,17 +259,17 @@ END FUNCTION
 
 ''
 ''
-function clsDB2.dbGetNext() as DB2_DATA ptr
+function clsDB2.dbGetnext() as DB2_DATA ptr
    ' Set index pointer to next array index that is not deleted
    dim as long ub = ubound(m_arrData)
    do
       m_index = m_index + 1
-      if m_index > ub THEN return 0
-      if m_arrData(m_index).deleted THEN 
+      if m_index > ub then return 0
+      if m_arrData(m_index).deleted then 
          continue do
       else
          exit do   
-      END IF
+      end if
    loop
    function = @m_arrData(m_index)
 END FUNCTION
@@ -276,10 +277,12 @@ END FUNCTION
 
 ''
 ''
-function clsDB2.dbSeek( byval sLookFor as string, _
-                        byval Action as long, _
-                        byval sFilename as string = "" _
-                        ) as DB2_DATA ptr
+function clsDB2.dbSeek( _
+            byval sLookFor as string, _
+            byval Action as long, _
+            byval sFilename as string = "" _
+            ) as DB2_DATA ptr
+
    ' GENERIC SEEK FUNCTION THAT OTHER FUNCTIONS CALL TO DO THE HARD WORK
    ' Find the array element that contains the function name beng searched for
    dim pData as DB2_DATA ptr
@@ -311,12 +314,12 @@ function clsDB2.dbSeek( byval sLookFor as string, _
    sLookFor = ucase(sLookFor)
    this.dbRewind()
    do 
-      pData = this.dbGetNext()
-      if pData = 0 THEN exit do
-      if pData->id = Action THEN
+      pData = this.dbGetnext()
+      if pData = 0 then exit do
+      if pData->id = Action then
          
          if ( sLookFor = ucase(pData->ElementName) ) andalso _
-            ( nGetSet = pData->GetSet )  THEN
+            ( nGetSet = pData->GetSet )  then
             
             if len(sFilename) then
                if ucase(pData->fileName) = ucase(sFilename) then 
@@ -328,7 +331,7 @@ function clsDB2.dbSeek( byval sLookFor as string, _
          
          end if
       
-      END IF
+      end if
    loop
    
    function = 0
@@ -372,7 +375,7 @@ function clsDB2.dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
    ' If this Type is an ALIAS for another Type then get that real type
    if ucase(pData->ElementName) <> ucase(pData->VariableType) then
       return this.dbSeek(pData->VariableType, DB2_TYPE) 
-   END IF   
+   end if   
    return pData
 end function
 
@@ -411,8 +414,8 @@ function clsDB2.dbDebug() as long
       pStream.WriteLine wszTitle
       this.dbRewind()
       do 
-         pData = this.dbGetNext
-         if pData = 0 THEN exit do
+         pData = this.dbGetnext
+         if pData = 0 then exit do
          if pData->id <> dataType then continue do
          'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
          pStream.WriteLine "   " & wszTitle

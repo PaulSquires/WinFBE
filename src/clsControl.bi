@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ type clsEvent
    private:
    public:
       wszEventName as CWSTR          ' Used for Get/Set of event value
-      bIsSelected  as Boolean        ' User has selected this event to include into code
-END TYPE
+      bIsSelected  as boolean        ' User has selected this event to include into code
+end type
 
 type clsProperty
    private:
@@ -40,7 +40,7 @@ type clsProperty
       wszPropValue     as CWSTR
       wszPropDefault   as CWSTR
       PropType         as PropertyType 
-END TYPE
+end type
 
 type clsControl
    private:
@@ -48,18 +48,18 @@ type clsControl
    public:
       hWindow           as hwnd
       ControlType       as long 
-      AfxButtonPtr      as CXPButton Ptr    ' we use XPButton rather than the built in Windows button
-      AfxMaskedPtr      as CMaskedEdit Ptr 
-      AfxPicturePtr     as CImageCtx Ptr 
-      IsSelected        as Boolean
-      IsActive          as Boolean
-      SuspendLayout     as Boolean         ' prevent layout properties from being acted on individually (instead treat as a group)
+      AfxButtonPtr      as CXPButton ptr    ' we use XPButton rather than the built in Windows button
+      AfxMaskedPtr      as CMaskedEdit ptr 
+      AfxPicturePtr     as CImageCtx ptr 
+      IsSelected        as boolean
+      IsActive          as boolean
+      SuspendLayout     as boolean         ' prevent layout properties from being acted on individually (instead treat as a group)
       rcHandles(1 to 8) as RECT            ' 8 grab handles
-      Properties(Any)   As clsProperty
-      Events(Any)       As clsEvent
+      Properties(any)   as clsProperty
+      Events(any)       as clsEvent
       hBackBrush        as HBRUSH            ' needed for STATIC/LABEL controls (destroyed in destructor)
       hImageList        as HANDLE            ' needed for TabControl
-      Declare Destructor
-END TYPE
+      declare destructor
+end type
 
 

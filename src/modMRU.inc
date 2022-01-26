@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -12,135 +12,162 @@
 '    GNU General Public License for more details.
 
 #include once "modMRU.bi"
-#include once "frmRecent.bi"
 
+''
+''
+private function clearMRUFilesItems( byval nParentID as long ) as long
+   ' clear out any existing items that match the nParentID so that they can be
+   ' reused when the MRU popup menu is created and shown. This function is used
+   ' fr both Files and Projects MRU lists.
+   for i as long = lbound(gTopMenu) to ubound(gTopMenu)
+      if gTopMenu(i).nParentID = nParentID then
+         gTopMenu(i).nParentID = 0
+         gTopMenu(i).nID = 0
+         gTopMenu(i).nChildID = 0
+      end if
+   next
+   function = 0
+end function
+
+''
+''
+private function getNextFreeMRUindex() as long
+   ' gets the first available free MRU index in the gTopMenu array. If there are
+   ' none free then the gTopMenu array is extended and that index is returned. This
+   ' function is used for both Files and Projects MRU lists.
+   dim as long nFoundAt = -1
+   for i as long = lbound(gTopMenu) to ubound(gTopMenu)
+      if gTopMenu(i).nParentID = 0 then return i
+   next
+   if nFoundAt = -1 then
+      nFoundAt = ubound(gTopMenu) + 1
+      redim preserve gTopMenu(nFoundAt) as TOPMENU_TYPE
+   end if
+   function = nFoundAt
+end function
 
 
 ''
 ''
-private Function GetMRUMenuHandle() as HMENU
-   Dim hFileMenu as HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, FILES_MENU_POSITION ) 
-   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, MRUFILES_MENU_POSITION )
-   Function = hSubMenu
-End Function
-
-
-''
-''
-public Function OpenMRUFile( ByVal HWnd As HWnd, _
-                             ByVal wID As Long _
-                             ) As Long
-   Dim wzFile As WString * MAX_PATH
+public Function updateMRUFilesItems() as long
+   ' clear MRU items already existing in the gTopMenu array. We overwrite and extend
+   ' the gTopMenu array rather than erase it because existing menus depend on the 
+   ' array index that aready exist. The function also returns the width to use for
+   ' the resulting popup menu (based on text width metrics of each filename).
+   clearMRUFilesItems( IDM_MRU )
    
-   wzFile = gConfig.MRU(wID - IDC_MRUBASE)
-   frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                           False, _    ' bIsNewFile
-                           False, _    ' bIsTemplate
-                           true, _     ' bShowInTab
-                           false, _    ' bIsInclude
-                           wzFile, _   ' wszName
-                           0 )  ' pDocIn
+   dim wszText as WSTRING * 256
+   dim as boolean hasMRUfiles = false
+   dim as long txtWidth = 0
+   dim as long nMenuWidth = -1
    
-   Function = 0
-End Function
+   For i As Long = 0 To 9
+      ' If the file no longer exists then remove it from the MRU list
+      gConfig.MRU(i) = ProcessFromCurdriveApp( gConfig.MRU(i) )
+      If AfxFileExists( gConfig.MRU(i) ) = 0 Then
+         gConfig.MRU(i) = ""
+      Else
+         hasMRUfiles = true
+         setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRU, IDM_MRUBASE + i, 0, false, false )
+         wszText = gConfig.MRU(i)
+         txtWidth = getTextWidth( HWND_FRMMAIN_MENUBAR, wszText, ghMenuBar.hFontMenuBar, 30 )
+         if txtWidth > nMenuWidth then nMenuWidth = txtWidth
+      End If
+   Next
+   
+   if hasMRUfiles = false then
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRU, IDM_MRUFILES, 0, false, false )  ' (empty)
+   else
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRU, IDM_MRUFILES, 0, false, true ) 
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRU, IDM_MRUCLEAR, 0, false, false )
+   end if   
+   
+   function = nMenuWidth
+end function
+
+
+''
+''
+public Function updateMRUProjectFilesItems() as long
+   ' clear MRU items already existing in the gTopMenu array. We overwrite and extend
+   ' the gTopMenu array rather than erase it because existing menus depend on the 
+   ' array index that aready eist.
+   clearMRUFilesItems( IDM_MRUPROJECT )
+   
+   dim wszText as WSTRING * 256
+   dim as boolean hasMRUfiles = false
+   dim as long txtWidth = 0
+   dim as long nMenuWidth = -1
+
+   For i As Long = 0 To 9
+      ' If the file no longer exists then remove it from the MRU list
+      gConfig.MRUPROJECT(i) = ProcessFromCurdriveApp( gConfig.MRUPROJECT(i) )
+      If AfxFileExists( gConfig.MRUPROJECT(i) ) = 0 Then
+         gConfig.MRUPROJECT(i) = ""
+      Else
+         hasMRUfiles = true
+         setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRUPROJECT, IDM_MRUPROJECTBASE + i, 0, false, false )
+         wszText = gConfig.MRUPROJECT(i)
+         txtWidth = getTextWidth( HWND_FRMMAIN_MENUBAR, wszText, ghMenuBar.hFontMenuBar, 30 )
+         if txtWidth > nMenuWidth then nMenuWidth = txtWidth
+      End If
+   Next
+   
+   if hasMRUfiles = false then
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRUPROJECT, IDM_MRUPROJECTFILES, 0, false, false )  ' (empty)
+   else
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRUPROJECT, IDM_MRUPROJECTFILES, 0, false, true ) 
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_MRUPROJECT, IDM_MRUPROJECTCLEAR, 0, false, false )
+   end if   
+   
+   function = nMenuWidth
+end function
+
+
+''
+''
+public function OpenMRUFile( byval HWnd As HWnd, _
+                             byval wID As long _
+                             ) as long
+   dim wszFile as WString * MAX_PATH
+   dim pDoc as clsDocument ptr
+   dim pDocIn as clsDocument ptr
+   wszFile = gConfig.MRU(wID - IDM_MRUBASE)
+   
+   ' If file is already loaded then simply switch to that file
+   ' within the editor.
+   pDocIn = gApp.GetDocumentPtrByFilename( wszFile )
+   
+   pDoc = frmMain_OpenFileSafely( _
+                  HWND_FRMMAIN, _
+                  false, _    ' bIsNewFile
+                  false, _    ' bIsTemplate
+                  true, _     ' bShowInTab
+                  false, _    ' bIsInclude
+                  wszFile, _  ' wszName
+                  pDocIn )    ' pDocIn
+   
+   function = 0
+end function
 
 
 ''
 ''
 public Function ClearMRUlist( ByVal wID As Long ) As Long
-
-   Dim As Long i 
-   
    Select Case wID
       Case IDM_MRUCLEAR
-         For i = 0 To 9
+         For i as long = 0 To 9
             gConfig.MRU(i) = ""
          Next
-         frmRecent_LoadTreeview
       Case IDM_MRUPROJECTCLEAR
-         For i = 0 To 9
+         For i as long = 0 To 9
             gConfig.MRUPROJECT(i) = ""
          Next
-         frmRecent_LoadTreeview
    End Select
-   
-   frmRecent_PositionWindows
-
    Function = 0
 End Function
 
 
-''
-''
-public Function CreateMRUpopup() As HMENU
-   ' Popup menu that is displayed when downarrown on toolbar is pressed.
-   Dim As HMENU hPopupMenu = CreatePopupMenu()
-   
-   ' Display MRU files
-   For i As Long = 0 To 9
-      ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRU(i) = ProcessFromCurdriveApp(gConfig.MRU(i))
-      If AfxFileExists(gConfig.MRU(i)) = 0 Then
-         gConfig.MRU(i) = ""
-      Else
-         AppendMenu( hPopupMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
-      End If
-   Next
-   
-   ' Display MRU projects
-   For i As Long = 0 To 9
-      ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRUPROJECT(i) = ProcessFromCurdriveApp(gConfig.MRUPROJECT(i))
-      If AfxFileExists(gConfig.MRUPROJECT(i)) = 0 Then
-         gConfig.MRUPROJECT(i) = ""
-      Else               
-         If i = 0 Then AppendMenuW( hPopUpMenu, MF_SEPARATOR, 0, "" )
-         AppendMenu( hPopupMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUPROJECT(i) )
-      End If
-   Next
-
-   If GetMenuItemCount(hPopupMenu) = 0 Then
-      AppendMenu( hPopupMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
-   End If
-   
-   Function = hPopupMenu
-End Function
-
-''
-''
-public Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
-   ' Modify the actual topmenu display items based on the MRU strings
-   Dim hSubMenu As HMENU = GetMRUMenuHandle()
-   Dim i        As Long 
-   
-   If hMenu <> hSubMenu Then Exit Function
-   
-   ' Remove the existing items
-   Do Until GetMenuItemCount( hSubMenu ) = 0
-      RemoveMenu( hSubMenu, 0, MF_BYPOSITION )
-   Loop
-   
-   ' Add the new items
-   For i = 0 To 9
-      ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRU(i) = ProcessFromCurdriveApp(gConfig.MRU(i))
-      If AfxFileExists( gConfig.MRU(i) ) Then
-         AppendMenu( hSubMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
-      Else
-         gConfig.MRU(i) = ""
-      End If
-   Next
-   
-   If GetMenuItemCount( hSubMenu ) = 0 Then
-      AppendMenu( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
-   Else
-      AppendMenu( hSubMenu, MF_SEPARATOR, 0, "" )
-      AppendMenu( hSubMenu, MF_STRING, IDM_MRUCLEAR, L(225, "Clear this list") )
-   End If
-   
-   Function = 0
-End Function
-   
 ''
 ''
 public Function UpdateMRUList( Byref wzFilename As WString ) As Long
@@ -186,58 +213,15 @@ End Function
 
 ''
 ''
-private Function GetMRUProjectMenuHandle() As HMENU
-   Dim hFileMenu As HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, PROJECT_MENU_POSITION ) 
-   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, MRUPROJECTS_MENU_POSITION )
-   Function = hSubMenu
-End Function
-
-
-''
-''
 public Function OpenMRUProjectFile( ByVal HWnd As HWnd, _
                                     ByVal wID As Long _
                                     ) As Long
    Dim wzFile As WString * MAX_PATH
-   wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
+   wzFile = gConfig.MRUPROJECT(wID - IDM_MRUPROJECTBASE)
    frmMain_OpenProjectSafely(HWnd, wzFile) 
    Function = 0
 End Function
 
-''
-''
-public Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
-   ' Modify the actual topmenu display items based on the MRU strings
-   Dim hSubMenu As HMENU = GetMRUProjectMenuHandle()
-   Dim i        As Long 
- 
-   If hMenu <> hSubMenu Then Exit Function
-   
-   ' Remove the existing items
-   Do Until GetMenuItemCount(hSubMenu) = 0
-      RemoveMenu( hSubMenu, 0, MF_BYPOSITION )
-   Loop
-   
-   ' Add the new items
-   For i = 0 To 9
-      ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRUProject(i) = ProcessFromCurdriveApp(gConfig.MRUProject(i))
-      If AfxFileExists(gConfig.MRUProject(i)) = 0 Then
-         gConfig.MRUProject(i) = ""
-      Else
-         AppendMenu( hSubMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUProject(i) )
-      End If
-   Next
-   
-   If GetMenuItemCount(hSubMenu) = 0 Then
-      AppendMenu( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
-   Else
-      AppendMenu( hSubMenu, MF_SEPARATOR, 0, "" )
-      AppendMenu( hSubMenu, MF_STRING, IDM_MRUPROJECTCLEAR, L(225, "Clear this list") )
-   End If
-   
-   Function = 0
-End Function
    
 ''
 ''
@@ -273,15 +257,6 @@ public Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
 
    Function = 0
 End Function  
-
-
-
-
-
-
-
-
-
 
 
 

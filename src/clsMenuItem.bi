@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@ type clsMenuItem
       wszName     as CWSTR
       wszCaption  as CWSTR
       wszShortcut as CWSTR
-      nIndent     as Long
-      chkAlt      as Long
-      chkShift    as Long
-      chkCtrl     as Long
-      chkChecked  as Long
+      nIndent     as long
+      chkAlt      as long
+      chkShift    as long
+      chkCtrl     as long
+      chkChecked  as long
       chkGrayed   as long
 end type
 

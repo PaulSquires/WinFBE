@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -224,7 +224,7 @@ private Function frmFindInFiles_SetControlStates() As Long
    EnableWindow( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKCURRENTDOC), _
                  iif( gTTabCtl.GetActiveDocumentPtr, true, false) )     
    EnableWindow( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKALLOPENDOCS), _
-                 iif( TabCtrl_GetItemCount(gTTabCtl.hWindow), true, false) )     
+                 iif( gTTabCtl.GetItemCount, true, false) )     
    EnableWindow( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKPROJECT), _
                  gApp.IsProjectActive )     
 
@@ -333,8 +333,6 @@ private function frmFindInFiles_ParseSearchResults( byref wszResultFile as wstri
    
    wst = L(262, "Search Results") & ": " & gFindInFiles.txtFind
    ListBox_AddString(hLB, wst.sptr)
-   wst = ""
-   ListBox_AddString(hLB, wst.sptr)
    
    do until pStream.EOS
       wst = pStream.ReadLine
@@ -364,7 +362,7 @@ private function frmFindInFiles_ParseSearchResults( byref wszResultFile as wstri
    pStream.Close
    
    ' Show the search results listbox
-   TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 2 )
+   gOutputTabsCurSel = 2 
    ShowWindow HWND_FRMOUTPUT, SW_SHOW
    frmOutput_PositionWindows
    frmMain_PositionWindows

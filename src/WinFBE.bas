@@ -1,11 +1,11 @@
 ' ========================================================================================
 ' WinFBE
 ' Windows FreeBASIC Editor (Windows 32/64 bit)
-' Paul Squires (2016-2020)
+' Paul Squires (2016-2022)
 ' ========================================================================================
 
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -17,51 +17,45 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-#Define UNICODE
-#Define _WIN32_WINNT &h0602  
+#define UNICODE
+#define _WIN32_WINNT &h0602  
 
-#Include Once "windows.bi"
-#Include Once "vbcompat.bi"
-#Include Once "win\shobjidl.bi"
-#Include Once "win\TlHelp32.bi"
-#Include Once "crt\string.bi"
-#Include Once "win\Shlobj.bi"
-#Include Once "Afx\CWindow.inc"
-#Include Once "Afx\AfxFile.inc"
-#Include Once "Afx\AfxStr.inc"
-#Include Once "Afx\AfxTime.inc"
-#Include Once "Afx\AfxGdiplus.inc"
-#Include Once "Afx\AfxMenu.inc" 
-#Include Once "Afx\AfxCom.inc" 
-#Include Once "Afx\CXpButton.inc"
-#Include Once "Afx\CMaskedEdit.inc"
-#Include Once "Afx\CImageCtx.inc"
-#Include Once "Afx\CAxHost\CWebCtx.inc"
-#Include Once "Afx\CWinHttpRequest.inc"
+#include once "windows.bi"
+#include once "vbcompat.bi"
+#include once "win\shobjidl.bi"
+#include once "win\TlHelp32.bi"
+#include once "crt\string.bi"
+#include once "win\Shlobj.bi"
+#include once "Afx\CWindow.inc"
+#include once "Afx\AfxFile.inc"
+#include once "Afx\AfxStr.inc"
+#include once "Afx\AfxTime.inc"
+#include once "Afx\AfxGdiplus.inc"
+#include once "Afx\AfxMenu.inc" 
+#include once "Afx\AfxCom.inc" 
+#include once "Afx\CXpButton.inc"
+#include once "Afx\CMaskedEdit.inc"
+#include once "Afx\CImageCtx.inc"
+#include once "Afx\CAxHost\CWebCtx.inc"
+#include once "Afx\CWinHttpRequest.inc"
 
-Using Afx
+using Afx
 
 
-#Define APPNAME        WStr("WinFBE - FreeBASIC Editor")
-#Define APPNAMESHORT   WStr("WinFBE")
-#Define APPVERSION     WStr("2.2.0") 
-#Define APPCOPYRIGHT   WStr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2021") 
-
+#define APPNAME        wstr("WinFBE - FreeBASIC Editor")
+#define APPNAMESHORT   wstr("WinFBE")
+#define APPVERSION     wstr("3.0.0") 
+#define APPCOPYRIGHT   wstr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2022") 
+dim shared as CWSTR gwszDefaultToolchain = "FreeBASIC-1.09.0-winlibs-gcc-9.3.0"
 
 #ifdef __FB_64BIT__
-   #Define APPBITS WStr(" (64-bit)")
+   #define APPBITS wstr(" (64-bit)")
 #else
-   #Define APPBITS WStr(" (32-bit)")
+   #define APPBITS wstr(" (32-bit)")
 #endif
 
-#Define FILES_MENU_POSITION        0
-#Define PROJECT_MENU_POSITION      4
-#Define TOOLS_MENU_POSITION        8
-#Define MRUFILES_MENU_POSITION     11
-#Define MRUPROJECTS_MENU_POSITION  3
-
-#Include Once "modScintilla.bi"
-#Include Once "modDeclares.bi"         
+#include once "modScintilla.bi"
+#include once "modDeclares.bi"         
 
 #include once "clsLasso.bi"
 #include once "clsDocument.bi"
@@ -71,142 +65,174 @@ Using Afx
 #include once "clsApp.bi"
 
 '  Global classes
-Dim Shared gApp     As clsApp
-Dim Shared gConfig  As clsConfig
-Dim Shared gTTabCtl As clsTopTabCtl
+dim shared gApp     as clsApp
+dim shared gConfig  as clsConfig
+dim shared gTTabCtl as clsTopTabCtl
 dim shared gLasso   as clsLasso
 
 
-#Include Once "clsDB2.inc"
-#Include Once "clsParser.inc"
-#Include Once "clsConfig.inc"
-#Include Once "modRoutines.inc"
-#Include Once "modParser.inc"
-#Include Once "modCBColor.inc"
-#Include Once "clsControl.inc"
-#Include Once "clsCollection.inc"
-#Include Once "clsDocument.inc"
-#Include Once "clsApp.inc"
-#Include Once "clsTopTabCtl.inc"
-#Include Once "clsLasso.inc"
-#Include Once "modVDDesignFrame.inc"
-#Include Once "modVDRoutines.inc"
-#Include Once "modVDProperties.inc"
-#Include Once "modVDApplyProperties.inc"
-#Include Once "modVDColors.inc"
-#Include Once "modVDControls.inc"
-#Include Once "modVDDesignForm.inc"
-#Include Once "modVDDesignMain.inc"
-#Include Once "modVDToolbox.inc"
-#Include Once "modAutoInsert.inc"
-#Include Once "modCompile.inc"
-#Include Once "modMenus.inc"
-#Include Once "modToolbar.inc"
-#Include Once "modMRU.inc"
-#Include Once "modCodetips.inc"
-#Include Once "modGenerateCode.inc"
+#include once "clsDB2.inc"
+#include once "clsParser.inc"
+#include once "clsConfig.inc"
+#include once "modThemes.inc"
+#include once "modRoutines.inc"
+#include once "modParser.inc"
+#include once "clsControl.inc"
+#include once "clsCollection.inc"
+#include once "clsDocument.inc"
+#include once "clsApp.inc"
+#include once "clsTopTabCtl.inc"
+#include once "clsLasso.inc"
+#include once "modVDDesignFrame.inc"
+#include once "modVDRoutines.inc"
+#include once "modVDProperties.inc"
+#include once "modVDApplyProperties.inc"
+#include once "modVDColors.inc"
+#include once "modVDControls.inc"
+#include once "modVDDesignForm.inc"
+#include once "modVDDesignMain.inc"
+#include once "modVDToolbox.inc"
+#include once "modAutoInsert.inc"
+#include once "modCompile.inc"
+#include once "modMenus.inc"
+#include once "modCodetips.inc"
+#include once "modGenerateCode.inc"
+#include once "modMenuDefinitions.inc"
+#include once "modMRU.inc"
 
-#Include Once "frmVDTabChild.inc"
-#Include Once "frmAbout.inc" 
-#Include Once "frmImageManager.inc" 
-#Include Once "frmRecent.inc" 
-#Include Once "frmExplorer.inc" 
-#Include Once "frmUserTools.inc" 
-#Include Once "frmSnippets.inc"
-#Include Once "frmBuildConfig.inc" 
-#Include Once "frmOutput.inc" 
-#Include Once "frmOptionsGeneral.inc"
-#Include Once "frmOptionsEditor.inc"
-#Include Once "frmOptionsEditor2.inc"
-#Include Once "frmOptionsColors.inc"
-#Include Once "frmOptionsCompiler.inc"
-#Include Once "frmOptionsLocal.inc"
-#Include Once "frmOptionsKeywords.inc"
-#Include Once "frmOptions.inc"
-#Include Once "frmTemplates.inc"
-#Include Once "frmFunctionList.inc"
-#Include Once "frmGoto.inc"
-#Include Once "frmCommandLine.inc"
-#Include Once "frmFindInFiles.inc"
-#Include Once "frmFindReplace.inc"
-#Include Once "frmProjectOptions.inc"
-#Include Once "frmHelpViewer.inc"
-#Include Once "frmMenuEditor.inc"
-#Include Once "frmToolBarEditor.inc"
-#Include Once "frmStatusBarEditor.inc"
-#Include Once "frmMainOnCommand.inc"
-#Include Once "frmMain.inc"
+#include once "frmVDTabChild.inc"
+#include once "frmAbout.inc" 
+#include once "frmPopupMenu.inc"
+#include once "frmTopTabs.inc"
+#include once "frmMenuBar.inc"
+#include once "frmStatusBar.inc"
+#include once "frmImageManager.inc" 
+#include once "frmExplorerVScroll.inc" 
+#include once "frmExplorer.inc" 
+#include once "frmKeyboardEdit.inc" 
+#include once "frmKeyboard.inc" 
+#include once "frmUserTools.inc" 
+#include once "frmSnippets.inc"
+#include once "frmBuildConfig.inc" 
+#include once "frmOutput.inc" 
+#include once "frmOptionsGeneral.inc"
+#include once "frmOptionsEditor.inc"
+#include once "frmOptionsEditor2.inc"
+#include once "frmOptionsColors.inc"
+#include once "frmOptionsCompiler.inc"
+#include once "frmOptionsLocal.inc"
+#include once "frmOptionsKeywords.inc"
+#include once "frmOptionsKeywordsWinApi.inc"
+#include once "frmOptions.inc"
+#include once "frmTemplates.inc"
+'#include once "frmNewFunctionList.inc"
+#include once "frmFunctionList.inc"
+#include once "frmGoto.inc"
+#include once "frmCommandLine.inc"
+#include once "frmFindInFiles.inc"
+#include once "frmFindReplace.inc"
+#include once "frmProjectOptions.inc"
+#include once "frmHelpViewer.inc"
+#include once "frmMenuEditor.inc"
+#include once "frmToolBarEditor.inc"
+#include once "frmStatusBarEditor.inc"
+#include once "frmMainOnCommand.inc"
+#include once "modMsgPump.inc"
+#include once "frmMainFile.inc"
+#include once "frmMainEdit.inc"
+#include once "frmMainSearch.inc"
+#include once "frmMainView.inc"
+#include once "frmMainProject.inc"
+#include once "frmMainCompile.inc"
+#include once "frmMainDesigner.inc"
+#include once "frmMain.inc"
+
+' ========================================================================================
+' Check if running under Linux Wine
+' ========================================================================================
+function isWineActive() as boolean
+   dim hLib as HMODULE = LoadLibraryW("NtDll.dll")
+   if hLib = null then exit function
+   dim pwine as function() as long
+   pwine = cast(any ptr, GetProcAddress(hLib, "wine_get_version"))
+   function = iif( pwine, true, false )
+   FreeLibrary hLib
+end function
+' ========================================================================================
 
 
 ' ========================================================================================
 ' WinMain
 ' ========================================================================================
-Function WinMain( _
-            ByVal hInstance     As HINSTANCE, _
-            ByVal hPrevInstance As HINSTANCE, _
-            ByVal szCmdLine     As ZString Ptr, _
-            ByVal nCmdShow      As Long _
-            ) As Long
+function WinMain( _
+            byval hInstance     as HINSTANCE, _
+            byval hPrevInstance as HINSTANCE, _
+            byval szCmdLine     as zstring ptr, _
+            byval nCmdShow      as long _
+            ) as long
+
+   gApp.isWineActive = isWineActive()
 
    ' Load configuration files 
    gConfig.LoadConfigFile()
    gConfig.LoadKeywords()
-   
 
+  
    ' Attempt to load the english localization file. This is necessary because
    ' any non-english localization file will have missing entries filled by the
    ' english version.
    dim as CWSTR wszLocalizationFile
    wszLocalizationFile = AfxGetExePathName + wstr("Languages\english.lang")
-   If LoadLocalizationFile(wszLocalizationFile, true) = False Then
+   if LoadLocalizationFile(wszLocalizationFile, true) = false Then
       MessageBox( 0, _
                   "English Localization file could not be loaded. Aborting application." + vbcrlf + _
                   wszLocalizationFile, _
                   "Error", _
-                  MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
-      Return 1
-   End If
+                  MB_OK or MB_ICONWARNING or MB_DEFBUTTON1 or MB_APPLMODAL )
+      return 1
+   end if
    
    
    ' Load the selected localization file
    wszLocalizationFile = AfxGetExePathName + "Languages\" + gConfig.LocalizationFile
-   If LoadLocalizationFile(wszLocalizationFile, false) = False Then
+   if LoadLocalizationFile(wszLocalizationFile, false) = false then
       MessageBox( 0, _
                   "Localization file could not be loaded. Aborting application." + vbcrlf + _
                   wszLocalizationFile, _
                   "Error", _
-                  MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+                  MB_OK or MB_ICONWARNING or MB_DEFBUTTON1 or MB_APPLMODAL )
       Return 1
-   End If
+   end if
 
 
    ' Check for previous instance 
-   If gConfig.MultipleInstances = False Then
+   if gConfig.MultipleInstances = false Then
       dim as HWND hWindow = FindWindow("WinFBE_Class", 0)
-      If hWindow Then
+      if hWindow then
          SetForegroundWindow(hWindow)
          frmMain_ProcessCommandLine(hWindow)
-         Return True
-      End If
-   End If
+         return true
+      end if
+   end if
    
 
    ' Initialize the COM library
-   CoInitialize(Null)
+   CoInitialize(null)
 
 
    #IfDef __FB_64BIT__
       ' Load the Scintilla code editing dll
-      Dim As Any Ptr pLibSciLexer = Dylibload("SciLexer64.dll")
+      dim as any ptr pLibLexilla = dylibload("Lexilla64.dll")
+      dim as any ptr pLibScintilla = dylibload("Scintilla64.dll")
    #Else
       ' Load the Scintilla code editing dll
-      Dim As Any Ptr pLibSciLexer = Dylibload("SciLexer32.dll")
+      dim as any ptr pLibLexilla = dylibload("Lexilla32.dll")
+      dim as any ptr pLibScintilla = dylibload("Scintilla32.dll")
    #EndIf
+   gApp.pfnCreateLexerfn = cast(CreateLexerFn , GetProcAddress(pLibLexilla, "CreateLexer"))
 
-   
    ' Load the HTML help library for displaying FreeBASIC help *.chm file
-   gpHelpLib = DyLibLoad( "hhctrl.ocx" )
-
+   gpHelpLib = dylibload( "hhctrl.ocx" )
 
    ' Load preparsed cached codetip files 
    if gConfig.Codetips then gConfig.LoadCodetipsCache
@@ -218,29 +244,26 @@ Function WinMain( _
    
 
    ' Show the main form
-   Function = frmMain_Show( 0 )
+   function = frmMain_Show( 0 )
 
-   ' If the codetip cache needs to be saved then do that now
+   ' if the codetip cache needs to be saved then do that now
    if gConfig.bWriteCodetipCache then gConfig.SaveCodetipsCache
 
 
    ' Free the Scintilla, CaptureConsole and HTML help libraries
-   Dylibfree(pLibSciLexer)
-   Dylibfree(gpHelpLib)
+   dylibfree(pLibLexilla)
+   dylibfree(pLibScintilla)
+   dylibfree(gpHelpLib)
    
 
    ' Uninitialize the COM library
    CoUninitialize
 
-End Function
+end function
 
 
 ' ========================================================================================
 ' Main program entry point
 ' ========================================================================================
-End WinMain( GetModuleHandle(Null), Null, Command(), SW_NORMAL )
-
-
-
-
+end WinMain( GetModuleHandle(null), null, command(), SW_NORMAL )
 

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,31 +13,6 @@
 
 #pragma once
 
-
-' Colors
-enum
-   ' Start the enum at 2 because when theme is saved to file the first parse is the
-   ' theme id and theme description. The colors start at parse 2. Never change the
-   ' order of these constants ro insert any into the list because readign and writing
-   ' the Theme data expects the colors to be in this order. Add new colors at the end.
-   CLR_CARET = 2          
-   CLR_COMMENTS
-   CLR_HIGHLIGHTED     
-   CLR_KEYWORD         
-   CLR_FOLDMARGIN
-   CLR_FOLDSYMBOL      
-   CLR_LINENUMBERS     
-   CLR_OPERATORS       
-   CLR_INDENTGUIDES    
-   CLR_PREPROCESSOR    
-   CLR_SELECTION       
-   CLR_STRINGS         
-   CLR_TEXT            
-   CLR_WINDOW
-   CLR_BRACEGOOD
-   CLR_BRACEBAD   
-   CLR_OCCURRENCE '18
-end enum
 
 '  Control types   
 enum
@@ -77,49 +52,31 @@ type TYPE_TOOLS
    wszKey           as CWSTR
    wszWorkingFolder as CWSTR
    IsCtrl           as long
-   IsAlt            as Long
-   IsShift          as Long
-   IsPromptRun      as Long
-   IsMinimized      as Long
-   IsWaitFinish     as Long
-   IsDisplayMenu    as Long
+   IsAlt            as long
+   IsShift          as long
+   IsPromptRun      as long
+   IsMinimized      as long
+   IsWaitFinish     as long
+   IsDisplayMenu    as long
    Action           as long 
-END TYPE
+end type
 
 
 type TYPE_SNIPPETS
    wszDescription as CWSTR
    wszTrigger     as CWSTR
    wszCode        as CWSTR
-END TYPE
+end type
 
 
 type TYPE_BUILDS
    id             as string    ' GUID
    wszDescription as CWSTR
-   IsDefault      as Long      ' 0:False, 1:True
-   Is32bit        as Long      ' 0:False, 1:True
-   Is64bit        as Long      ' 0:False, 1:True
+   IsDefault      as long      ' 0:False, 1:True
+   Is32bit        as long      ' 0:False, 1:True
+   Is64bit        as long      ' 0:False, 1:True
    wszOptions     as CWSTR     ' Compiler options (manual and selected from listbox)
-END TYPE
-
-' Used for Themes.
-Type TYPE_COLORS
-   nFg As COLORREF
-   nBg As COLORREF
-   ' bUseDefaultBg is currently not used. Do not use BOOLEAN because we don't 
-   ' want the words true/false outputted to the ini file.
-   bUseDefaultBg as Long = 0  
-   bFontBold   as Long = 0
-   bFontItalic as Long = 0
-   bFontUnderline as long = 0
-End Type
-
-type TYPE_THEMES
-   id             as string    ' GUID
-   wszDescription as CWSTR
-   colors(CLR_CARET to CLR_OCCURRENCE) as TYPE_COLORS
-END TYPE
+end type
 
 
 ' Structure used to save codetip cache database information to disk. This
@@ -127,18 +84,19 @@ END TYPE
 ' codetip files had changed since the cache was created. If yes, then that
 ' codetip file needs to be reparsed.
 type CODETIP_META_DATA
-   nFileType    as long           ' refer to DB2_FILETYPE_*  (filenames are not stored)
+   nFiletype    as long           ' refer to DB2_FILETYPE_*  (filenames are not stored)
    DateFileTime as FILETIME       ' DateTime of original codetip file
    filler(1024) as ubyte          ' extra space for possible future expansion
 end type
 
 
-Type clsConfig
+type clsConfig
    Private:
-      _ConfigFilename            As CWSTR 
+      _ConfigFilename            as CWSTR 
       _SnippetsFilename          as CWSTR
       _SnippetsDefaultFilename   as CWSTR
       _FBKeywordsFilename        as CWSTR 
+      _WinApiKeywordsFilename    as CWSTR 
       _FBKeywordsDefaultFilename as CWSTR 
       _FBCodetipsFilename        as CWSTR
       _WinAPICodetipsFilename    as CWSTR 
@@ -146,105 +104,108 @@ Type clsConfig
       _WinFBXCodetipsFilename    as CWSTR
       _CodetipCacheDatabase      as CWSTR 
       _CodetipCacheMetaData      as CWSTR
-      _DateFileTime              As FILETIME
+      _DateFileTime              as FILETIME
       
-   Public:
+   public:
       WinFBEversion         as CWSTR
-      SelectedTheme         as string          ' GUID of selected theme
-      idxTheme              as long            ' need global b/c can't GetCurSel from CBN_EDITCHANGE
-      Themes(any)           as TYPE_THEMES
-      ThemesTemp(any)       as TYPE_THEMES
+      SelectedTheme         as string                ' filename of selected theme
       Tools(any)            as TYPE_TOOLS
       ToolsTemp(any)        as TYPE_TOOLS  
       Builds(any)           as TYPE_BUILDS  
       BuildsTemp(any)       as TYPE_BUILDS  
       Snippets(any)         as TYPE_SNIPPETS
       SnippetsTemp(any)     as TYPE_SNIPPETS  
-      rcSnippets            as rect                 ' Snippet window position (nt saved to file)
-      FBKeywords            As String
-      bKeywordsDirty        As BOOLEAN = True       ' not saved to file
-      AskExit               As Long = false         ' use Long so True/False string not written to file
-      CheckForUpdates       As Long = True
-      EnableProjectCache    as Long = true          ' Fast project cache
+      rcSnippets            as rect                 ' Snippet window position (not saved to file)
+      FBKeywords            as string
+      WinApiKeywords        as string
+      bKeywordsDirty        as boolean = true       ' not saved to file
+      AskExit               as long = false         ' use long so true/False string not written to file
+      CheckForUpdates       as long = true
+      EnableProjectCache    as long = true          ' Fast project cache
       LastUpdateCheck       as long = 0             ' Julian date of last update check
-      HideToolbar           as long = false
-      HideStatusbar         as long = false
-      CloseFuncList         As Long = True
-      ShowExplorer          As Long = True
-      ShowExplorerWidth     As Long = 250
-      SyntaxHighlighting    As Long = True
-      Codetips              As Long = True
-      AutoComplete          As Long = True
-      CharacterAutoComplete As Long = true
-      RightEdge             As Long = TRUE
-      RightEdgePosition     As CWSTR = "80"
-      LeftMargin            As Long = True
-      FoldMargin            As Long = false
-      AutoIndentation       As Long = True
+      AutoSaveFiles         as long = true
+      AutoSaveInterval      as long = 10            ' seconds between autosave checks
+      idAutoSaveTimer       as long = 999           ' id of Autosave timer
+      RestoreSession        as long = false
+      wszLastActiveSession  as CWSTR
+      CloseFuncList         as long = true
+      ShowExplorer          as long = true
+      ShowExplorerWidth     as long = 250
+      SyntaxHighlighting    as long = true
+      Codetips              as long = true
+      AutoComplete          as long = true
+      CharacterAutoComplete as long = false
+      RightEdge             as long = false
+      RightEdgePosition     as CWSTR = "80"
+      LeftMargin            as long = true
+      FoldMargin            as long = false
+      AutoIndentation       as long = true
       ForNextVariable       as long = false
-      ConfineCaret          As Long = true
-      LineNumbering         As Long = True
-      HighlightCurrentLine  As Long = True
-      IndentGuides          As Long = True
+      ConfineCaret          as long = true
+      LineNumbering         as long = true
+      HighlightCurrentLine  as long = true
+      IndentGuides          as long = false
       PositionMiddle        as long = false         ' position found text to middle of screen
-      BraceHighlight        As Long = True
-      OccurrenceHighlight   As Long = True
-      TabIndentSpaces       As Long = True
-      MultipleInstances     As Long = True
-      CompileAutosave       As Long = True
-      UnicodeEncoding       As Long = False
-      TabSize               As CWSTR = "4"
-      LocalizationFile      As CWSTR = "english.lang"
-      EditorFontname        As CWSTR = "Courier New"
-      EditorFontCharSet     As CWSTR = "Default"
-      EditorFontsize        As CWSTR = "10"
-      KeywordCase           As Long = 2  ' "Original Case"
-      StartupLeft           As Long = 0
-      StartupTop            As Long = 0
-      StartupRight          As Long = 0
-      StartupBottom         As Long = 0
-      StartupMaximized      As Long = False
+      BraceHighlight        as long = false
+      OccurrenceHighlight   as long = false
+      TabIndentSpaces       as long = true
+      MultipleInstances     as long = true
+      CompileAutosave       as long = true
+      UnicodeEncoding       as long = false
+      TabSize               as CWSTR = "3"
+      LocalizationFile      as CWSTR = "english.lang"
+      EditorFontname        as CWSTR = "Consolas"
+      EditorFontCharSet     as CWSTR = "Default"
+      EditorFontsize        as CWSTR = "11"
+      FontExtraSpace        as CWSTR = "10"
+      ThemeFilename         as CWSTR = "visual_studio_dark.theme"
+      KeywordCase           as long = 3  ' "Original Case"
+      StartupLeft           as long = 0
+      StartupTop            as long = 0
+      StartupRight          as long = 0
+      StartupBottom         as long = 0
+      StartupMaximized      as long = false
       ToolBoxLeft           as long = 0
       ToolBoxTop            as long = 0
       ToolBoxRight          as long = 0
       ToolBoxBottom         as long = 0
-      FBWINCompiler32       As CWSTR
-      FBWINCompiler64       As CWSTR
-      CompilerSwitches      As CWSTR
-      CompilerHelpfile      As CWSTR
-      Win32APIHelpfile      As CWSTR
-      WinFBXHelpfile        As CWSTR
+      FBWINCompiler32       as CWSTR
+      FBWINCompiler64       as CWSTR
+      CompilerBuild         as CWSTR     ' Build GUID
+      CompilerSwitches      as CWSTR
+      CompilerHelpfile      as CWSTR
+      WinFBXHelpfile        as CWSTR
       WinFBXPath            as CWSTR
-      RunViaCommandWindow   As Long = False
+      RunViaCommandWindow   as long = false
       DisableCompileBeep    as long = false
-      MRU(9)                As CWSTR
-      MRUProject(9)         As CWSTR
+      MRU(9)                as CWSTR
+      MRUProject(9)         as CWSTR
       bWriteCodetipCache    as boolean
       
-      Declare Constructor()
-      declare function ImportTheme( byref st as wstring, byval bImportExternal as Boolean = false ) as Long
-      declare Function GetThemePtr() as TYPE_THEMES ptr
-      Declare Function LoadKeywords() As Long
-      Declare Function SaveKeywords() As Long
-      Declare Function WriteMRU() As Long
-      Declare Function WriteMRUProjects() As Long
-      Declare Function SaveConfigFile() As Long
-      Declare Function LoadConfigFile() As Long
-      declare Function LoadSnippets() as Long
-      declare Function SaveSnippets() as Long
-      declare Function InitializeToolBox() as Long
-      Declare Function ProjectSaveToFile() As BOOLEAN    
-      declare Function ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN    
+      declare constructor()
+      declare function LoadKeywords() as long
+      declare function SaveKeywords() as long
+      declare function WriteMRU() as long
+      declare function WriteMRUProjects() as long
+      declare function SaveConfigFile() as long
+      declare function LoadConfigFile() as long
+      declare function LoadSnippets() as long
+      declare function SaveSnippets() as long
+      declare function InitializeToolBox() as long
+      declare function SaveSessionFile( byref wszSessionFile as wstring ) as boolean    
+      declare function LoadSessionFile( byref wszSessionFile as wstring ) as boolean    
+      declare function ProjectSaveToFile() as boolean    
+      declare function ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean    
       declare function ProjectGetCacheFilename() as CWSTR
-      declare function ProjectSaveCache() as Long
-      declare function ProjectLoadCache() as Long
-      declare Function LoadCodetipsFB() as boolean
-      declare Function LoadCodetipsWinAPI() as boolean
-      declare Function LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
-      declare Function LoadCodetipsWinFormsX() as boolean
-      declare Function LoadCodetipsWinFBX() as boolean
-      declare Function LoadCodetipsGeneric( byval wszFilename as CWSTR, byval nFileType as Long) as boolean
-      declare function LoadCodetipsCache() as Long
-      declare function SaveCodetipsCache() as Long
-      declare Function ReloadConfigFileTest() As BOOLEAN    
-End Type
+      declare function ProjectSaveCache() as long
+      declare function ProjectLoadCache() as long
+      declare function LoadCodetipsFB() as boolean
+      declare function LoadCodetipsWinAPI() as boolean
+      declare function LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
+      declare function LoadCodetipsWinFormsX() as boolean
+      declare function LoadCodetipsWinFBX() as boolean
+      declare function LoadCodetipsGeneric( byval wszFilename as CWSTR, byval nFiletype as long) as boolean
+      declare function LoadCodetipsCache() as long
+      declare function SaveCodetipsCache() as long
+      declare function ReloadConfigFileTest() as boolean    
+end type

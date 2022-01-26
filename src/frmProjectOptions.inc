@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ private function frmProjectOptions_CreateResourceManifest() as Long
       pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
                               False, _    ' bIsNewFile
                               False, _    ' bIsTemplate
-                              FALSE, _    ' bShowInTab
+                              false, _    ' bShowInTab
                               false, _    ' bIsInclude
                               wszResource, _  ' pwszName
                               0 )  ' pDocIn
@@ -104,8 +104,6 @@ private Function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As B
    gApp.IsProjectActive = true
    gApp.ProjectFilename = wText
    gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
-   TreeView_SetItemText(GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
-                          gApp.hExplorerRootNode, ucase(gApp.ProjectName))
 
    gApp.ProjectOther32     = AfxGetWindowText(GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS32))
    gApp.ProjectOther64     = AfxGetWindowText(GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS64))

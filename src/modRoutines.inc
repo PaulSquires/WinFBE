@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -19,12 +19,53 @@
 #include once "frmProjectOptions.bi"
 #include once "frmMain.bi"
 
+' ========================================================================================
+' Get the width of the text in unscaled pixels because we feed this value
+' to the pWindow create control function that will then scale up the value.
+' ========================================================================================
+function getTextWidth( _
+            byval hWnd as HWND, _
+            byref wszText as WSTRING, _
+            byval _hFont as HFONT, _
+            byval nPadding as long _
+            ) as long
 
+   dim size AS SIZEL
+   dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   
+   dim as HDC hDC = GetDC(hWnd)
+   if _hFont then SelectObject(hDC, _hFont)
+   GetTextExtentPoint32( hDC, @wszText, len(wszText), @size )  'get text size
+   ReleaseDC hWnd, hDC
+   
+   function = pWindow->UnScaleX(size.cx) + pWindow->ScaleX(nPadding)  ' add enough padding
+
+end function
+
+' ========================================================================================
+' Determine if the mouse cursor is currently over the incoming window
+' ========================================================================================
+function isMouseOverWindow( byval hChild as HWND ) as boolean
+   dim as POINT pt
+   GetCursorPos( @pt )
+   dim as RECT rc = AfxGetWindowRect(hChild)
+   if PtInRect( @rc, pt ) then return true
+end function
+
+' ========================================================================================
+' Determine if the mouse cursor is currently over client RECT area
+' ========================================================================================
+function isMouseOverRECT( byval hWin as HWND, byval rc as RECT ) as boolean
+   dim as POINT pt
+   GetCursorPos( @pt )
+   MapWindowPoints( hWin, HWND_DESKTOP, cast( POINT ptr, @rc), 2 )
+   if PtInRect( @rc, pt ) then return true
+end function
 
 ' ========================================================================================
 ' Return the pixel width of the incoming text string
 ' ========================================================================================
-public function GetTextWidthPixels( byval hWin as HWND, byref wszText as WString ) as Long
+function GetTextWidthPixels( byval hWin as HWND, byref wszText as WString ) as Long
    dim as HDC _hdc = GetDC(hWin)
    dim as SIZE _size 
    dim as HFONT oldfont = SelectObject( _hdc, AfxGetWindowFont(hWin) )
@@ -35,11 +76,10 @@ public function GetTextWidthPixels( byval hWin as HWND, byref wszText as WString
 end function
 
 
-
 ' ========================================================================================
 ' Calculate the Julian date for today's date. Used by CheckForUpdates.
 ' ========================================================================================
-public function JulianDateNow() as long
+function JulianDateNow() as long
    function = AfxGregorianToJulian( AfxSystemDay, AfxSystemMonth, AfxSystemYear )
 end function
 
@@ -47,7 +87,7 @@ end function
 ' ========================================================================================
 ' Convert WinFBE version to whole number for comparison to file versions being loaded.
 ' ========================================================================================
-public function ConvertWinFBEversion( byref wszVersion as wstring ) as long
+function ConvertWinFBEversion( byref wszVersion as wstring ) as long
    dim as CWSTR wszPart1, wszPart2, wszPart3
    
    wszPart1 = AfxStrLSet( AfxStrParse(wszVersion, 1, "."), 3, "0" )
@@ -61,7 +101,7 @@ end function
 ' ========================================================================================
 ' Disable all modeless windows belonging to frmMain so that the popup modal is truly modal.
 ' ========================================================================================
-public function DisableAllModeless() as long
+function DisableAllModeless() as long
    ' No need to enable/disable the modeless Help form.
    if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, false)
    if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, false)
@@ -74,7 +114,7 @@ end function
 ' ========================================================================================
 ' Enable all modeless windows belonging to frmMain.
 ' ========================================================================================
-public function EnableAllModeless() as long
+function EnableAllModeless() as long
    ' No need to enable/disable the modeless Help form.
    if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, true)
    if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, true)
@@ -87,14 +127,16 @@ end function
 ' ========================================================================================
 ' Return temporary file name
 ' ========================================================================================
-public FUNCTION GetTemporaryFilename( byref wszFolder as wstring, _
-                                      BYREF wszExtension AS wSTRING _
-                                      ) AS string
+FUNCTION GetTemporaryFilename( _
+            byref wszFolder as wstring, _
+            BYREF wszExtension AS wSTRING _
+            ) AS string
+
    dim wszTempFilename as wstring * MAX_PATH
-   if GetTempFileName(@wszFolder, "TMP", 0, @wszTempFilename) then
+   if GetTempFileName( @wszFolder, "TMP", 0, @wszTempFilename ) then
       ' Delete the temp file that gets created b/c we will create it ourselves based on the 
       ' returned filename.
-      kill wszTempFilename
+      AfxDeleteFile( wszTempFilename )
       IF LEN(wszExtension) THEN 
          wszTempFilename = LEFT(wszTempFilename, LEN(wszTempFilename) -  3) & wszExtension
       end if
@@ -106,11 +148,12 @@ END FUNCTION
 ' ========================================================================================
 ' Replace a string in a combobox
 ' ========================================================================================
-public FUNCTION ComboBox_ReplaceString( BYVAL hComboBox AS HWND, _
-                                        BYVAL index AS LONG, _
-                                        BYVAL pwszNewText AS WSTRING PTR, _
-                                        BYVAL pNewData AS LONG_PTR = 0 _
-                                        ) AS LONG
+FUNCTION ComboBox_ReplaceString( _
+            BYVAL hComboBox AS HWND, _
+            BYVAL index AS LONG, _
+            BYVAL pwszNewText AS WSTRING PTR, _
+            BYVAL pNewData AS LONG_PTR = 0 _
+            ) AS LONG
    ' Delete the string
    DIM lRes AS LRESULT = SendMessage(hComboBox, CB_DELETESTRING, index, 0)
    IF lRes = LB_ERR THEN RETURN lRes
@@ -126,7 +169,7 @@ END FUNCTION
 ' ========================================================================================
 ' Get the Scintilla value for a character sets
 ' ========================================================================================
-public Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
+Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 
    If Len(wzCharsetName) = 0 Then Return SC_CHARSET_DEFAULT
    
@@ -158,7 +201,7 @@ End Function
 ' ========================================================================================
 ' Remove duplicate spaces from the incoming line.
 ' ========================================================================================
-public function RemoveDuplicateSpaces( byref sText as const string) as string
+function RemoveDuplicateSpaces( byref sText as const string) as string
    dim as string st = sText
    do until instr(st, "  ") = 0
       st = AfxStrReplace(st, "  ", " ")
@@ -170,7 +213,7 @@ end function
 ' ========================================================================================
 ' Convert incoming text to proper case based on config setting. Used for autocomplete.
 ' ========================================================================================
-public function ConvertCase( byval sText as string) as string
+function ConvertCase( byval sText as string) as string
 
    Select Case gConfig.KeywordCase
       Case 0:  return lcase(sText)
@@ -196,7 +239,7 @@ end function
 ' ========================================================================================
 ' Maps UTF-8 string to Ansi string.
 ' ========================================================================================
-public FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
+FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
 
    dim i AS LONG                ' // Loop counter
    dim strAscii AS STRING       ' // Ascii string
@@ -255,7 +298,7 @@ END FUNCTION
 ' ========================================================================================
 ' Maps Ansi character string to a UTF-8 string.
 ' ========================================================================================
-public FUNCTION AnsiToUtf8(BYREF sAnsi AS STRING) AS STRING
+FUNCTION AnsiToUtf8( BYREF sAnsi AS STRING ) AS STRING
  dim sUnicode AS STRING
  dim sUtf8    AS STRING
 
@@ -288,7 +331,7 @@ END FUNCTION
 ' ========================================================================================
 ' Maps UTF-8 string to Unicode character string 
 ' ========================================================================================
-public FUNCTION Utf8ToUnicode(BYREF ansiStr AS CONST STRING) AS STRING
+FUNCTION Utf8ToUnicode( BYREF ansiStr AS CONST STRING ) AS STRING
 '*** This conversion does not appear to be reliable.
 '*** Better using the CWSTR.Utf8 method instead.
    DIM dwLen AS DWORD = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), NULL, 0)
@@ -303,7 +346,7 @@ end function
 ' ========================================================================================
 ' Maps Unicode character string to a UTF-8 string.
 ' ========================================================================================
-public FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
+FUNCTION UnicodeToUtf8( byval pswzUnicode as wstring ptr ) AS STRING
  dim sUtf8 AS STRING
 
  'Maps Unicode character string to a UTF-8 string.
@@ -324,9 +367,11 @@ END FUNCTION
 ' ========================================================================================
 ' Parse a string to a string array and return the number of lines.
 ' ========================================================================================
-public function GetStringToArray( byref txtBuffer as string, _
-                                  txtArray() as string _
-                                  ) as long
+function GetStringToArray( _
+            byref txtBuffer as string, _
+            txtArray() as string _
+            ) as long
+
    ' Load the lines into the string array. This is MUCH faster than having
    ' to use AfxStrParse to retrieve each line.
    dim as string st
@@ -354,10 +399,11 @@ end function
 ' ========================================================================================
 ' Open a disk file and read it into a string (ANSI or UTF8)
 ' ========================================================================================
-public function GetFileToString( byref wszFilename as const wstring, _
-                                 byref txtBuffer as string, _
-                                 byval pDoc as clsDocument ptr _
-                                 ) as boolean
+function GetFileToString( _
+            byref wszFilename as const wstring, _
+            byref txtBuffer as string, _
+            byval pDoc as clsDocument ptr _
+            ) as boolean
    
    if pDoc = 0 then return true
    
@@ -415,9 +461,10 @@ END FUNCTION
 ' ========================================================================================
 ' Convert the current text buffer to the specified encoding and redisplay the text.
 ' ========================================================================================
-public function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
-                            byval FileEncoding as long _
-                            ) as Long
+function ConvertTextBuffer( _
+            byval pDoc as clsDocument ptr, _
+            byval FileEncoding as long _
+            ) as Long
                             
    if pDoc = 0 then exit function
 
@@ -466,7 +513,7 @@ end function
 ' ========================================================================================
 ' Determine if current line is a valid #Include filename
 ' ========================================================================================
-public function IsCurrentLineIncludeFilename() as Boolean
+function IsCurrentLineIncludeFilename() as Boolean
    ' Determine if the text under the current line is a valid #Include filename
    ' and return TRUE if it is. If F6 was pressed then the calling program can
    ' simply open/load the gApp.IncludeFilename. If the right click popup menu
@@ -483,7 +530,7 @@ public function IsCurrentLineIncludeFilename() as Boolean
    Dim nLine           As Long   
    Dim i               As Long
 
-   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   dim as long idxBuild = frmBuildConfig_getActiveBuildIndex()
    if idxBuild = -1 then idxBuild = 0
    if gConfig.Builds(idxBuild).Is32bit then wszCompilerPath = gConfig.FBWINcompiler32
    if gConfig.Builds(idxBuild).Is64bit then wszCompilerPath = gConfig.FBWINcompiler64
@@ -532,10 +579,11 @@ end function
 ' ========================================================================================
 ' Generic open document handler for when Function ListBox item selected or Explorer Treeview
 ' ========================================================================================
-public function OpenSelectedDocument( byref wszFilename as wstring, _
-                                      byref wszFunctionName as WSTRING = "", _
-                                      byval nLineNumber as long = -1 _
-                                      ) as clsDocument ptr
+function OpenSelectedDocument( _
+            byref wszFilename as wstring, _
+            byref wszFunctionName as WSTRING = "", _
+            byval nLineNumber as long = -1 _
+            ) as clsDocument ptr
 
    ' This function is called in the following situations:
    '   1. When a selection is made in the Function List.
@@ -585,7 +633,7 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
                               wszFilename, _  ' wszFileName
                               0 )         ' pDocIn
    end if
-   
+
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
@@ -618,7 +666,7 @@ end function
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
-public Function ProcessToCurdriveApp( Byval wszFilename As CWSTR ) As CWSTR
+Function ProcessToCurdriveApp( Byval wszFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the WinFBE app. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -641,7 +689,7 @@ End Function
 ' ========================================================================================
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
-public Function ProcessFromCurdriveApp( Byval wszFilename As CWSTR ) As CWSTR
+Function ProcessFromCurdriveApp( Byval wszFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the WinFBE app. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -660,7 +708,7 @@ End Function
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
-public Function ProcessToCurdriveProject( Byval wszFilename As CWSTR ) As CWSTR
+Function ProcessToCurdriveProject( Byval wszFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -683,7 +731,7 @@ End Function
 ' ========================================================================================
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
-public Function ProcessFromCurdriveProject( Byval wszFilename As CWSTR ) As CWSTR
+Function ProcessFromCurdriveProject( Byval wszFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -703,9 +751,10 @@ End Function
 ' Displays the FileOpenDialog.
 ' The returned pointer must be freed with CoTaskMemFree
 ' ========================================================================================
-public Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, _
-                                     ByVal idButton As Long _
-                                     ) As WString Ptr
+Function AfxIFileOpenDialogW( _
+            ByVal hwndOwner As HWnd, _
+            ByVal idButton As Long _
+            ) As WString Ptr
 
    Dim hr As Long
    Dim CLSID_FileOpenDialog As CLSID = (&hDC1C5A9C, &hE88A, &h4DDE, {&hA5, &hA1, &h60, &hF8, &h2A, &h20, &hAE, &hF7})
@@ -720,7 +769,16 @@ public Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, _
    Dim rgFileTypes(1 To 5) As COMDLG_FILTERSPEC
 
    Select Case idButton
-      case IDC_FRMUSERTOOLS_CMDBROWSEEXE   '1012
+      case IDM_LOADSESSION  
+         rgFileTypes(1).pszName = @wstr("Session files")
+         rgFileTypes(1).pszSpec = @WSTR("*.session")
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         ' Set the title of the dialog
+         hr = pofd->lpVtbl->SetTitle(pofd, L(426,"Load Session"))
+
+      case IDC_FRMUSERTOOLS_CMDBROWSEEXE  
          rgFileTypes(1).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 1, @rgFileTypes(1))
@@ -751,17 +809,6 @@ public Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, _
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(80,"Insert File"))
 
-      Case IDC_FRMOPTIONSCOMPILER_CMDFBWIN32, IDC_FRMOPTIONSCOMPILER_CMDFBWIN64  '1003,1008
-         rgFileTypes(1).pszName = @L(100,"FB Compiler")
-         rgFileTypes(1).pszSpec = @WSTR("fbc*.exe")
-         rgFileTypes(2).pszName = @L(230,"Executable")
-         rgFileTypes(2).pszSpec = @WSTR("*.exe")
-         rgFileTypes(3).pszName = @L(79,"All files")
-         rgFileTypes(3).pszSpec = @WSTR("*.*")
-         pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
-         ' Set the title of the dialog
-         hr = pofd->lpVtbl->SetTitle(pofd, L(101,"Find FreeBASIC Compiler"))
-   
       Case IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION  '1012
          rgFileTypes(1).pszName = @L(102,"Localization files")
          rgFileTypes(1).pszSpec = @WSTR("*.lang")
@@ -771,7 +818,7 @@ public Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, _
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(103,"Open Localization File"))
 
-      Case IDC_FRMOPTIONSCOMPILER_CMDFBHELPFILE, IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH '1007,1011
+      Case IDC_FRMOPTIONSCOMPILER_CMDFBHELPFILE 
          rgFileTypes(1).pszName = @L(104,"Help file")
          rgFileTypes(1).pszSpec = @WSTR("*.chm")
          rgFileTypes(2).pszName = @L(79,"All files")
@@ -807,14 +854,16 @@ End Function
 ' Displays the FileOpenDialog (multiple selection)
 ' Returns a pointer to the IShellItemArray collection.
 ' ========================================================================================
-public Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, _
-                                            ByVal idButton As Long _
-                                            ) As IShellItemArray Ptr
+Function AfxIFileOpenDialogMultiple( _
+            ByVal hwndOwner As HWnd, _
+            ByVal idButton As Long _
+            ) As IShellItemArray Ptr
 
    ' Create an instance of the FileOpenDialog interface
    Dim hr As Long
    Dim pofd As IFileOpenDialog Ptr
-   hr = CoCreateInstance(@CLSID_FileOpenDialog, Null, CLSCTX_INPROC_SERVER, @IID_IFileOpenDialog, @pofd)
+   hr = CoCreateInstance( @CLSID_FileOpenDialog, Null, CLSCTX_INPROC_SERVER, _
+                             @IID_IFileOpenDialog, @pofd)
    If pofd = Null Then Return Null
 
    ' Set the file types
@@ -843,17 +892,21 @@ public Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, _
          
    end select
 
-   
    ' Set the title of the dialog
    hr = pofd->lpVtbl->SetTitle(pofd, L(248,"Open file"))
 
    ' Set the default folder to display in the open dialog
-   dim wszDefaultFolder as WString * MAX_PATH
-   if AfxFileExists( gApp.ProjectFilename ) then
-      wszDefaultFolder = AfxStrPathName( "PATH", gApp.ProjectFilename )
+   dim wszDefaultFolder as wstring * MAX_PATH
+   if gApp.wszLastOpenFolder = "" then 
+      if AfxFileExists( gApp.ProjectFilename ) then 
+         wszDefaultFolder = AfxStrPathName( "PATH", gApp.ProjectFilename )
+      else
+         wszDefaultFolder = AfxGetCurDir
+      end if
    else
-      wszDefaultFolder = AfxStrPathName( "PATH", AfxGetCurDir )  
+      wszDefaultFolder = gApp.wszLastOpenFolder
    end if
+   
    Dim pFolder As IShellItem Ptr
    SHCreateItemFromParsingName (wszDefaultFolder, Null, @IID_IShellItem, @pFolder)
    If pFolder Then
@@ -884,12 +937,13 @@ End Function
 ' Displays the FileSaveDialog
 ' The returned pointer must be freed with CoTaskMemFree
 ' ========================================================================================
-public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
-                                    ByVal pwszFileName As WString Ptr, _    ' full path and filename
-                                    ByVal pwszDefExt As WString Ptr, _
-                                    ByVal id As Long = 0, _
-                                    ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH _
-                                    ) As WString Ptr
+Function AfxIFileSaveDialog( _
+            ByVal hwndOwner As HWnd, _
+            ByVal pwszFileName As WString Ptr, _    ' full path and filename
+            ByVal pwszDefExt As WString Ptr, _
+            ByVal id As Long = 0, _
+            ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH _
+            ) As WString Ptr
 
    ' // Create an instance of the IFileSaveDialog interface
    Dim rgFileTypes(1 To 4) As COMDLG_FILTERSPEC 
@@ -913,20 +967,33 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    if AfxFileExists( *pwszFileName ) then
       wszFilePath = AfxStrPathName( "PATH", *pwszFileName )
    else   
-      ' If this is a new file being saved then try to default to the project folder
-      ' if a project is active.
-      if AfxFileExists( gApp.ProjectFilename ) then
-         wszFilePath = AfxStrPathname( "PATH", gApp.ProjectFilename )
+      ' Set the default folder to save the file
+      if gApp.wszLastOpenFolder then 
+         wszFilePath = gApp.wszLastOpenFolder
+      else
+         ' New file being saved try to default to the project folder
+         if AfxFileExists( gApp.ProjectFilename ) then
+            wszFilePath = AfxStrPathname( "PATH", gApp.ProjectFilename )
+         end if
       end if
+      gApp.wszLastOpenFolder = wszFilePath
    end if
 
-   ' // Set the file types
-   
+   ' Set the file types
    Select Case id
+      Case IDM_SAVESESSION
+         rgFileTypes(1).pszName = @wstr("Session files")
+         rgFileTypes(1).pszSpec = @WSTR("*.session")
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
+         ' // Set the title of the dialog
+         hr = psfd->lpVtbl->SetTitle(psfd, L(425,"Save Session"))
+
       Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS
          rgFileTypes(1).pszName = @L(216,"Project files")
-         rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.wfbe")
+         rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
          ' // Set the title of the dialog
@@ -934,30 +1001,30 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
 
       case IDM_FILESAVEDECLARES 
          rgFileTypes(1).pszName = @L(78,"FB Include files")
-         rgFileTypes(2).pszName = @L(77,"FB code files")
-         rgFileTypes(3).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(2).pszName = @L(77,"FB code files")
          rgFileTypes(2).pszSpec = @WSTR("*.bas")
+         rgFileTypes(3).pszName = @L(79,"All files")
          rgFileTypes(3).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
          psfd->lpVtbl->SetTitle(psfd, L(265,"Save Declares File"))
 
       Case IDC_FRMOPTIONSLOCAL_CMDNEW
          rgFileTypes(1).pszName = @L(102,"Localization files")
-         rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.lang")
+         rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
          psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
 
       Case Else
          rgFileTypes(1).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszName = @L(78,"FB Include files")
-         rgFileTypes(3).pszName = @L(209,"Resource files")
-         rgFileTypes(4).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.bas")
+         rgFileTypes(2).pszName = @L(78,"FB Include files")
          rgFileTypes(2).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(3).pszName = @L(209,"Resource files")
          rgFileTypes(3).pszSpec = @WSTR("*.rc")
+         rgFileTypes(4).pszName = @L(79,"All files")
          rgFileTypes(4).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 4, @rgFileTypes(1))
          psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
@@ -1006,43 +1073,16 @@ End Function
 
 
 ' ========================================================================================
-' Enables the specified button in a toolbar.
-' Returns TRUE if successful, or FALSE otherwise.
-' ========================================================================================
-public Function FF_Toolbar_EnableButton( ByVal hToolBar As HWnd, _
-                                         ByVal idButton As Long _
-                                         ) As BOOLEAN
-   ' Only enable the button if it is not already enabled. This should help reduce flicker.
-   If SendMessage(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) = 0 Then
-      Function = SendMessage(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(CTRUE, 0)))
-   End If   
-End Function
-
-
-' ========================================================================================
-' Disables the specified button in a toolbar.
-' Returns TRUE if successful, or FALSE otherwise.
-' ========================================================================================
-public Function FF_Toolbar_DisableButton( ByVal hToolBar As HWnd, _
-                                          ByVal idButton As Long _
-                                          ) As BOOLEAN
-   ' Only disable the button if it is not already disabled. This should help reduce flicker.
-   If SendMessage(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) Then
-      Function = SendMessage(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(False, 0)))
-   End If
-End Function
-
-
-
-' ========================================================================================
 ' Inserts an item at a specific location in the ListView.
 ' ========================================================================================
-public Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, _
-                                        ByVal iRow        As Long, _         
-                                        ByVal iColumn     As Long, _
-                                        ByVal pwszText    As WString Ptr, _
-                                        ByVal lParam      As LPARAM = 0 _
-                                        ) As BOOLEAN
+Function FF_ListView_InsertItem( _
+            ByVal hWndControl As HWnd, _
+            ByVal iRow        As Long, _         
+            ByVal iColumn     As Long, _
+            ByVal pwszText    As WString Ptr, _
+            ByVal lParam      As LPARAM = 0 _
+            ) As BOOLEAN
+
    Dim lvi As LVITEMW
    lvi.iItem     = iRow
    lvi.iSubItem  = iColumn 
@@ -1061,12 +1101,14 @@ End Function
 ' ========================================================================================
 ' Retrieves the text of a ListView item.
 ' ========================================================================================
-public Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, _
-                                         ByVal iRow As Long, _
-                                         ByVal iColumn As Long, _
-                                         ByVal pwszText As WString Ptr, _
-                                         ByVal nTextMax As Long _
-                                         ) As BOOLEAN
+Function FF_ListView_GetItemText( _
+            ByVal hWndControl As HWnd, _
+            ByVal iRow As Long, _
+            ByVal iColumn As Long, _
+            ByVal pwszText As WString Ptr, _
+            ByVal nTextMax As Long _
+            ) As BOOLEAN
+
    If pwszText = 0 Then Return False
    If nTextMax = 0 Then Return False
    Dim lvi As LVITEMW
@@ -1084,12 +1126,14 @@ End Function
 ' ========================================================================================
 ' Set the text for the specified row and col item
 ' ========================================================================================
-public Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, _
-                                         ByVal iRow As Long, _
-                                         ByVal iColumn As Long, _
-                                         ByVal pwszText As WString Ptr, _
-                                         ByVal nTextMax As Long _
-                                         ) As Long
+Function FF_ListView_SetItemText( _
+            ByVal hWndControl As HWnd, _
+            ByVal iRow As Long, _
+            ByVal iColumn As Long, _
+            ByVal pwszText As WString Ptr, _
+            ByVal nTextMax As Long _
+            ) As Long
+
   Dim li As LV_ITEM
   li.mask       = LVIF_TEXT
   li.iItem      = iRow
@@ -1103,9 +1147,11 @@ End Function
 ' ========================================================================================
 ' Retrieve the lParam value from a Listview line
 ' ========================================================================================
-public Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
-                                       ByVal iRow As Long _
-                                       ) As LPARAM
+Function FF_ListView_GetlParam( _
+            ByVal hWndControl As HWnd, _
+            ByVal iRow As Long _
+            ) As LPARAM
+
    Dim li As LV_ITEM
    li.mask       = LVIF_PARAM
    li.iItem      = iRow
@@ -1119,10 +1165,11 @@ End Function
 ' ========================================================================================
 ' Set the lParam value for a Listview line
 ' ========================================================================================
-public Function FF_ListView_SetlParam( ByVal hWndControl As HWnd, _
-                                       ByVal iRow As Long, _
-                                       ByVal ilParam As LPARAM _
-                                       ) As long
+Function FF_ListView_SetlParam( _
+            ByVal hWndControl As HWnd, _
+            ByVal iRow As Long, _
+            ByVal ilParam As LPARAM _
+            ) As long
    Dim li As LV_ITEM
    li.mask       = LVIF_PARAM
    li.iItem      = iRow
@@ -1137,9 +1184,10 @@ End Function
 ' The IsEnglish parameter is used when we want to populate the gLangEnglish global
 ' array that is used in the WinFBE.bas startup code.
 ' ========================================================================================
-public Function LoadLocalizationFile( Byref wszFileName As CWSTR, _
-                                      byval IsEnglish as boolean = false _
-                                      ) As BOOLEAN
+Function LoadLocalizationFile( _
+            Byref wszFileName As CWSTR, _
+            byval IsEnglish as boolean = false _
+            ) As BOOLEAN
 
    ' default that the file failed to load
    Function = False
@@ -1215,9 +1263,11 @@ End Function
 ' ========================================================================================
 ' Get the full process image name
 ' ========================================================================================
-public Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, _
-                                     ByVal pwszExeName As WString Ptr _
-                                     ) As Long
+Function GetProcessImageName( _
+            ByVal pe32w As PROCESSENTRY32W Ptr, _
+            ByVal pwszExeName As WString Ptr _
+            ) As Long
+
    Dim dwSize As Long
    Dim hProcess As HANDLE 
    hProcess = OpenProcess(PROCESS_QUERY_INFORMATION Or PROCESS_VM_READ, 1, pe32w->th32ProcessID)
@@ -1249,7 +1299,7 @@ End Function
 ' ========================================================================================
 ' Checks if the program that we are going to compile is already running
 ' ========================================================================================
-public Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
+Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 
    Dim hSnapShot As HANDLE
    Dim pe32w As PROCESSENTRY32W
@@ -1284,14 +1334,13 @@ End Function
 ' ========================================================================================
 ' Determine the EXE name of the currently active document or project.
 ' ========================================================================================
-public function GetRunExecutableFilename() as CWSTR
-   ' Used by the top menu and toolbar to determine if the Run Executable options
-   ' should be grayed out.
+function GetRunExecutableFilename() as CWSTR
+   ' Used by the top menu to determine if the Run Executable option is available
    dim wszFilename as CWSTR
    dim wszOptions as CWSTR
    Dim pDocMain As clsDocument Ptr 
 
-   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   dim as long idxBuild = frmBuildConfig_getActiveBuildIndex()
    dim as Boolean bInString = false
    
    pDocMain = iIf( gApp.IsProjectActive, gApp.GetMainDocumentPtr, gTTabCtl.GetActiveDocumentPtr)
@@ -1379,9 +1428,11 @@ END TYPE
 ' ========================================================================================
 ' Get a raw PNG from the Resource - needed to load images into Scintilla popup list.
 ' ========================================================================================
-public FUNCTION LoadPNGfromRes( BYVAL hInstance AS HINSTANCE, _
-                                BYREF wszImageName AS WSTRING _
-                                ) as any ptr
+FUNCTION LoadPNGfromRes( _
+            BYVAL hInstance AS HINSTANCE, _
+            BYREF wszImageName AS WSTRING _
+            ) as any ptr
+
    dim as HBITMAP hBitmap = AfxGdipImageFromRes(hInstance, wszImageName, 0, false, IMAGE_BITMAP) 
         
    dim bi AS MYBITMAPINFO
@@ -1421,9 +1472,10 @@ END FUNCTION
 ' ========================================================================================
 ' Check PlanetSquires server for latest WinFBE version.
 ' ========================================================================================
-public function DoCheckForUpdates( byval hWndParent as hwnd, _
-                                   byval bSilentCheck as Boolean = false _
-                                   ) as long
+function DoCheckForUpdates( _
+            byval hWndParent as hwnd, _
+            byval bSilentCheck as Boolean = false _
+            ) as long
    
    ''  Contact the PlanetSquires server and download the text file containing
    ''  the latest WinFBE version number. If an update exists then ask the user
@@ -1434,12 +1486,19 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    dim as CWSTR wszLatestVersion
    dim as CWSTR wszMsg
    dim as string st
-    
+   dim as boolean bFailedCheck = false
+
+   if AfxWinHttpCheckPlatform() = false then
+      ' This platform does not support the Windows HTTP Services (WinHTTP)
+      'print "Windows HTTP Services (WinHTTP) not supported on this platform"
+      exit function
+   end if
+   
    DIM pWHttp AS CWinHttpRequest
    
-   wszFilename = AfxGetExePathName + wszServerFile
+   wszFilename = AfxGetExePathName & wszServerFile
 
-   ' Open an HTTP connection to an HTTP resource
+   ' Open an HTTP connection to an HTTP resource (synchronous mode)
    if pWHttp.Open( "GET", "https://www.planetsquires.com/" & wszServerFile ) = S_OK then
 
       ' Send HTTP request and wait 5 seconds for response 
@@ -1447,34 +1506,48 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
     
       if pWHttp.WaitForResponse(5) then
          st = pWHttp.GetResponseBody
-          
          ' Open a file stream and save the downloaded file
          DIM pFileStream AS CFileStream
          IF pFileStream.Open(wszFilename, STGM_CREATE OR STGM_WRITE) = S_OK then
             pFileStream.WriteTextA(st)
             pFileStream.Close
+         else
+            bFailedCheck = true
          END IF
       end if
+   
+   else
+      bFailedCheck = true
+      'print "Error GET update version file: "; pWHttp.GetErrorInfo()
    end if
    
    ' Open the downloaded file and check for the version number. It is possible that the socket
    ' will open but fail and send request but security parameters of the system will prevent data
    ' from being received resulting in a zero byte file. 
-   if AfxFileExists( wszFilename ) then
-      dim pStream AS CTextStream 
-      if pStream.Open(wszFilename, IOMODE_FORREADING) = S_OK then 
-         Do Until pStream.EOS
-            st = pStream.ReadLine
-            if left( st, 15 ) = "latest_version=" then
-               wszLatestVersion = trim(mid( st, 16 ))
-               exit do
-            end if
-         loop
-         pStream.Close
+   if bFailedCheck = false then
+      if AfxFileExists( wszFilename ) then
+         dim pStream AS CTextStream 
+         if pStream.Open(wszFilename, IOMODE_FORREADING) = S_OK then 
+            Do Until pStream.EOS
+               st = pStream.ReadLine
+               if left( st, 15 ) = "latest_version=" then
+                  wszLatestVersion = trim(mid( st, 16 ))
+                  if len(wszLatestVersion) = 0 then
+                     bFailedCheck = true
+                  end if   
+                  exit do
+               end if
+            loop
+            pStream.Close
+         end if
       end if
    end if
-   
-   if len(wszLatestVersion) = 0 then
+      
+   ' Check the installed vs. available version numbers   
+   dim as long latestVersion = ConvertWinFBEversion(wszLatestVersion)
+   dim as long installedVersion = ConvertWinFBEversion(APPVERSION)
+
+   if (bFailedCheck = true) or (latestVersion = 0) then
       if bSilentCheck = false then      
          MessageBox( hWndParent, _
                      L(92,"Failed to retrieve update information"), _
@@ -1486,10 +1559,6 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    end if
       
       
-   ' Check the installed vs. available version numbers   
-   dim as long latestVersion = ConvertWinFBEversion(wszLatestVersion)
-   dim as long installedVersion = ConvertWinFBEversion(APPVERSION)
-
    ' Save the config file so that other editor instances will not also do update checks again
    gConfig.LastUpdateCheck = JulianDateNow
    gConfig.SaveConfigFile
@@ -1497,7 +1566,7 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    AfxDeleteFile( wszFilename ) 
 
    if bSilentCheck = false then      
-      if installedVersion = latestVersion then
+      if installedVersion >= latestVersion then
          wszMsg = L(96,"You are up to date!") & vbcrlf & _
                   "WinFBE v" & APPVERSION & " " & L(97,"is currently the newest version available.")
          MessageBox( hWndParent, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
@@ -1522,9 +1591,10 @@ end function
 ' Calcluate the client area at bottom of Listbox not covered by a row (needed to manually
 ' paint the unused area in WM_ERASEBKGRD messages to avoid flicker.
 ' ========================================================================================
-public function GetListBoxEmptyClientArea( byval hListBox as HWND, _
-                                           byval nLineHeight as long _
-                                           ) as RECT
+function GetListBoxEmptyClientArea( _
+            byval hListBox as HWND, _
+            byval nLineHeight as long _
+            ) as RECT
    
    dim as RECT rc: GetClientRect( hListBox, @rc )
    ' If the number of lines in the listbox is less than the number per page then 

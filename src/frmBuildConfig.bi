@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -30,7 +30,8 @@
 
 #define FRMBUILDCONFIG_LISTBOX_LINEHEIGHT  20 
 
-declare function frmBuildConfig_LoadBuildComboBox() as Long
+declare function frmBuildConfig_getActiveBuildIndex() as long
+declare function frmBuildConfig_GetSelectedBuildDescription() as CWSTR
 declare function frmBuildConfig_GetSelectedBuildGUID() as String
 declare Function frmBuildConfig_Show( ByVal hWndParent As HWnd ) As LRESULT
 

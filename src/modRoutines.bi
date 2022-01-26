@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,6 +13,8 @@
 
 #pragma once
 
+declare function isMouseOverRECT( byval hWin as HWND, byval rc as RECT ) as boolean
+declare function isMouseOverWindow( byval hChild as HWND ) as boolean
 declare function GetTextWidthPixels( byval hWin as HWND, byref wszText as WString ) as Long
 declare function JulianDateNow() as long
 declare function ConvertWinFBEversion( byref wszVersion as wstring ) as long

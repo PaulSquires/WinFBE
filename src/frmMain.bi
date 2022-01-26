@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -14,14 +14,8 @@
 #pragma once
 
 #Define IDC_FRMMAIN_TOPTABCONTROL                   1000
-#Define IDC_FRMMAIN_TOOLBAR                         1001
-#Define IDC_FRMMAIN_REBAR                           1002
-#Define IDC_FRMMAIN_STATUSBAR                       1003
-#Define IDC_FRMMAIN_COMPILETIMER                    1004
-#Define IDC_FRMMAIN_COMBOBUILDS                     1005
-#Define IDC_FRMMAIN_COMBOFILES                      1006
-#Define IDC_FRMMAIN_COMBOFUNCTIONS                  1007
-#Define IDC_FRMMAIN_COMBOTOOLCHAINS                 1008
+#Define IDC_FRMMAIN_COMPILETIMER                    1001
+
 
 '' Last position in document. Used when "Last Position" menu option is selected.
 Type LASTPOSITION_TYPE
@@ -34,12 +28,9 @@ Dim Shared gLastPosition As LASTPOSITION_TYPE
 dim shared as long SPLITSIZE 
 SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for split editing windows
 
-declare Function frmMain_AddToComboFiles( byval pDoc as clsDocument ptr ) As Long
-declare Function frmMain_RemoveFromComboFiles( byval pDoc as clsDocument ptr ) As Long
-declare Function frmMain_SelectComboFunctions() As Long
-declare Function frmMain_SelectComboFiles() As Long
-declare Function frmMain_LoadComboFunctions() As Long
-declare Function frmMain_LoadComboFiles() As Long
+declare Function frmMain_GotoFile( ByVal pDoc As clsDocument Ptr, byval nMenuId as long ) As Long
+declare Function frmMain_GotoLastPosition() As Long
+declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 declare Function frmMain_SetStatusbar() as long
 declare Function frmMain_SetFocusToCurrentCodeWindow() As Long
 Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, Byref wszName As WString, ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false, byval nFileType as long = FILETYPE_UNDEFINED ) As clsDocument Ptr

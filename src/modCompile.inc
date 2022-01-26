@@ -1,5 +1,5 @@
 ''    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-''    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+''    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 ''
 ''    This program is free software: you can redistribute it and/or modify
 ''    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ Dim Shared gCompile As COMPILE_TYPE
 ''  Set the statusbar text and icon for a good/bad compile
 ''
 private function SetCompileStatusBarMessage( byref wszText as wstring, _
-                                             byval hIconCompile as HICON _
+                                             byval hIconCompile as long _
                                              ) as LRESULT
    gApp.wszPanelText = wszText
    gApp.hIconPanel = hIconCompile
@@ -146,15 +146,11 @@ end function
 ''  Reset all Scintilla editing cursors
 ''
 public function ResetScintillaCursors() as Long
-   Dim pDoc As clsDocument Ptr
-   Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
-   Dim TB As TC_ITEM 
+   Dim As Long nCount = gTTabCtl.GetItemCount 
 
    For i as long = 0 To nCount - 1
-      ' Get the document pointer and then save file to disk
-      TB.Mask = TCIF_PARAM
-      TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
-      pDoc = Cast(clsDocument Ptr, TB.lParam)
+      if gTTabCtl.IsSafeIndex(i) = false then continue for
+      dim as clsDocument ptr pDoc = gTTabCtl.tabs(i).pDoc
       if pDoc THEN 
          SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
          SciExec( pDoc->hWindow(1), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
@@ -347,8 +343,8 @@ public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
    Dim pDoc As clsDocument Ptr 
 
    ' Get the line number and filename of the selected item
-   FF_ListView_GetItemText(hLV, nCurSel, 0, @wszErrorLine, MAX_PATH)
-   FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorFile, MAX_PATH)
+   FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorLine, MAX_PATH)
+   FF_ListView_GetItemText(hLV, nCurSel, 2, @wszErrorFile, MAX_PATH)
    dim as long nLineNum = Val(wszErrorLine) - 1   ' because visually the editor is one based line numbers
 
    ' If we are doing a QuickRun then it must be on the currently loaded
@@ -455,9 +451,10 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       ' from a 32-bit operating system.
       If Left(wst_ucase, 16) = "THIS VERSION OF " Then
          fGoodCompile = false
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, "0" )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, "" ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, "compiling FAILED: Windows not 64-bit (refer to log file)" ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, "" )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, "0" )
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, "" ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 3, "compiling FAILED: Windows not 64-bit (refer to log file)" ) 
          wszOutputMsg = wsLogSt: exit For
          exit for
       End If   
@@ -487,26 +484,30 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       ' Check to see if linking failed
       If (Left(wst_ucase, 6) = "ERROR!") or _
          (left(wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" )
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 2, "compiling resource FAILED: Error Code 1 (refer to log file)" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "0" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, "" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 3, "compiling resource FAILED: Error Code 1 (refer to log file)" ) 
          NumErrors = NumErrors + 1
       elseIf (Left(wst_ucase, 5) = "ERROR") Then
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" )
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 2, "compiling FAILED: Error Code 1 (refer to log file)" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "0" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, "" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 3, "compiling FAILED: Error Code 1 (refer to log file)" ) 
          NumErrors = NumErrors + 1
       elseIf (Left(wst_ucase, 19) = "COMPILING C FAILED:") Then
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" )
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 2, "compiling C FAILED: Error Code 1 (refer to log file)" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "0" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, "" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 3, "compiling C FAILED: Error Code 1 (refer to log file)" ) 
          NumErrors = NumErrors + 1
       end if
       
       If Instr(wst_ucase, "LINKING FAILED:") Then 
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 2, wst & " (refer to log file)" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "0" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, "" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 3, wst & " (refer to log file)" ) 
          NumErrors = NumErrors + 1
       End If
  
@@ -597,10 +598,11 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
                   END IF
                
                end if
-               
-               FF_ListView_InsertItem( hLV, nListViewLine, 0, wst2 )  ' line#
-               FF_ListView_InsertItem( hLV, nListViewLine, 1, wst1 )  ' filename
-               FF_ListView_InsertItem( hLV, nListViewLine, 2, wst3 )  ' error message
+              
+               FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )
+               FF_ListView_InsertItem( hLV, nListViewLine, 1, wst2 )  ' line#
+               FF_ListView_InsertItem( hLV, nListViewLine, 2, wst1 )  ' filename
+               FF_ListView_InsertItem( hLV, nListViewLine, 3, wst3 )  ' error message
                 
                If IsWarning Then 
                   NumWarnings = NumWarnings + 1
@@ -614,9 +616,10 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
 
          else
                      
-            FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )  ' line#
-            FF_ListView_InsertItem( hLV, nListViewLine, 1, "" )  ' filename
-            FF_ListView_InsertItem( hLV, nListViewLine, 2, wst )  ' message
+            FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )
+            FF_ListView_InsertItem( hLV, nListViewLine, 1, "" )  ' line#
+            FF_ListView_InsertItem( hLV, nListViewLine, 2, "" )  ' filename
+            FF_ListView_InsertItem( hLV, nListViewLine, 3, wst )  ' message
             NumDirectives = NumDirectives + 1
          end if
 
@@ -665,9 +668,9 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
        
       ' If the Search Results, TODO, Notes tab is active then reposition to 
       ' the first tab for error listview
-      select case TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) 
+      select case gOutputTabsCurSel 
          case 2, 3, 4
-         TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
+         gOutputTabsCurSel = 0
          frmOutput_PositionWindows
       end select
       
@@ -680,7 +683,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    ' If there were no errors or warnings then close any previously open compiler results listviews
    If (NumWarnings = 0) andalso (NumErrors = 0) andalso (NumDirectives = 0) then
       if IsWindowVisible(HWND_FRMOUTPUT) THEN
-         if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
+         if gOutputTabsCurSel = 0 THEN
             ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
             frmMain_PositionWindows
          END IF   
@@ -783,7 +786,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    END IF
    
    ' Get the array index for the current selected build (project or document)
-   idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   idxBuild = frmBuildConfig_getActiveBuildIndex()
    if idxBuild = -1 then idxBuild = 0
    
    ' Perform some pre-compile checks to see if we should continue.
@@ -1037,7 +1040,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       if gConfig.Tools(y).Action = USERTOOL_ACTION_PRECOMPILE then
          frmUserTools_ExecuteUserTool(y)
       end if   
-   NEXT
+   next
 
    ' Change to the output code directory
    ChDir gCompile.MainFolder

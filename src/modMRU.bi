@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,17 +13,12 @@
 
 #pragma once
 
-#define IDC_MRUBASE          5000  ' Windows id of MRU items 1 to 10 (located under File menu)
-#define IDC_MRUPROJECTBASE   6000  ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
-
-
+declare Function updateMRUFilesItems() as long
+declare Function updateMRUProjectFilesItems() as long
 declare Function OpenMRUFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
 declare Function ClearMRUlist( ByVal wID As Long ) As Long
-declare Function CreateMRUpopup() As HMENU
-declare Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
 declare Function UpdateMRUList( Byref wzFilename As WString ) As Long
 declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long) As Long
-declare Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
 declare Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
 
 

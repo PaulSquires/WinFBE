@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -21,19 +21,19 @@ type clsLasso
       hWndParent   as hwnd
       ptStart      as POINT
       ptEnd        as POINT
-      bLasso       as Boolean
+      bLasso       as boolean
       
    public:
       declare destructor
-      declare function IsActive() as Boolean
+      declare function IsActive() as boolean
       declare function GetLassoRect() as RECT
       declare function SetStartPoint( byval x as long, byval y as Long) as Long
       declare function SetEndPoint( byval x as long, byval y as Long) as Long
       declare function GetStartPoint() as POINT
       declare function GetEndPoint() as POINT
-      declare function FillAlpha(byval hBmp as HBITMAP) as Boolean
+      declare function FillAlpha(byval hBmp as HBITMAP) as boolean 
       declare function Show() as Long
       declare function Create( byval hWndParent as HWND ) as boolean
       declare function Destroy() as boolean
-END TYPE
+end type
 

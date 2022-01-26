@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -11,7 +11,16 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-#pragma once
+declare function frmTopTabs_PositionWindows() as LRESULT
 
-declare Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
-declare Function frmMain_ChangeToolbarButtonsState() As Long
+type TOPTABS_HSCROLL_TYPE
+   listBoxHeight as long
+   numItems as long 
+   itemHeight as long
+   itemsPerPage as long
+   thumbWidth as long
+   rc as RECT
+end type
+dim shared gTopTabsHScroll as TOPTABS_HSCROLL_TYPE
+
+

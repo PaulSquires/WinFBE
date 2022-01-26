@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -16,4 +16,4 @@
 
 #Define IDC_FRMTEMPLATES_LISTBOX                    1000
 
-declare Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As Long) As LRESULT
+declare Function frmTemplates_Show (ByVal hParent As HWnd) As LRESULT

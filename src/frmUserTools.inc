@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,6 +13,44 @@
 
 #include once "frmUserTools.bi"
 #include once "clsConfig.bi"
+#include once "modMRU.bi"
+
+
+' ========================================================================================
+' Update the UserTools items in the topmenu array
+' ========================================================================================
+public Function updateUserToolsMenuItems() as long
+   ' clear MRU items already existing in the gTopMenu array. We overwrite and extend
+   ' the gTopMenu array rather than erase it because existing menus depend on the 
+   ' array index that aready exist. The function also returns the width to use for
+   ' the resulting popup menu (based on text width metrics of each filename).
+   clearMRUFilesItems( IDM_USERTOOLS )
+   
+   dim wszText as WSTRING * 256
+   dim as boolean hasTools = false
+   dim as long txtWidth = 0
+   dim as long nMenuWidth = -1
+
+   setTopMenuMRUItem( getNextFreeMRUindex(), IDM_USERTOOLS, IDM_USERTOOLSDIALOG, 0, false, false )
+   setTopMenuMRUItem( getNextFreeMRUindex(), IDM_USERTOOLS, 0, 0, false, true )
+   
+   for i as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
+      hasTools = true
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_USERTOOLS, IDM_USERTOOLSBASE + i, 0, false, false )
+      wszText = gConfig.Tools(i).wszDescription
+      if gConfig.Tools(i).wszKey then
+         wszText = wszText & chr(9) & gConfig.Tools(i).wszKey
+      end if
+      txtWidth = getTextWidth( HWND_FRMMAIN_MENUBAR, wszText, ghMenuBar.hFontMenuBar, 30 )
+      if txtWidth > nMenuWidth then nMenuWidth = txtWidth
+   next
+
+   if hasTools = false then
+      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_USERTOOLS, IDM_USERTOOLSLIST, 0, false, false )  ' (empty)
+   end if   
+   
+   function = nMenuWidth
+end function
 
 
 ' ========================================================================================
@@ -70,7 +108,7 @@ public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long
       wszParameters = AfxStrReplace(wszParameters, "<S>", wszMainSource)
       wszParameters = AfxStrReplace(wszParameters, "<s>", wszMainSource)
 
-      dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+      dim as long idxBuild = frmBuildConfig_getActiveBuildIndex()
       if (idxBuild > -1) andalso (pDocMain <> 0) THEN
          wszExeName = gCompile.OutputFilename
          if len(wszExeName) = 0 then
@@ -159,12 +197,27 @@ End Function
 
   
 ' ========================================================================================
+' Create the keyboard shortcut text description.
+' ========================================================================================
+public function createToolsMenuShortcut( byval nCtrlID as long ) as CWSTR
+   dim wszShortcut as CWSTR
+      
+   If gConfig.Tools(nCtrlID).IsCtrl Then wszShortcut = "Ctrl+"
+   If gConfig.Tools(nCtrlID).IsShift Then wszShortcut = wszShortcut + "Shift+"
+   If gConfig.Tools(nCtrlID).IsAlt Then wszShortcut = wszShortcut + "Alt+"
+   wszShortcut = trim(wszShortcut + UCase(Trim(gConfig.Tools(nCtrlID).wszKey)), any " +")
+   
+   return wszShortcut
+end function
+
+
+
+' ========================================================================================
 ' Create an accelerator table based on selections for the user tools.
 ' Also adds the Tools to the top menu.
 ' ========================================================================================
 public Function frmUserTools_CreateAcceleratorTable() As Long
 
-   dim wszShortcut as CWSTR
    dim NumKeys  As Long
    dim nKey     As Long
    dim fVirt    As Long
@@ -172,43 +225,14 @@ public Function frmUserTools_CreateAcceleratorTable() As Long
    If ghAccelUserTools Then DestroyAcceleratorTable(ghAccelUserTools)
    Dim a(any) As ACCEL
       
-   dim as HMENU hPopUpMenu = CreatePopupMenu
-   
-   ' If at least one Tool exists that needs to be displayed in the top menu
-   ' then add a separator bar between the "User Tools" menu option and the 
-   ' actual list of tools.
-   DeleteMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION)
-   InsertMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION or MF_POPUP, _
-               Cast(UINT_PTR, hPopUpMenu), L(305,"Tools"))
-   AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
-   
-   for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
-      if gConfig.Tools(y).IsDisplayMenu then
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         exit for
-      end if   
-   NEXT
-   
-   dim as HMENU hToolsMenu = GetSubMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION)
-
    NumKeys = 0
    For y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
           
-      wszShortcut = ""
       fVirt = FNOINVERT Or FVIRTKEY
       
-      If gConfig.Tools(y).IsCtrl Then 
-         fVirt = fVirt Or FCONTROL: wszShortcut = "Ctrl+"
-      end if   
-      
-      If gConfig.Tools(y).IsShift Then 
-         fVirt = fVirt Or FSHIFT: wszShortcut = wszShortcut + "Shift+"
-      end if   
-
-      If gConfig.Tools(y).IsAlt Then 
-         fVirt = fVirt Or FALT
-         wszShortcut = wszShortcut + "Alt+"
-      end if   
+      If gConfig.Tools(y).IsCtrl Then fVirt = fVirt Or FCONTROL
+      If gConfig.Tools(y).IsShift Then fVirt = fVirt Or FSHIFT
+      If gConfig.Tools(y).IsAlt Then fVirt = fVirt Or FALT
           
       nKey = 0   ' important to reset
       Select Case UCase(Trim(gConfig.Tools(y).wszKey))
@@ -262,28 +286,20 @@ public Function frmUserTools_CreateAcceleratorTable() As Long
          Case "Z":   nKey = VK_Z  
       End Select
          
-      wszShortcut = trim(wszShortcut + UCase(Trim(gConfig.Tools(y).wszKey)), any " +")
-      
       If nKey > 0 Then
          NumKeys = NumKeys + 1
          ReDim Preserve a(1 To NumKeys) As ACCEL
          a(NumKeys).fVirt = fVirt
          a(NumKeys).key   = nKey
-         a(NumKeys).cmd   = IDM_USERTOOL + y
+         a(NumKeys).cmd   = IDM_USERTOOLSBASE + y
       End If
 
-      if gConfig.Tools(y).IsDisplayMenu then
-         if len(wszShortcut) then wszShortcut = wchr(9) + wszShortcut
-         AppendMenu(hToolsMenu, MF_ENABLED, IDM_USERTOOL + y, gConfig.Tools(y).wszDescription + wszShortcut)
-      end if
    Next                                    
       
    If NumKeys Then
       ghAccelUserTools = CreateAcceleratorTable(CAST(LPACCEL, @a(1)), NumKeys)
    End If
 
-   DrawMenuBar(HWND_FRMMAIN)
-   
    function = 0
 End Function
 

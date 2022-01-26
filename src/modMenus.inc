@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,513 +13,308 @@
 
 #include once "modMenus.bi"
 
+' ========================================================================================
+' EnableTopMenuItem: basically my internal version of the EnableMenuItem api
+' ========================================================================================
+function EnableTopMenuItem( byval nID as long, byval bEnabled as boolean ) as long
+   dim p as TOPMENU_TYPE ptr = getTopMenuPtr(nID)
+   if p = 0 then exit function
+   if bEnabled = false then 
+      p->isDisabled = true
+   else   
+      p->isDisabled = false
+   end if
+   function = 0
+end function
 
 ' ========================================================================================
-' Build the frmMain topmenu
+' CheckMarkTopMenuItem: Show a checkmark to the left of the menu entry
 ' ========================================================================================
-public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
-
-   Dim As HMENU hMenu, hPopUpMenu, hPopUpSubMenu
-
-   hMenu = CreateMenu
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(2,"&File")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILENEW, L(3,"New") & Chr(9) & "Ctrl+N"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPEN, L(4,"Open") & "..." & Chr(9) & "Ctrl+O"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPENTEMPLATES, L(197,"Open Templates") & "..." & Chr(9) & "Ctrl+T"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE, L(5,"Close") & Chr(9) & "Ctrl+Q"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE, L(7,"Save") & Chr(9) & "Ctrl+S"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") & "..." & Chr(9) & "F12"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEALL, L(9,"Save All") & Chr(9) & "Ctrl+Shift+S"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(10,"Recent Files")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MRU, L(11,"(Empty)")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMMAND, L(12,"Command Prompt" & "...")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_EXIT, L(13,"Exit") & Chr(9) & "Alt+F4"
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(14,"Edit")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_UNDO, L(15,"Undo") & Chr(9) & "Ctrl+Z"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REDO, L(16,"Redo") & Chr(9) & "Ctrl+E"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_CUT, L(17,"Cut") & Chr(9) & "Ctrl+X"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COPY, L(18,"Copy") & Chr(9) & "Ctrl+C"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PASTE, L(19,"Paste") & Chr(9) & "Ctrl+V"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_DELETELINE, L(20,"Delete Line") & Chr(9) & "Ctrl+Y"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_INSERTFILE, L(21,"Insert File") & "..." & Chr(9) & "Ctrl+I"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(271,"File Encoding")
-              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_ANSI, "ANSI"
-              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8BOM, "UTF-8 (BOM)"
-              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF16BOM, "UTF-16 (BOM)"
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(22,"Block Operations")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_INDENTBLOCK, L(23,"Indent Block") & Chr(9) & "TAB"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_UNINDENTBLOCK, L(24,"UnIndent Block") & Chr(9) & "Shift+TAB"
-              AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_COMMENTBLOCK, L(25,"Comment Block") & Chr(9) & "Ctrl+B"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_UNCOMMENTBLOCK, L(26,"UnComment Block") & Chr(9) & "Ctrl+Shift+B"
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(27,"Line Operations")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_DUPLICATELINE, L(28,"Duplicate Current Line") & Chr(9) & "Ctrl+D"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEUP, L(29,"Move Up Current Line") & Chr(9) & "Ctrl+Shift+Up"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEDOWN, L(30,"Move Down Current Line") & Chr(9) & "Ctrl+Shift+Down"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_NEWLINEBELOWCURRENT, L(403,"New Line Below Current Line") & Chr(9) & "Ctrl+Enter"
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(31,"Case Conversions")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOUPPERCASE, L(32,"Selection to Upper Case") & Chr(9) & "Ctrl+Alt+U"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOLOWERCASE, L(33,"Selection to Lower Case") & Chr(9) & "Ctrl+Alt+L"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOMIXEDCASE, L(34,"Selection to Mixed Case") & Chr(9) & "Ctrl+Alt+M"
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(35,"End of Line Character Conversions")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_EOLTOCRLF, L(36,"Convert to CRLF")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_EOLTOCR, L(37,"Convert to CR")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_EOLTOLF, L(38,"Convert to LF")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TABSTOSPACES, L(39,"Replace Tabs with Spaces")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select All") & Chr(9) & "Ctrl+A"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SELECTLINE, L(41,"Select Line") & Chr(9) & "Ctrl+L"
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(42,"Search")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FIND, L(43,"Find") & "..." & Chr(9) & "Ctrl+F"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDNEXT, L(44,"Find Next") & Chr(9) & "F3"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDPREV, L(45,"Find Previous") & Chr(9) & "Shift+F3"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDINFILES, L(257,"Find In Files...") & Chr(9) & "Ctrl+Shift+F"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REPLACE, L(46,"Replace") & "..." & Chr(9) & "Ctrl+R"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTO, L(49,"Goto Line") & "..." & Chr(9) & "Ctrl+G"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(189,"Source Navigation")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function Definition") & Chr(9) & "F6"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_LASTPOSITION, L(48,"Last Position") & Chr(9) & "Shift+F6"
-               AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTONEXTFUNCTION, L(84,"Next Function") & Chr(9) & "Ctrl+PgDn"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOPREVFUNCTION, L(85,"Previous Function") & Chr(9) & "Ctrl+PgUp"
-               AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOHEADERFILE, L(231,"Goto Header File") & Chr(9) & "Ctrl+Shift+H"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOSOURCEFILE, L(232,"Goto Code File") & Chr(9) & "Ctrl+Shift+C"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOMAINFILE, L(233,"Goto Main File") & Chr(9) & "Ctrl+Shift+M"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTORESOURCEFILE, L(234,"Goto Resource File") & Chr(9) & "Ctrl+Shift+R"
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(187,"Tab Navigation")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTONEXTTAB, L(82,"Next Tab") & Chr(9) & "Ctrl+TAB"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOPREVTAB, L(83,"Previous Tab") & Chr(9) & "Ctrl+Shift+TAB"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CLOSETAB, L(86,"Close Tab") & Chr(9) & "Ctrl+W"
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(188,"Bookmarks")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKTOGGLE, L(50,"Toggle Bookmark") & Chr(9) & "Ctrl+F2"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKNEXT, L(51,"Next Bookmark") & Chr(9) & "F2"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKPREV, L(52,"Previous Bookmark") & Chr(9) & "Shift+F2"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKCLEARALL, L(53,"Clear Bookmarks") & Chr(9) & "Ctrl+Shift+F2"
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(54,"View")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDTOGGLE, L(55,"Toggle Current Fold Point") & Chr(9) & "F8"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDBELOW, L(56,"Toggle Current And All Below") & Chr(9) & "Ctrl+F8"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDALL, L(57,"Fold All") & Chr(9) & "Alt+F8"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_UNFOLDALL, L(58,"Unfold All") & Chr(9) & "Shift+F8"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ZOOMIN, L(59,"Zoom In") & Chr(9) & "Ctrl++"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ZOOMOUT, L(60,"Zoom Out") & Chr(9) & "Ctrl+-"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONLIST, L(221,"View Function List") & Chr(9) & "F4"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWEXPLORER, L(250,"View Explorer Window") & Chr(9) & "F9"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWOUTPUT, L(251,"View Output Window") & Chr(9) & "Ctrl+F9"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_RESTOREMAIN, L(61,"Restore Main Window Size")
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"Project")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"New Project")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"Open Project") & "..." 
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(219,"Recent Projects")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MRUPROJECT, L(11,"(Empty)")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTCLOSE, L(183,"Close Project")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"Save Project")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVEAS, L(185,"Save Project As") & "..."
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, L(207,"Add Files to Project") & "..."
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, L(186,"Project Options") & "..."      
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"Compile")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And Execute") & Chr(9) & "F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(64,"Compile") & Chr(9) & "Ctrl+F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"Rebuild All") & Chr(9) & "Ctrl+Alt+F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_QUICKRUN, L(285,"Quick Run") & Chr(9) & "Ctrl+Shift+F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"Run Executable") & Chr(9) & "Shift+F5"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command Line") & "..."
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"Options")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"Environment Options") & "..." & chr(9) & "Shift+F7"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDCONFIG, L(277,"Build Configurations") & "..." & Chr(9) & "F7"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERSNIPPETS, L(88,"User Snippets") & "..." & Chr(9) & "Ctrl+Shift+F7"
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(309,"Designer")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_NEWFORM, L(310,"New Form")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWTOOLBOX, L(311,"View Toolbox")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOGGLEVIEWCODE, L(382,"Toggle View Form/Code") & chr(9) & "Ctrl+M"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(315,"Align")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNLEFTS, L(316,"Lefts")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNCENTERS, L(317,"Centers")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNRIGHTS, L(318,"Rights")
-               AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNTOPS, L(319,"Tops")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNMIDDLES, L(320,"Middles")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNBOTTOMS, L(321,"Bottoms")
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(322,"Make Same Size")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEWIDTHS, L(323,"Widths")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEHEIGHTS, L(324,"Heights")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEBOTH, L(325,"Both")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(265,"Horizontal Spacing")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZEQUAL, L(329,"Make Equal")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZINCREASE, L(330,"Increase")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZDECREASE, L(331,"Decrease")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZREMOVE, L(349,"Remove")
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(284,"Vertical Spacing")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTEQUAL, L(329,"Make Equal")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTINCREASE, L(330,"Increase")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTDECREASE, L(331,"Decrease")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTREMOVE, L(349,"Remove")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(332,"Center in Form")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERHORIZ, L(333,"Horizontally")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERVERT, L(334,"Vertically")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERBOTH, L(325,"Both")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"Menu Editor") & "..."
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Toolbar Editor") & "..."
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"Statusbar Editor") & "..."
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_IMAGEMANAGER, L(368,"Image Manager") & "..."
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SNAPLINES, L(365,"Enable SnapLines")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_LOCKCONTROLS, L(335,"Lock Controls")
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(305,"Tools")
-      AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"Help")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELP, "FreeBASIC " + L(73,"Help") & Chr(9) & "F1"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBE, "WinFBE Editor Help"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBX, "WinFBX Framework Help"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINAPI, "WinAPI Help"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPSHORTCUTS, L(220,"Keyboard Shortcuts") & "..."
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_CHECKFORUPDATES, L(91,"Check for Updates")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ABOUT, L(74,"About")
-
-   Function = hMenu
-
-   '  Create the accelerator table for the menu
-   pWindow->AddAccelerator( FVIRTKEY, VK_F1,   IDM_HELP )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F2,   IDM_BOOKMARKNEXT )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F3,   IDM_FINDNEXTACCEL )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F4,   IDM_FUNCTIONLIST )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F5,   IDM_BUILDEXECUTE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F6,   IDM_DEFINITION )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F7,   IDM_BUILDCONFIG )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F8,   IDM_FOLDTOGGLE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F9,   IDM_VIEWEXPLORER)
-   pWindow->AddAccelerator( FVIRTKEY, VK_F12,  IDM_FILESAVEAS )
-   pWindow->AddAccelerator( FVIRTKEY, VK_TAB,  IDM_INDENTBLOCK )
-
-   pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_F4, IDM_EXIT )
-   pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_F8, IDM_FOLDALL )
-
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F2,  IDM_BOOKMARKPREV )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F3,  IDM_FINDPREVACCEL )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F5,  IDM_RUNEXE )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F6,  IDM_LASTPOSITION )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F7,  IDM_OPTIONS )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F8,  IDM_UNFOLDALL )
-   pWindow->AddAccelerator( FVIRTKEY or FSHIFT,   VK_TAB, IDM_UNINDENTBLOCK )
-   
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_A,          IDM_SELECTALL )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_B,          IDM_COMMENTBLOCK )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_C,          IDM_COPY )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_D,          IDM_DUPLICATELINE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_E,          IDM_REDO )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F,          IDM_FIND )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_G,          IDM_GOTO )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_I,          IDM_INSERTFILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_L,          IDM_SELECTLINE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_M,          IDM_TOGGLEVIEWCODE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_N,          IDM_FILENEW )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_O,          IDM_FILEOPEN )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Q,          IDM_FILECLOSE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,          IDM_REPLACE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_S,          IDM_FILESAVE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_T,          IDM_FILEOPENTEMPLATES )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_V,          IDM_PASTE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,          IDM_CLOSETAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_X,          IDM_CUT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Y,          IDM_DELETELINE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,         IDM_BOOKMARKTOGGLE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,         IDM_COMPILE )
-   pWindow->AddAccelerator( FVIRTKEY or FCONTROL, VK_F7,         IDM_USERTOOLSDIALOG )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F8,         IDM_FOLDBELOW )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F9,         IDM_VIEWOUTPUT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_TAB,        IDM_GOTONEXTTAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_NEXT,       IDM_GOTONEXTFUNCTION )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_PRIOR,      IDM_GOTOPREVFUNCTION )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,   IDM_ZOOMIN )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_RETURN,     IDM_NEWLINEBELOWCURRENT )
-
-
-
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_U,  IDM_TOUPPERCASE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_L,  IDM_TOLOWERCASE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_M,  IDM_TOMIXEDCASE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FALT, VK_F5, IDM_REBUILDALL)
-
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_B,     IDM_UNCOMMENTBLOCK )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_C,     IDM_GOTOSOURCEFILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F,     IDM_FINDINFILES )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_H,     IDM_GOTOHEADERFILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_M,     IDM_GOTOMAINFILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_R,     IDM_GOTORESOURCEFILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_S,     IDM_FILESAVEALL )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F2,    IDM_BOOKMARKCLEARALL )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,    IDM_QUICKRUN )
-   pWindow->AddAccelerator( FVIRTKEY or FCONTROL or FSHIFT, VK_F7,    IDM_USERSNIPPETS )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_TAB,   IDM_GOTOPREVTAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_UP,    IDM_MOVELINEUP )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_DOWN,  IDM_MOVELINEDOWN )
-
-   pWindow->CreateAcceleratorTable()
-
-End Function
+function CheckMarkTopMenuItem( byval nID as long, byval bChecked as boolean ) as long
+   dim p as TOPMENU_TYPE ptr = getTopMenuPtr(nID)
+   if p = 0 then exit function
+   p->isChecked = bChecked
+   function = 0
+end function
 
 
 ' ========================================================================================
 ' Enable/Disable top menu items depending on application state
 ' ========================================================================================
-public Function frmMain_ChangeTopMenuStates() As Long
+function frmMain_FileTopMenuStates() as long
+   
+   ' Start off by disabling everything in order to make things easier. 
+   For idMenu as long = IDM_FILE_START To IDM_FILE_END
+      EnableTopMenuItem( idMenu, false )
+   Next
 
-   Dim hMenu As HMENU = GetMenu(HWND_FRMMAIN)
-   Dim idMenu      As Long
-   Dim startSelPos As Long
-   Dim endSelPos   As Long
-   Dim nSelected   As Long 
-   Dim hEdit       As HWnd
-   dim wzText      as WSTRING * MAX_PATH
-   
-   ' Start off by disabling everything in order to make things easier. (We only
-   ' then need to enable things)
-   For idMenu = IDM_FILE To IDM_ABOUT
-      EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
-   Next
-   For idMenu = IDM_PROJECTNEW To IDM_PROJECTOPTIONS
-      EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
-   Next
-   For idMenu = IDM_BUILDEXECUTE To IDM_LOCKCONTROLS
-      EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
-   Next
-   
    ' Items that will always be enabled.
-   EnableMenuItem hMenu, IDM_FILENEW, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_FILEOPEN, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_FILEOPENTEMPLATES, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_COMMAND, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_EXIT, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_VIEWEXPLORER, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_VIEWOUTPUT, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_RESTOREMAIN, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_OPTIONS, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_BUILDCONFIG, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_USERTOOLSDIALOG, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_USERSNIPPETS, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_NEWFORM, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_HELPWINAPI, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_HELPWINFBE, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_HELPWINFBX, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_HELPSHORTCUTS, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_CHECKFORUPDATES, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
+   EnableTopMenuItem( IDM_FILENEW, true )
+   EnableTopMenuItem( IDM_FILEOPEN, true )
+   EnableTopMenuItem( IDM_FILEOPENTEMPLATES, true )
+   EnableTopMenuItem( IDM_LOADSESSION, true )
+   EnableTopMenuItem( IDM_MRU, true )
+   EnableTopMenuItem( IDM_KEYBOARDSHORTCUTS, true )
+   EnableTopMenuItem( IDM_USERTOOLS, true )
+   EnableTopMenuItem( IDM_USERTOOLSDIALOG, true )
+   EnableTopMenuItem( IDM_OPTIONS, true )
+   EnableTopMenuItem( IDM_OPTIONSDIALOG, true )
+   EnableTopMenuItem( IDM_BUILDCONFIG, true )
+   EnableTopMenuItem( IDM_USERSNIPPETS, true )
+   EnableTopMenuItem( IDM_EXIT, true )
+   EnableTopMenuItem( IDM_AUTOSAVE, true )
+   CheckMarkTopMenuItem( IDM_AUTOSAVE, iif( gConfig.AutoSaveFiles, true, false ))
 
-   ' Enable everything if a document is open
-   Dim As Long NumTabs = TabCtrl_GetItemCount(gTTabCtl.hWindow)
-   If NumTabs > 0 Then
-      For idMenu = IDM_FILE To IDM_ABOUT
-         EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_ENABLED
+   If gTTabCtl.GetItemCount() Then
+      For idMenu as long = IDM_FILECLOSE To IDM_SAVESESSION
+         EnableTopMenuItem( idMenu, true )
       Next
-
-      ' Enable or disable specific edit menu items (based on the currently active document)
-      Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-      If pDoc Then 
-         
-         dim as hwnd hEdit = pDoc->hWndActiveScintilla
-
-         ' Enable/Disable depending on if Visual Designer or Code Editor
-         if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
-            ' Disable specific code editing menu options
-            ' all of Edit/Search/View menu up to ZoomOut
-            ' except for cut/copy/paste and FunctionList
-            for idMenu = IDM_UNDO to IDM_FUNCTIONLIST
-               EnableMenuItem( hMenu, idMenu, MF_GRAYED)
-            NEXT
-            ' Only re-enable the cut/copy if an actual control is selected.
-            if pDoc->Controls.SelectedControlsCount > 0 THEN
-               EnableMenuItem hMenu, IDM_CUT, MF_BYCOMMAND Or MF_ENABLED
-               EnableMenuItem hMenu, IDM_COPY, MF_BYCOMMAND Or MF_ENABLED
-            END IF
-            ' Disable Align, Horiz, Vert, and Same Size if less than 2 controls are selected.
-            if pDoc->Controls.SelectedControlsCount < 2 THEN
-               for i as long = IDM_ALIGNLEFTS to IDM_SAMEBOTH
-                  EnableMenuItem hMenu, i, MF_BYCOMMAND Or MF_GRAYED
-               next
-            END IF
-            ' Disable Center in Form if no controls are selected
-            if pDoc->Controls.SelectedControlsCount = 0 THEN
-               for i as long = IDM_CENTERHORIZ to IDM_CENTERBOTH
-                  EnableMenuItem hMenu, i, MF_BYCOMMAND Or MF_GRAYED
-               next
-            END IF
-            EnableMenuItem hMenu, IDM_PASTE, MF_BYCOMMAND Or MF_ENABLED
-            EnableMenuItem hMenu, IDM_SELECTALL, MF_BYCOMMAND Or MF_ENABLED
-            CheckMenuItem( hMenu, IDM_SNAPLINES, MF_BYCOMMAND or iif(pDoc->bSnapLines, MF_CHECKED, MF_UNCHECKED))
-            CheckMenuItem( hMenu, IDM_LOCKCONTROLS, MF_BYCOMMAND or iif(pDoc->bLockControls, MF_CHECKED, MF_UNCHECKED))
-         else
-            ' Code editor is active
-            ' Disable visual designer menu options except for "New Form"
-            for idMenu = IDM_VIEWTOOLBOX to IDM_LOCKCONTROLS
-               EnableMenuItem( hMenu, idMenu, MF_GRAYED)
-            NEXT
-
-            If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
-               EnableMenuItem( hMenu, IDM_PASTE, MF_GRAYED)
-            End If
-            
-            startSelPos = SendMessage(hEdit, SCI_GETSELECTIONSTART, 0, 0)
-            endSelPos   = SendMessage(hEdit, SCI_GETSELECTIONEND, 0, 0)
-            If startSelPos = endSelPos Then
-               EnableMenuItem hMenu, IDM_CUT, MF_GRAYED
-               EnableMenuItem hMenu, IDM_COPY, MF_GRAYED
-            End If
-         
-            If SendMessageW(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
-               EnableMenuItem hMenu, IDM_UNDO, MF_GRAYED
-            End If
-                  
-            If SendMessage(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
-               EnableMenuItem hMenu, IDM_REDO, MF_GRAYED
-            End If
-
-            If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
-               EnableMenuItem hMenu, IDM_PASTE, MF_GRAYED
-            End If
-         
-            if gApp.GetMainDocumentPtr = 0 then
-               EnableMenuItem hMenu, IDM_GOTOMAINFILE, MF_GRAYED
-            end if
-            
-            if gApp.GetResourceDocumentPtr = 0 then
-               EnableMenuItem hMenu, IDM_GOTORESOURCEFILE, MF_GRAYED
-            end if
-
-            if gApp.GetHeaderDocumentPtr( pDoc ) = 0 then
-               EnableMenuItem hMenu, IDM_GOTOHEADERFILE, MF_GRAYED
-            end if
-
-            if gApp.GetSourceDocumentPtr( pDoc ) = 0 then
-               EnableMenuItem hMenu, IDM_GOTOSOURCEFILE, MF_GRAYED
-            end if
-            
-            if pDoc->IsDesigner then
-               EnableMenuItem hMenu, IDM_TOGGLEVIEWCODE, MF_BYCOMMAND Or MF_ENABLED
-            end if
-            
-            ' Check the File Encoding
-            select CASE pDoc->FileEncoding
-               case FILE_ENCODING_ANSI: nSelected = IDM_ANSI
-               case FILE_ENCODING_UTF8_BOM: nSelected = IDM_UTF8BOM
-               case FILE_ENCODING_UTF16_BOM: nSelected = IDM_UTF16BOM
-               CASE ELSE
-            END SELECT
-            CheckMenuRadioItem( hMenu, IDM_ANSI, IDM_UTF16BOM, nSelected, MF_BYCOMMAND )
-            EnableMenuItem hMenu, IDM_ANSI, MF_BYCOMMAND Or MF_ENABLED
-            EnableMenuItem hMenu, IDM_UTF8BOM, MF_BYCOMMAND Or MF_ENABLED
-            EnableMenuItem hMenu, IDM_UTF16BOM, MF_BYCOMMAND Or MF_ENABLED
-            EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or MF_ENABLED
-         end if
-         
-      End If
-   End If
-   
-   ' Check if a Project is open and active
-   Dim As Long fEnabled = Iif( gApp.IsProjectActive, MF_ENABLED, MF_GRAYED )
-   EnableMenuItem hMenu, IDM_PROJECTCLOSE, MF_BYCOMMAND Or fEnabled
-   EnableMenuItem hMenu, IDM_PROJECTSAVE, MF_BYCOMMAND Or fEnabled
-   EnableMenuItem hMenu, IDM_PROJECTSAVEAS, MF_BYCOMMAND Or fEnabled
-   EnableMenuItem hMenu, IDM_PROJECTFILESADD, MF_BYCOMMAND Or fEnabled
-   EnableMenuItem hMenu, IDM_PROJECTOPTIONS, MF_BYCOMMAND Or fEnabled
-
-   If (gApp.IsProjectActive = True) OrElse cbool(NumTabs > 0) Then
-      fEnabled = MF_ENABLED
-   Else
-      fEnabled = MF_GRAYED 
-   End If
-   EnableMenuItem hMenu, IDM_BUILDEXECUTE, MF_BYCOMMAND Or fEnabled
-   EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
-   EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
-
-   If gApp.IsProjectActive then 
-      ' QuickRun should be disabled for Projects
-      EnableMenuItem hMenu, IDM_QUICKRUN, MF_BYCOMMAND Or MF_GRAYED
    end if
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+function frmMain_EditTopMenuStates() as long
+   
+   ' Start off by disabling everything in order to make things easier. 
+   For idMenu as long = IDM_EDIT_START To IDM_EDIT_END
+      EnableTopMenuItem( idMenu, false )
+   Next
 
    ' If any documents exist in the editor then enable FindInFiles
-   if gApp.GetDocumentCount then
-      EnableMenuItem hMenu, IDM_FINDINFILES, MF_BYCOMMAND Or MF_ENABLED
-   end if
+   if gApp.GetDocumentCount then EnableTopMenuItem( IDM_FINDINFILES, true )
       
-   If AfxFileExists(GetRunExecutableFilename) Then
-      EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
-   Else
-      EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
-   End If
+   ' Enable or disable specific edit menu items (based on the currently active document)
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then exit function
 
+   ' Enable/Disable if Visual Designer is active
+   if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
+      ' Only re-enable the cut/copy if an actual control is selected.
+      if pDoc->Controls.SelectedControlsCount > 0 then
+         EnableTopMenuItem( IDM_CUT, true )
+         EnableTopMenuItem( IDM_COPY, true )
+      end if
+      EnableTopMenuItem( IDM_PASTE, true )
+      EnableTopMenuItem( IDM_SELECTALL, true )
+   
+   else
+      ' A code editing window is active
+      If len(pDoc->GetSelText) Then
+         EnableTopMenuItem( IDM_CUT, true )
+         EnableTopMenuItem( IDM_COPY, true )
+      End If
+      
+      dim as HWND hEdit = pDoc->hWndActiveScintilla 
+      if SendMessage( hEdit, SCI_CANUNDO, 0, 0) then EnableTopMenuItem( IDM_UNDO, true )
+      if SendMessage( hEdit, SCI_CANREDO, 0, 0) then EnableTopMenuItem( IDM_REDO, true )
+      If SendMessage( hEdit, SCI_CANPASTE, 0, 0) then EnableTopMenuItem( IDM_PASTE, true )
+      For idMenu as long = IDM_DELETELINE To IDM_SELECTALL
+         EnableTopMenuItem( idMenu, true )
+      Next 
+   end if
+
+   function = 0
+end function
+   
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+function frmMain_SearchTopMenuStates() as long
+   
+   ' Start off by disabling everything in order to make things easier. 
+   For idMenu as long = IDM_SEARCH_START To IDM_SEARCH_END
+      EnableTopMenuItem( idMenu, false )
+   Next
+
+   ' Enable or disable specific edit menu items (based on the currently active document)
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then exit function
+   
+   For idMenu as long = IDM_DEFINITION To IDM_GOTOPREVFUNCTION
+      EnableTopMenuItem( idMenu, true )
+   Next
+
+   if gApp.GetMainDocumentPtr then EnableTopMenuItem( IDM_GOTOMAINFILE, true )
+   if gApp.GetResourceDocumentPtr then EnableTopMenuItem( IDM_GOTORESOURCEFILE, true )
+   if gApp.GetHeaderDocumentPtr(pDoc) then EnableTopMenuItem( IDM_GOTOHEADERFILE, true )
+   if gApp.GetSourceDocumentPtr(pDoc) then EnableTopMenuItem( IDM_GOTOSOURCEFILE, true )
+
+   For idMenu as long = IDM_BOOKMARKTOGGLE To IDM_GOTO
+      EnableTopMenuItem( idMenu, true )
+   Next
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+function frmMain_ViewTopMenuStates() as long
+   
+   ' Start off by disabling everything in order to make things easier. 
+   For idMenu as long = IDM_VIEW_START To IDM_VIEW_END
+      EnableTopMenuItem( idMenu, false )
+   Next
+
+   EnableTopMenuItem( IDM_VIEWEXPLORER, true )
+   EnableTopMenuItem( IDM_VIEWOUTPUT, true )
+   EnableTopMenuItem( IDM_RESTOREMAIN, true )
+
+   CheckMarkTopMenuItem( IDM_VIEWEXPLORER, iif( IsWindowVisible(HWND_FRMEXPLORER), true, false ))
+   CheckMarkTopMenuItem( IDM_VIEWOUTPUT, iif( IsWindowVisible(HWND_FRMOUTPUT), true, false ))
+   CheckMarkTopMenuItem( IDM_FUNCTIONLIST, iif( IsWindowVisible(HWND_FRMFUNCTIONLIST), true, false ))
+
+   ' Enable or disable specific edit menu items (based on the currently active document)
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then exit function
+   
+   EnableTopMenuItem( IDM_FUNCTIONLIST, true )
+
+   For idMenu as long = IDM_ZOOMIN To IDM_RESTOREMAIN
+      EnableTopMenuItem( idMenu, true )
+   Next
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+function frmMain_ProjectTopMenuStates() as long
+   
+   ' Start off by disabling everything in order to make things easier. 
+   For idMenu as long = IDM_PROJECT_START To IDM_PROJECT_END
+      EnableTopMenuItem( idMenu, false )
+   Next
+
+   EnableTopMenuItem( IDM_PROJECTNEW, true )
+   EnableTopMenuItem( IDM_PROJECTOPEN, true )
+   EnableTopMenuItem( IDM_MRUPROJECT, true )
+
+   ' Check if a Project is open and active
+   Dim As Long fEnabled = Iif( gApp.IsProjectActive, true, false )
+   EnableTopMenuItem( IDM_PROJECTCLOSE, fEnabled )
+   EnableTopMenuItem( IDM_PROJECTSAVEAS, fEnabled )
+   EnableTopMenuItem( IDM_PROJECTSAVE, fEnabled )
+   EnableTopMenuItem( IDM_PROJECTFILESADD, fEnabled )
+   EnableTopMenuItem( IDM_PROJECTOPTIONS, fEnabled )
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+function frmMain_CompileTopMenuStates() as long
+   
+   ' Start off by disabling everything in order to make things easier. 
+   For idMenu as long = IDM_COMPILE_START To IDM_COMPILE_END
+      EnableTopMenuItem( idMenu, false )
+   Next
+
+   dim as boolean fEnabled = iif( gApp.IsProjectActive orelse cbool(gTTabCtl.GetItemCount), true, false )
+   EnableTopMenuItem( IDM_BUILDEXECUTE, fEnabled )
+   EnableTopMenuItem( IDM_COMPILE, fEnabled )
+   EnableTopMenuItem( IDM_REBUILDALL, fEnabled )
+   EnableTopMenuItem( IDM_COMMANDLINE, fEnabled )
+
+   ' QuickRun should be enabled for non-Projects
+   If gApp.IsProjectActive = false then 
+      if gTTabCtl.GetItemCount then EnableTopMenuItem( IDM_QUICKRUN, true )
+   end if
+   
+   ' Determine if an executable exists based on the current active file or project
+   dim as CWSTR wszRunFile = GetRunExecutableFilename()
+   If AfxFileExists(wszRunFile) Then EnableTopMenuItem( IDM_RUNEXE, true )
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+function frmMain_DesignerTopMenuStates() as long
+   
+   ' Start off by disabling everything in order to make things easier. 
+   For idMenu as long = IDM_DESIGNER_START To IDM_DESIGNER_END
+      EnableTopMenuItem( idMenu, false )
+   Next
+
+   EnableTopMenuItem( IDM_NEWFORM, true )
+
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then exit function
+
+   ' Enable if Visual Designer is active
+   if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
+      ' Enable Align, Horiz, Vert, and Same Size if more than 1 control is selected.
+      if pDoc->Controls.SelectedControlsCount > 1 then
+         for idMenu as long = IDM_ALIGN to IDM_SAMEBOTH
+            EnableTopMenuItem( idMenu, true )
+         next
+      end if
+      ' Enable Center in Form if control(s) are selected
+      if pDoc->Controls.SelectedControlsCount THEN
+         for idMenu as long = IDM_CENTER to IDM_CENTERBOTH
+            EnableTopMenuItem( idMenu, true )
+         next
+      end if
+      CheckMarkTopMenuItem( IDM_SNAPLINES, iif( pDoc->bSnapLines, true, false ) )
+      CheckMarkTopMenuItem( IDM_LOCKCONTROLS, iif( pDoc->bLockControls, true, false ) )
+      EnableTopMenuItem( IDM_TOGGLEVIEWCODE, true )
+   end if
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+function frmMain_HelpTopMenuStates() as long
+   
+   ' All Help menu items are always enabled
+   For idMenu as long = IDM_HELP_START To IDM_HELP_END
+      EnableTopMenuItem( idMenu, true )
+   Next
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Enable/Disable top menu items depending on application state
+' ========================================================================================
+Function frmMain_ChangeTopMenuStates() As Long
+   
+   select case GetDlgCtrlID( ghWndActiveMenuBarButton )
+      case IDC_MENUBAR_FILE:     frmMain_FileTopMenuStates()
+      case IDC_MENUBAR_EDIT:     frmMain_EditTopMenuStates()
+      case IDC_MENUBAR_SEARCH:   frmMain_SearchTopMenuStates()
+      case IDC_MENUBAR_VIEW:     frmMain_ViewTopMenuStates()
+      case IDC_MENUBAR_PROJECT:  frmMain_ProjectTopMenuStates()
+      case IDC_MENUBAR_COMPILE:  frmMain_CompileTopMenuStates()
+      case IDC_MENUBAR_DESIGNER: frmMain_DesignerTopMenuStates()
+      case IDC_MENUBAR_HELP:     frmMain_HelpTopMenuStates()
+   end select
+   
    Function = 0
 End Function
 
 
 ''
 ''
-private Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
+Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
                                             ByVal pDoc As clsDocument Ptr, _
                                             byval fSeparator as BOOLEAN, _
                                             byval fExplorerTreeview as BOOLEAN _
@@ -558,15 +353,24 @@ private Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
       Case FILETYPE_MODULE:   nFileType = messages(idx + 3)
       Case FILETYPE_NORMAL:   nFileType = messages(idx + 4)
    End Select
-   CheckMenuRadioItem( hPopupMenu, messages(idx + 0), messages(idx + 4), nFileType, MF_BYCOMMAND )
 
+   ' Some of our available chocies are affected by the fact that multiple selections
+   ' in the explorer listbox may exist. In that case, we a default FileType selection
+   ' only when the selection count is 1
+   dim as long nSelCount = SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_GETSELCOUNT, 0, 0 )
+   dim as long bAllowCheckMark = true
+   if (fExplorerTreeview = true) and (nSelCount > 1) then bAllowCheckMark = false 
+   if bAllowCheckMark then
+      CheckMenuRadioItem( hPopupMenu, messages(idx + 0), messages(idx + 4), nFileType, MF_BYCOMMAND )
+   end if
+   
    Function = 0
 End Function
 
 
 ''
 ''
-public Function CreateStatusBarFileTypeContextMenu() As HMENU
+Function CreateStatusBarFileTypeContextMenu() As HMENU
    Dim hPopUpMenu As HMENU
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
@@ -581,13 +385,13 @@ End Function
 
 ''
 ''
-public Function CreateStatusBarFileEncodingContextMenu() As HMENU
+Function CreateStatusBarFileEncodingContextMenu() As HMENU
    Dim hPopUpMenu As HMENU
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
       hPopUpMenu = CreatePopupMenu
-      ' winFBE forms must be UTF-16 so only allow other encodings for non-forms
+      ' WinFBE forms must be UTF-16 so only allow other encodings for non-forms
       if pDoc->IsDesigner = false then
          AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_ANSI, "ANSI"
          AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8BOM, "UTF-8 (BOM)"
@@ -609,12 +413,50 @@ End Function
 
 ''
 ''
-public Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
+Function CreateStatusBarSpacesContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then
+      hPopUpMenu = CreatePopupMenu
+      for i as long = 0 to 8
+         dim as long idMenu = IDM_SPACES + i
+         dim as CWSTR wszCaption = str(i)
+         if i = val(gConfig.TabSize) then wszCaption = wszCaption & "  (Current Tab Size)"
+         AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, idMenu, wszCaption
+      next
+      CheckMenuRadioItem( hPopupMenu, IDM_SPACES, IDM_SPACES+8, IDM_SPACES+gConfig.TabSize, MF_BYCOMMAND )
+   End If
+
+   Function = hPopupMenu
+End Function
+
+
+
+''
+''
+Function CreateStatusBarLineEndingsContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then
+      hPopUpMenu = CreatePopupMenu
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_EOLTOCRLF, L(36,"Convert to CRLF")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_EOLTOCR, L(37,"Convert to CR")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_EOLTOLF, L(38,"Convert to LF")
+   End If
+
+   Function = hPopupMenu
+End Function
+
+''
+''
+Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    Dim hPopUpMenu As HMENU
    Dim hPopUpSubMenu As HMENU
    Dim wszText As WString * MAX_PATH
-   Dim As Long CuriTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
-   Dim As Long MaxiTab = TabCtrl_GetItemCount(gTTabCtl.hWindow) - 1
+   Dim As Long CuriTab = gTTabCtl.CurSel
+   Dim As Long MaxiTab = gTTabCtl.GetItemCount - 1
 
    hPopUpMenu = CreatePopupMenu
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
@@ -643,51 +485,7 @@ End Function
 
 ''
 ''
-public Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
-   
-   Dim wszText As WString * MAX_PATH
-   Dim hPopUpMenu As HMENU = CreatePopupMenu()
-
-   ' if pDoc is zero then most likely we have right clicked on a Project or FILES root node
-   if pDoc = 0 THEN
-      If gApp.IsProjectActive = True Then
-         dim as hwnd hTree = GetDlgItem( hWnd_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-         dim as HTREEITEM hNode = Treeview_GetSelection(hTree)
-         if gApp.hExplorerRootNode = hNode THEN
-            wszText = L(207,"Add Files to Project")
-            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, wszText )
-         END IF
-      END IF
-   else
-      If gApp.IsProjectActive Then
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPEN_EXPLORERTREEVIEW,   L(75,"Open") 
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
-         if gTTabCtl.GetTabIndexByDocumentPtr( pDoc ) <> -1 then
-            AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE_EXPLORERTREEVIEW,  L(5,"Close") 
-            AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
-         end if
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE_EXPLORERTREEVIEW,   L(7,"Save") 
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS_EXPLORERTREEVIEW, L(8,"Save As") 
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
-         wszText = L(190,"Remove from project") 
-         AppendMenu( hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT_EXPLORERTREEVIEW, wszText )
-         AddProjectFileTypesToMenu(hPopUpMenu, pDoc, true, true)
-      Else
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE_EXPLORERTREEVIEW,  L(5,"Close") 
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE_EXPLORERTREEVIEW,   L(7,"Save") 
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS_EXPLORERTREEVIEW, L(8,"Save As") 
-      End If
-   END IF
-
-   Function = hPopupMenu
- 
-End Function
-
-
-''
-''
-public Function CreateScintillaContextMenu() As HMENU
+Function CreateScintillaContextMenu() As HMENU
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then Exit Function
@@ -737,6 +535,72 @@ public Function CreateScintillaContextMenu() As HMENU
    
    Function = hPopupMenu
 
+End Function
+
+
+
+''
+''
+Function CreateExplorerContextMenu(ByVal pDoc As clsDocument Ptr ) As HMENU
+   
+   Dim wszText As WString * MAX_PATH
+   Dim hPopUpMenu As HMENU = CreatePopupMenu()
+
+   ' Some of our available chocies are affected by the fact that multiple selections
+   ' in the explorer listbox may exist. In that case, we allow options like "Close"
+   ' and also don't set a selected FileType.
+   dim as long nSelCount = SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_GETSELCOUNT, 0, 0 )
+
+   ' if pDoc is zero then most likely we have right clicked on a Project or FILES root node
+   if pDoc THEN
+      If gApp.IsProjectActive Then
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPEN_EXPLORERLISTBOX,   L(75,"Open") 
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+         if (gTTabCtl.GetTabIndexByDocumentPtr( pDoc ) <> -1) orelse (nSelCount > 0) then
+            AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE_EXPLORERLISTBOX,  L(5,"Close") 
+            AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+         end if
+         if nSelCount = 1 then
+            AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE_EXPLORERLISTBOX,   L(7,"Save") 
+            AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS_EXPLORERLISTBOX, L(8,"Save As") 
+            AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+         end if
+         wszText = L(190,"Remove from project") 
+         AppendMenu( hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT_EXPLORERLISTBOX, wszText )
+         AddProjectFileTypesToMenu(hPopUpMenu, pDoc, true, true)
+      Else
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE_EXPLORERLISTBOX,  L(5,"Close") 
+         if nSelCount = 1 then
+            AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+            AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE_EXPLORERLISTBOX,   L(7,"Save") 
+            AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS_EXPLORERLISTBOX, L(8,"Save As") 
+         end if
+      End If
+   END IF
+
+   Function = hPopupMenu
+ 
+End Function
+
+''
+''
+Function CreateTopTabsActionButtonContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   dim as CWSTR wszCaption
+   
+   ' List all of the Top Tab open tabs in the popup menu. Simply use the array
+   ' index as the ID because the calling program will use this ID to set the
+   ' gTTabCtl.CurSel. Must add 1 to idMenu because Win32 returns 0 if the popup
+   ' menu is cancelled.
+   hPopUpMenu = CreatePopupMenu
+   for idMenu as long = 0 to gTTabCtl.GetItemCount - 1
+      wszCaption = gTTabCtl.tabs(idMenu).wszText
+      AppendMenu( hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, idMenu + 1, wszCaption )
+   next
+   ' Check the item that is the currently active tab (1 based)
+   CheckMenuRadioItem( hPopupMenu, 1, gTTabCtl.GetItemCount, gTTabCtl.CurSel+1, MF_BYCOMMAND )
+
+   Function = hPopupMenu
 End Function
 
 

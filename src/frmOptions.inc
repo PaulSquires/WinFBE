@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include once "frmOptionsColors.bi"
 #include once "frmOptionsLocal.bi"
 #include once "frmOptionsKeywords.bi"
+#include once "frmOptionsKeywordsWinApi.bi"
 #include once "frmMain.bi"
 
 #include once "clsConfig.bi"
@@ -38,8 +39,7 @@ private function frmOptions_SaveEditorOptions() as long
    gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE) )
    gConfig.CloseFuncList        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST) )
    gConfig.AskExit              = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT) )
-   gConfig.HideToolbar          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR) )
-   gConfig.HideStatusbar        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR) )
+   gConfig.RestoreSession       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKRESTORESESSION) )
    gConfig.CheckForUpdates      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKUPDATES) )
    gConfig.EnableProjectCache   = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKPROJECTCACHE) )
 
@@ -88,34 +88,36 @@ private function frmOptions_SaveEditorOptions() as long
    gConfig.LocalizationFile = wText
    
    
-   ' COLOR/FONT OPTIONS
+   ' THEME COLOR/FONT OPTIONS
    HWnd = HWND_FRMOPTIONSCOLORS
-   ' Copy the temporary items to the main array  
-   redim gConfig.Themes(ubound(gConfig.ThemesTemp))
-   for i as long = lbound(gConfig.ThemesTemp) to ubound(gConfig.ThemesTemp)
-      gConfig.Themes(i) = gConfig.ThemesTemp(i)   
-   NEXT
-   dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
-   Dim As Long idxTheme = Combobox_GetCurSel( hWndCombo )
-   gConfig.SelectedTheme = gConfig.ThemesTemp(idxTheme).id
-   erase gConfig.ThemesTemp
 
    Dim idx As Long 
+   idx = ListBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_LSTTHEMES) )
+   if idx >= lbound(gThemeFilenames) and idx <= ubound(gThemeFilenames) then
+      gConfig.ThemeFilename = gThemeFilenames(idx)
+   end if   
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME) )
    gConfig.EditorFontname = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), idx )
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE) )
    gConfig.EditorFontSize = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE), idx )  
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET) )
    gConfig.EditorFontCharSet = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET), idx )
+   gConfig.FontExtraSpace = AfxGetWindowText( GetDlgItem( HWnd, IDC_FRMOPTIONSCOLORS_TXTEXTRASPACE))
    
    
    ' COMPILER OPTIONS
    HWnd = HWND_FRMOPTIONSCOMPILER
-   gConfig.FBWINCompiler32  = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN32) )
-   gConfig.FBWINCompiler64  = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN64) )
+   
+   ' Get the selected toolchain and then build the paths to the compilers
+   dim as CWSTR wszPath
+   idx = ListBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_LSTTOOLCHAINS) )
+   if idx <> -1 then
+      wszPath = AfxGetExePathName + "Toolchains\" + AfxGetListBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_LSTTOOLCHAINS), idx )
+      gConfig.FBWINCompiler32 = wszPath + "\fbc32.exe"
+      gConfig.FBWINCompiler64 = wszPath + "\fbc64.exe"
+   end if
    gConfig.CompilerSwitches = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBSWITCHES) )
    gConfig.CompilerHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE) )
-   gConfig.Win32APIHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH) )
    gConfig.WinFBXHelpfile   = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWINFBXHELPPATH) )
    gConfig.RunViaCommandWindow = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW) )
    gConfig.DisableCompileBeep = Button_GetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_CHKDISABLECOMPILEBEEP) )
@@ -130,6 +132,16 @@ private function frmOptions_SaveEditorOptions() as long
       GetWindowText( hTextBox, pzswKeywords, nLen )
       Dim As String FBKeywords = Str(*pzswKeywords)
       gConfig.FBKeywords = Trim(FBKeywords)
+      gConfig.SaveKeywords
+      Deallocate(pzswKeywords)
+
+      HWnd = HWND_FRMOPTIONSKEYWORDSWINAPI
+      hTextBox = GetDlgItem(HWnd, IDC_FRMOPTIONSKEYWORDSWINAPI_TXTKEYWORDS)
+      nLen = GetWindowTextLength(hTextBox) + 2  ' add space for ending nuls
+      pzswKeywords  = CAllocate(nLen*2)
+      GetWindowText( hTextBox, pzswKeywords, nLen )
+      Dim As String WinApiKeywords = Str(*pzswKeywords)
+      gConfig.WinApiKeywords = Trim(WinApiKeywords)
       gConfig.SaveKeywords
       Deallocate(pzswKeywords)
    End If
@@ -152,9 +164,10 @@ End function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmOptions
 ' ========================================================================================
-private Function frmOptions_OnCreate( ByVal HWnd As HWnd, _
-                                      ByVal lpCreateStructPtr As LPCREATESTRUCT _
-                                      ) As BOOLEAN
+Function frmOptions_OnCreate( _
+            ByVal HWnd As HWnd, _
+            ByVal lpCreateStructPtr As LPCREATESTRUCT _
+            ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -170,11 +183,12 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOptions
 ' ========================================================================================
-private Function frmOptions_OnCommand( ByVal HWnd As HWnd, _
-                                       ByVal id As Long, _
-                                       ByVal hwndCtl As HWnd, _
-                                       ByVal codeNotify As UINT _
-                                       ) As LRESULT
+Function frmOptions_OnCommand( _
+            ByVal HWnd As HWnd, _
+            ByVal id As Long, _
+            ByVal hwndCtl As HWnd, _
+            ByVal codeNotify As UINT _
+            ) As LRESULT
 
    Select Case id
       
@@ -189,13 +203,13 @@ private Function frmOptions_OnCommand( ByVal HWnd As HWnd, _
                pDoc->ApplyProperties
                pDoc = pDoc->pDocNext
             loop   
-            SendMessage HWnd, WM_CLOSE, 0, 0
+            SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          End If
       
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
-            SendMessage HWnd, WM_CLOSE, 0, 0
+            SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          End If
    
@@ -208,10 +222,11 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmOptions
 ' ========================================================================================
-private Function frmOptions_OnNotify( ByVal HWnd As HWnd, _
-                                      ByVal id As Long, _
-                                      ByVal pNMHDR As NMHDR Ptr _
-                                      ) As LRESULT
+Function frmOptions_OnNotify( _
+            ByVal HWnd As HWnd, _
+            ByVal id As Long, _
+            ByVal pNMHDR As NMHDR Ptr _
+            ) As LRESULT
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
     
@@ -242,7 +257,7 @@ private Function frmOptions_OnNotify( ByVal HWnd As HWnd, _
                   AfxSetWindowText( hLabel, " " & L(110,"Code Editor")) 
                   hForm = HWND_FRMOPTIONSEDITOR2
                Case 3
-                  AfxSetWindowText( hLabel, " " & L(111,"Colors and Fonts") )
+                  AfxSetWindowText( hLabel, " " & L(111,"Themes and Fonts") )
                   hForm = HWND_FRMOPTIONSCOLORS
                Case 4
                   AfxSetWindowText( hLabel, " " & L(112,"Compiler Setup") )
@@ -253,6 +268,9 @@ private Function frmOptions_OnNotify( ByVal HWnd As HWnd, _
                Case 6
                   AfxSetWindowText( hLabel, " " & L(177,"FreeBASIC Keywords") )
                   hForm = HWND_FRMOPTIONSKEYWORDS
+               Case 7
+                  AfxSetWindowText( hLabel, " " & L(435,"Windows Api Keywords") )
+                  hForm = HWND_FRMOPTIONSKEYWORDSWINAPI
             End Select
              
             ' Save the most recently opened tree branch 
@@ -283,11 +301,12 @@ End Function
 ' ========================================================================================
 ' Process WM_CTLCOLORSTATIC message for window/dialog: frmOptions
 ' ========================================================================================
-private Function frmOptions_OnCtlColorStatic( byval HWnd As HWnd, _
-                                              byval hdc As HDC, _
-                                              byval hWndChild As HWnd, _
-                                              byval nType As Long _
-                                              ) As HBRUSH
+Function frmOptions_OnCtlColorStatic( _
+            byval HWnd As HWnd, _
+            byval hdc As HDC, _
+            byval hWndChild As HWnd, _
+            byval nType As Long _
+            ) As HBRUSH
 
    if hWndChild = GetDlgItem( HWnd, IDC_FRMOPTIONS_LBLCATEGORY ) then
       ' Set the category label to blue text 
@@ -303,7 +322,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmOptions
 ' ========================================================================================
-private Function frmOptions_OnClose( byval HWnd As HWnd ) As LRESULT
+Function frmOptions_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
@@ -314,7 +333,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmOptions
 ' ========================================================================================
-private Function frmOptions_OnDestroy( byval HWnd As HWnd ) As LRESULT
+Function frmOptions_OnDestroy( byval HWnd As HWnd ) As LRESULT
    Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOPTIONS_LBLCATEGORY))
    DeleteFont(hFont)
    PostQuitMessage(0)
@@ -325,11 +344,12 @@ End Function
 ' ========================================================================================
 ' frmOptions Window procedure
 ' ========================================================================================
-private Function frmOptions_WndProc( ByVal HWnd   As HWnd, _
-                                     ByVal uMsg   As UINT, _
-                                     ByVal wParam As WPARAM, _
-                                     ByVal lParam As LPARAM _
-                                     ) As LRESULT
+Function frmOptions_WndProc( _
+            ByVal HWnd   As HWnd, _
+            ByVal uMsg   As UINT, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmOptions_OnCreate)
@@ -390,7 +410,7 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    gConfig.LoadConfigFile()
 
    ' Configure the TreeView
-   Dim hItems(6) As HTREEITEM 
+   Dim hItems(7) As HTREEITEM 
    hItems(0) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(226,"General Options"),    0)
    hItems(1) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        1)
    hItems(2) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        2)
@@ -398,6 +418,7 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    hItems(4) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     4)
    hItems(5) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       5)
    hItems(6) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 6)
+   hItems(7) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(435,"Windows API Keywords"), 7)
 
    ' Load all of the child dialogs
    frmOptionsGeneral_Show( pWindow->hWindow )
@@ -407,6 +428,7 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    frmOptionsCompiler_Show( pWindow->hWindow )
    frmOptionsLocal_Show( pWindow->hWindow )
    frmOptionsKeywords_Show( pWindow->hWindow )
+   frmOptionsKeywordsWinApi_Show( pWindow->hWindow )
 
    ' Select the most previously open tree branch or first item "Code Editor" by default.
    TreeView_SelectItem( hWndTreeview, hItems(OptionsDialogLastOpened) )
@@ -427,6 +449,7 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOMPILER):  Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSLOCAL):     Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDS):  Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDSWINAPI):  Delete pWindow
 
 End Function
 

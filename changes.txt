@@ -1,3 +1,38 @@
+Version 3.0.0
+Editor:
+- Complete re-write of main editor UI to have a look and feel more in line with modern code editors.
+- Updated to Scintilla Version 5.1.5 (Dec 7, 2021). Also, switched to use Lexilla.dll with custom lexer called lexWinFBE that handles the FreeBasic lexing.
+- All new Theme system. All colors (RGB) can be edited in external .theme files found in the \themes folder.
+- Added Windows API keywords and syntax highlighting.
+- New option to save/restore "session". Allow reloading and showing of files active during most previous editor use. Will reload a project should a project had been active. Editor state (open windows, editing position, selected compiler, etc) is saved and restored. 
+- Added Environment option to automatically load the last used Session file when the editor starts. If the last Session saved was a Project, then the project will be loaded.
+- New keyboard binding mapping allowing the user to choose their own keyboard shortcuts for various editor functions. 
+- New Auto Save functionality. When enabled, unsaved files will be periodically saved to temporary files. In the event of crash, these files will be ask to be used when the editor next attempts to load the crashed file.
+- New Font option (Environment Options / Colors and Fonts) to allow for extra spacing between editor lines on screen.
+- Re-worked portions of Code Folding to make it visually more appealing.
+- Changed some default Code Folding keyboard shortcuts because "Alt" based shortcut would sometimes invoke Windows system functionality.
+- Changed logic of "Toggle Current and All Below" folding to now work on fold levels inside a function that of greater depth than the fold level being toggle. Previously, this function only worked on base level fold points (basically, the sub/function line and all other sub/functions below it in the source code). This new logic makes it easier to fold/unfold code blocks from deep with a particular function making it somewhat more usable in practice than the old logic.
+- Greatly increased the Font selector combobox (Environment Options / Colors and Fonts) so it should be easier now to pick fonts that have long descriptive names.
+- Multiple code editor text selections is now enabled. Hold CTRL and highlight multiple areas of text.
+- Editor will try to gracefully fallback amongst various monospaced fonts should the previously selected font in the config file no longer exist. This can occur, for example, if you switch to different computers without the same fonts installed, or you switch between Windows and Linux (Wine).
+- Replace All actions are now batched allowing Ctrl+Z Undo to undo all of the changes made, not just the last one.
+- Changed Replace keyboard short from Ctrl+R to Ctrl+H to be in line with the vast number of other editors that use the Ctrl+H shortcut.
+- Added the forward slash ('/') key shortcut for commenting lines (in addition to the current 'B' key option).
+- Removed the ancient Win32 api help file and the menu option to invoke it.
+- Removed main editor Toolbar to be consistent with most other modern editors that have foregone the use of a dedicated toolbar.
+- When files added to a Project, newly added *.BAS files are now treated as NORMAL rather than MODULE files.
+- Tweaked "Check for Updates" to provide more reliable reporting in the event of failure to retrieve information from the server.
+- Tweaked the F3 and Shift+F3 accelerator that will Find Next/Prev the last highlighted search text. It is now more consistent by not being reset to a different search term under some situations.
+- Re-worked the Find/Replace popup dialog to be visually more appealing and to work better with keyboard. Added keyboard shortcuts for some find/replace actions (for example, Ctrl+Alt+Enter to Replace All).
+- Added keyboard shortcut "CTRL+~" (ctrl+tilde) to allow you to move keyboard focus back to the active editing window. This is useful, for example, for jumping between the editing window and the Find/Replace dialog.
+- Added keyboard shortcuts to move to next and move to previous compiler errors. This is a quick way to jump to and fix errors without having to use your mouse to double click the compiler error message in the Output window.
+- The Explorer window now allows for multiple nodes to be selected (via Ctrl or Shift) and to popup right-click menu to perform actions on the group of selected nodes (for example, to re-designate files to different FileTypes, etc).
+
+
+Visual Designer:
+- New control property hWindowToolTip which will retrieve the windows handle for any tooltip created for a control.
+
+
 Version 2.2.0 (March 26, 2021)
 - Previous upload for version 2.1.9 did not include GCC toolchain for 32-bit FBC. It is now included so you can use the -gen gcc compiler flag to create 32-bit programs.
 

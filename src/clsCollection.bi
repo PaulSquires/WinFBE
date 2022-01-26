@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -16,15 +16,15 @@
 #include once "clsControl.bi"
 
 
-Type clsCollection
-   Private:
-      Dim _arrControls(Any) As clsControl Ptr
+type clsCollection
+   private:
+      dim _arrControls(any) as clsControl ptr
       
-   Public:
-      Declare Property Count() As Long
-      Declare Property ItemFirst() As Long
-      Declare Property ItemLast() As Long
-      Declare Function ItemAt( ByVal nIndex As Long ) As clsControl Ptr 
+   public:
+      declare property Count() as long
+      declare property ItemFirst() as long
+      declare property ItemLast() as long
+      declare function ItemAt( byval nIndex as long ) as clsControl ptr 
       declare function DeselectAllControls() as long
       declare function SelectAllControls() as long
       declare function SelectControl( byval hWndCtrl as hwnd) as long
@@ -32,10 +32,10 @@ Type clsCollection
       declare function SetActiveControl( byval hWndCtrl as hwnd) as long
       declare function GetActiveControl() as clsControl ptr
       declare function GetCtrlPtr( byval hWndCtrl as hwnd) as clsControl ptr
-      Declare Function Add( ByVal pCtrl As clsControl Ptr ) As Long
+      declare function Add( byval pCtrl as clsControl ptr ) as long
       declare function Remove( byval pCtrl as clsControl ptr ) as long
       declare function Debug() as long
-      Declare Constructor
-      Declare Destructor
-End Type
+      declare constructor
+      declare destructor
+end type
 
