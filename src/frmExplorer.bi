@@ -23,17 +23,6 @@ declare function frmExplorer_SelectItemData( byval pDoc as clsDocument ptr ) as 
 declare function frmExplorerVScroll_Show( byval hWndParent as HWnd ) as LRESULT
 declare function frmExplorerVScroll_PositionWindows( byval nShowState as long ) as LRESULT
 
-' NOTE: These node types are different values than the FileType defines from
-' the cldDocument.bi file so we could not reuse those equates. These nodetype
-' equates defined the order in which the files will be displayed in the 
-' explorer listbox.
- #define NODETYPE_MAIN              0    ' when no project open then this is just all files (UNDEFINED)
- #define NODETYPE_RESOURCE          1
- #define NODETYPE_HEADER            2
- #define NODETYPE_MODULE            3
- #define NODETYPE_NORMAL            4
-dim shared gExplorerNodeShow( NODETYPE_MAIN to NODETYPE_NORMAL ) as boolean
-
 type EXPLORER_VSCROLL_TYPE
    listBoxHeight as long
    numItems as long 

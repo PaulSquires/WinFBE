@@ -49,8 +49,10 @@ function frmExplorer_SelectItemData( byval pDoc as clsDocument ptr ) as boolean
       end if   
    next 
 
-   ListBox_SetSel( HWND_FRMEXPLORER_LISTBOX, true, idx )
-   AfxRedrawWindow( HWND_FRMEXPLORER_LISTBOX )
+   if idx <> -1 then
+      ListBox_SetSel( HWND_FRMEXPLORER_LISTBOX, true, idx )
+      AfxRedrawWindow( HWND_FRMEXPLORER_LISTBOX )
+   end if
    
    if idx >= 0 then function = true   
 end function
@@ -544,6 +546,8 @@ function frmExplorerListBox_SubclassProc ( _
                        IDM_SETFILEHEADER_EXPLORERTREEVIEW, IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
                        IDM_SETFILENORMAL_EXPLORERTREEVIEW 
                        OnCommand_ProjectSetFileType( id, pDocArray(i) )
+                  case is > IDM_SETCATEGORY     
+                       OnCommand_ProjectSetFileType( id, pDocArray(i) )
                end select
             next
             LoadExplorerFiles()
@@ -566,7 +570,7 @@ function frmExplorerListBox_SubclassProc ( _
             if left(wszCaption, 1) = "%" then
                ' Toggle the show/hide of files under this node
                dim as long idxArray = val(mid(wszCaption, 2, 1))
-               gExplorerNodeShow(idxArray) = not gExplorerNodeShow(idxArray)
+               gConfig.Cat(idxArray).bShow = not gConfig.Cat(idxArray).bShow
                ' allow listbox click event to fully process before loading new explorer files
                ' so that we can correctly select the current item.
                PostMessage( hWin, MSG_USER_LOAD_EXPLORERFILES, 0, 0 )
@@ -705,75 +709,57 @@ function LoadExplorerFiles() as long
    
    ' Add the list of filenames (allow the treeview to sort the data for us)
    dim as HTREEITEM hParent
-   dim as long p
+   dim as long p, nStart, nEnd
    dim wszText as wstring * MAX_PATH
 
-   redim hRootNodes(any) as HTREEITEM
-   
-   '#define NODETYPE_MAIN              0
-   '#define NODETYPE_RESOURCE          1
-   '#define NODETYPE_HEADER            2
-   '#define NODETYPE_MODULE            3
-   '#define NODETYPE_NORMAL            4
+   '#define NODETYPE_FILES             0
+   '#define NODETYPE_MAIN              1
+   '#define NODETYPE_RESOURCE          2
+   '#define NODETYPE_HEADER            3
+   '#define NODETYPE_MODULE            4
+   '#define NODETYPE_NORMAL            5
 
    if gApp.IsProjectActive then
-      redim hRootNodes(4) as HTREEITEM
-      hRootNodes(0) = gApp.hExplorerMainNode          
-      hRootNodes(1) = gApp.hExplorerResourceNode      
-      hRootNodes(2) = gApp.hExplorerHeaderNode        
-      hRootNodes(3) = gApp.hExplorerModuleNode        
-      hRootNodes(4) = gApp.hExplorerNormalNode        
+      nStart = NODETYPE_MAIN
+      nEnd = ubound(gConfig.Cat)
    else   
-      redim hRootNodes(0) as HTREEITEM
-      hRootNodes(0) = gApp.hExplorerFilesNode
+      ' no project active so just "files"
+      nStart = NODETYPE_FILES
+      nEnd = NODETYPE_FILES
    end if
-   
-   for ii as long = lbound(hRootNodes) to ubound(hRootNodes)
 
+   for ii as long = nStart to nEnd
       ' The node header description starts with a % in order for the
       ' drawing routine to know that it is a node header and not a
       ' regular file.
       ' e.g.
-      '       %0%1%Main
-      '       %1%1%Resource
-      '       %2%0%Header
-      '       %3%0%Module
-      '       %4%1%Normal
-      ' The value after the % is the array index into gExplorerNodeShow
+      '       %0%1%Files
+      '       %1%1%Main
+      '       %2%1%Resource
+      '       %3%0%Header
+      '       %4%0%Module
+      '       %5%1%Normal
+      ' The value after the % is the array index into gConfig.Cat(i).bShow
       ' that allows the mouse routines to toggle on/off displaying of
       ' the files. The value after the second % indicates to the drawing 
       ' routine that files exist ("1") under the node, or ("0") that 
-      ' no files exist. This wil then dictate what icon to show next
+      ' no files exist. This will then dictate what icon to show next
       ' to the line.
-      
       wszText = "%" & ii & "%"
-      if gExplorerNodeShow(ii) = false then 
-         wszText = wszText & "0" & "%"
+      if gConfig.Cat(ii).bShow = false then 
+         wszText = wszText & "0" & "%" & gConfig.Cat(ii).wszDescription
       else   
-         wszText = wszText & "1" & "%"
+         wszText = wszText & "1" & "%" & gConfig.Cat(ii).wszDescription
       end if
 
-      select case ii
-         case NODETYPE_MAIN
-            if gApp.IsProjectActive then
-               wszText = wszText & L(212, "Main")
-            else   
-               wszText = wszText & L(2, "File")
-            end if   
-         case NODETYPE_RESOURCE: wszText = wszText & L(213, "Resource")
-         case NODETYPE_HEADER:   wszText = wszText & L(175, "Header")
-         case NODETYPE_MODULE:   wszText = wszText & L(211, "Module")
-         case NODETYPE_NORMAL:   wszText = wszText & L(210, "Normal")
-      end select
-      
+      ' Add the header description to the listbox
       p = Listbox_AddString( hList, @wszText )
 
-      ' Check the global array gExplorerNodeShow to see if these types
-      ' of files should be loaded into the listbox.
-      if gExplorerNodeShow(ii) = false then continue for
+      ' Check to see if these types of files should be loaded into the listbox.
+      if gConfig.Cat(ii).bShow = false then continue for
       
-      Treeview_SortChildren( hTree, hRootNodes(ii), 0 )
-      hParent = Treeview_GetChild( hTree, hRootNodes(ii))
+      Treeview_SortChildren( hTree, gConfig.Cat(ii).hNodeExplorer, 0 )
+      hParent = Treeview_GetChild( hTree, gConfig.Cat(ii).hNodeExplorer)
       do until hParent = 0 
          ' Filename
          Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
@@ -801,8 +787,10 @@ function LoadExplorerFiles() as long
 
    ' Set current selection to the item that was selected  prior
    ' to us reloading the listbox
-   ListBox_SetSel( hList, true, idxRestore )
-   AfxRedrawWindow(hList)
+   if idxRestore <> -1 then
+      ListBox_SetSel( hList, true, idxRestore )
+      AfxRedrawWindow(hList)
+   end if
 
    ' Determine if the VScroll bar has changed size or is now hidden/shown
    frmExplorerVScroll_PositionWindows( SW_HIDE )

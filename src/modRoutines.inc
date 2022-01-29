@@ -644,6 +644,13 @@ function OpenSelectedDocument( _
             frmMain_PositionWindows
          end if   
       end if
+
+      ' If this was a previously saved project/session file that may have had an active
+      ' Scintilla at one point then bookmarks/foldpoints may have existed. Now that the
+      ' document is finally being opened then we can try to restore those states.
+      pDoc->SetBookmarks(pDoc->wszOnLoadBookmarks)
+      pDoc->SetFoldPoints(pDoc->wszOnLoadFoldPoints)
+
       ' Do not reposition if incoming LineNumber is -1 because that value represents
       ' the caller specifically not wanting a repositioning.
       if nLineNumber <> -1 then 

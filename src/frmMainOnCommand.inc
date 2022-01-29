@@ -137,7 +137,7 @@ Function frmMain_OnCommand( _
       case IDM_BUILDCONFIG:        frmBuildConfig_Show( HWND ) 
       case IDM_USERTOOLSDIALOG:    frmUserTools_Show( HWND ) 
       case IDM_USERSNIPPETS:       frmSnippets_Show( HWND ) 
-'      case IDM_CATEGORIES:         frmCategories_Show( HWND ) 
+      case IDM_CATEGORIES:         frmCategories_Show( HWND ) 
       Case IDM_MRUCLEAR:           ClearMRUlist( id )
 
       Case IDM_MRUBASE To (IDM_MRUBASE + 10)

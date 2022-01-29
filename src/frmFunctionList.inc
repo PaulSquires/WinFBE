@@ -503,20 +503,48 @@ public function frmFunctionList_CreateSpecialNodes() as HTREEITEM
    ' Add the subnodes for the various file types
    gApp.hExplorerFilesNode = _
       TreeView_AppendItem( hTV, gApp.hExplorerRootNode, "Files", cast(LPARAM, 0) )
+      gConfig.Cat(NODETYPE_FILES).wszDescription = L(2, "File")
+      gConfig.Cat(NODETYPE_FILES).hNodeExplorer = gApp.hExplorerFilesNode
+      gConfig.Cat(NODETYPE_FILES).bShow = true
+      
    gApp.hExplorerMainNode = _
       TreeView_AppendItem( hTV, gApp.hExplorerRootNode, "Main", cast(LPARAM, 0) )
+      gConfig.Cat(NODETYPE_MAIN).wszDescription = L(212, "Main")
+      gConfig.Cat(NODETYPE_MAIN).hNodeExplorer = gApp.hExplorerMainNode
+      gConfig.Cat(NODETYPE_MAIN).bShow = true
+
    gApp.hExplorerResourceNode = _
       TreeView_AppendItem( hTV, gApp.hExplorerRootNode, "Resource", cast(LPARAM, 0) )
+      gConfig.Cat(NODETYPE_RESOURCE).wszDescription = L(213, "Resource")
+      gConfig.Cat(NODETYPE_RESOURCE).hNodeExplorer = gApp.hExplorerResourceNode
+      gConfig.Cat(NODETYPE_RESOURCE).bShow = true
+
    gApp.hExplorerHeaderNode = _
       TreeView_AppendItem( hTV, gApp.hExplorerRootNode, "Header", cast(LPARAM, 0) )
+      gConfig.Cat(NODETYPE_HEADER).wszDescription = L(175, "Header")
+      gConfig.Cat(NODETYPE_HEADER).hNodeExplorer = gApp.hExplorerHeaderNode
+      gConfig.Cat(NODETYPE_HEADER).bShow = true
+
    gApp.hExplorerModuleNode = _
       TreeView_AppendItem( hTV, gApp.hExplorerRootNode, "Module", cast(LPARAM, 0) )
+      gConfig.Cat(NODETYPE_MODULE).wszDescription = L(211, "Module")
+      gConfig.Cat(NODETYPE_MODULE).hNodeExplorer = gApp.hExplorerModuleNode
+      gConfig.Cat(NODETYPE_MODULE).bShow = true
+
    gApp.hExplorerNormalNode = _
       TreeView_AppendItem( hTV, gApp.hExplorerRootNode, "Normal", cast(LPARAM, 0) )
+      gConfig.Cat(NODETYPE_NORMAL).wszDescription = L(210, "Normal")
+      gConfig.Cat(NODETYPE_NORMAL).hNodeExplorer = gApp.hExplorerNormalNode
+      gConfig.Cat(NODETYPE_NORMAL).bShow = true
 
-   ' reset array that determines which Explorer nodes to display
-   for i as long = lbound(gExplorerNodeShow) to ubound(gExplorerNodeShow)
-      gExplorerNodeShow(i) = true
+   for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
+      ' User defined categories will have an GUID id. Starts with an {
+      if left(gConfig.Cat(i).id, 1) = "{" then
+         gConfig.Cat(i).hNodeExplorer = _
+            TreeView_AppendItem( hTV, gApp.hExplorerRootNode, gConfig.Cat(i).wszDescription, cast(LPARAM, 0) )
+         gConfig.Cat(i).hNodeExplorer = gConfig.Cat(i).hNodeExplorer
+         gConfig.Cat(i).bShow = true
+      end if
    next
 
    function = 0
@@ -526,15 +554,15 @@ end function
 ' ========================================================================================
 ' Get the special subnode based on the filetype
 ' ========================================================================================
-public function frmFunctionList_GetSpecialNode( byval nFileType as long ) as HTREEITEM
+public function frmFunctionList_GetSpecialNode( byval wszFileType as CWSTR ) as HTREEITEM
    
-   dim hRootNode as HTREEITEM
+   dim hRootNode as HTREEITEM = 0
    
    ' If project is not active then we retrieve the data from the Files node
    if gApp.IsProjectActive = false then hRootNode = gApp.hExplorerFilesNode
 
    ' Add the pDoc to the node depending on what file type it is.
-   select case nFileType
+   select case wszFileType
       case FILETYPE_UNDEFINED
          if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
             hRootNode = gApp.hExplorerNormalNode
@@ -544,6 +572,13 @@ public function frmFunctionList_GetSpecialNode( byval nFileType as long ) as HTR
       case FILETYPE_NORMAL:    hRootNode = gApp.hExplorerNormalNode
       case FILETYPE_RESOURCE:  hRootNode = gApp.hExplorerResourceNode
       case FILETYPE_HEADER:    hRootNode = gApp.hExplorerHeaderNode
+      case else
+         for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
+            if gConfig.Cat(i).id = wszFileType then
+               hRootNode = gConfig.Cat(i).hNodeExplorer
+               exit for
+            end if 
+         next
    end select
 
    function = hRootNode

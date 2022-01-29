@@ -1141,6 +1141,21 @@ function clsConfig.SaveConfigFile() as long
    
 
    pStream.WriteLine ""
+   pStream.WriteLine "[Categories]"  
+   dim as long nNext = 0
+   for i as long = lbound(this.Cat) to ubound(this.Cat)
+      if left(this.Cat(i).wszDescription, 2) <> "%%" then
+         if trim(this.Cat(i).wszDescription) <> "" then
+            pStream.Write "CATEGORY_" & right("00" & str(nNext), 2) & "="
+            pStream.Write this.Cat(i).id & "|-|"
+            pStream.WriteLine this.Cat(i).wszDescription
+            nNext = nNext + 1
+         end if
+      end if   
+   next
+   pStream.WriteLine ""
+   
+   pStream.WriteLine ""
    pStream.WriteLine "[UserTools]"  
    for i as long = lbound(this.Tools) to ubound(this.Tools)
       pStream.Write "USERTOOL_" & right("00" & str(i), 2) & "="
@@ -1322,6 +1337,29 @@ function clsConfig.SaveSnippets() as long
    function = 0
 end function
 
+   
+''
+''  Set default values for Explorer Categories should none exist
+''
+function clsConfig.SetCategoryDefaults() as long
+   if ubound(this.Cat) = -1 then
+      redim this.Cat(5)
+      this.Cat(0).id = wstr(NODETYPE_FILES)
+      this.Cat(0).wszDescription = L(2, "File")
+      this.Cat(1).id = wstr(NODETYPE_MAIN)
+      this.Cat(1).wszDescription = L(212, "Main")
+      this.Cat(2).id = wstr(NODETYPE_RESOURCE)
+      this.Cat(2).wszDescription = L(213, "Resource")
+      this.Cat(3).id = wstr(NODETYPE_HEADER)
+      this.Cat(3).wszDescription = L(175, "Header")
+      this.Cat(4).id = wstr(NODETYPE_MODULE)
+      this.Cat(4).wszDescription = L(211, "Module")
+      this.Cat(5).id = wstr(NODETYPE_NORMAL)
+      this.Cat(5).wszDescription = L(210, "Normal")
+   end if
+   function = 0
+end function
+
 
 ''
 ''  LOAD CONFIGURATION FROM DISK FILE
@@ -1335,6 +1373,8 @@ function clsConfig.LoadConfigFile() as long
    dim bNewConfigFile as boolean
 
    ' Remove any existing Builds
+   ' We can not recreate the Categories each time the config reloads because the
+   ' structure contains references to existing hNodeExplorer nodes.
    erase this.Builds
    
    if AfxFileExists(_ConfigFilename) = 0 then
@@ -1375,6 +1415,17 @@ function clsConfig.LoadConfigFile() as long
          nData = val(wData)
          
 
+         if left(wKey, 9) = "CATEGORY_" then  ' is this a CATEGORY entry
+            i = val(right(wKey,2))
+            if i > ubound(this.Cat) then
+               redim preserve this.Cat(i) 
+               this.Cat(i).id             = AfxStrParse(wData, 1, "|-|")
+               this.Cat(i).wszDescription = AfxStrParse(wData, 2, "|-|")
+               continue do
+            end if
+         end if
+         
+            
          if left(wKey, 9) = "USERTOOL_" then  ' is this a User Tool entry
             i = val(right(wKey,2))
             if i > ubound(this.Tools) then
@@ -1527,6 +1578,15 @@ function clsConfig.LoadConfigFile() as long
    end if
       
 
+   ' Set some defaults if the config file was missing or corrupt
+   ' if no Categories exist then create some default ones... 
+   ' NOTE: The default for Categories is not set here because some
+   ' category names depend on the translation from the Localization
+   ' file and that file is not loaded until the Config file is read.
+   ' We do the setting of default Categories in gConfig.SetCategoryDefaults
+   ' in WinMain after the localization is correctly loaded.
+   
+         
    ' Set some defaults if the config file was missing or corrupt
    ' if no builds exist then create some default ones... We do this
    ' no matter if it is a bNewConfigFile or not.
@@ -1691,6 +1751,7 @@ function clsConfig.SaveSessionFile( byref wszSessionFile as wstring ) as boolean
             pStream.WriteLine "FileType=" & pDoc->ProjectFileType
             pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than true
             pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+            pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
             pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
             pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
             pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
@@ -1722,12 +1783,14 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
    dim as CWSTR wst, wKey, wData, wszFilename, wszProjectName
       
    dim sBookmarks as string
+   dim sFoldPoints as string
    dim as long nData, i, iTab, nActiveTab, nFocusEdit
    dim as long nFileIndex = -1
    dim as long nFirstLine, nPosition, nFirstLine1, nPosition1, nSplitPosition
 
    ' Info saved for each File and used to create the file once Fileend is found
-   dim as long nFileType, nTabIndex
+   dim as long nTabIndex
+   dim as CWSTR wszFileType
    dim as boolean bLoadInTab
    dim as boolean bIsDesigner
    dim as boolean bDesignerView
@@ -1773,12 +1836,13 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
          case "ActiveTab":           nActiveTab = nData
          
          case "File":                wszFilename = wData
-         case "FileType":            nFileType   = nData
+         case "FileType":            wszFileType = wData
          
          case "IsDesigner":          bIsDesigner = nData
          case "IsDesignerView":      bDesignerView = nData
          case "TabIndex":            bLoadInTab  = nData
          case "Bookmarks":           sBookmarks  = str(wData)
+         case "FoldPoints":          sFoldPoints = str(wData)
          case "FirstLine":           nFirstLine  = nData
          case "Position":            nPosition   = nData
          case "FirstLine1":          nFirstLine1 = nData
@@ -1797,7 +1861,7 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
                         wszFilename, _  ' wszName
                         0, _            ' pDocIn
                         bIsDesigner, _  ' bIsDesigner
-                        nFileType )
+                        wszFileType )
     
                iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
                if bDesignerView then
@@ -1815,6 +1879,7 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
                SciExec( pDoc->hWindow(1), SCI_GOTOPOS, nPosition1, 0) 
                pDoc->hWndActiveScintilla = pDoc->hWindow(nFocusEdit)
                pDoc->SetBookmarks(sBookmarks)
+               pDoc->SetFoldPoints(sFoldPoints)
             end if
       
       end select
@@ -1829,8 +1894,8 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
 
    ' Load all of the filenames into the Explorer listbox. Configure the node
    ' array to allow all types of files to be shown in the listbox
-   for i as long = lbound(gExplorerNodeShow) to ubound(gExplorerNodeShow)
-      gExplorerNodeShow(i) = true
+   for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
+      gConfig.Cat(i).bShow = true
    next
    LoadExplorerFiles()
    
@@ -1916,6 +1981,7 @@ function clsConfig.ProjectSaveToFile() as boolean
          pStream.WriteLine "FileType=" & pDoc->ProjectFileType
          pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than true
          pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+         pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
          pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
          pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
          pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
@@ -1941,8 +2007,22 @@ function clsConfig.ProjectSaveToFile() as boolean
             wszText = ProcessToCurdriveProject(wszText)
             pStream.WriteLine "File=" & wszText
             pStream.WriteLine "FileType=" & pDoc->ProjectFileType
-            pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
             pStream.WriteLine "TabIndex=" & 0    
+            if IsWindow(pDoc->hWindow(0)) then
+               pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+               pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
+               pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
+               pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
+               pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+               pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
+               pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+               pStream.WriteLine "Position1=" & SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
+               pStream.WriteLine "SplitPosition=" & pDoc->SplitY
+               pStream.WriteLine "FocusEdit=" & iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
+            else
+               pStream.WriteLine "Bookmarks=" & pDoc->wszOnLoadBookmarks 
+               pStream.WriteLine "FoldPoints=" & pDoc->wszOnLoadFoldPoints 
+            end if
             pStream.WriteLine "FileEnd=[-]"
          end If
       end if
@@ -1974,18 +2054,20 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
    dim as CWSTR wst, wKey, wData, wszFilename
       
    dim sBookmarks as string
+   dim sFoldPoints as string
    dim as long nData, i, iTab, nActiveTab, nFocusEdit
    dim as long nFileIndex = -1
    dim as long nFirstLine, nPosition, nFirstLine1, nPosition1, nSplitPosition
 
    ' Info saved for each File and used to create the file once Fileend is found
-   dim as long nFileType, nTabIndex
+   dim as long nTabIndex
+   dim as CWSTR wszFileType
    dim as boolean bLoadInTab
    dim as boolean bReadingNote
    dim as boolean bIsDesigner
    dim as boolean bDesignerView
    
-   dim as hwnd hTree = GetDlgItem(HWND_FRMfunctionLIST, IDC_FRMfunctionLIST_TREE)
+   dim as hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
    dim as hwnd hStatusBar = HWND_FRMMAIN_STATUSBAR 
    
    if AfxFileExists(wszFile) = 0 then exit function
@@ -2057,12 +2139,13 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          case "ActiveTab":           nActiveTab = nData
          
          case "File":                wszFilename = wData
-         case "FileType":            nFileType   = nData
+         case "FileType":            wszFileType  = wData
          
          case "IsDesigner":          bIsDesigner = nData
          case "IsDesignerView":      bDesignerView = nData
          case "TabIndex":            bLoadInTab  = nData
          case "Bookmarks":           sBookmarks  = str(wData)
+         case "FoldPoints":          sFoldPoints = str(wData)
          case "FirstLine":           nFirstLine  = nData
          case "Position":            nPosition   = nData
          case "FirstLine1":          nFirstLine1 = nData
@@ -2087,9 +2170,10 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
 
                with docData(nFileIndex)
                   .wszFilename    = wszFilename
-                  .nFileType      = nFileType
+                  .wszFileType    = wszFileType
                   .bLoadInTab     = bLoadInTab
                   .wszBookmarks   = sBookmarks
+                  .wszFoldPoints  = sFoldPoints
                   .IsDesigner     = bIsDesigner
                   .IsDesignerView = bDesignerView
                   .nFirstLine     = nFirstLine
@@ -2104,6 +2188,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
                nFirstLine1 = 0: nPosition1 = 0
                nFocusEdit  = 0: nSplitPosition = 0
                sBookmarks  = ""
+               sFoldPoints = ""
                bLoadInTab    = false
                bIsDesigner   = false
                bDesignerView = false
@@ -2138,7 +2223,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
                      docData(i).wszFilename, _  ' wszName
                      0, _        ' pDocIn
                      docData(i).IsDesigner, _    ' bIsDesigner
-                     docData(i).nFileType )
+                     docData(i).wszFileType )
  
          if docData(i).bLoadInTab then
             iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
@@ -2156,6 +2241,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
             SciExec( pDoc->hWindow(1), SCI_GOTOPOS, docData(i).nPosition1, 0) 
             pDoc->hWndActiveScintilla = pDoc->hWindow(docData(i).nFocusEdit)
             pDoc->SetBookmarks(docData(i).wszBookmarks)
+            pDoc->SetFoldPoints(docData(i).wszFoldPoints)
          end if
       
       else
@@ -2165,13 +2251,17 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          pDoc->DateFileTime    = AfxGetFileLastWriteTime( docData(i).wszFilename )
          pDoc->DiskFilename    = docData(i).wszFilename
          pDoc->IsDesigner      = docData(i).IsDesigner
-         pDoc->ProjectFileType = docData(i).nFileType
+         pDoc->ProjectFileType = docData(i).wszFileType
          ' No Scinitlla window is created for these types of documents so no parsing has
          ' been done yet. Do the parsing now.
          if gApp.IsProjectCacheLoaded = false then
             pDoc->bNeedsParsing = true 
             ParseDocument( pDoc )
          end if
+         ' Save the bookmarks and foldpoints for when (if) the document gets opened
+         pDoc->wszOnLoadBookmarks = docData(i).wszBookmarks
+         pDoc->wszOnLoadFoldPoints = docData(i).wszFoldPoints
+
          pDoc->hNodeExplorer = frmfunctionList_AddParentNode( pDoc )
          frmfunctionList_AddChildNodes( pDoc )
       end if
@@ -2187,8 +2277,8 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
    
    ' Load all of the filenames into the Explorer listbox. Configure the node
    ' array to allow all types of files to be shown in the listbox
-   for i as long = lbound(gExplorerNodeShow) to ubound(gExplorerNodeShow)
-      gExplorerNodeShow(i) = true
+   for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
+      gConfig.Cat(i).bShow = true
    next
    LoadExplorerFiles()
    

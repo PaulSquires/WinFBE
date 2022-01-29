@@ -61,6 +61,7 @@ function frmMain_FileTopMenuStates() as long
    EnableTopMenuItem( IDM_OPTIONSDIALOG, true )
    EnableTopMenuItem( IDM_BUILDCONFIG, true )
    EnableTopMenuItem( IDM_USERSNIPPETS, true )
+   EnableTopMenuItem( IDM_CATEGORIES, true )
    EnableTopMenuItem( IDM_EXIT, true )
    EnableTopMenuItem( IDM_AUTOSAVE, true )
    CheckMarkTopMenuItem( IDM_AUTOSAVE, iif( gConfig.AutoSaveFiles, true, false ))
@@ -314,11 +315,14 @@ End Function
 
 ''
 ''
-Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
-                                            ByVal pDoc As clsDocument Ptr, _
-                                            byval fSeparator as BOOLEAN, _
-                                            byval fExplorerTreeview as BOOLEAN _
-                                            ) As Long
+Function AddProjectFileTypesToMenu( _
+            ByVal hPopUpMenu As HMENU, _
+            ByVal pDoc As clsDocument Ptr, _
+            byval fSeparator as BOOLEAN, _
+            byval fExplorerTreeview as BOOLEAN _
+            ) As Long
+
+   Dim As HMENU hPopUpSubMenu
 
    if fSeparator then AppendMenu( hPopUpMenu, MF_SEPARATOR, 0, "" )
 
@@ -332,7 +336,8 @@ Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
         IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
         IDM_SETFILEHEADER_EXPLORERTREEVIEW, _
         IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
-        IDM_SETFILENORMAL_EXPLORERTREEVIEW _
+        IDM_SETFILENORMAL_EXPLORERTREEVIEW, _
+        IDM_SETCATEGORY _
        }
 
    ' If we need to use the Explorer Treeview version of the messages then we
@@ -344,7 +349,16 @@ Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
    AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 2), L(181,"Header file") 
    AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 3), L(205,"Module file") 
    AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 4), L(204,"Normal file") 
-
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+   hPopUpSubMenu = CreatePopupMenu
+      AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(439,"User Defined Categories")
+      for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
+         ' User defined categories will have an GUID id. Starts with an {
+         if left(gConfig.Cat(i).id, 1) = "{" then
+            AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_SETCATEGORY + i, gConfig.Cat(i).wszDescription
+         end if
+      next
+  
    Dim nFileType As Long
    Select Case pDoc->ProjectFileType
       Case FILETYPE_MAIN:     nFileType = messages(idx + 0)
@@ -352,6 +366,10 @@ Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
       Case FILETYPE_HEADER:   nFileType = messages(idx + 2)
       Case FILETYPE_MODULE:   nFileType = messages(idx + 3)
       Case FILETYPE_NORMAL:   nFileType = messages(idx + 4)
+      case else
+         ' The file is part of a User Defined Category so set a message
+         ' value that will not result in a checkmark in the code below.
+         nFileType = IDM_SETCATEGORY   
    End Select
 
    ' Some of our available chocies are affected by the fact that multiple selections

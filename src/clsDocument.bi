@@ -22,12 +22,12 @@
 #define FILE_ENCODING_UTF8_BOM     1
 #define FILE_ENCODING_UTF16_BOM    2
 
-#define FILETYPE_UNDEFINED         0
-#define FILETYPE_MAIN              1
-#define FILETYPE_MODULE            2
-#define FILETYPE_NORMAL            3
-#define FILETYPE_RESOURCE          4
-#define FILETYPE_HEADER            5
+#define FILETYPE_UNDEFINED        "0"
+#define FILETYPE_MAIN             "1"
+#define FILETYPE_MODULE           "2"
+#define FILETYPE_NORMAL           "3"
+#define FILETYPE_RESOURCE         "4"
+#define FILETYPE_HEADER           "5"
 
 
 #include once "clsMenuItem.bi"
@@ -61,9 +61,10 @@ end type
 ' the project file.
 type PROJECT_FILELOAD_DATA
    wszFilename    as CWSTR        ' full path and filename
-   nFiletype      as long         ' pDoc->ProjectFileType
+   wszFiletype    as CWSTR        ' pDoc->ProjectFileType
    bLoadInTab     as boolean
    wszBookmarks   as CWSTR        ' pDoc->GetBookmarks()
+   wszFoldPoints  as CWSTR        ' pDoc->GetFoldPoints()
    IsDesigner     as boolean
    IsDesignerView as long         
    nFirstLine     as long         ' first line of main view 
@@ -138,7 +139,7 @@ type clsDocument
       ptCursorStart(3)  as POINT     ' Client coordinate of cursor at time of snap
       
       ' Code document related
-      ProjectFiletype   as long = FILETYPE_UNDEFINED
+      ProjectFiletype   as CWSTR = FILETYPE_UNDEFINED
       DiskFilename      as wstring * MAX_PATH
       AutoSaveFilename  as wstring * MAX_PATH    '#filename#
       AutoSaveRequired  as boolean
@@ -151,7 +152,10 @@ type clsDocument
       sMatchWord        as string   ' for the incremental autocomplete search
       AutoCompletetype  as long     ' AUTOC_DIMAS, AUTOC_TYPE
       AutoCStartPos     as long
-      lastCaretPos      as long     'used for checking in SCN_UPDATEUI
+      lastCaretPos      as long        ' used for checking in SCN_UPDATEUI
+      
+      wszOnLoadBookmarks  as CWSTR     ' saved from project load for files that are not immediately shown in open tab      
+      wszOnLoadFoldPoints as CWSTR     ' saved from project load for files that are not immediately shown in open tab      
       
       ' Following used for split edit views
       hScrollBar        as hwnd
@@ -212,6 +216,8 @@ type clsDocument
       declare function GetWord( byval curPos as long = -1 ) as string
       declare function GetBookmarks() as string
       declare function SetBookmarks( byval sBookmarks as string ) as long
+      declare function GetFoldPoints() as string
+      declare function SetFoldPoints( byval sFoldPoints as string ) as long
       declare function GetCurrentFunctionName( byref sFunctionName as string, byref nGetSet as ClassProperty ) as long
       declare function LineDuplicate() as long
       declare function SetMarkerHighlight() as long

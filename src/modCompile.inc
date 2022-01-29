@@ -1177,9 +1177,9 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       if pStream.Create(wszVDMain, true, true) = S_OK then 
          ' Get all of the text from the MAIN pDoc file
          if pDocMain->hWindow(0) = 0 then
-            dim as long nFileType = pDocMain->ProjectFileType
+            dim as CWSTR wszFileType = pDocMain->ProjectFileType
             pDocMain->CreateCodeWindow( HWND_FRMMAIN, false, false, pDocMain->DiskFilename )
-            pDocMain->ProjectFileType = nFileType
+            pDocMain->ProjectFileType = wszFileType
          end if
          
          dim as CWSTR wszMainFileText 

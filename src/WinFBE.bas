@@ -113,6 +113,7 @@ dim shared gLasso   as clsLasso
 #include once "frmKeyboard.inc" 
 #include once "frmUserTools.inc" 
 #include once "frmSnippets.inc"
+#include once "frmCategories.inc" 
 #include once "frmBuildConfig.inc" 
 #include once "frmOutput.inc" 
 #include once "frmOptionsGeneral.inc"
@@ -204,6 +205,10 @@ function WinMain( _
       Return 1
    end if
 
+   ' Load default Explorer Categories should none exist. Need to do it here
+   ' rather than from within Config because the localization file must be 
+   ' loaded first.
+   gConfig.SetCategoryDefaults()
 
    ' Check for previous instance 
    if gConfig.MultipleInstances = false Then

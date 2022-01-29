@@ -112,7 +112,6 @@ Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
    
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_HIDE
-
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), SW_HIDE
@@ -121,34 +120,31 @@ Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
       case 0    ' compiler results
          hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW)
          ListView_SetColumnWidth( hCtrl, 3, LVSCW_AUTOSIZE_USEHEADER ) 
-         ShowWindow( hCtrl, SW_SHOW )    
 
       case 1    ' compiler log file
          hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE)
          GetClientRect( hCtrl, @rc )
          rc.left = rc.left + pWindow->ScaleX(20)
          SendMessage( hCtrl, EM_SETRECT, 0, cast(LPARAM, @rc) )
-         ShowWindow( hCtrl, SW_SHOW )
 
       case 2    ' search results
          hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH)
-         ShowWindow( hCtrl, SW_SHOW )
-         AfxRedrawWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH) )
 
       case 3    ' ToDo list
          ' ensure last column is sized to fit to end of client area.
          hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO)
          ListView_SetColumnWidth( hCtrl, 3, LVSCW_AUTOSIZE_USEHEADER ) 
-         ShowWindow( hCtrl, SW_SHOW )
 
       case 4    ' Notes
          hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES)
          GetClientRect( hCtrl, @rc )
          rc.left = rc.left + pWindow->ScaleX(20)
          SendMessage( hCtrl, EM_SETRECT, 0, cast(LPARAM, @rc) )
-         ShowWindow( hCtrl, SW_SHOW )
-
+   
    end select
+   
+   SetWindowPos( hCtrl, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_SHOWWINDOW )    
+   AfxRedrawWindow( hCtrl )
    SetFocus( hCtrl )
          
    Function = 0
@@ -260,10 +256,12 @@ Function frmOutput_OnSize( _
             ByVal cx As Long, _
             ByVal cy As Long _
             ) As LRESULT
+
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
       frmOutput_PositionWindows
    End If
+
    Function = 0
 End Function
    
@@ -357,7 +355,7 @@ end function
 
 
 ' ========================================================================================
-' frmOutputListBox_SubclassProc 
+' frmOutputListBox_SubclassProc (Search Results)
 ' ========================================================================================
 function frmOutputListBox_SubclassProc ( _
             byval hWin   as HWnd, _                 ' // Control window handle
@@ -395,7 +393,10 @@ function frmOutputListBox_SubclassProc ( _
          
          hDC = BeginPaint( hWin, @ps )
          SaveDC( hDC )
-         FillRect( hDC, @ps.rcPaint, ghOutput.hPanelBrush )
+         dim as RECT rc = GetListBoxEmptyClientArea( hWin, pWindow->ScaleY(EXPLORERITEM_HEIGHT) )
+
+         'FillRect( hDC, @rc, ghOutput.hPanelBrush )
+         FillRect( hDC, @rc, GetSysColorBrush(COLOR_WINDOW) )
          RestoreDC( hDC, -1 )
          EndPaint( hWin, @ps )
 
@@ -945,7 +946,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    hCtl = pWindow->AddControl("RICHEDIT", , IDC_FRMOUTPUT_TXTLOGFILE, "", _
                  0, 0, 0, 0, _
-                 WS_CHILD or WS_VISIBLE or WS_TABSTOP or WS_VSCROLL or _
+                 WS_CHILD or WS_TABSTOP or WS_VSCROLL or _
                  ES_MULTILINE or ES_LEFT or ES_AUTOVSCROLL, _
                  WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR )
       AfxSetWindowFont( hCtl, ghStatusBar.hFontStatusBar )
@@ -955,7 +956,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    hCtl = pWindow->AddControl("RICHEDIT", , IDC_FRMOUTPUT_TXTNOTES, "", _
                  0, 0, 0, 0, _
-                 WS_CHILD or WS_VISIBLE or WS_TABSTOP or WS_VSCROLL or _
+                 WS_CHILD or WS_TABSTOP or WS_VSCROLL or _
                  ES_MULTILINE or ES_LEFT or ES_AUTOVSCROLL or ES_WANTRETURN, _
                  WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR )
       AfxSetWindowFont( hCtl, ghStatusBar.hFontStatusBar )

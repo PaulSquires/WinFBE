@@ -231,7 +231,7 @@ function handleKeysExplorerListBox( byval uMsg as MSG ) as boolean
          if left(wszCaption, 1) = "%" then
             ' expand/contract the header node
             dim as long idxArray = val(mid(wszCaption, 2, 1))
-            gExplorerNodeShow(idxArray) = not gExplorerNodeShow(idxArray)
+            gConfig.Cat(idxArray).bShow = not gConfig.Cat(idxArray).bShow
             LoadExplorerFiles()
             ListBox_SetCurSel( hList, nCurSel )
             SetFocus( hList )

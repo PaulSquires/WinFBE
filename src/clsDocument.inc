@@ -1488,19 +1488,23 @@ end function
 
 ''
 ''
-function clsDocument.nextBookmark() as long 
+function clsDocument.NextBookmark() as long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    dim fMark as long  ' 32 bit value
-   dim nLine as long = this.GetCurrentLineNumber() + 1
+   dim nCurLine as long = this.GetCurrentLineNumber() 
+   dim nLine as long = this.GetCurrentLineNumber() + 1  ' start line
    fMark = bitset(fMark, 0)
-   nLine = SciMsg( pSci, SCI_MARKERnext, nLine, fMark)
+   nLine = SciMsg( pSci, SCI_MARKERNEXT, nLine, fMark)
    if nLine > -1 then
       SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
    else
-      nLine = SciMsg( pSci, SCI_MARKERnext, nLine, fMark)
+      nLine = SciMsg( pSci, SCI_MARKERNEXT, nLine, fMark)
       if nLine > -1 then
          SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
       end if
+   end if
+   if nLine <> -1 then
+      if nLine <> nCurLine then this.CenterCurrentLine()
    end if
    function = 0 
 end function
@@ -1510,7 +1514,8 @@ end function
 function clsDocument.PrevBookmark() as long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    dim fMark  as long  ' 32 bit value
-   dim nLine  as long = this.GetCurrentLineNumber() - 1
+   dim nCurLine as long = this.GetCurrentLineNumber() 
+   dim nLine  as long = this.GetCurrentLineNumber() - 1   ' start line
    dim nLines as long = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) - 1
    fMark = bitset(fMark, 0)
    nLine = SciMsg( pSci, SCI_MARKERPREVIOUS, nLine, fMark)
@@ -1521,6 +1526,9 @@ function clsDocument.PrevBookmark() as long
       if nLine > -1 then
          SciMsg( pSci, SCI_GOTOLINE, nLine, 0)
       end if
+   end if
+   if nLine <> -1 then
+      if nLine <> nCurLine then this.CenterCurrentLine()
    end if
    function = 0 
 end function
@@ -2119,6 +2127,49 @@ function clsDocument.SetBookmarks( byval sBookmarks as string ) as long
    for i as long = 1 to nCount
       nLine = val( AfxStrParse(sBookmarks, i, ",") )
       SciMsg( pSci, SCI_MARKERADD, nLine, 0)
+   next
+
+   function = 0
+
+end function
+
+''
+''
+function clsDocument.GetFoldPoints() as string
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   ' Retrieve all folding positions in the document and return it
+   ' as a comma delimited string to be saved to project file.
+   dim as string buffer
+   dim as long nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) 
+
+   for i as long = 0 to nLines - 1
+      dim nFoldLevel as long = SciMsg( pSci, SCI_GETFOLDLEVEL, i, 0)
+      if (nFoldLevel and SC_FOLDLEVELHEADERFLAG) then
+         if SciMsg( pSci, SCI_GETFOLDEXPANDED, i, 0) = 0 then
+            buffer = buffer & i & ","
+         end if   
+      end if
+   next
+
+   function = rtrim(buffer, ",")
+
+end function
+
+''
+''
+function clsDocument.SetFoldPoints( byval sFoldPoints as string ) as long
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   ' Set all folding positions in the document and based on the 
+   ' incoming comma delimited string retrieved from a project file.
+   sFoldPoints = trim(sFoldPoints)
+   if len(sFoldPoints) = 0 then exit function
+   
+   dim as long nCount = AfxStrParseCount(sFoldPoints, ",")
+   dim as long nLine
+   
+   for i as long = 1 to nCount
+      nLine = val( AfxStrParse(sFoldPoints, i, ",") )
+      SciMsg( pSci, SCI_FOLDLINE, nLine, SC_FOLDACTION_CONTRACT) 
    next
 
    function = 0

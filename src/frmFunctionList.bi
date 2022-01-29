@@ -22,7 +22,7 @@ declare function LoadFunctionListFiles() as long
 declare function frmFunctionList_Show( ByVal hWndParent As HWnd ) as LRESULT
 declare function frmFunctionList_ReparseFiles() as Long
 declare function frmFunctionList_CreateSpecialNodes() as HTREEITEM
-declare function frmFunctionList_GetSpecialNode( byval nFileType as long ) as HTREEITEM
+declare function frmFunctionList_GetSpecialNode( byval wszFileType as CWSTR ) as HTREEITEM
 declare function frmFunctionList_GetFileNameFunctionName( byval hItem as HTREEITEM, byref wszFilename as CWSTR, byref wszFunctionName as CWSTR) as long
 declare function frmFunctionList_AddParentNode( ByVal pDoc As clsDocument Ptr ) as HTREEITEM
 declare function frmFunctionList_AddChildNodes( ByVal pDoc As clsDocument Ptr ) as long

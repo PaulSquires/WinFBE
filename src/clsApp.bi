@@ -81,7 +81,7 @@ type clsApp
       declare function GetSourceDocumentPtr( byval pDocIn as clsDocument ptr ) as clsDocument ptr
       declare function GetHeaderDocumentPtr( byval pDocIn as clsDocument ptr ) as clsDocument ptr
       Declare function SaveProject( byval bSaveas as boolean = False ) as boolean
-      Declare function ProjectSetFileType( byval pDoc as clsDocument ptr, byval nFiletype as long ) as LRESULT
+      Declare function ProjectSetFileType( byval pDoc as clsDocument ptr, byval wszFiletype as CWSTR ) as LRESULT
       declare function GetProjectCompiler() as long
       
 end type

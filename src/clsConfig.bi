@@ -78,6 +78,23 @@ type TYPE_BUILDS
    wszOptions     as CWSTR     ' Compiler options (manual and selected from listbox)
 end type
 
+type TYPE_CATEGORIES
+   id             as string    ' GUID or special node value
+   wszDescription as CWSTR
+   hNodeExplorer  as HTREEITEM
+   bShow          as boolean
+end type
+
+' NOTE: These node types are different values than the FileType defines from
+' the clsDocument.bi file so we could not reuse those equates. These nodetype
+' equates defined the order in which the files will be displayed in the 
+' explorer listbox.
+ #define NODETYPE_FILES             0
+ #define NODETYPE_MAIN              1
+ #define NODETYPE_RESOURCE          2
+ #define NODETYPE_HEADER            3
+ #define NODETYPE_MODULE            4
+ #define NODETYPE_NORMAL            5
 
 ' Structure used to save codetip cache database information to disk. This
 ' data is checked when loading the codetip cache to see if any of the original
@@ -113,6 +130,8 @@ type clsConfig
       ToolsTemp(any)        as TYPE_TOOLS  
       Builds(any)           as TYPE_BUILDS  
       BuildsTemp(any)       as TYPE_BUILDS  
+      Cat(any)              as TYPE_CATEGORIES
+      CatTemp(any)          as TYPE_CATEGORIES
       Snippets(any)         as TYPE_SNIPPETS
       SnippetsTemp(any)     as TYPE_SNIPPETS  
       rcSnippets            as rect                 ' Snippet window position (not saved to file)
@@ -183,6 +202,7 @@ type clsConfig
       bWriteCodetipCache    as boolean
       
       declare constructor()
+      declare function SetCategoryDefaults() as long
       declare function LoadKeywords() as long
       declare function SaveKeywords() as long
       declare function WriteMRU() as long

@@ -598,6 +598,7 @@ private Function frmBuildConfig_OnCommand( ByVal HWnd As HWnd, _
                frmMain_SetStatusbar
             end if
             
+            gConfig.SaveConfigFile
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          end if

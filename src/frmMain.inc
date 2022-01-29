@@ -988,7 +988,7 @@ function frmMain_OpenFileSafely( _
             byref wszName     as wstring, _
             byval pDocIn      as clsDocument ptr, _
             byval bIsDesigner as boolean = false, _
-            byval nFileType   as long = FILETYPE_UNDEFINED _
+            byval wszFileType as CWSTR = FILETYPE_UNDEFINED _
             ) as clsDocument ptr
      
    dim as long iTab = -1
@@ -1014,7 +1014,7 @@ function frmMain_OpenFileSafely( _
          pDoc->bNeedsParsing = true
          ParseDocument( pDoc )
       end if
-      pDoc->ProjectFileType = nFileType
+      pDoc->ProjectFileType = wszFileType
       ' Add the document data to the Explorer treeview   
       pDoc->hNodeExplorer = frmFunctionList_AddParentNode( pDoc )
       frmFunctionList_AddChildNodes( pDoc )
@@ -1028,9 +1028,9 @@ function frmMain_OpenFileSafely( _
    if pDocIn then 
       if pDocIn->hWndActiveScintilla = 0 then
          ' Call CreateCodeWindow will reset the ProjectFileType so save it here.
-         dim as long nFileType = pDocIn->ProjectFileType
+         dim as CWSTR wszFileType = pDocIn->ProjectFileType
          pDocIn->CreateCodeWindow( HWnd, false, false, pDocIn->DiskFilename )
-         pDocIn->ProjectFileType = nFileType
+         pDocIn->ProjectFileType = wszFileType
          ' This document would already have its data added to the Explorer treeview so
          ' no need to do that again.
       end if
@@ -1258,7 +1258,7 @@ function frmMain_OnActivateApp( _
                                L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
                   
                   dim as CWSTR wszFilename = pDoc->DiskFilename
-                  dim as long nFileType = pDoc->ProjectFileType
+                  dim as CWSTR wszFileType = pDoc->ProjectFileType
                   
                   ' Remove the current file and open the changed file.
                   frmMain_OnCommand(HWND_FRMMAIN, IDM_REMOVEFILEFROMPROJECT, 0, 0)
@@ -1273,7 +1273,7 @@ function frmMain_OnActivateApp( _
                                           wszFilename, _ ' wszName
                                           0 )         ' pDocIn
                   
-                  pDocLoad->ProjectFileType = nFileType
+                  pDocLoad->ProjectFileType = wszFileType
                   pDocLoad->hNodeExplorer = frmFunctionList_AddParentNode( pDocLoad )
                   frmFunctionList_AddChildNodes( pDocLoad )
                   

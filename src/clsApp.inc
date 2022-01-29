@@ -231,7 +231,7 @@ end function
 ''
 function clsApp.ProjectSetFileType( _
             byval pDoc as clsDocument ptr, _
-            byval nFileType as long _       ' new filetype 
+            byval wszFileType as CWSTR _       ' new filetype 
             ) as LRESULT
 
    if pDoc = 0 then exit function
@@ -254,11 +254,11 @@ function clsApp.ProjectSetFileType( _
    if bFound = false then
       if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
          select case ucase(wzFileExt)
-            case ".BAS":  nFileType = FILETYPE_NORMAL
-            case ".RC":   nFileType = FILETYPE_RESOURCE
-            case ".BI":   nFileType = FILETYPE_HEADER
-            case ".INC":  nFileType = FILETYPE_NORMAL
-            case else:    nFileType = FILETYPE_NORMAL
+            case ".BAS":  wszFileType = FILETYPE_NORMAL
+            case ".RC":   wszFileType = FILETYPE_RESOURCE
+            case ".BI":   wszFileType = FILETYPE_HEADER
+            case ".INC":  wszFileType = FILETYPE_NORMAL
+            case else:    wszFileType = FILETYPE_NORMAL
          end select   
       end if
    end if
@@ -270,7 +270,7 @@ function clsApp.ProjectSetFileType( _
    ' file to "Normal". There can only be one Main file. Likewise, there can only be 
    ' one "Resource" file.
 
-   if nFileType = FILETYPE_MAIN then
+   if wszFileType = FILETYPE_MAIN then
       pDocSearch = this.pDocList
       do until pDocSearch = 0
          if pDocSearch->ProjectFileType = FILETYPE_MAIN then 
@@ -279,7 +279,7 @@ function clsApp.ProjectSetFileType( _
          pDocSearch = pDocSearch->pDocNext
       loop
    end if      
-   if nFileType = FILETYPE_RESOURCE then
+   if wszFileType = FILETYPE_RESOURCE then
       pDocSearch = this.pDocList
       do until pDocSearch = 0
          if pDocSearch->ProjectFileType = FILETYPE_RESOURCE then 
@@ -289,7 +289,7 @@ function clsApp.ProjectSetFileType( _
       loop
    end if      
 
-   pDoc->ProjectFileType = nFileType
+   pDoc->ProjectFileType = wszFileType
 
    ' Refresh the statusbar to ensure that the file's type is displayed properly
    frmMain_SetStatusbar

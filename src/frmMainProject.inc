@@ -418,29 +418,31 @@ function OnCommand_ProjectSetFileType( _
             ) as LRESULT
 
    ' This code also handles right click messages from the Explorer Treeview. 
-   dim as long nFileType
+   dim as CWSTR wszFileType
 
    select case id
       case IDM_SETFILENORMAL, IDM_SETFILENORMAL_EXPLORERTREEVIEW 
-         nFileType = FILETYPE_NORMAL
+         wszFileType = FILETYPE_NORMAL
       case IDM_SETFILEMODULE, IDM_SETFILEMODULE_EXPLORERTREEVIEW
-         nFileType = FILETYPE_MODULE
+         wszFileType = FILETYPE_MODULE
       case IDM_SETFILEMAIN, IDM_SETFILEMAIN_EXPLORERTREEVIEW
-         nFileType = FILETYPE_MAIN
+         wszFileType = FILETYPE_MAIN
       case IDM_SETFILERESOURCE, IDM_SETFILERESOURCE_EXPLORERTREEVIEW
-         nFileType = FILETYPE_RESOURCE
+         wszFileType = FILETYPE_RESOURCE
       case IDM_SETFILEHEADER, IDM_SETFILEHEADER_EXPLORERTREEVIEW
-         nFileType = FILETYPE_HEADER
+         wszFileType = FILETYPE_HEADER
+      case is > IDM_SETCATEGORY
+         wszFileType = gConfig.Cat(id-IDM_SETCATEGORY).id
    end select
    
    if pDoc = 0 then exit function
-   
-   if pDoc->ProjectFileType <> nFileType then
+
+   if pDoc->ProjectFileType <> wszFileType then
       ' If attempting to set MAIN or RESOURCE then we need to move any existing
       ' pDoc that have that filetype over to the NORMAL branch.
       dim as hwnd hTV = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
-      if (nFileType = FILETYPE_MAIN) or (nFileType = FILETYPE_RESOURCE) then
-         dim pDoc2 as clsDocument ptr = iif(nFileType = FILETYPE_MAIN, gApp.GetMainDocumentPtr, gApp.GetResourceDocumentPtr)
+      if (wszFileType = FILETYPE_MAIN) or (wszFileType = FILETYPE_RESOURCE) then
+         dim pDoc2 as clsDocument ptr = iif(wszFileType = FILETYPE_MAIN, gApp.GetMainDocumentPtr, gApp.GetResourceDocumentPtr)
          if pDoc2 then
             Treeview_DeleteItem( hTV, pDoc2->hNodeExplorer )
             pDoc2->hNodeExplorer = 0
@@ -450,7 +452,7 @@ function OnCommand_ProjectSetFileType( _
          end if   
       end if
       ' Set the new FileType for the currently selected document
-      gApp.ProjectSetFileType( pDoc, nFileType )
+      gApp.ProjectSetFileType( pDoc, wszFileType )
       Treeview_DeleteItem( hTV, pDoc->hNodeExplorer )
       pDoc->hNodeExplorer = 0
       pDoc->hNodeExplorer = frmFunctionList_AddParentNode( pDoc )
