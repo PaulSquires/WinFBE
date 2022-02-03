@@ -15,7 +15,7 @@
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmStatusBar_PositionWindows() As LRESULT
+Function frmStatusBar_PositionWindows() As LRESULT
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMMAIN_STATUSBAR)
    If pWindow = 0 Then Exit Function
@@ -108,11 +108,12 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmStatusBar
 ' ========================================================================================
-private Function frmStatusBar_OnSize( ByVal HWnd As HWnd, _
-                                      ByVal state As UINT, _
-                                      ByVal cx As Long, _
-                                      ByVal cy As Long _
-                                      ) As LRESULT
+Function frmStatusBar_OnSize( _
+            ByVal HWnd As HWnd, _
+            ByVal state As UINT, _
+            ByVal cx As Long, _
+            ByVal cy As Long _
+            ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       frmStatusBar_PositionWindows()
    End If
@@ -123,11 +124,12 @@ End Function
 ' ========================================================================================
 ' frmStatusBar Window procedure
 ' ========================================================================================
-private Function frmStatusBar_WndProc( ByVal HWnd   As HWnd, _
-                                       ByVal uMsg   As UINT, _
-                                       ByVal wParam As WPARAM, _
-                                       ByVal lParam As LPARAM _
-                                       ) As LRESULT
+Function frmStatusBar_WndProc( _
+            ByVal HWnd   As HWnd, _
+            ByVal uMsg   As UINT, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As LRESULT
 
    static as long prev_idxHot = -1
    static as long curr_idxHot = -1
@@ -262,11 +264,10 @@ private Function frmStatusBar_WndProc( ByVal HWnd   As HWnd, _
 End Function
 
 
-
 ' ========================================================================================
 ' frmStatusBar_Show
 ' ========================================================================================
-public Function frmStatusBar_Show( ByVal hWndParent As HWnd ) As LRESULT
+Function frmStatusBar_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

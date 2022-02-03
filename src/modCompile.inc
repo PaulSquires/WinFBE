@@ -419,7 +419,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
 
    wDQ = wchr(34) ' unicode double quotes
 
-   hLV = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW)
+   hLV = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVRESULTS)
    ListView_DeleteAllItems( hLV )
    
    ' On some Windows systems with tight security policies, the CreateChildProcess used

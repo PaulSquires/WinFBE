@@ -57,9 +57,10 @@ declare function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr )
 declare function OnCommand_SearchGotoLastPosition() as LRESULT
 declare function OnCommand_SearchGotoCompileError( byval bMoveNext as boolean ) as long
 declare function OnCommand_SearchGotoFile( ByVal id as long, byval pDoc as clsDocument ptr ) as LRESULT
-declare function OnCommand_SearchCommon( ByVal id as long, byval pDoc as clsDocument ptr ) as LRESULT
+declare function OnCommand_SearchBookmarks( ByVal id as long, byval pDoc as clsDocument ptr ) as LRESULT
 
 declare function OnCommand_ViewFunctionList() as LRESULT
+declare function OnCommand_ViewBookmarksList() as LRESULT
 declare function OnCommand_ViewExplorer() as LRESULT
 declare function OnCommand_ViewOutput() as LRESULT
 declare function OnCommand_ViewFold( ByVal id as long, byval pDoc as clsDocument ptr ) as LRESULT

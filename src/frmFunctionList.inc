@@ -358,7 +358,7 @@ private function frmFunctionList_PaintNonItemAreas( byval hDC as HDC ) as long
    dim as RECT rc: GetClientRect( HWND_FRMFUNCTIONLIST, @rc )
    DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMFUNCTIONLIST)
    If pWindow Then rc.top = rc.bottom - pWindow->ScaleY(18)
-   FillRect( hDC, @rc, ghFunctionList.hPanelBrush )  
+   FillRect( hDC, @rc, ghPanel.hPanelBrush )  
    function = 0
 end function
 
@@ -437,11 +437,11 @@ private Function frmFunctionList_WndProc( ByVal HWnd   As HWND, _
       HANDLE_MSG (HWnd, WM_MEASUREITEM, frmFunctionList_OnMeasureItem)
       HANDLE_MSG (HWnd, WM_DRAWITEM,    frmFunctionList_OnDrawItem)
    
-      case WM_CTLCOLOREDIT
-         dim as HDC hDC = cast( HDC, wParam )
-         SetBkColor( hDC, ghFunctionList.TextBoxBackColor )   
-         SetTextColor( hDC, ghFunctionList.TextBoxForeColor )
-         return cast( LRESULT, ghFunctionList.hBackBrushTextBox )
+'      case WM_CTLCOLOREDIT
+'         dim as HDC hDC = cast( HDC, wParam )
+'         SetBkColor( hDC, ghPanel.TextBoxBackColor )   
+'         SetTextColor( hDC, ghPanel.TextBoxForeColor )
+'         return cast( LRESULT, ghPanel.hBackBrushTextBox )
 
 '      case WM_NCPAINT
 '         dim as HDC hDC = cast( HDC, wParam ) 

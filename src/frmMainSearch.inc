@@ -19,7 +19,7 @@
 ' ========================================================================================
 function OnCommand_SearchGotoCompileError( byval bMoveNext as boolean ) as long
    ' Determine the current selection in the listview and move prev/next as needed
-   dim as HWND hLV = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW )
+   dim as HWND hLV = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVRESULTS )
    Dim As Long nCurSel = ListView_GetSelection(hLV)
    If nCurSel < 0 Then Return 0 
 
@@ -170,8 +170,34 @@ function OnCommand_SearchGotoFile( _
    
    dim pDocFile as clsDocument ptr
    dim as CWSTR wszFilename
+
+   dim as HWND hEdit = pDoc->hWndActiveScintilla
    
    select case id
+      Case IDM_GOTO
+         frmGoto_Show( hEdit )
+         exit function
+      
+      case IDM_GOTONEXTFUNCTION
+         pDoc->GotoNextFunction
+         exit function
+      
+      case IDM_GOTOPREVFUNCTION
+         pDoc->GotoPrevFunction
+         exit function
+         
+      Case IDM_GOTONEXTTAB
+         gTTabCtl.NextTab
+         exit function
+      
+      Case IDM_GOTOPREVTAB
+         gTTabCtl.PrevTab
+         exit function
+      
+      Case IDM_CLOSETAB
+         gTTabCtl.CloseTab
+         exit function
+
       case IDM_GOTOMAINFILE
          pDocFile = gApp.GetMainDocumentPtr
          if pDocFile then wszFilename = pDocFile->DiskFilename
@@ -194,7 +220,6 @@ function OnCommand_SearchGotoFile( _
    if pDocFile = pDoc then exit function
    
    ' Save our current position in case user invokes "Last Position" option,   
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    gLastPosition.pDoc       = pDoc
    gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
    gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
@@ -208,7 +233,7 @@ End Function
 ' ========================================================================================
 ' Search action Common actions
 ' ========================================================================================
-function OnCommand_SearchCommon( _
+function OnCommand_SearchBookmarks( _
             ByVal id as long, _
             byval pDoc as clsDocument ptr _
             ) as LRESULT
@@ -216,17 +241,32 @@ function OnCommand_SearchCommon( _
    dim as HWND hEdit = pDoc->hWndActiveScintilla
 
    select case id
-      Case IDM_GOTO:             frmGoto_Show( hEdit )
-      case IDM_GOTONEXTFUNCTION: pDoc->GotoNextFunction
-      case IDM_GOTOPREVFUNCTION: pDoc->GotoPrevFunction
-      Case IDM_GOTONEXTTAB:      gTTabCtl.NextTab
-      Case IDM_GOTOPREVTAB:      gTTabCtl.PrevTab
-      Case IDM_CLOSETAB:         gTTabCtl.CloseTab
-      Case IDM_BOOKMARKTOGGLE:   pDoc->ToggleBookmark( pDoc->GetCurrentLineNumber )
       Case IDM_BOOKMARKNEXT:     pDoc->NextBookmark
       Case IDM_BOOKMARKPREV:     pDoc->PrevBookmark
-      Case IDM_BOOKMARKCLEARALL: SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
       
+      Case IDM_BOOKMARKCLEARALL
+         SciExec( hEdit, SCI_MARKERDELETEALL, -1, 0 )
+         LoadBookmarksFiles
+         AfxRedrawWindow( HWND_FRMBOOKMARKS )
+
+      Case IDM_BOOKMARKTOGGLE
+         pDoc->ToggleBookmark( pDoc->GetCurrentLineNumber )
+         LoadBookmarksFiles
+         AfxRedrawWindow( HWND_FRMBOOKMARKS )
+
+      case IDM_BOOKMARKCLEARALLDOCS
+         dim pDoc as clsDocument ptr = gApp.pDocList
+         do until pDoc = 0
+            hEdit = pDoc->hWindow(0)
+            if hEdit then
+               SciExec( hEdit, SCI_MARKERDELETEALL, -1, 0 )
+            else
+               pDoc->wszOnLoadBookmarks = ""   
+            end if
+            pDoc = pDoc->pDocNext
+         loop
+         LoadBookmarksFiles
+         AfxRedrawWindow( HWND_FRMBOOKMARKS )
    end select
    
    function = 0

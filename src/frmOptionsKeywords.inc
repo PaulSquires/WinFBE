@@ -61,7 +61,7 @@ private Function frmOptionsKeywords_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_DESTROY, frmOptionsKeywords_OnDestroy)
    End Select
 
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc( HWnd, uMsg, wParam, lParam )
 
 End Function
 
@@ -77,14 +77,15 @@ public function frmOptionsKeywords_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    HWND_FRMOPTIONSKEYWORDS = pWindow->Create( hWndParent, "", @frmOptionsKeywords_WndProc, 0, 0, 0, 0, _
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
-        WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+        WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING )
    ' Height and width of this child form is set in frmOptions_OnNotify when the treeview option is selected.
    
    Dim As HWnd hTextBox = _
    pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS, "", 0, 0, 386, 345, _
-        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or ES_LEFT Or ES_MULTILINE Or ES_AUTOVSCROLL Or ES_WANTRETURN, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   
+        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or ES_LEFT Or _
+        ES_MULTILINE Or ES_AUTOVSCROLL Or ES_WANTRETURN, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING )
+   SendMessage( hTextBox, EM_SETLIMITTEXT, (1024 * 100), 0 )    ' max 100K text   
    Dim As HFONT hFont = pWindow->CreateFont("Courier New", 9)
    AfxSetWindowFont hTextBox, hFont, True
 

@@ -14,12 +14,12 @@
 #pragma once 
 
 #Define IDC_FRMOUTPUT_TABS                          1000
-#Define IDC_FRMOUTPUT_LISTVIEW                      1001
+#Define IDC_FRMOUTPUT_LVRESULTS                     1001
 #Define IDC_FRMOUTPUT_TXTLOGFILE                    1002
-#Define IDC_FRMOUTPUT_BTNCLOSE                      1003
-#Define IDC_FRMOUTPUT_LISTSEARCH                    1004
-#Define IDC_FRMOUTPUT_LVTODO                        1005
-#Define IDC_FRMOUTPUT_TXTNOTES                      1006
+#Define IDC_FRMOUTPUT_LVSEARCH                      1003
+#Define IDC_FRMOUTPUT_LVTODO                        1004
+#Define IDC_FRMOUTPUT_TXTNOTES                      1005
+#Define IDC_FRMOUTPUT_BTNCLOSE                      1006
 
 #define OUTPUT_TABS_HEIGHT  40
 
@@ -30,12 +30,14 @@ type OUTPUT_TABS
    rcText as RECT     ' diff rect b/c line drawn under Text for CurSel
    isHot as boolean
 end type
+
 dim shared gOutputTabs(4) as OUTPUT_TABS
 dim shared gOutputTabsCurSel as long = 0  ' default to first tab
 dim shared gOutputCloseRect as RECT
 
 declare function frmOutput_ShowNotes() as long 
 declare function frmOutput_UpdateToDoListview() as long 
+declare function frmOutput_UpdateSearchListview( byref wszResultFile as wstring ) as long 
 declare Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
 declare Function frmOutput_PositionWindows As LRESULT
 declare Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT

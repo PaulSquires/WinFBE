@@ -205,8 +205,6 @@ private Function frmPopupMenu_OnDrawItem( ByVal HWnd As HWnd, _
       ( lpdis->itemAction = ODA_SELECT ) orelse _
       ( lpdis->itemAction = ODA_FOCUS ) then
 
-      if lpdis->itemAction = ODA_FOCUS then return true
-
       dim as RECT rc = lpdis->rcItem
       dim as long nWidth  = rc.right-rc.left
       dim as long nHeight = rc.bottom-rc.top 

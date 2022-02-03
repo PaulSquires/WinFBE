@@ -191,6 +191,8 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SC_MARK_AVAILABLE                               28
 #Define SC_MARK_UNDERLINE                               29
 #Define SC_MARK_RGBAIMAGE                               30
+#define SC_MARK_BOOKMARK                                31
+#define SC_MARK_VERTICALBOOKMARK                        32
 #Define SC_MARK_CHARACTER                               10000
 #Define SC_MARKNUM_FOLDEREND                            25
 #Define SC_MARKNUM_FOLDEROPENMID                        26
@@ -480,6 +482,7 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SCI_REPLACETARGET                               2194
 #Define SCI_REPLACETARGETRE                             2195
 #Define SCI_SEARCHINTARGET                              2197
+#define SCI_GETTARGETTEXT                               2687
 #Define SCI_SETSEARCHFLAGS                              2198
 #Define SCI_GETSEARCHFLAGS                              2199
 #Define SCI_CALLTIPSHOW                                 2200

@@ -125,25 +125,11 @@ private function frmOptions_SaveEditorOptions() as long
    
    ' KEYWORDS
    If gConfig.bKeywordsDirty Then
-      HWnd = HWND_FRMOPTIONSKEYWORDS
-      Dim As HWnd hTextBox = GetDlgItem(HWnd, IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS)
-      Dim As Long nLen = GetWindowTextLength(hTextBox) + 2  ' add space for ending nuls
-      Dim pzswKeywords As WString Ptr = CAllocate(nLen*2)
-      GetWindowText( hTextBox, pzswKeywords, nLen )
-      Dim As String FBKeywords = Str(*pzswKeywords)
-      gConfig.FBKeywords = Trim(FBKeywords)
+      Dim As HWnd hTextBox = GetDlgItem(HWND_FRMOPTIONSKEYWORDS, IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS)
+      gConfig.FBKeywords = AfxGetWindowText(hTextBox)
+      hTextBox = GetDlgItem(HWND_FRMOPTIONSKEYWORDSWINAPI, IDC_FRMOPTIONSKEYWORDSWINAPI_TXTKEYWORDS)
+      gConfig.WinApiKeywords = AfxGetWindowText(hTextBox)
       gConfig.SaveKeywords
-      Deallocate(pzswKeywords)
-
-      HWnd = HWND_FRMOPTIONSKEYWORDSWINAPI
-      hTextBox = GetDlgItem(HWnd, IDC_FRMOPTIONSKEYWORDSWINAPI_TXTKEYWORDS)
-      nLen = GetWindowTextLength(hTextBox) + 2  ' add space for ending nuls
-      pzswKeywords  = CAllocate(nLen*2)
-      GetWindowText( hTextBox, pzswKeywords, nLen )
-      Dim As String WinApiKeywords = Str(*pzswKeywords)
-      gConfig.WinApiKeywords = Trim(WinApiKeywords)
-      gConfig.SaveKeywords
-      Deallocate(pzswKeywords)
    End If
    
    ' Output the config settings to disk file

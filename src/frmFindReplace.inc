@@ -13,6 +13,27 @@
 
 #include once "frmFindReplace.bi"
 
+' ========================================================================================
+' Determine if the incoming string is uppercase
+' ========================================================================================
+function isUpperCaseString( byval sText as string ) as boolean
+   ' Default that the string is uppercase
+   function = true
+   for i as long = 0 to len(sText) - 1
+      if isupper( sText[i] ) = 0 then return false
+   next
+end function
+
+' ========================================================================================
+' Determine if the incoming string is lowercase
+' ========================================================================================
+function isLowerCaseString( byval sText as string ) as boolean
+   ' Default that the string is lowercase
+   function = true
+   for i as long = 0 to len(sText) - 1
+      if islower( sText[i] ) = 0 then return false
+   next
+end function
 
 ' ========================================================================================
 ' frmFindReplace_PositionWindows
@@ -122,18 +143,15 @@ public function frmFindReplace_PositionWindows() as LRESULT
    SetWindowPos( GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), 0, _
                   nLeft, nTop, 0, 0, iif(gFind.bExpanded, SWP_SHOWWINDOW, SWP_HIDEWINDOW) or SWP_NOSIZE )
 
-' TODO: Scintilla doesn't seem to have a preserve case option for replace?
    ' Preserve Case RECT
-'   gFind.rcPreserve.Left = nleft + _
-'      AfxGetWindowWidth(GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE))
-'   gFind.rcPreserve.top = nTop
-'   gFind.rcPreserve.right = gFind.rcPreserve.Left + iconWidth
-'   gFind.rcPreserve.bottom = gFind.rcPreserve.top + iconWidth
+   gFind.rcPreserve.Left = nleft + _
+      AfxGetWindowWidth(GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE))
+   gFind.rcPreserve.top = nTop
+   gFind.rcPreserve.right = gFind.rcPreserve.Left + iconWidth
+   gFind.rcPreserve.bottom = gFind.rcPreserve.top + iconWidth
  
    ' Replace RECT
-   gFind.rcReplace.Left = nleft + _
-      AfxGetWindowWidth(GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)) + hmargin
-'   gFind.rcReplace.Left = gFind.rcPreserve.right + hmargin + hmargin
+   gFind.rcReplace.Left = gFind.rcPreserve.right + hmargin + hmargin
    gFind.rcReplace.top = nTop
    gFind.rcReplace.right = gFind.rcReplace.Left + iconWidth
    gFind.rcReplace.bottom = gFind.rcReplace.top + iconWidth
@@ -267,9 +285,29 @@ private function frmFindReplace_DoReplace( _
       do 
          r = SciExec( hEdit, SCI_SEARCHINTARGET, len(txtFind), strptr(txtFind))
          if r = -1 then exit do
-         SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
-         startPos = r + len(txtReplace)  'len(txtFind)
-         ' Adjust the searching positions
+         dim as zstring * MAX_PATH sSelText
+         SciExec( hEdit, SCI_GETTARGETTEXT, 0, @sSelText )
+         ' If Preserve Case is active then check the selection to see if the entire
+         ' selection is all UPPERCASE or all lowercase.
+         if gFind.nPreserve then
+            dim as string sReplaceText
+            if isUpperCaseString( sSelText ) then
+               sReplaceText = ucase(txtReplace)
+            elseif isLowerCaseString( sSelText ) then
+               sReplaceText = lcase(txtReplace)
+            else
+               sReplaceText = txtReplace
+            end if
+            SciExec( hEdit, SCI_REPLACETARGET, len(sReplaceText), strptr(sReplaceText) )
+            startPos = r + len(sReplaceText)
+            endPos = endPos + len(sReplaceText) - len(sSelText)
+         else            
+            SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
+            startPos = r + len(txtReplace)  
+            endPos = endPos + len(txtReplace) - len(sSelText)
+         end if
+         ' Need to update the end searching positions because the replace action may
+         ' have made the document larger or smaller.
          SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
          SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       loop
@@ -287,8 +325,24 @@ private function frmFindReplace_DoReplace( _
          exit function
       end if
       SciExec( hEdit, SCI_TARGETFROMSELECTION, 0, 0)
-      SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
-      startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + 1
+      ' If Preserve Case is active then check the selection to see if the entire
+      ' selection is all UPPERCASE or all lowercase.
+      if gFind.nPreserve then
+         dim as string sSelText = pDoc->GetSelText
+         dim as string sReplaceText
+         if isUpperCaseString( sSelText ) then
+            sReplaceText = ucase(txtReplace)
+         elseif isLowerCaseString( sSelText ) then
+            sReplaceText = lcase(txtReplace)
+         else
+            sReplaceText = txtReplace
+         end if
+         SciExec( hEdit, SCI_REPLACETARGET, len(sReplaceText), strptr(sReplaceText) )
+         startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + len(sReplaceText)
+      else            
+         SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
+         startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + len(txtReplace)
+      end if
       frmFindReplace_nextSelection(startPos, fMovenext)
    end if
       
@@ -476,8 +530,7 @@ private function frmFindReplace_OnPaint( byval HWnd as HWND) as LRESULT
       SelectObject( hDC, ghFindReplace.hBackBrushTextBox )
       GetWindowRect( GetDlgItem(HWND, IDC_FRMFINDREPLACE_TXTREPLACE), @rc )
       MapWindowPoints( HWND_DESKTOP, HWND, cast(LPPOINT, @rc), 2)
-'      Rectangle( memDC, rc.left - 1, rc.top - 1, rc.right + pWindow->ScaleX(25), rc.bottom + 1 )
-      Rectangle( memDC, rc.left - 1, rc.top - 1, rc.right + 1, rc.bottom + 1 )
+      Rectangle( memDC, rc.left - 1, rc.top - 1, rc.right + pWindow->ScaleX(25), rc.bottom + 1 )
   end if
    DeleteObject( hPen )
    
@@ -608,28 +661,28 @@ private function frmFindReplace_OnPaint( byval HWnd as HWND) as LRESULT
    wsStyle = DT_NOPREFIX or DT_CENTER or DT_VCENTER or DT_SINGLELINE
    DrawText( memDC, wszClose, -1, cast(lpRect, @rc), wsStyle )
 
-'   ' Preserve Case
-'   if gFind.nPreserve then 
-'      SetBkColor( memDC, ghFindReplace.IconSelectedBackColor )
-'      SetTextColor( memDC, ghFindReplace.ForeColor )
-'      SelectObject( memDC, ghFindReplace.hBackBrushIconSelected )
-'   elseif isMouseOverRECT( HWnd, gFind.rcPreserve ) then
-'      SetBkColor( memDC, ghFindReplace.IconBackColorHot )
-'      SetTextColor( memDC, ghFindReplace.ForeColorHot )
-'      SelectObject( memDC, ghFindReplace.hIconBrushHot )
-'   else
-'      SetBkColor( memDC, ghFindReplace.TextBoxBackColor )
-'      SetTextColor( memDC, ghFindReplace.ForeColor )
-'      SelectObject( memDC, ghFindReplace.hBackBrushTextBox )
-'  end if
-'   FillRect( memDC, @gFind.rcPreserve, ghFindReplace.hBackBrushTextBox )
-'   ' shrink the rectangle in order to fit within the textbox
-'   rc = gFind.rcPreserve
-'   InflateRect( @rc, -(pWindow->ScaleX(2)), -(pWindow->ScaleY(2)) )
-'   RoundRect( memDC, rc.left, rc.top, rc.right, rc.bottom, 20, 20 )
-'   SelectObject(memDC, ghStatusBar.hFontStatusBar)
-'   wsStyle = DT_NOPREFIX or DT_CENTER or DT_VCENTER or DT_SINGLELINE
-'   DrawText( memDC, wszPreserveCase, -1, cast(lpRect, @rc), wsStyle )
+   ' Preserve Case
+   if gFind.nPreserve then 
+      SetBkColor( memDC, ghFindReplace.IconSelectedBackColor )
+      SetTextColor( memDC, ghFindReplace.ForeColor )
+      SelectObject( memDC, ghFindReplace.hBackBrushIconSelected )
+   elseif isMouseOverRECT( HWnd, gFind.rcPreserve ) then
+      SetBkColor( memDC, ghFindReplace.IconBackColorHot )
+      SetTextColor( memDC, ghFindReplace.ForeColorHot )
+      SelectObject( memDC, ghFindReplace.hIconBrushHot )
+   else
+      SetBkColor( memDC, ghFindReplace.TextBoxBackColor )
+      SetTextColor( memDC, ghFindReplace.ForeColor )
+      SelectObject( memDC, ghFindReplace.hBackBrushTextBox )
+  end if
+   FillRect( memDC, @gFind.rcPreserve, ghFindReplace.hBackBrushTextBox )
+   ' shrink the rectangle in order to fit within the textbox
+   rc = gFind.rcPreserve
+   InflateRect( @rc, -(pWindow->ScaleX(2)), -(pWindow->ScaleY(2)) )
+   RoundRect( memDC, rc.left, rc.top, rc.right, rc.bottom, 20, 20 )
+   SelectObject(memDC, ghStatusBar.hFontStatusBar)
+   wsStyle = DT_NOPREFIX or DT_CENTER or DT_VCENTER or DT_SINGLELINE
+   DrawText( memDC, wszPreserveCase, -1, cast(lpRect, @rc), wsStyle )
    
    ' Paint the Replace icon
    if isMouseOverRECT( HWnd, gFind.rcReplace) then
@@ -1003,7 +1056,7 @@ public function frmFindReplace_Show( _
       SendMessage( hCtlFind, EM_SETEVENTMASK, 0, cast(LPARAM, ENM_SELCHANGE or ENM_CHANGE) )
       
       hCtlReplace = pWindow->AddControl("RICHEDIT", , IDC_FRMFINDREPLACE_TXTREPLACE, wstr(gFind.txtReplace), _
-                    0, 0, 214, 24, _
+                    0, 0, 190, 24, _
                     WS_CHILD or WS_VISIBLE or WS_TABSTOP or ES_LEFT or ES_AUTOHSCROLL, _
                     WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR, _
                     0, @frmFindReplace_RichEdit_SubclassProc, IDC_FRMFINDREPLACE_TXTREPLACE, null )

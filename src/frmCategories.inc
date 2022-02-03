@@ -585,22 +585,16 @@ Function frmCategories_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
    
    hCtrl = _
-   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCATEGORIES_CMDUP, "", 245, 388, 28, 28, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
+   pWindow->AddControl("BUTTON", , IDC_FRMCATEGORIES_CMDUP, wszTriangleUp, 245, 388, 28, 28, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWUP", "IMAGE_ARROWUP16")
-         hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
-         SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
-         IF hBitmap THEN DeleteObject(hBitmap)
+   AfxSetWindowFont( hCtrl, ghMenuBar.hFontSymbolLargeBold, false )     
 
    hCtrl = _
-   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCATEGORIES_CMDDOWN, "", 278, 388, 28, 28, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
+   pWindow->AddControl("BUTTON", , IDC_FRMCATEGORIES_CMDDOWN, wszTriangleDown, 278, 388, 28, 28, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWDOWN", "IMAGE_ARROWDOWN16")
-         hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
-         SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
-         IF hBitmap THEN DeleteObject(hBitmap)
+   AfxSetWindowFont( hCtrl, ghMenuBar.hFontSymbolLargeBold, false )     
 
    pWindow->AddControl("BUTTON", , IDC_FRMCATEGORIES_CMDOK, L(0,"OK"), 346, 388, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _

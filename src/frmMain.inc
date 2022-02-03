@@ -18,6 +18,7 @@
 #include once "frmProjectOptions.bi"
 #include once "frmBuildConfig.bi"
 #include once "frmExplorer.bi"
+#include once "frmPanel.bi"
 #include once "modMRU.bi"
 #include once "modAutoInsert.bi"
 #include once "modMenus.bi"
@@ -731,8 +732,8 @@ function frmMain_OnPaint( byval HWnd as HWnd ) as LRESULT
          if IsWindowVisible(pDoc->hWindow(1)) then 
             ' if the window is visible then we need to extend the splitter hit
             ' area to include all the way to left edge of the client area.
-            if IsWindowVisible(HWND_FRMEXPLORER) then 
-               rc.left = AfxGetWindowWidth( HWND_FRMEXPLORER )
+            if IsWindowVisible(HWND_FRMPANEL) then 
+               rc.left = AfxGetWindowWidth( HWND_FRMPANEL )
                pDoc->rcSplitButton.left = rc.left
             end if   
          end if
@@ -770,7 +771,7 @@ function frmMain_PositionWindows() as LRESULT
    dim as long nHeightMenuBar   = AfxGetWindowHeight( HWND_FRMMAIN_MENUBAR )
    dim as long nHeightStatusBar = AfxGetWindowHeight( HWND_FRMMAIN_STATUSBAR )
    dim as long nHeightOutput    = AfxGetWindowHeight( HWND_FRMOUTPUT )
-   dim as long nWidthExplorer   = AfxGetWindowWidth( HWND_FRMEXPLORER )
+   dim as long nWidthPanel      = AfxGetWindowWidth( HWND_FRMPANEL )
 
    ' Set the top menu menubar into place 
    SetWindowPos( HWND_FRMMAIN_MENUBAR, 0, _
@@ -785,17 +786,17 @@ function frmMain_PositionWindows() as LRESULT
    nLeft = rc.Left 
    nTop = rc.top + nHeightMenuBar
    
-   ' Set the Explorer pane into place if applicable
-   if IsWindowVisible(HWND_FRMEXPLORER) then
-      SetWindowPos( HWND_FRMEXPLORER, 0, _
+   ' Set the Panel pane into place if applicable
+   if IsWindowVisible(HWND_FRMPANEL) then
+      SetWindowPos( HWND_FRMPANEL, 0, _
                     nLeft, nTop, _
-                    nWidthExplorer, _
+                    nWidthPanel, _
                     rc.Bottom - nHeightStatusBar - nHeightMenuBar, _
                     SWP_NOZORDER or SWP_SHOWWINDOW ) 
-      frmExplorer_PositionWindows
-      nLeft = nWidthExplorer
+      frmPanel_PositionWindows
+      nLeft = nWidthPanel
    Else
-      nWidthExplorer = 0
+      nWidthPanel = 0
    end if
 
 
@@ -803,15 +804,13 @@ function frmMain_PositionWindows() as LRESULT
    if gTTabCtl.GetItemCount = 0 then
       ShowWindow( HWND_FRMMAIN_TOPTABS, SW_HIDE )
       nHeightTabControl = 0
-      
    Else
       nHeightTabControl = AfxGetWindowHeight(HWND_FRMMAIN_TOPTABS)
       SetWindowPos( HWND_FRMMAIN_TOPTABS, 0, _
                     nLeft, nTop, _
-                    rc.Right - nWidthExplorer, nHeightTabControl, _
+                    rc.Right - nWidthPanel, nHeightTabControl, _
                     SWP_SHOWWINDOW or SWP_NOZORDER )
       frmTopTabs_PositionWindows()
-      
    end if
    
 
@@ -833,7 +832,7 @@ function frmMain_PositionWindows() as LRESULT
       ' Reduce the height of the client area by the size of the statusbar and menubar.
       rcClient.left = nLeft
       rcClient.top = nTop + nHeightTabControl 
-      rcClient.right = rc.Right - nWidthExplorer
+      rcClient.right = rc.Right - nWidthPanel
       rcClient.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
       
       dim as long iScrollbarWidth  = GetSystemMetrics(SM_CXVSCROLL)
@@ -846,7 +845,8 @@ function frmMain_PositionWindows() as LRESULT
          nDesignCodeTabHeight = pWindow->ScaleY(24)
       end if
       
-      dim as long lStyle = SWP_SHOWWINDOW or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_NOACTIVATE or SWP_NOCOPYBITS
+      dim as long lStyle = SWP_SHOWWINDOW or SWP_NOZORDER or SWP_NOOWNERZORDER or _
+                           SWP_NOACTIVATE or SWP_NOCOPYBITS
       
       if pDoc->IsDesigner then
          SetWindowPos( pDoc->hDesignTabCtrl, 0, _
@@ -854,7 +854,7 @@ function frmMain_PositionWindows() as LRESULT
                        rcClient.right, rcClient.bottom - nDesignCodeTabHeight, _
                        lStyle )
       else   
-         ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
+         ShowWindow( pDoc->hDesignTabCtrl, SW_HIDE )
       end if
       
       if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
@@ -920,7 +920,7 @@ function frmMain_PositionWindows() as LRESULT
          frmFindReplace_PositionWindows
          
       end if
-      AfxRedrawWindow(HWND_FRMMAIN)
+      AfxRedrawWindow( HWND_FRMMAIN )
    end if
    
    ' Ensure that the correct notes are shown
@@ -969,7 +969,7 @@ function frmMain_OpenProjectSafely( _
    gApp.IsProjectActive = true
    
    ' Position all of the controls into place
-   frmExplorer_PositionWindows
+   frmPanel_PositionWindows
    frmMain_PositionWindows
 
    function = true
@@ -1401,11 +1401,11 @@ function frmMain_OnClose( byval HWnd as HWnd ) as LRESULT
    ' treeview, etc. Those tasks simply slow down the exiting of the program.
    gApp.IsShutdown = true
 
-   ' Save whether the Explorer should be shown the next time the program is run.
-   ' Also save the Explorer panel width. 
+   ' Save whether the Panel should be shown the next time the program is run.
+   ' Also save the panel width. 
    dim pWindow as CWindow ptr = AfxCWindowPtr(HWND)
-   gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
-   gConfig.ShowExplorerWidth = pWindow->UnScaleX(AfxGetWindowWidth( HWND_FRMEXPLORER ))
+   gConfig.ShowPanel = IsWindowVisible(HWND_FRMPANEL)
+   gConfig.ShowPanelWidth = pWindow->UnScaleX(AfxGetWindowWidth( HWND_FRMPANEL ))
    
    ' if a project(s) is already open then save/close it.
    if gApp.IsProjectActive then 
@@ -1878,8 +1878,8 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
   
    ' Create the various child windows
    frmFunctionList_Show( HWND_FRMMAIN )
-   frmExplorer_Show( HWND_FRMMAIN )
-   frmExplorerVScroll_Show( HWND_FRMMAIN )
+   frmPanel_Show( HWND_FRMMAIN )
+   frmPanelVScroll_Show( HWND_FRMMAIN )
    frmOutput_Show( HWND_FRMMAIN )
 
 
@@ -1905,13 +1905,13 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
       .rcNormalPosition.Bottom = gConfig.StartupBottom
       .showCmd = iif( gConfig.StartupMaximized, SW_MAXIMIZE, SW_SHOWNORMAL )
    end with
-   SetWindowPlacement(pWindow->hWindow, @WinPla)
+   SetWindowPlacement( pWindow->hWindow, @WinPla )
      
    ' Ensure the window is placed on screen should the user had changed 
    ' the logical ordering of a multiple display setup.
-   AfxForceVisibleDisplay(pWindow->hWindow)
+   AfxForceVisibleDisplay( pWindow->hWindow )
    
-   UpdateWindow pWindow->hWindow
+   UpdateWindow( pWindow->hWindow )
 
    ' Post a message to process the application's command line as applicable.
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE, 0, 0 )
@@ -1981,7 +1981,6 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
             ' dialog box and, if it is, processes the message.
             ' Ensure keystrokes like TAB are properly handled by the modeless dialogs
             if AfxCAxHostForwardMessage(GetFocus, @uMsg) = false then
-               if IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) then Continue Do
                if IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) then Continue Do
                if IsDialogMessage( HWND_FRMHELPVIEWER, @uMsg ) then Continue Do
 
@@ -2003,12 +2002,12 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
    if ghAccelUserTools then DestroyAcceleratorTable( ghAccelUserTools )
    
    ' delete the allocated memory for the various child windows
-   pWindow = AfxCWindowPtr( HWND_FRMHELPVIEWER ):   delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER ):     delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER_VSCROLLBAR ): delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ):       delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMHELPVIEWER ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMPANEL ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMPANEL_VSCROLLBAR ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMFUNCTIONLIST ): delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMMAIN ):         delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMMAIN ): delete pWindow
 
 end function
 

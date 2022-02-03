@@ -29,7 +29,8 @@
 #define IDC_FRMKEYBOARDEDIT_COMBOACCEL  1107
 
 TYPE KEYBINDINGS_TYPE
-   idAction as long       ' IDM_* message
+   idAction as long         ' IDM_* message
+   wszMsgString as CWSTR    ' "IDM_SAVE", "IDM_SAVEAS", etc 
    wszCategory as CWSTR
    wszDescription as CWSTR
    wszDefaultKeys as CWSTR
@@ -43,6 +44,7 @@ declare function frmKeyboard_SaveKeyBindings( byval wszFilename as CWSTR ) as lo
 declare function frmKeyBoard_AddKeyBinding( _
             byval wszCategory as CWSTR, _
             byval idAction as long, _
+            byval wszMsgString as CWSTR, _
             byval wszDescription as CWSTR, _
             byval wszDefaultKeys as CWSTR, _
             byval wszUserKeys as CWSTR _

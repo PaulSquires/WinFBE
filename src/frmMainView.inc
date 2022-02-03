@@ -52,15 +52,46 @@ end function
 
 
 ' ========================================================================================
-' View FunctionList, Explorer, Output windows
+' View FunctionList, Explorer, Output, Bookmarks windows
 ' ========================================================================================
 function OnCommand_ViewFunctionList() as LRESULT
+' TODO: Remove legacy FunctionList call
    if gApp.GetDocumentCount then ShowFunctionList()
+   
+   ' If FunctionList is already visible and active then toggle it closed
+   if IsWindowVisible(HWND_FRMFUNCTIONS) andalso (gPanel.hActiveChild = HWND_FRMFUNCTIONS) then
+      ShowWindow( HWND_FRMPANEL, SW_HIDE )
+   else   
+      ShowWindow( HWND_FRMPANEL, SW_SHOW )
+      gPanel.hActiveChild = HWND_FRMFUNCTIONS
+   end if
+   frmPanel_PositionWindows
+   frmMain_PositionWindows
    function = 0
 end function
 
 function OnCommand_ViewExplorer() as LRESULT
-   ShowWindow HWND_FRMEXPLORER, Iif(IsWindowVisible(HWND_FRMEXPLORER), SW_HIDE, SW_SHOW)
+   ' If Explorer is already visible and active then toggle it closed
+   if IsWindowVisible(HWND_FRMPANEL) andalso (gPanel.hActiveChild = HWND_FRMEXPLORER) then
+      ShowWindow( HWND_FRMPANEL, SW_HIDE )
+   else   
+      ShowWindow( HWND_FRMPANEL, SW_SHOW )
+      gPanel.hActiveChild = HWND_FRMEXPLORER
+   end if
+   frmPanel_PositionWindows
+   frmMain_PositionWindows
+   function = 0
+end function
+
+function OnCommand_ViewBookmarksList() as LRESULT
+   ' If Bookmarks is already visible and active then toggle it closed
+   if IsWindowVisible(HWND_FRMPANEL) andalso (gPanel.hActiveChild = HWND_FRMBOOKMARKS) then
+      ShowWindow( HWND_FRMPANEL, SW_HIDE )
+   else   
+      ShowWindow( HWND_FRMPANEL, SW_SHOW )
+      gPanel.hActiveChild = HWND_FRMBOOKMARKS
+   end if
+   frmPanel_PositionWindows
    frmMain_PositionWindows
    function = 0
 end function
@@ -70,7 +101,6 @@ function OnCommand_ViewOutput() as LRESULT
    frmMain_PositionWindows
    function = 0
 end function
-
 
 ' ========================================================================================
 ' View Restore Main window size

@@ -145,12 +145,13 @@ type clsDocument
       AutoSaveRequired  as boolean
       DateFileTime      as FILETIME  
       hNodeExplorer     as HTREEITEM
+      bBookmarkExpanded as boolean = true    ' Bookmarks list expand/collapse state
       FileEncoding      as long       
-      bNeedsParsing     as boolean  ' Document requires to be parsed due to changes.
-      DeletedButKeep    as boolean  ' file no longer exists but keep open anyway
-      DocumentBuild     as string   ' specific build configuration to use for this document
-      sMatchWord        as string   ' for the incremental autocomplete search
-      AutoCompletetype  as long     ' AUTOC_DIMAS, AUTOC_TYPE
+      bNeedsParsing     as boolean     ' Document requires to be parsed due to changes.
+      DeletedButKeep    as boolean     ' file no longer exists but keep open anyway
+      DocumentBuild     as string      ' specific build configuration to use for this document
+      sMatchWord        as string      ' for the incremental autocomplete search
+      AutoCompletetype  as long        ' AUTOC_DIMAS, AUTOC_TYPE
       AutoCStartPos     as long
       lastCaretPos      as long        ' used for checking in SCN_UPDATEUI
       

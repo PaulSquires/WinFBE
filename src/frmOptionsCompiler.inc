@@ -87,7 +87,6 @@ public Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-
    pWindow->AddControl("LABEL", , IDC_FRMOPTIONSCOMPILER_LBLSWITCHES, _
         L(153,"Additional compiler option switches (optional)" & ":"), 0, 148, 375, 16, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
@@ -106,7 +105,7 @@ public Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    pWindow->AddControl("LABEL", , IDC_FRMOPTIONSCOMPILER_LBLFBHELP, _
-        L(155,"FreeBASIC Help file (*.chm)") & ":", 0, 300, 375, 14, _
+        L(155,"FreeBASIC Help file (*.chm)") & ":", 0, 300, 375, 18, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE, "", 0, 320, 356, 20, _
@@ -116,12 +115,10 @@ public Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    
-   
    gConfig.FBWINCompiler32  = ProcessFromCurdriveApp(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64  = ProcessFromCurdriveApp(gConfig.FBWINCompiler64)
    gConfig.CompilerHelpfile = ProcessFromCurdriveApp(gConfig.CompilerHelpfile)
    gConfig.WinFBXHelpfile   = ProcessFromCurdriveApp(gConfig.WinFBXHelpfile)
-
 
    ' Load the Toolchain listbox
    DIM hSearch as HANDLE

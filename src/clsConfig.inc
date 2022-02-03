@@ -17,6 +17,7 @@
 #include once "clsConfig.bi"
 #include once "modRoutines.bi"
 #include once "frmfunctionList.bi"
+#include once "frmBookmarks.bi"
 #include once "frmExplorer.bi"
 #include once "frmOutput.bi"
 #include once "frmBuildConfig.bi"
@@ -62,13 +63,11 @@ function clsConfig.LoadKeywords() as long
 
    dim pStream as CTextStream
    if pStream.Open(_FBKeywordsFilename) <> S_OK then exit function
-   dim as CWSTR wst = pStream.ReadAll
-   this.FBKeywords = AfxStrShrink(wst, " " & wchr(13,10))
+   this.FBKeywords = pStream.ReadAll
    pStream.Close
 
    if pStream.Open(_WinApiKeywordsFilename) <> S_OK then exit function
-   wst = pStream.ReadAll
-   this.WinApiKeywords = AfxStrShrink(wst, " " & wchr(13,10))
+   this.WinApiKeywords = pStream.ReadAll
    pStream.Close
    function = 0
 end function
@@ -481,7 +480,6 @@ function clsConfig.SaveCodetipsCache() as long
          pStream.Write( @meta, sizeof(CODETIP_META_DATA), null )
          pStream.Close
       end if
-      
       
       ' Write the actual codetip cache
       if AfxFileExists(_CodetipCacheDatabase) then AfxDeleteFile( _CodetipCacheDatabase )
@@ -1110,8 +1108,8 @@ function clsConfig.SaveConfigFile() as long
    pStream.WriteLine "StartupRight="          & this.StartupRight         
    pStream.WriteLine "StartupBottom="         & this.StartupBottom        
    pStream.WriteLine "StartupMaximized="      & this.StartupMaximized     
-   pStream.WriteLine "ShowExplorer="          & this.ShowExplorer         
-   pStream.WriteLine "ShowExplorerWidth="     & this.ShowExplorerWidth    
+   pStream.WriteLine "ShowPanel="             & this.ShowPanel
+   pStream.WriteLine "ShowPanelWidth="        & this.ShowPanelWidth    
    pStream.WriteLine "ToolBoxLeft="           & this.ToolBoxLeft          
    pStream.WriteLine "ToolBoxTop="            & this.ToolBoxTop           
    pStream.WriteLine "ToolBoxRight="          & this.ToolBoxRight         
@@ -1524,8 +1522,8 @@ function clsConfig.LoadConfigFile() as long
             case "StartupRight":           this.StartupRight          = nData
             case "StartupBottom":          this.StartupBottom         = nData
             case "StartupMaximized":       this.StartupMaximized      = nData
-            case "ShowExplorer":           this.ShowExplorer          = nData
-            case "ShowExplorerWidth":      this.ShowExplorerWidth     = nData
+            case "ShowPanel":              this.ShowPanel             = nData
+            case "ShowPanelWidth":         this.ShowPanelWidth        = nData
             case "ToolBoxLeft":            this.ToolBoxLeft           = nData
             case "ToolBoxTop":             this.ToolBoxTop            = nData
             case "ToolBoxRight":           this.ToolBoxRight          = nData
@@ -1535,10 +1533,10 @@ function clsConfig.LoadConfigFile() as long
             case "WinFBXPath":             this.WinFBXPath            = ProcessFromCurdriveApp(wData)
             case "CompilerBuild":          this.CompilerBuild         = wData
             case "CompilerSwitches":       this.CompilerSwitches      = wData
-            case "CompilerHelpfile":       this.CompilerHelpfile     = ProcessFromCurdriveApp(wData)
-            case "WinFBXHelpfile":         this.WinFBXHelpfile       = ProcessFromCurdriveApp(wData)
-            case "RunViaCommandWindow":    this.RunViaCommandWindow  = nData
-            case "DisableCompileBeep":     this.DisableCompileBeep   = nData
+            case "CompilerHelpfile":       this.CompilerHelpfile      = ProcessFromCurdriveApp(wData)
+            case "WinFBXHelpfile":         this.WinFBXHelpfile        = ProcessFromCurdriveApp(wData)
+            case "RunViaCommandWindow":    this.RunViaCommandWindow   = nData
+            case "DisableCompileBeep":     this.DisableCompileBeep    = nData
          end select
       
       loop
@@ -2281,6 +2279,10 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
       gConfig.Cat(i).bShow = true
    next
    LoadExplorerFiles()
+
+   ' Load all of the bookmarks into the Bookmarks listbox. 
+   LoadBookmarksFiles()
+
    
    ' Display the active editing window
    if gTTabCtl.IsSafeIndex(nActiveTab) = false then 

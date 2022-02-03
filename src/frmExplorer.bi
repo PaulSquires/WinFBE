@@ -14,22 +14,8 @@
 #pragma once
 
 
-#define IDC_FRMEXPLORER_LBLEXPLORER   1000
-#define IDC_FRMEXPLORER_LISTBOX       1001
+#define IDC_FRMEXPLORER_LISTBOX       1000
 
 declare function frmExplorer_Show( byval hWndParent as HWnd ) as LRESULT
 declare function LoadExplorerFiles() as long
 declare function frmExplorer_SelectItemData( byval pDoc as clsDocument ptr ) as boolean
-declare function frmExplorerVScroll_Show( byval hWndParent as HWnd ) as LRESULT
-declare function frmExplorerVScroll_PositionWindows( byval nShowState as long ) as LRESULT
-
-type EXPLORER_VSCROLL_TYPE
-   listBoxHeight as long
-   numItems as long 
-   itemHeight as long
-   itemsPerPage as long
-   thumbHeight as long
-   rc as RECT
-end type
-dim shared gExplorerVScroll as EXPLORER_VSCROLL_TYPE
-

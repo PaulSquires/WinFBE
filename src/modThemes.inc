@@ -31,23 +31,26 @@ type GENERAL_HANDLES_TYPE
 end type
 dim shared ghGeneral as GENERAL_HANDLES_TYPE
 
-type EXPLORER_HANDLES_TYPE
+type PANEL_HANDLES_TYPE
    hPanelBrush as HBRUSH
    hBackBrushScrollBar as HBRUSH
    BackColorScrollBar as COLORREF
    ForeColorScrollBar as COLORREF
    hBackBrushThumb as HBRUSH
-   hBackBrushNode as HBRUSH
-   BackColorNode as COLORREF
-   ForeColorNode as COLORREF
    hBackBrush as HBRUSH
    BackColor as COLORREF
    ForeColor as COLORREF
    hBackBrushHot as HBRUSH
    BackColorHot as COLORREF
    ForeColorHot as COLORREF
+   hBackBrushButton as HBRUSH
+   BackColorButton as COLORREF
+   ForeColorButton as COLORREF
+   hBackBrushButtonHot as HBRUSH
+   BackColorButtonHot as COLORREF
+   ForeColorButtonHot as COLORREF
 end type
-dim shared ghExplorer as EXPLORER_HANDLES_TYPE
+dim shared ghPanel as PANEL_HANDLES_TYPE
 
 type MENUBAR_HANDLES_TYPE
    hPanelBrush as HBRUSH
@@ -127,28 +130,28 @@ type FINDREPLACE_HANDLES_TYPE
 end type
 dim shared ghFindReplace as FINDREPLACE_HANDLES_TYPE
 
-type FUNCTIONLIST_HANDLES_TYPE
-   PanelColor as COLORREF
-   hPanelBrush as HBRUSH
-   hBackBrushScrollBar as HBRUSH
-   BackColorScrollBar as COLORREF
-   ForeColorScrollBar as COLORREF
-   hBackBrushThumb as HBRUSH
-   hBackBrushNode as HBRUSH
-   BackColorNode as COLORREF
-   ForeColorNode as COLORREF
-   hBackBrush as HBRUSH
-   BackColor as COLORREF
-   ForeColor as COLORREF
-   hBackBrushHot as HBRUSH
-   BackColorHot as COLORREF
-   ForeColorHot as COLORREF
-   hBackBrushTextBox as HBRUSH
-   TextBoxForeColor as COLORREF
-   TextBoxBackColor as COLORREF
-   CueBannerForeColor as COLORREF
-end type
-dim shared ghFunctionList as FUNCTIONLIST_HANDLES_TYPE
+'type FUNCTIONLIST_HANDLES_TYPE
+'   PanelColor as COLORREF
+'   hPanelBrush as HBRUSH
+'   hBackBrushScrollBar as HBRUSH
+'   BackColorScrollBar as COLORREF
+'   ForeColorScrollBar as COLORREF
+'   hBackBrushThumb as HBRUSH
+'   hBackBrushNode as HBRUSH
+'   BackColorNode as COLORREF
+'   ForeColorNode as COLORREF
+'   hBackBrush as HBRUSH
+'   BackColor as COLORREF
+'   ForeColor as COLORREF
+'   hBackBrushHot as HBRUSH
+'   BackColorHot as COLORREF
+'   ForeColorHot as COLORREF
+'   hBackBrushTextBox as HBRUSH
+'   TextBoxForeColor as COLORREF
+'   TextBoxBackColor as COLORREF
+'   CueBannerForeColor as COLORREF
+'end type
+'dim shared ghFunctionList as FUNCTIONLIST_HANDLES_TYPE
 
 type OUTPUT_HANDLES_TYPE
    hPanelBrush as HBRUSH
@@ -191,11 +194,16 @@ function LoadThemeFile() as boolean
    dim as CWSTR wszFilename = AfxGetExePathName & "themes\" & gConfig.ThemeFilename
    if AfxFileExists(wszFilename) = 0 then
       ' default to the visual studio dark theme
-      wszFilename = AfxGetExePathName & "themes\visual_studio_dark.theme"
+      wszFilename = AfxGetExePathName & "themes\winfbe_default_dark.theme"
       if AfxFileExists(wszFilename) = 0 then
          ' If the theme still does not exist then most likely the Themes folder is
          ' missing or the theme was renamed. Use the backup version in the settings folder. 
-         wszFilename = AfxGetExePathName & "settings\backup_visual_studio_dark.theme"
+         wszFilename = AfxGetExePathName & "settings\backup_winfbe_default_dark.theme"
+         ' Attempt to copy the file for next time
+         dim as CWSTR wszThemeDirFilename = AfxGetExePathName & "themes\winfbe_default_dark.theme"
+         if AfxCopyFile( wszFilename, wszThemeDirFilename ) then
+            gConfig.ThemeFilename = "winfbe_default_dark.theme"
+         end if   
       end if
    end if
 
@@ -301,32 +309,37 @@ function LoadThemeFile() as boolean
    pTheme = getThemePtr("compile.iconfail")
    ghGeneral.iconfail = pTheme->foreground
 
-   pTheme = getThemePtr("explorer.panel")
-   if ghExplorer.hPanelBrush then DeleteObject(ghExplorer.hPanelBrush)
-   ghExplorer.hPanelBrush = CreateSolidBrush(pTheme->background)
-   pTheme = getThemePtr("explorer.text")
-   if ghExplorer.hBackBrush then DeleteObject(ghExplorer.hBackBrush)
-   ghExplorer.hBackBrush = CreateSolidBrush(pTheme->background)
-   ghExplorer.BackColor = pTheme->background
-   ghExplorer.ForeColor = pTheme->foreground
-   pTheme = getThemePtr("explorer.texthot")
-   if ghExplorer.hBackBrushHot then DeleteObject(ghExplorer.hBackBrushHot)
-   ghExplorer.hBackBrushHot = CreateSolidBrush(pTheme->background)
-   ghExplorer.BackColorHot = pTheme->background
-   ghExplorer.ForeColorHot = pTheme->foreground
-   pTheme = getThemePtr("explorer.nodetext")
-   if ghExplorer.hBackBrushNode then DeleteObject(ghExplorer.hBackBrushNode)
-   ghExplorer.hBackBrushNode = CreateSolidBrush(pTheme->background)
-   ghExplorer.BackColorNode = pTheme->background
-   ghExplorer.ForeColorNode = pTheme->foreground
-   pTheme = getThemePtr("explorer.scrollbar")
-   if ghExplorer.hBackBrushScrollBar then DeleteObject(ghExplorer.hBackBrushScrollBar)
-   ghExplorer.hBackBrushScrollBar = CreateSolidBrush(pTheme->background)
-   if ghExplorer.hBackBrushThumb then DeleteObject(ghExplorer.hBackBrushThumb)
-   ghExplorer.hBackBrushThumb = CreateSolidBrush(pTheme->foreground)
-   ghExplorer.BackColorScrollBar = pTheme->background
-   ghExplorer.ForeColorScrollBar = pTheme->foreground
-      
+   pTheme = getThemePtr("panel.panel")
+   if ghPanel.hPanelBrush then DeleteObject(ghPanel.hPanelBrush)
+   ghPanel.hPanelBrush = CreateSolidBrush(pTheme->background)
+   pTheme = getThemePtr("panel.text")
+   if ghPanel.hBackBrush then DeleteObject(ghPanel.hBackBrush)
+   ghPanel.hBackBrush = CreateSolidBrush(pTheme->background)
+   ghPanel.BackColor = pTheme->background
+   ghPanel.ForeColor = pTheme->foreground
+   pTheme = getThemePtr("panel.texthot")
+   if ghPanel.hBackBrushHot then DeleteObject(ghPanel.hBackBrushHot)
+   ghPanel.hBackBrushHot = CreateSolidBrush(pTheme->background)
+   ghPanel.BackColorHot = pTheme->background
+   ghPanel.ForeColorHot = pTheme->foreground
+   pTheme = getThemePtr("panel.scrollbar")
+   if ghPanel.hBackBrushScrollBar then DeleteObject(ghPanel.hBackBrushScrollBar)
+   ghPanel.hBackBrushScrollBar = CreateSolidBrush(pTheme->background)
+   if ghPanel.hBackBrushThumb then DeleteObject(ghPanel.hBackBrushThumb)
+   ghPanel.hBackBrushThumb = CreateSolidBrush(pTheme->foreground)
+   ghPanel.BackColorScrollBar = pTheme->background
+   ghPanel.ForeColorScrollBar = pTheme->foreground
+   pTheme = getThemePtr("panel.button")
+   if ghPanel.hBackBrushButton then DeleteObject(ghPanel.hBackBrushButton)
+   ghPanel.hBackBrushButton = CreateSolidBrush(pTheme->background)
+   ghPanel.BackColorButton = pTheme->background
+   ghPanel.ForeColorButton = pTheme->foreground
+   pTheme = getThemePtr("panel.buttonhot")
+   if ghPanel.hBackBrushButtonHot then DeleteObject(ghPanel.hBackBrushButtonHot)
+   ghPanel.hBackBrushButtonHot = CreateSolidBrush(pTheme->background)
+   ghPanel.BackColorButtonHot = pTheme->background
+   ghPanel.ForeColorButtonHot = pTheme->foreground
+
    pTheme = getThemePtr("topmenu.panel")
    ghPopup.PanelColor = pTheme->background
    if ghPopup.hPanelBrush then DeleteObject(ghPopup.hPanelBrush)
@@ -427,40 +440,6 @@ function LoadThemeFile() as boolean
    ghFindReplace.IconSelectedBackColor = pTheme->background
    pTheme = getThemePtr("findreplace.cuebanner")
    ghFindReplace.CueBannerForeColor = pTheme->foreground
-
-   pTheme = getThemePtr("functionlist.panel")
-   ghFunctionList.PanelColor = pTheme->background
-   if ghFunctionList.hPanelBrush then DeleteObject(ghFunctionList.hPanelBrush)
-   ghFunctionList.hPanelBrush = CreateSolidBrush(ghFunctionList.PanelColor)
-   pTheme = getThemePtr("functionlist.nodetext")
-   if ghFunctionList.hBackBrushNode then DeleteObject(ghFunctionList.hBackBrushNode)
-   ghFunctionList.hBackBrushNode = CreateSolidBrush(pTheme->background)
-   ghFunctionList.BackColorNode = pTheme->background
-   ghFunctionList.ForeColorNode = pTheme->foreground
-   pTheme = getThemePtr("functionlist.text")
-   if ghFunctionList.hBackBrush then DeleteObject(ghFunctionList.hBackBrush)
-   ghFunctionList.hBackBrush = CreateSolidBrush(pTheme->background)
-   ghFunctionList.BackColor = pTheme->background
-   ghFunctionList.ForeColor = pTheme->foreground
-   pTheme = getThemePtr("functionlist.texthot")
-   if ghFunctionList.hBackBrushHot then DeleteObject(ghFunctionList.hBackBrushHot)
-   ghFunctionList.hBackBrushHot = CreateSolidBrush(pTheme->background)
-   ghFunctionList.BackColorHot = pTheme->background
-   ghFunctionList.ForeColorHot = pTheme->foreground
-   pTheme = getThemePtr("functionlist.textbox")
-   if ghFunctionList.hBackBrushTextBox then DeleteObject(ghFunctionList.hBackBrushTextBox)
-   ghFunctionList.hBackBrushTextBox = CreateSolidBrush(pTheme->background)
-   ghFunctionList.TextBoxBackColor = pTheme->background
-   ghFunctionList.TextBoxForeColor = pTheme->foreground
-   pTheme = getThemePtr("functionlist.cuebanner")
-   ghFunctionList.CueBannerForeColor = pTheme->foreground
-   pTheme = getThemePtr("functionlist.scrollbar")
-   if ghFunctionList.hBackBrushScrollBar then DeleteObject(ghFunctionList.hBackBrushScrollBar)
-   ghExplorer.hBackBrushScrollBar = CreateSolidBrush(pTheme->background)
-   if ghFunctionList.hBackBrushThumb then DeleteObject(ghFunctionList.hBackBrushThumb)
-   ghFunctionList.hBackBrushThumb = CreateSolidBrush(pTheme->foreground)
-   ghFunctionList.BackColorScrollBar = pTheme->background
-   ghFunctionList.ForeColorScrollBar = pTheme->foreground
 
    pTheme = getThemePtr("output.panel")
    if ghOutput.hPanelBrush then DeleteObject(ghOutput.hPanelBrush)

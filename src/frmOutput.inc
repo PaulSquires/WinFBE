@@ -12,7 +12,6 @@
 '    GNU General Public License for more details.
 
 #include once "frmOutput.bi"
-#include once "clsApp.bi"
 
 
 ' ========================================================================================
@@ -20,9 +19,9 @@
 ' when Projects are loaded and closed.
 ' ========================================================================================
 function frmOutput_ResetAllControls() as long 
-   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
+   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVRESULTS) )
    AfxSetWindowText( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
-   ListBox_ResetContent( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH) )
+   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVSEARCH) )
    ListView_DeleteAllItems( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO) )
    AfxSetWindowText( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), "" )
    function = 0
@@ -71,30 +70,62 @@ function frmOutput_UpdateToDoListview() as long
    function = 0
 END FUNCTION
 
-
 ' ========================================================================================
-' Process the search result that was double clicked
+' Update the SEARCH listview
 ' ========================================================================================
-function frmOutput_DoSearchFileSelected() as LONG
+function frmOutput_UpdateSearchListview( byref wszResultFile as wstring ) as long 
+   dim hLV as hwnd = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVSEARCH )
 
-   dim wszText as wstring * MAX_PATH
-   dim wszFilename as wstring * MAX_PATH
-   dim as long nCursel, nLineNum
+   ListView_DeleteAllItems( hLV )
+   dim as long n = 0
 
-   dim as HWND hList = GetDlgItem(hWnd_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH)
-   nCurSel = ListBox_GetCurSel( hList )
-   SendMessage( hList, LB_GETTEXT, nCurSel, cast(LPARAM, @wszText))
+   if AfxFileExists(wszResultFile) = 0 then exit function
    
-   'X:\FB\WinFBE - Editor\license.txt(1): WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+   dim as CWSTR wst
+
+   dim pStream as CTextStream
+   if pStream.OpenUnicode(wszResultFile) <> S_OK then exit function
    
-   wszFilename = AfxStrExtract( 1, wszText, "(" )
-   nLineNum    = val( AfxStrExtract( wszText, "(", ")" ) ) - 1
+   do until pStream.EOS
+      wst = pStream.ReadLine
+      
+      wst = trim(wst)
+      if len(wst) = 0 THEN continue do
+
+      dim as CWSTR wszFilename, wszLineNum, wszDescription
+      dim as long f1, f2
+      
+      ' Original as seen in the output file
+      'X:\FB\WinFBE - Editor\license.txt:1:WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+
+      ' Search for the 2nd semicolon
+      f1 = instr( 3, wst, ":" )
+      if f1 then f2 = instr( f1 + 1, wst, ":" )
+
+      if f1 then wszFilename = left(wst, f1 - 1)
+      if f2 > f1 then wszLinenum = mid(wst, f1 + 1, f2 - f1 - 1)
+      if f2 then wszDescription = rtrim(mid(wst, f2 + 1))
+
+      FF_ListView_InsertItem( hLV, n, 0, "" ) 
+      FF_ListView_InsertItem( hLV, n, 1, wszLineNum ) 
+      FF_ListView_InsertItem( hLV, n, 2, wszFilename )
+      FF_ListView_InsertItem( hLV, n, 3, wszDescription ) 
+      n = n + 1
+
+   loop
+   pStream.Close
+
+   AfxDeleteFile( wszResultFile )
    
-   OpenSelectedDocument( wszFilename, "", nLineNum )
+   ' Show the search results
+   gOutputTabsCurSel = 2 
+   ShowWindow( HWND_FRMOUTPUT, SW_SHOW )
+   frmMain_PositionWindows
+   frmOutput_PositionWindows
 
    function = 0
 end function
-  
+         
 
 ' ========================================================================================
 ' Show/Hide correct child controls
@@ -110,15 +141,15 @@ Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TABS), SW_SHOW
    AfxRedrawWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_TABS) )
    
-   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LVRESULTS), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_HIDE
-   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LVSEARCH), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), SW_HIDE
    
    Select case gOutputTabsCurSel
       case 0    ' compiler results
-         hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW)
+         hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_LVRESULTS)
          ListView_SetColumnWidth( hCtrl, 3, LVSCW_AUTOSIZE_USEHEADER ) 
 
       case 1    ' compiler log file
@@ -128,7 +159,8 @@ Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
          SendMessage( hCtrl, EM_SETRECT, 0, cast(LPARAM, @rc) )
 
       case 2    ' search results
-         hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH)
+         hCtrl = GetDlgItem(hWnd, IDC_FRMOUTPUT_LVSEARCH)
+         ListView_SetColumnWidth( hCtrl, 3, LVSCW_AUTOSIZE_USEHEADER ) 
 
       case 3    ' ToDo list
          ' ensure last column is sized to fit to end of client area.
@@ -144,7 +176,6 @@ Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
    end select
    
    SetWindowPos( hCtrl, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_SHOWWINDOW )    
-   AfxRedrawWindow( hCtrl )
    SetFocus( hCtrl )
          
    Function = 0
@@ -172,8 +203,8 @@ Function frmOutput_PositionWindows() As LRESULT
    ' Position the child controls
    nTop = nTop + nTabsHeight + pWindow->ScaleY(8)
    SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
-   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
-   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVRESULTS), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVSEARCH), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
    SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
    SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
 
@@ -267,153 +298,6 @@ End Function
    
 
 ' ========================================================================================
-' Process WM_MEASUREITEM message for window/dialog: frmOutput
-' ========================================================================================
-function frmOutput_OnMeasureItem( _
-            byval HWnd as HWnd, _
-            byval lpmis as MEASUREITEMSTRUCT ptr _
-            ) as long
-   ' Set the height of the list box items. 
-   dim pWindow as CWindow ptr = AfxCWindowPtr(HWnd)
-   lpmis->itemHeight = pWindow->ScaleY(EXPLORERITEM_HEIGHT)
-      
-   function = 0
-end function
-
-' ========================================================================================
-' Process WM_DRAWITEM message for window/dialog: frmOutput
-' ========================================================================================
-function frmOutput_OnDrawItem( _
-            byval HWnd as HWnd, _
-            byval lpdis as const DRAWITEMSTRUCT ptr _
-            ) as long
-
-   dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMOUTPUT)
-   if pWindow = 0 then exit function
-
-   if lpdis = 0 then exit function
- 
-   if ( lpdis->itemAction = ODA_DRAWENTIRE ) orelse _
-      ( lpdis->itemAction = ODA_SELECT ) orelse _
-      ( lpdis->itemAction = ODA_FOCUS ) then
-
-      if lpdis->itemAction = ODA_FOCUS then return true
-
-      dim as RECT rc = lpdis->rcItem
-      dim as long nWidth  = rc.right-rc.left
-      dim as long nHeight = rc.bottom-rc.top 
-
-      SaveDC(lpdis->hDC)
-
-      dim memDC as HDC      ' Double buffering
-      dim hbit as HBITMAP   ' Double buffering
-
-      memDC = CreateCompatibleDC( lpdis->hDC )
-      hbit  = CreateCompatibleBitmap( lpdis->hDC, nWidth, nHeight )
-      if hbit then hbit = SelectObject( memDC, hbit )
-
-      ' Default to using normal
-      dim as HBRUSH hBrush = ghOutput.hBackBrush
-      dim as COLORREF foreclr = ghOutput.ForeColor
-      dim as COLORREF backclr = ghOutput.BackColor
-         
-      dim as boolean IsHot = false
-         
-      if ListBox_GetCurSel(lpdis->hwndItem) = lpdis->itemID then IsHot = true
-
-      hBrush = iif( IsHot, ghOutput.hBackBrushHot, ghOutput.hBackBrush)
-      backclr = iif( IsHot, ghOutput.BackColorHot, ghOutput.BackColor)
-      foreclr = iif( IsHot, ghOutput.ForeColorHot, ghOutput.ForeColor)
-
-      dim as CWSTR wszCaption = AfxGetListBoxText(lpdis->hwndItem, lpdis->ItemID)
-
-      ' Paint the entire background
-      ' Create our rect that works with the entire line
-      SetRect( @rc, 0, 0, nWidth, nHeight )
-      FillRect( memDC, @rc, hBrush )
-
-      SetBkColor( memDC, backclr )   
-      SetTextColor( memDC, foreclr )
-
-      dim as long wsStyle = DT_NOPREFIX or DT_LEFT or DT_VCENTER or DT_SINGLELINE  
-      SelectObject( memDC, ghStatusBar.hFontStatusBar )
-      rc.left = rc.left + pWindow->ScaleX(20)
-      DrawText( memDC, wszCaption.sptr, -1, cast(lpRect, @rc), wsStyle )
-         
-      BitBlt lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, _
-             nWidth, nHeight, memDC, 0, 0, SRCCOPY 
-
-      ' Cleanup
-      if hbit  then DeleteObject SelectObject(memDC, hbit)
-      if memDC then DeleteDC memDC
-      RestoreDC(lpdis->hDC, -1)
-   end if   
-
-   function = true
-   
-end function
-
-
-' ========================================================================================
-' frmOutputListBox_SubclassProc (Search Results)
-' ========================================================================================
-function frmOutputListBox_SubclassProc ( _
-            byval hWin   as HWnd, _                 ' // Control window handle
-            byval uMsg   as UINT, _                 ' // Type of message
-            byval _wParam as WPARAM, _               ' // First message parameter
-            byval _lParam as LPARAM, _               ' // Second message parameter
-            byval uIdSubclass as UINT_PTR, _        ' // The subclass ID
-            byval dwRefData as DWORD_PTR _          ' // Pointer to reference data
-            ) as LRESULT
-
-   dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMOUTPUT)
-   static as long accumDelta
-   
-   select case uMsg
-
-      Case WM_MOUSEWHEEL
-         ' accumulate delta until scroll one line (up +120, down -120). 
-         ' 120 is the Microsoft default delta
-         dim as long zDelta = GET_WHEEL_DELTA_WPARAM( _wParam )
-         dim as long nTopIndex = SendMessage( hWin, LB_GETTOPINDEX, 0, 0 ) 
-         accumDelta = accumDelta + zDelta
-         if accumDelta >= 120 then       ' scroll up 3 lines
-            nTopIndex = nTopIndex - 3
-            SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 ) 
-            accumDelta = 0
-         elseif accumDelta <= -120 then  ' scroll down 3 lines
-            nTopIndex = nTopIndex + 3
-            SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 ) 
-            accumDelta = 0
-         end if
-         
-      case WM_PAINT
-         Dim As PAINTSTRUCT ps
-         Dim As HDC hDC
-         
-         hDC = BeginPaint( hWin, @ps )
-         SaveDC( hDC )
-         dim as RECT rc = GetListBoxEmptyClientArea( hWin, pWindow->ScaleY(EXPLORERITEM_HEIGHT) )
-
-         'FillRect( hDC, @rc, ghOutput.hPanelBrush )
-         FillRect( hDC, @rc, GetSysColorBrush(COLOR_WINDOW) )
-         RestoreDC( hDC, -1 )
-         EndPaint( hWin, @ps )
-
-      case WM_ERASEBKGND
-         return true
-      
-      Case WM_DESTROY
-         ' REQUIRED: Remove control subclassing
-         RemoveWindowSubclass( hWin, @frmOutputListBox_SubclassProc, uIdSubclass )
-   end select
-    
-   ' For messages that we don't deal with
-   function = DefSubclassProc(hWin, uMsg, _wParam, _lParam)
-
-end function
-
-' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOutput
 ' ========================================================================================
 Function frmOutput_OnCommand( _
@@ -424,14 +308,7 @@ Function frmOutput_OnCommand( _
             ) As LRESULT
 
    Select case codeNotify
-
-      case LBN_DBLCLK 
-         if (id = IDC_FRMOUTPUT_LISTSEARCH) orelse _
-              (id = IDC_FRMOUTPUT_LVTODO) then
-            frmOutput_DoSearchFileSelected()   
-            Exit Function
-         End If
-      
+     
       case EN_CHANGE
          ' Notes have been modified. Save them to the correct global variable
          ' to ensure that the changes are not lost when documents or projects
@@ -442,6 +319,7 @@ Function frmOutput_OnCommand( _
             else
                gApp.NonProjectNotes = AfxGetWindowText(hwndCtl)
             end if   
+            exit function
          end if
          
    end select
@@ -449,28 +327,7 @@ Function frmOutput_OnCommand( _
    Function = 0
 End Function
       
-            
-' ========================================================================================
-' Process WM_PAINT message for window/dialog: frmOutput
-' ========================================================================================
-Function frmOutput_OnPaint( ByVal HWnd As HWnd) As LRESULT
-            
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMOUTPUT)
-   If pWindow = 0 Then Exit Function
-
-   Dim As PAINTSTRUCT ps
-   Dim As HDC hDC
    
-   hDC = BeginPaint( hWnd, @ps )
-   SaveDC( hDC )
-   FillRect( hDC, @ps.rcPaint, ghOutput.hPanelBrush )
-   RestoreDC( hDC, -1 )
-   EndPaint( hWnd, @ps )
-   
-   Function = 0
-End Function
-
-
 ' ========================================================================================
 ' Processes messages for the subclassed frmOutput Compile Results and TODO listviews .
 ' ========================================================================================
@@ -560,15 +417,16 @@ Function frmOutput_Listview_SubclassProc ( _
 
       Case WM_CHAR   ' prevent the annoying beep!
          If wParam = VK_RETURN Then Return 0
+         If wParam = VK_ESCAPE Then Return 0
 
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
-         RemoveWindowSubclass HWnd, @frmOutput_Listview_SubclassProc, uIdSubclass
+         RemoveWindowSubclass( HWnd, @frmOutput_Listview_SubclassProc, uIdSubclass )
 
    End Select
 
    ' Default processing of Windows messages
-   Function = DefSubclassProc(HWnd, uMsg, wParam, lParam)
+   Function = DefSubclassProc( HWnd, uMsg, wParam, lParam )
 
 End Function
 
@@ -755,7 +613,7 @@ function frmOutputTabs_SubclassProc ( _
             isLastClose = isClose
             AfxRedrawWindow(hWin)   
          end if
-         
+         exit function
                      
       case WM_MOUSEHOVER
          dim as CWSTR wszTooltip = ""
@@ -764,7 +622,7 @@ function frmOutputTabs_SubclassProc ( _
             wszTooltip  = L(161, "Close")
          end if
          AfxSetTooltipText( hTooltip, hWin, wszTooltip )
-
+         exit function
 
       case WM_MOUSELEAVE
          ' reset the hot tab index
@@ -773,7 +631,7 @@ function frmOutputTabs_SubclassProc ( _
          AfxDeleteTooltip( hTooltip, hWin )
          hTooltip = 0
          AfxRedrawWindow(hWin)   
-         
+         exit function         
         
       case WM_LBUTTONUP
          if isMouseOverRECT( hWin, gOutputCloseRect ) = true then
@@ -785,7 +643,8 @@ function frmOutputTabs_SubclassProc ( _
             AfxRedrawWindow(hWin)   
             frmOutput_ShowHideOutputControls( HWND_FRMOUTPUT )
          end if
-         
+         exit function
+            
       case WM_ERASEBKGND
          return true
       
@@ -876,12 +735,12 @@ function frmOutputTabs_SubclassProc ( _
       
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
-         RemoveWindowSubclass( hWin, @frmExplorerListBox_SubclassProc, uIdSubclass )
+         RemoveWindowSubclass( hWin, @frmOutputTabs_SubclassProc, uIdSubclass )
          
    end select
     
    ' For messages that we don't deal with
-   function = DefSubclassProc(hWin, uMsg, _wParam, _lParam)
+   function = DefSubclassProc( hWin, uMsg, _wParam, _lParam )
 
 end function
 
@@ -899,19 +758,27 @@ Function frmOutput_WndProc( _
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND,     frmOutput_OnCommand)
       HANDLE_MSG (HWnd, WM_SIZE,        frmOutput_OnSize)
-      HANDLE_MSG (HWnd, WM_PAINT,       frmOutput_OnPaint)
       HANDLE_MSG (HWnd, WM_LBUTTONUP,   frmOutput_OnLButtonUp)
       HANDLE_MSG (HWnd, WM_LBUTTONDOWN, frmOutput_OnLButtonDown)
       HANDLE_MSG (HWnd, WM_MOUSEMOVE,   frmOutput_OnMouseMove)
-      HANDLE_MSG (HWnd, WM_MEASUREITEM, frmOutput_OnMeasureItem)
-      HANDLE_MSG (HWnd, WM_DRAWITEM,    frmOutput_OnDrawItem)
   
    case WM_ERASEBKGND
       return true
 
+   case WM_PAINT            
+      Dim As PAINTSTRUCT ps
+      Dim As HDC hDC
+      
+      hDC = BeginPaint( hWnd, @ps )
+      SaveDC( hDC )
+      FillRect( hDC, @ps.rcPaint, ghOutput.hPanelBrush )
+      RestoreDC( hDC, -1 )
+      EndPaint( hWnd, @ps )
+      exit function
+
    End Select
 
-   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc( HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -928,6 +795,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    HWND_FRMOUTPUT = pWindow->Create( hWndParent, "", @frmOutput_WndProc, 0, 0, 0, 180, _
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   pWindow->ClassStyle = CS_DBLCLKS
    
    Dim As HWnd hCtl, hLV, hLB
    
@@ -966,10 +834,10 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       frmOutput_ShowNotes()   
 
    hLV = _
-      pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LISTVIEW, "", 0, 0, 0, 0, _
+      pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LVRESULTS, "", 0, 0, 0, 0, _
       WS_CHILD Or WS_TABSTOP Or LVS_REPORT Or LVS_SINGLESEL, _
       WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-      Cast(SUBCLASSPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LISTVIEW, Cast(DWORD_PTR, @pWindow))
+      Cast(SUBCLASSPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LVRESULTS, Cast(DWORD_PTR, @pWindow))
 
       ' Configure the ListView
       AfxSetWindowFont( hLV, ghStatusBar.hFontStatusBar )
@@ -985,14 +853,26 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       ListView_AddColumn( hLV, 2, L(254, "File"), pWindow->ScaleX(250) )
       ListView_AddColumn( hLV, 3, L(255, "Description"), pWindow->ScaleX(480) )
        
-   ' Search results listbox
-   hLB = _
-      pWindow->AddControl("LISTBOX", , IDC_FRMOUTPUT_LISTSEARCH, "", 0, 0, 0, 0, _
-      WS_CHILD Or WS_VSCROLL Or WS_TABSTOP Or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or _
-      LBS_NOTIFY Or LBS_HASSTRINGS or LBS_NOINTEGRALHEIGHT or LBS_OWNERDRAWFIXED, _
-      WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR, , _
-      cast(SUBCLASSPROC, @frmOutputListBox_SubclassProc), _
-      IDC_FRMOUTPUT_LISTSEARCH, cast(DWORD_PTR, @pWindow))
+   ' Search results Listview
+   hLV = _
+      pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LVSEARCH, "", 0, 0, 0, 0, _
+      WS_CHILD Or WS_TABSTOP Or LVS_REPORT Or LVS_SINGLESEL, _
+      WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+      Cast(SUBCLASSPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LVSEARCH, Cast(DWORD_PTR, @pWindow))
+
+      ' Configure the ListView
+      AfxSetWindowFont( hLV, ghStatusBar.hFontStatusBar )
+      dwExStyle = ListView_GetExtendedListViewStyle(hLV)
+      dwExStyle = dwExStyle Or LVS_EX_FULLROWSELECT Or LVS_EX_DOUBLEBUFFER Or LVS_EX_FLATSB
+      ListView_SetExtendedListViewStyle(hLV, dwExStyle)
+      ListView_MakeHeaderFlat(hLV)
+      ListView_SetBkColor( hLV, ghOutput.BackColor )
+      ListView_SetTextColor( hLV, ghOutput.ForeColorHot )
+      ListView_SetTextBkColor( hLV, ghOutput.BackColor )
+      ListView_AddColumn( hLV, 0, "", pWindow->ScaleX(20) )
+      ListView_AddColumn( hLV, 1, L(253, "Line"), pWindow->ScaleX(75) )
+      ListView_AddColumn( hLV, 2, L(254, "File"), pWindow->ScaleX(250) )
+      ListView_AddColumn( hLV, 3, L(255, "Description"), pWindow->ScaleX(480) )
 
    ' TODO listview
    hLV = _

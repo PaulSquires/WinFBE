@@ -13,7 +13,7 @@
 
 #pragma once
 
-#Define IDC_FRMOPTIONSKEYWORDSWINAPI_TXTKEYWORDS     1000
+#Define IDC_FRMOPTIONSKEYWORDSWINAPI_TXTKEYWORDS     1001
 
 declare function frmOptionsKeywordsWinApi_Show( ByVal hWndParent As HWnd ) as LRESULT
 

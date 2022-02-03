@@ -91,7 +91,7 @@ Function frmTopTabs_PositionWindows() As LRESULT
    dim pDoc as clsDocument ptr 
    dim as long nTextWidth = 0
    dim as long nLeft = rc.left 
-   dim as long TabHeight = 36
+   dim as long TabHeight = TOPTABS_HEIGHT
    dim as long rcTextWidth = 70
    dim as long rcCloseWidth = 20
    dim as long rcIconWidth = 20   ' currently not using an icon in the tabs
@@ -464,6 +464,20 @@ Function frmTopTabs_WndProc( _
          SetCapture(hWnd)
       end if
 
+   case WM_LBUTTONDBLCLK
+      ' This will have already fired WM_LBUTTONUP
+      ' If the tab holds a pDoc that is a visual designer form then we will toggle between
+      ' code and design by toggling the designer tab control.
+      dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+      if pDoc then
+         if pDoc->IsDesigner then
+            dim as long nCurSel = TabCtrl_GetCurSel(pDoc->hDesignTabCtrl)
+            nCurSel = iif(nCurSel = 0, 1, 0)
+            TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, nCurSel)
+            frmMain_PositionWindows
+         END IF
+      END IF
+   
    case WM_LBUTTONUP
       if isPrevTabsHitTest( HWnd ) then
          ' if the first displayed tab is not index 0 then there must be tabs before it

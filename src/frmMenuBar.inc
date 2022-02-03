@@ -96,8 +96,6 @@ private Function frmMenuBar_WndProc( ByVal HWnd   As HWnd, _
          ( lpdis->itemAction = ODA_SELECT ) orelse _
          ( lpdis->itemAction = ODA_FOCUS ) then
 
-         if lpdis->itemAction = ODA_FOCUS then return true
-
          GetClientRect( lpdis->hwndItem, @rc )
          
          SaveDC(lpdis->hDC)

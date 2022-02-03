@@ -20,13 +20,13 @@ function handleMouseScrollBar( byval uMsg as MSG ) as boolean
    ' transparent WS_EX_LAYERED scrollbar
    select case uMsg.message 
       case WM_MOUSEMOVE, WM_LBUTTONDOWN, WM_LBUTTONUP
-         if IsWindowVisible( HWND_FRMEXPLORER_VSCROLLBAR ) then
-            if isMouseOverWindow( HWND_FRMEXPLORER_VSCROLLBAR ) orelse _
-               GetCapture() = HWND_FRMEXPLORER_VSCROLLBAR then 
+         if IsWindowVisible( HWND_FRMPANEL_VSCROLLBAR ) then
+            if isMouseOverWindow( HWND_FRMPANEL_VSCROLLBAR ) orelse _
+               GetCapture() = HWND_FRMPANEL_VSCROLLBAR then 
                ' forward the message to the scrollbar instead of say 
                ' the Explorer listbox that is underneath it
-               AfxRedrawWindow( HWND_FRMEXPLORER_LISTBOX )
-               SendMessage( HWND_FRMEXPLORER_VSCROLLBAR, uMsg.message, uMsg.wParam, uMsg.lParam )
+               AfxRedrawWindow( gPanelVScroll.hListBox )
+               SendMessage( HWND_FRMPANEL_VSCROLLBAR, uMsg.message, uMsg.wParam, uMsg.lParam )
                return true
             end if
          end if
@@ -46,14 +46,14 @@ function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
       if IsWindowVisible( HWND_MENU(0) ) then return false
 
       ' HIT TEST for VSCROLLBAR in EXPLORER
-      dim as boolean isVisible = IsWindowVisible(HWND_FRMEXPLORER_VSCROLLBAR)
+      dim as boolean isVisible = IsWindowVisible(HWND_FRMPANEL_VSCROLLBAR)
       dim as long curState = iif(isVisible, SW_SHOWNA, SW_HIDE)
       dim as long newState = SW_HIDE
-      if isMouseOverWindow( HWND_FRMEXPLORER_LISTBOX ) orelse _
-         isMouseOverWindow( HWND_FRMEXPLORER_VSCROLLBAR ) then 
+      if isMouseOverWindow( gPanelVScroll.hListBox ) orelse _
+         isMouseOverWindow( HWND_FRMPANEL_VSCROLLBAR ) then 
          newState = SW_SHOWNA
       end if
-      if newState <> curState then frmExplorerVScroll_PositionWindows( newState )
+      if newState <> curState then frmPanelVScroll_PositionWindows( newState )
    end if
    ' we want our mouse message to continue so return FALSE
    return false
@@ -225,26 +225,28 @@ function handleKeysExplorerListBox( byval uMsg as MSG ) as boolean
    ' Was ENTER key pressed while scrolling the Explorer listbox via keyboard
    dim as HWND hList = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_LISTBOX)
    if (uMsg.message = WM_KEYDOWN) andalso (uMsg.HWnd = hList) then
-      dim as long nCurSel = Listbox_GetCurSel( hList )
-      dim as CWSTR wszCaption = AfxGetListBoxText( hList, nCurSel )
+      dim as long nSel = ListBox_GetCaretIndex( hList )
+      dim as CWSTR wszCaption = AfxGetListBoxText( hList, nSel )
       if uMsg.wParam = VK_RETURN then
          if left(wszCaption, 1) = "%" then
             ' expand/contract the header node
-            dim as long idxArray = val(mid(wszCaption, 2, 1))
-            gConfig.Cat(idxArray).bShow = not gConfig.Cat(idxArray).bShow
+            dim as long idxArray = getExplorerNodeHeaderIndex( wszCaption )
+            if idxArray <> -1 then
+               gConfig.Cat(idxArray).bShow = not gConfig.Cat(idxArray).bShow
+            end if
             LoadExplorerFiles()
-            ListBox_SetCurSel( hList, nCurSel )
             SetFocus( hList )
             return true
          else   
             ' open the selected document
             dim as CWSTR wszFilename
-            dim as long p = ListBox_GetItemData( hList, nCurSel )
+            dim as long p = ListBox_GetItemData( hList, nSel )
             dim pDoc as clsDocument ptr = cast( clsDocument ptr, cast(integer, p) )
             if pDoc then
                frmFunctionList_GetFileNameFunctionName( pDoc->hNodeExplorer, wszFilename, "" )
                OpenSelectedDocument( wszFilename, "" )
             end if
+            SetFocus( hList )
             return true
          end if
       end if

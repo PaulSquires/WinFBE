@@ -170,13 +170,15 @@ function frmMain_ViewTopMenuStates() as long
 
    CheckMarkTopMenuItem( IDM_VIEWEXPLORER, iif( IsWindowVisible(HWND_FRMEXPLORER), true, false ))
    CheckMarkTopMenuItem( IDM_VIEWOUTPUT, iif( IsWindowVisible(HWND_FRMOUTPUT), true, false ))
-   CheckMarkTopMenuItem( IDM_FUNCTIONLIST, iif( IsWindowVisible(HWND_FRMFUNCTIONLIST), true, false ))
+   CheckMarkTopMenuItem( IDM_FUNCTIONLIST, iif( IsWindowVisible(HWND_FRMFUNCTIONS), true, false ))
+   CheckMarkTopMenuItem( IDM_BOOKMARKSLIST, iif( IsWindowVisible(HWND_FRMBOOKMARKS), true, false ))
 
    ' Enable or disable specific edit menu items (based on the currently active document)
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then exit function
    
    EnableTopMenuItem( IDM_FUNCTIONLIST, true )
+   EnableTopMenuItem( IDM_BOOKMARKSLIST, true )
 
    For idMenu as long = IDM_ZOOMIN To IDM_RESTOREMAIN
       EnableTopMenuItem( idMenu, true )
@@ -602,10 +604,38 @@ End Function
 
 ''
 ''
-Function CreateTopTabsActionButtonContextMenu() As HMENU
+Function CreateExplorerActionButtonContextMenu() As HMENU
    Dim hPopUpMenu As HMENU
    dim as CWSTR wszCaption
    
+   hPopUpMenu = CreatePopupMenu
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_EXPLORER_EXPANDALL, L(441,"Expand All") 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_EXPLORER_COLLAPSEALL, L(442,"Collapse All") 
+
+   Function = hPopupMenu
+End Function
+
+''
+''
+Function CreateBookmarksActionButtonContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   dim as CWSTR wszCaption
+   
+   hPopUpMenu = CreatePopupMenu
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKS_EXPANDALL, L(441,"Expand All") 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKS_COLLAPSEALL, L(442,"Collapse All") 
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKCLEARALLDOCS, L(53,"Clear Bookmarks") 
+
+   Function = hPopupMenu
+End Function
+
+
+''
+''
+Function CreateTopTabsActionButtonContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   dim as CWSTR wszCaption
    ' List all of the Top Tab open tabs in the popup menu. Simply use the array
    ' index as the ID because the calling program will use this ID to set the
    ' gTTabCtl.CurSel. Must add 1 to idMenu because Win32 returns 0 if the popup
@@ -620,5 +650,4 @@ Function CreateTopTabsActionButtonContextMenu() As HMENU
 
    Function = hPopupMenu
 End Function
-
 

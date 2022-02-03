@@ -159,8 +159,16 @@ function FindInFiles_RecursiveFileSearch( _
                ' Check if the file spec is a wildcard or a matching filename.
                if instr( wszFileSpecs(i), "*" ) then
                   wszExt = ucase(ltrim(AfxStrPathName("EXTN", wszFileSpecs(i)), "."))
-                  IF UCASE(pFinder.FileExt) = wszExt THEN
-                     bProcessFile = true
+                  IF (UCASE(pFinder.FileExt) = wszExt) orelse (wszExt = "*") THEN
+                     ' bypass know binary files
+                     select case UCASE(pFinder.FileExt)
+                        case "EXE", "DLL", "GIF", "PNG", "JPG", "JPEG", "BMP", "ICO", _
+                             "TIFF", "CHM", "CHW", "CUR", "XLS", "XLSX", "PDF", "ZIP", _
+                             "SVG", "RAR"
+                           bProcessFile = false
+                        case else   
+                           bProcessFile = true
+                     end select
                   end if
                else
                   ' Check if the filename matches.
@@ -312,62 +320,6 @@ Function frmFindInFiles_AddToFolderCombo( ByRef wszText As wString ) As Long
 
    Function = 0
 End Function
-
-
-' ========================================================================================
-' Parse the results from our File search 
-' ========================================================================================
-function frmFindInFiles_ParseSearchResults( byref wszResultFile as wstring ) as long 
-   
-   dim hLB as hwnd = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH )
-   ListBox_ResetContent( hLB )
-
-   if AfxFileExists(wszResultFile) = 0 THEN exit function
-   
-   dim as CWSTR wst
-   dim as long f1, f2, numFound
-
-   dim pStream as CTextStream
-   if pStream.OpenUnicode(wszResultFile) <> S_OK then exit function
-   
-   wst = L(262, "Search Results") & ": " & gFindInFiles.txtFind
-   ListBox_AddString( hLB, wst.sptr )
-   
-   do until pStream.EOS
-      wst = pStream.ReadLine
-      
-      wst = trim(wst)
-      if len(wst) = 0 THEN continue do
-
-      ' Format the string to display in the ListBox
-      
-      ' Original as seen in the output file
-      'X:\FB\WinFBE - Editor\license.txt:1:WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-      ' Format that we want to transfor it into
-      'X:\FB\WinFBE - Editor\license.txt(1): WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-      
-      ' Search for the 2nd semicolon
-      f1 = instr(3, wst, ":")
-      if f1 THEN
-         mid(wst, f1, 1) = "("
-         f2 = instr(f1, wst, ":")
-         if f2 THEN
-            wst = left(wst, f2-1) & "): " & mid(wst, f2+1)
-         end if
-      END IF
-      ListBox_AddString(hLB, wst.sptr)
-      numFound = numFound + 1
-   loop
-   pStream.Close
-   
-   ' Show the search results listbox
-   gOutputTabsCurSel = 2 
-   ShowWindow( HWND_FRMOUTPUT, SW_SHOW )
-   frmMain_PositionWindows
-   frmOutput_PositionWindows
-      
-   function = 0
-END FUNCTION
 
 
 ' ========================================================================================
@@ -523,8 +475,7 @@ function frmFindInFiles_DoFindInFilesEx() as LONG
       ' ? "Error creating _FindResults.txt file."
    end if   
 
-   frmFindInFiles_ParseSearchResults( wszSearchResults )
-   AfxDeleteFile( wszSearchResults )
+   frmOutput_UpdateSearchListview( wszSearchResults )
    
    SetCursor( hCurSave )
       
@@ -717,10 +668,30 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmFindInFiles
 ' ========================================================================================
 Function frmFindInFiles_OnClose( byval HWnd As HWnd ) As LRESULT
+   ' Enables parent window keeping parent's zorder
+   EnableAllModeless()
    DestroyWindow HWnd
    Function = 0
 End Function
 
+
+' ========================================================================================
+' Process WM_CREATE message for window/dialog: frmFindInFiles
+' ========================================================================================
+Function frmFindInFiles_OnCreate( _
+            ByVal HWnd As HWnd, _
+            ByVal lpCreateStructPtr As LPCREATESTRUCT _
+            ) As BOOLEAN
+
+   ' This is a modal popup window so disable the parent window
+   DisableAllModeless()
+
+   '  Message cracker macro expects a True to be returned for a successful
+   '  OnCreate handler even though returning -1 from a standard WM_CREATE
+   '  call would stop creating the window. This is just one of those Windows
+   '  inconsistencies.
+   Return True
+End Function
 
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmFindInFiles
@@ -740,9 +711,7 @@ Function frmFindInFiles_OnDestroy( byval HWnd As HWnd ) As LRESULT
 
    HWND_FRMFINDINFILES = 0
 
-   ' Delete the pWindow because it gets recreated everytime frmFindInFiles is invoked
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
-   if pWindow then Delete pWindow
+   PostQuitMessage(0)
 
    Function = 0
 End Function
@@ -759,6 +728,7 @@ Function frmFindInFiles_WndProc( _
             ) As LRESULT
 
    Select Case uMsg
+      HANDLE_MSG (HWnd, WM_CREATE,   frmFindInFiles_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmFindInFiles_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmFindInFiles_OnDestroy)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmFindInFiles_OnCommand)
@@ -878,6 +848,12 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    ShowWindow HWND_FRMFINDINFILES, SW_SHOW
    SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND) )
+
+   ' Process Windows messages(modal)
+   Function = pWindow->DoEvents( SW_SHOW )
+   
+   ' Delete the CWindow class manually allocated memory 
+   Delete pWindow
 
    Function = 0
 End Function

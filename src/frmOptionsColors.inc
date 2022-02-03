@@ -23,11 +23,13 @@
 ' %TMPF_DEVICE for device fonts (like printer fonts)
 ' Exclude what you don't want to include in list.
 ' ========================================================================================
-private Function frmOptionsColors_EnumFontName( byref lf As LOGFONTW, _
-                                                byref tm As TEXTMETRIC, _
-                                                ByVal FontType As Long, _
-                                                HWnd As HWnd _
-                                                ) As Long
+Function frmOptionsColors_EnumFontName( _
+            byref lf As LOGFONTW, _
+            byref tm As TEXTMETRIC, _
+            ByVal FontType As Long, _
+            HWnd As HWnd _
+            ) As Long
+
    static wszPrevText as CWSTR
    if gApp.isWineActive then
       ' Wine doesn't display the WYSIWYG version of the font. It will just be duplicate names
@@ -56,7 +58,7 @@ End Function
 ' ========================================================================================
 ' Fill combobox with list of valid font names
 ' ========================================================================================
-private function frmOptionsColors_FillFontCombo( ByVal HWnd As HWnd ) as long
+function frmOptionsColors_FillFontCombo( ByVal HWnd As HWnd ) as long
    Dim hDC As HDC = GetDC(0)
    SendMessage( HWnd, CB_RESETCONTENT, 0, 0)
    EnumFontFamilies hDC, ByVal 0, Cast(FONTENUMPROCW, @frmOptionsColors_EnumFontName), Cast(LPARAM, HWnd)
@@ -68,10 +70,12 @@ End function
 ' ========================================================================================
 ' WM_DRAWITEM procedure
 ' ========================================================================================
-private Function frmOptionsColors_DrawFontCombo( ByVal HWnd As HWnd, _
-                                                 ByVal wParam As WPARAM, _
-                                                 ByVal lParam As LPARAM _
-                                                 ) As Long
+Function frmOptionsColors_DrawFontCombo( _
+            ByVal HWnd As HWnd, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As Long
+
    Dim hFont As HFONT
    Dim lpdis As DRAWITEMSTRUCT Ptr
    Dim wText As WString * MAX_PATH
@@ -109,7 +113,6 @@ private Function frmOptionsColors_DrawFontCombo( ByVal HWnd As HWnd, _
          End If
          DrawTextW lpdis->hDC, @wText, Len(wText), @lpdis->rcItem, DT_SINGLELINE Or DT_LEFT Or DT_VCENTER
          If hFont Then DeleteObject SelectObject(lpdis->hDC, hFont)
-        
 
          ' Focus rect around selected item
          If (lpdis->itemState And ODS_SELECTED) Then
@@ -125,9 +128,11 @@ End Function
 ' ========================================================================================
 ' Fill combobox with list of valid font sizes
 ' ========================================================================================
-private function frmOptionsColors_FillFontSizeCombo( ByVal hCb As HWnd, _
-                                                     ByVal strFontName As WString Ptr _
-                                                     ) as long
+function frmOptionsColors_FillFontSizeCombo( _
+            ByVal hCb As HWnd, _
+            ByVal strFontName As WString Ptr _
+            ) as long
+
    Select Case Ucase(*strFontName)
       Case "FIXEDSYS"
          ComboBox_ResetContent(hCb)
@@ -164,7 +169,7 @@ End function
 ' ========================================================================================
 ' Fill combobox with list of valid character sets
 ' ========================================================================================
-private function frmOptionsColors_FillFontCharSets( ByVal hCtl As HWnd ) as long
+function frmOptionsColors_FillFontCharSets( ByVal hCtl As HWnd ) as long
    ComboBox_AddString( hCtl, @WStr("Default") )
    ComboBox_AddString( hCtl, @WStr("Ansi") )
    ComboBox_AddString( hCtl, @WStr("Arabic") )
@@ -192,26 +197,27 @@ End function
 ' ========================================================================================
 ' frmOptionsColors Window procedure
 ' ========================================================================================
-private Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
-                                           ByVal uMsg   As UINT, _
-                                           ByVal wParam As WPARAM, _
-                                           ByVal lParam As LPARAM _
-                                           ) As LRESULT
+Function frmOptionsColors_WndProc( _
+            ByVal HWnd   As HWnd, _
+            ByVal uMsg   As UINT, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As LRESULT
 
    Select Case uMsg
       
-      Case WM_DRAWITEM  ' must pass this one on to ownerdrawn combo
-         If (wParam = IDC_FRMOPTIONSCOLORS_COMBOFONTNAME) Then 
-            frmOptionsColors_DrawFontCombo( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), wParam, lParam )
-            Return True 
-         End If
-
      Case WM_MEASUREITEM
          If wParam = IDC_FRMOPTIONSCOLORS_COMBOFONTNAME Then
             Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
             Dim pMeasureItem As MEASUREITEMSTRUCT Ptr = Cast(MEASUREITEMSTRUCT Ptr, lParam)
             pMeasureItem->itemHeight = pWindow->ScaleY(pMeasureItem->itemHeight)
             Return True
+         End If
+
+      Case WM_DRAWITEM  ' must pass this one on to ownerdrawn combo
+         If (wParam = IDC_FRMOPTIONSCOLORS_COMBOFONTNAME) Then 
+            frmOptionsColors_DrawFontCombo( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), wParam, lParam )
+            Return True 
          End If
 
    End Select
@@ -224,7 +230,7 @@ End Function
 ' ========================================================================================
 ' GetThemeDescription
 ' ========================================================================================
-private function GetThemeDescription( byval wszFilename as CWSTR ) as string
+function GetThemeDescription( byval wszFilename as CWSTR ) as string
    ' default to the theme description being the filename
    function = AfxGetFileName(wszFilename)
 
@@ -258,7 +264,7 @@ end function
 ' ========================================================================================
 ' frmOptionsColors_Show
 ' ========================================================================================
-public Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
+Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -339,6 +345,8 @@ public Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
             idx = SendMessage( hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszDisplayName) )
             redim preserve gThemeFilenames(idx) as CWSTR
             gThemeFilenames(idx) = WFD.cFileName
+print 1, ucase(gConfig.ThemeFilename)
+print 2, ucase(WFD.cFileName ) 
             if ucase(gConfig.ThemeFilename) = ucase(WFD.cFileName ) then
                idxMatch = idx
             end if

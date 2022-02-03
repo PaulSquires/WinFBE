@@ -148,8 +148,8 @@ type clsConfig
       RestoreSession        as long = false
       wszLastActiveSession  as CWSTR
       CloseFuncList         as long = true
-      ShowExplorer          as long = true
-      ShowExplorerWidth     as long = 250
+      ShowPanel             as long = true
+      ShowPanelWidth        as long = 250
       SyntaxHighlighting    as long = true
       Codetips              as long = true
       AutoComplete          as long = true
@@ -177,7 +177,7 @@ type clsConfig
       EditorFontCharSet     as CWSTR = "Default"
       EditorFontsize        as CWSTR = "11"
       FontExtraSpace        as CWSTR = "10"
-      ThemeFilename         as CWSTR = "visual_studio_dark.theme"
+      ThemeFilename         as CWSTR = "winfbe_default_dark.theme"
       KeywordCase           as long = 3  ' "Original Case"
       StartupLeft           as long = 0
       StartupTop            as long = 0

@@ -1006,16 +1006,6 @@ Function AfxIFileSaveDialog( _
          ' // Set the title of the dialog
          hr = psfd->lpVtbl->SetTitle(psfd, L(185,"Save Project As..."))
 
-      case IDM_FILESAVEDECLARES 
-         rgFileTypes(1).pszName = @L(78,"FB Include files")
-         rgFileTypes(1).pszSpec = @WSTR("*.bi;*.inc")
-         rgFileTypes(2).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszSpec = @WSTR("*.bas")
-         rgFileTypes(3).pszName = @L(79,"All files")
-         rgFileTypes(3).pszSpec = @WSTR("*.*")
-         psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
-         psfd->lpVtbl->SetTitle(psfd, L(265,"Save Declares File"))
-
       Case IDC_FRMOPTIONSLOCAL_CMDNEW
          rgFileTypes(1).pszName = @L(102,"Localization files")
          rgFileTypes(1).pszSpec = @WSTR("*.lang")
@@ -1624,6 +1614,7 @@ function GetListBoxEmptyClientArea( _
    end if
 
    rc.top = visible_rows * itemHeight 
+   if rc.top > rc.bottom then rc.top = rc.bottom
    
    return rc
 end function

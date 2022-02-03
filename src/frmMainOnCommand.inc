@@ -61,7 +61,7 @@ Function frmMain_OnCommand( _
    ' Kill any currently displayed topmenu whenever a popup dialog is about to be activated
    Select Case id
       case IDM_FILEOPEN, IDM_FILEOPENTEMPLATES, IDM_FILESAVEAS, _
-           IDM_SAVESESSION, IDM_LOADSESSION, _
+           IDM_SAVESESSION, IDM_LOADSESSION, IDM_CATEGORIES, _
            IDM_KEYBOARDSHORTCUTS, IDM_USERTOOLSDIALOG, IDM_OPTIONSDIALOG, IDM_BUILDCONFIG, _
            IDM_USERSNIPPETS, IDM_FIND, IDM_FINDINFILES, IDM_PROJECTOPEN, IDM_PROJECTSAVEAS, _
            IDM_PROJECTOPTIONS, IDM_COMMANDLINE, IDM_ABOUT
@@ -113,8 +113,12 @@ Function frmMain_OnCommand( _
             loop   
          end if
    
-      Case IDM_OPENINCLUDE:        OpenSelectedDocument( gApp.IncludeFilename )
-      case IDM_SETFOCUSEDITOR:     frmMain_SetFocusToCurrentCodeWindow()   
+      Case IDM_OPENINCLUDE:           OpenSelectedDocument( gApp.IncludeFilename )
+      case IDM_SETFOCUSEDITOR:        frmMain_SetFocusToCurrentCodeWindow()   
+      case IDM_EXPLORER_EXPANDALL:    frmExplorer_ExpandAll()   
+      case IDM_EXPLORER_COLLAPSEALL:  frmExplorer_CollapseAll()   
+      case IDM_BOOKMARKS_EXPANDALL:   frmBookmarks_ExpandAll()   
+      case IDM_BOOKMARKS_COLLAPSEALL: frmBookmarks_CollapseAll()   
 
 
       ''  FILE MENU
@@ -182,32 +186,30 @@ Function frmMain_OnCommand( _
 
 
       ''  SEARCH MENU              
-      Case IDM_DEFINITION:       OnCommand_SearchGotoDefinition( pDoc )
-      Case IDM_LASTPOSITION:     OnCommand_SearchGotoLastPosition()
+      Case IDM_DEFINITION:           OnCommand_SearchGotoDefinition( pDoc )
+      Case IDM_LASTPOSITION:         OnCommand_SearchGotoLastPosition()
       case IDM_GOTONEXTCOMPILEERROR: OnCommand_SearchGotoCompileError( true )
       case IDM_GOTOPREVCOMPILEERROR: OnCommand_SearchGotoCompileError( false )
 
-      case IDM_GOTOHEADERFILE, _
-           IDM_GOTOSOURCEFILE, _ 
-           IDM_GOTOMAINFILE, _ 
-           IDM_GOTORESOURCEFILE 
+      case IDM_GOTOHEADERFILE,   IDM_GOTOSOURCEFILE, IDM_GOTOMAINFILE, _ 
+           IDM_GOTORESOURCEFILE, IDM_GOTO,           IDM_GOTONEXTFUNCTION, _
+           IDM_GOTOPREVFUNCTION, IDM_GOTONEXTTAB,    IDM_GOTOPREVTAB, _
+           IDM_CLOSETAB
          OnCommand_SearchGotoFile( id, pDoc )
          
-      Case IDM_GOTO,             IDM_DEFINITION,     IDM_GOTONEXTFUNCTION, _
-           IDM_LASTPOSITION,     IDM_CLOSETAB,       IDM_GOTOPREVFUNCTION, _
-           IDM_GOTONEXTTAB,      IDM_GOTOPREVTAB, _
-           IDM_BOOKMARKTOGGLE,   IDM_BOOKMARKNEXT, _
-           IDM_BOOKMARKPREV,     IDM_BOOKMARKCLEARALL
-           OnCommand_SearchCommon( id, pDoc )
+      Case IDM_BOOKMARKTOGGLE,   IDM_BOOKMARKNEXT,   IDM_BOOKMARKPREV, _
+           IDM_BOOKMARKCLEARALL, IDM_BOOKMARKCLEARALLDOCS
+           OnCommand_SearchBookmarks( id, pDoc )
       
       
       ''  VIEW MENU
-      Case IDM_FUNCTIONLIST:       OnCommand_ViewFunctionList():
       Case IDM_VIEWEXPLORER:       OnCommand_ViewExplorer():
       Case IDM_VIEWOUTPUT:         OnCommand_ViewOutput():
-      Case IDM_RESTOREMAIN:        OnCommand_ViewRestoreMain():
+      Case IDM_FUNCTIONLIST:       OnCommand_ViewFunctionList():
+      Case IDM_BOOKMARKSLIST:      OnCommand_ViewBookmarksList():
       case IDM_VIEWTODO:           OnCommand_ViewToDo():
       case IDM_VIEWNOTES:          OnCommand_ViewNotes():
+      Case IDM_RESTOREMAIN:        OnCommand_ViewRestoreMain():
          
       Case IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL
          OnCommand_ViewFold( id, pDoc )
