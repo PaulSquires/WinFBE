@@ -53,9 +53,6 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.SaveProject(false)
    if OnCommand_FileClose( HWnd, EFC_CLOSEALL ) = false then exit function
    
-   ' Delete all nodes in the Explorer treeview and reset it to "FILES" mode.
-   frmFunctionList_CreateSpecialNodes
-
    ' Save the project codetips to cache
    gConfig.ProjectSaveCache
    
@@ -432,7 +429,7 @@ function OnCommand_ProjectSetFileType( _
       case IDM_SETFILEHEADER, IDM_SETFILEHEADER_EXPLORERTREEVIEW
          wszFileType = FILETYPE_HEADER
       case is > IDM_SETCATEGORY
-         wszFileType = gConfig.Cat(id-IDM_SETCATEGORY).id
+         wszFileType = gConfig.Cat(id-IDM_SETCATEGORY).idFileType
    end select
    
    if pDoc = 0 then exit function
@@ -440,23 +437,14 @@ function OnCommand_ProjectSetFileType( _
    if pDoc->ProjectFileType <> wszFileType then
       ' If attempting to set MAIN or RESOURCE then we need to move any existing
       ' pDoc that have that filetype over to the NORMAL branch.
-      dim as hwnd hTV = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
       if (wszFileType = FILETYPE_MAIN) or (wszFileType = FILETYPE_RESOURCE) then
          dim pDoc2 as clsDocument ptr = iif(wszFileType = FILETYPE_MAIN, gApp.GetMainDocumentPtr, gApp.GetResourceDocumentPtr)
          if pDoc2 then
-            Treeview_DeleteItem( hTV, pDoc2->hNodeExplorer )
-            pDoc2->hNodeExplorer = 0
             pDoc2->ProjectFileType = FILETYPE_NORMAL
-            pDoc2->hNodeExplorer = frmFunctionList_AddParentNode( pDoc2 )
-            frmFunctionList_AddChildNodes( pDoc2 )
          end if   
       end if
       ' Set the new FileType for the currently selected document
       gApp.ProjectSetFileType( pDoc, wszFileType )
-      Treeview_DeleteItem( hTV, pDoc->hNodeExplorer )
-      pDoc->hNodeExplorer = 0
-      pDoc->hNodeExplorer = frmFunctionList_AddParentNode( pDoc )
-      frmFunctionList_AddChildNodes( pDoc )
       LoadExplorerFiles()
       ' Highlight the selected tab file in the Explorer listbox
       frmExplorer_SelectItemData( pDoc )
@@ -480,9 +468,7 @@ function OnCommand_ProjectRemove( _
      if OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT ) = false then exit function
    end if  
    ' File close succeeded. Remove this document from the project collection and remove treeview node. 
-   dim as HWND hTV = GetDlgItem( HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE )
    gdb2.dbDelete( pDoc->DiskFilename )
-   Treeview_DeleteItem( hTV, pDoc->hNodeExplorer)
    gApp.RemoveDocument( pDoc )
    LoadExplorerFiles()
    if gTTabCtl.IsSafeIndex(gTTabCtl.CurSel) then

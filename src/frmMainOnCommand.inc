@@ -17,6 +17,8 @@
 #include once "clsApp.bi"
 #include once "clsDocument.bi"
 #include once "frmMain.bi"
+#include once "frmFunctions.bi"
+
 
 ' Global array to hold cut/copy/paste controls
 dim shared gCopyControls(any) as clsControl
@@ -117,8 +119,12 @@ Function frmMain_OnCommand( _
       case IDM_SETFOCUSEDITOR:        frmMain_SetFocusToCurrentCodeWindow()   
       case IDM_EXPLORER_EXPANDALL:    frmExplorer_ExpandAll()   
       case IDM_EXPLORER_COLLAPSEALL:  frmExplorer_CollapseAll()   
+      case IDM_FUNCTIONS_EXPANDALL:   frmFunctions_ExpandAll()   
+      case IDM_FUNCTIONS_COLLAPSEALL: frmFunctions_CollapseAll()   
       case IDM_BOOKMARKS_EXPANDALL:   frmBookmarks_ExpandAll()   
       case IDM_BOOKMARKS_COLLAPSEALL: frmBookmarks_CollapseAll()   
+      case IDM_FUNCTIONS_VIEWASTREE:  frmFunctions_ViewAsTree()
+      case IDM_FUNCTIONS_VIEWASLIST:  frmFunctions_ViewAsList()
 
 
       ''  FILE MENU

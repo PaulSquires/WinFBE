@@ -16,7 +16,7 @@
 
 #include once "clsConfig.bi"
 #include once "modRoutines.bi"
-#include once "frmfunctionList.bi"
+#include once "frmFunctions.bi"
 #include once "frmBookmarks.bi"
 #include once "frmExplorer.bi"
 #include once "frmOutput.bi"
@@ -1145,7 +1145,7 @@ function clsConfig.SaveConfigFile() as long
       if left(this.Cat(i).wszDescription, 2) <> "%%" then
          if trim(this.Cat(i).wszDescription) <> "" then
             pStream.Write "CATEGORY_" & right("00" & str(nNext), 2) & "="
-            pStream.Write this.Cat(i).id & "|-|"
+            pStream.Write this.Cat(i).idFileType & "|-|"
             pStream.WriteLine this.Cat(i).wszDescription
             nNext = nNext + 1
          end if
@@ -1341,20 +1341,27 @@ end function
 ''
 function clsConfig.SetCategoryDefaults() as long
    if ubound(this.Cat) = -1 then
-      redim this.Cat(5)
-      this.Cat(0).id = wstr(NODETYPE_FILES)
-      this.Cat(0).wszDescription = L(2, "File")
-      this.Cat(1).id = wstr(NODETYPE_MAIN)
-      this.Cat(1).wszDescription = L(212, "Main")
-      this.Cat(2).id = wstr(NODETYPE_RESOURCE)
-      this.Cat(2).wszDescription = L(213, "Resource")
-      this.Cat(3).id = wstr(NODETYPE_HEADER)
-      this.Cat(3).wszDescription = L(175, "Header")
-      this.Cat(4).id = wstr(NODETYPE_MODULE)
-      this.Cat(4).wszDescription = L(211, "Module")
-      this.Cat(5).id = wstr(NODETYPE_NORMAL)
-      this.Cat(5).wszDescription = L(210, "Normal")
+      redim this.Cat(CATINDEX_NORMAL)
+
+      this.Cat(CATINDEX_FILES).idFileType = FILETYPE_UNDEFINED
+      this.Cat(CATINDEX_FILES).wszDescription = L(2, "File")
+      
+      this.Cat(CATINDEX_MAIN).idFileType = FILETYPE_MAIN
+      this.Cat(CATINDEX_MAIN).wszDescription = L(212, "Main")
+      
+      this.Cat(CATINDEX_RESOURCE).idFileType = FILETYPE_RESOURCE
+      this.Cat(CATINDEX_RESOURCE).wszDescription = L(213, "Resource")
+      
+      this.Cat(CATINDEX_HEADER).idFileType = FILETYPE_HEADER
+      this.Cat(CATINDEX_HEADER).wszDescription = L(175, "Header")
+      
+      this.Cat(CATINDEX_MODULE).idFileType = FILETYPE_MODULE
+      this.Cat(CATINDEX_MODULE).wszDescription = L(211, "Module")
+      
+      this.Cat(CATINDEX_NORMAL).idFileType = FILETYPE_NORMAL
+      this.Cat(CATINDEX_NORMAL).wszDescription = L(210, "Normal")
    end if
+
    function = 0
 end function
 
@@ -1417,7 +1424,7 @@ function clsConfig.LoadConfigFile() as long
             i = val(right(wKey,2))
             if i > ubound(this.Cat) then
                redim preserve this.Cat(i) 
-               this.Cat(i).id             = AfxStrParse(wData, 1, "|-|")
+               this.Cat(i).idFileType     = AfxStrParse(wData, 1, "|-|")
                this.Cat(i).wszDescription = AfxStrParse(wData, 2, "|-|")
                continue do
             end if
@@ -1578,7 +1585,7 @@ function clsConfig.LoadConfigFile() as long
 
    ' Set some defaults if the config file was missing or corrupt
    ' if no Categories exist then create some default ones... 
-   ' NOTE: The default for Categories is not set here because some
+   ' NOTE: The default for Categories are not set here because some
    ' category names depend on the translation from the Localization
    ' file and that file is not loaded until the Config file is read.
    ' We do the setting of default Categories in gConfig.SetCategoryDefaults
@@ -1797,9 +1804,6 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
    if AfxFileExists(wszSessionFile) = 0 then exit function
    if pStream.OpenUnicode( wszSessionFile ) <> S_OK then return false
 
-   ' Create the special functionlist treeview nodes 
-   frmfunctionList_CreateSpecialNodes()
-
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
    
@@ -1897,6 +1901,12 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
    next
    LoadExplorerFiles()
    
+   ' Load all of the bookmarks into the Bookmarks listbox. 
+   LoadBookmarksFiles()
+
+   ' Load all of the functions into the Function List listbox. 
+   LoadFunctionsFiles()
+
    ' Display the active editing window
    gTTabCtl.CurSel = nActiveTab
    gTTabCtl.DisplayScintilla( nActiveTab, true )
@@ -2007,7 +2017,15 @@ function clsConfig.ProjectSaveToFile() as boolean
             pStream.WriteLine "FileType=" & pDoc->ProjectFileType
             pStream.WriteLine "TabIndex=" & 0    
             if IsWindow(pDoc->hWindow(0)) then
-               pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+               dim as string sBookmarks = pDoc->GetBookmarks()
+               if len(sBookmarks) then
+                  dim as long nCount = AfxStrParseCount(sBookmarks, ",")
+                  for ii as long = 1 to nCount
+                     dim as CWSTR wszLineNum = AfxStrParse(sBookmarks, ii, ",") 
+                     pStream.WriteLine "OnLoadBookmark=" & _
+                        wszLineNum & "|" & trim(pDoc->GetLine(val(wszLineNum)))
+                  next
+               end if
                pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
                pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
                pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
@@ -2018,8 +2036,10 @@ function clsConfig.ProjectSaveToFile() as boolean
                pStream.WriteLine "SplitPosition=" & pDoc->SplitY
                pStream.WriteLine "FocusEdit=" & iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
             else
-               pStream.WriteLine "Bookmarks=" & pDoc->wszOnLoadBookmarks 
                pStream.WriteLine "FoldPoints=" & pDoc->wszOnLoadFoldPoints 
+               for ii as long = lbound(pDoc->wszOnLoadBookmarks) to ubound(pDoc->wszOnLoadBookmarks)
+                  pStream.WriteLine "OnLoadBookmark=" & pDoc->wszOnLoadBookmarks(ii)
+               next
             end if
             pStream.WriteLine "FileEnd=[-]"
          end If
@@ -2064,9 +2084,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
    dim as boolean bReadingNote
    dim as boolean bIsDesigner
    dim as boolean bDesignerView
-   
-   dim as hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
-   dim as hwnd hStatusBar = HWND_FRMMAIN_STATUSBAR 
+   dim as CWSTR OnLoadBookmarks(any)
    
    if AfxFileExists(wszFile) = 0 then exit function
 
@@ -2090,9 +2108,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
    
    gApp.IsProjectLoading = true 
          
-   ' Create the special functionlist treeview nodes 
-   frmfunctionList_CreateSpecialNodes()
-   
    gApp.FileLoadingCount = 0
    
    do until pStream.EOS
@@ -2139,10 +2154,15 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          case "File":                wszFilename = wData
          case "FileType":            wszFileType  = wData
          
+         case "Bookmarks":           sBookmarks  = str(wData)
+         case "OnLoadBookmark"
+            dim as long ub = ubound(OnLoadBookmarks) + 1
+            redim preserve OnLoadBookmarks(ub)
+            OnLoadBookmarks(ub) = wData
+            
          case "IsDesigner":          bIsDesigner = nData
          case "IsDesignerView":      bDesignerView = nData
          case "TabIndex":            bLoadInTab  = nData
-         case "Bookmarks":           sBookmarks  = str(wData)
          case "FoldPoints":          sFoldPoints = str(wData)
          case "FirstLine":           nFirstLine  = nData
          case "Position":            nPosition   = nData
@@ -2180,6 +2200,10 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
                   .nPosition1     = nPosition1
                   .nSplitPosition = nSplitPosition
                   .nFocusEdit     = nFocusEdit
+                  redim .OnLoadBookmarks(ubound(OnLoadBookmarks))
+                  for ii as long = lbound(OnLoadBookmarks) to ubound(OnLoadBookmarks)
+                     .OnLoadBookmarks(ii) = OnLoadBookmarks(ii)
+                  next
                end with
 
                nFirstLine  = 0: nPosition  = 0
@@ -2190,6 +2214,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
                bLoadInTab    = false
                bIsDesigner   = false
                bDesignerView = false
+               erase OnLoadBookmarks
             end if
             
       end select
@@ -2257,11 +2282,11 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
             ParseDocument( pDoc )
          end if
          ' Save the bookmarks and foldpoints for when (if) the document gets opened
-         pDoc->wszOnLoadBookmarks = docData(i).wszBookmarks
          pDoc->wszOnLoadFoldPoints = docData(i).wszFoldPoints
-
-         pDoc->hNodeExplorer = frmfunctionList_AddParentNode( pDoc )
-         frmfunctionList_AddChildNodes( pDoc )
+         redim pDoc->wszOnLoadBookmarks(ubound(docData(i).OnLoadBookmarks))
+         for ii as long = lbound(docData(i).OnLoadBookmarks) to ubound(docData(i).OnLoadBookmarks)
+            pDoc->wszOnLoadBookmarks(ii) = docData(i).OnLoadBookmarks(ii)
+         next
       end if
    
    next
@@ -2282,6 +2307,9 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
 
    ' Load all of the bookmarks into the Bookmarks listbox. 
    LoadBookmarksFiles()
+
+   ' Load all of the functions into the Function List listbox. 
+   LoadFunctionsFiles()
 
    
    ' Display the active editing window

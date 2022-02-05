@@ -243,7 +243,7 @@ function handleKeysExplorerListBox( byval uMsg as MSG ) as boolean
             dim as long p = ListBox_GetItemData( hList, nSel )
             dim pDoc as clsDocument ptr = cast( clsDocument ptr, cast(integer, p) )
             if pDoc then
-               frmFunctionList_GetFileNameFunctionName( pDoc->hNodeExplorer, wszFilename, "" )
+               wszFilename = pDoc->DiskFilename
                OpenSelectedDocument( wszFilename, "" )
             end if
             SetFocus( hList )
@@ -268,10 +268,6 @@ function handleEscKeyModeless( byval uMsg as MSG ) as boolean
       end if
       if IsWindowVisible( HWND_FRMFINDINFILES ) THEN 
          SendMessage( HWND_FRMFINDINFILES, WM_CLOSE, 0, 0 )
-         return true
-      end if
-      if IsWindowVisible( HWND_FRMFUNCTIONLIST ) THEN 
-         SendMessage( HWND_FRMFUNCTIONLIST, WM_CLOSE, 0, 0 )
          return true
       end if
    end if

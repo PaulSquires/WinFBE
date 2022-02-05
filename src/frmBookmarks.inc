@@ -183,7 +183,7 @@ function frmBookmarks_OnDrawItem( _
       ' if mouse is over VScrollBar then reset hot
       if isMouseOverWindow( HWND_FRMPANEL_VSCROLLBAR ) then IsHot = false
          
-      if ListBox_GetSel(lpdis->hwndItem, lpdis->itemID) then IsHot = true
+      if ListBox_GetCurSel(lpdis->hwndItem) = lpdis->itemID then IsHot = true
 
       hBrush = iif( IsHot, ghPanel.hBackBrushHot, ghPanel.hBackBrush)
       backclr = iif( IsHot, ghPanel.BackColorHot, ghPanel.BackColor)
@@ -345,6 +345,7 @@ function frmBookmarksListBox_SubclassProc ( _
          accumDelta = accumDelta + zDelta
          if accumDelta >= 120 then       ' scroll up 3 lines
             nTopIndex = nTopIndex - 3
+            nTopIndex = max( 0, nTopIndex )
             SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 ) 
             accumDelta = 0
             frmPanelVScroll_PositionWindows( SW_SHOWNA )
@@ -368,78 +369,91 @@ function frmBookmarksListBox_SubclassProc ( _
          ' that instead of the entire listbox
          dim as RECT rc
          dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         if idx <> nLastIdx then
-            ListBox_GetItemRect( hWin, idx, @rc )
-            InvalidateRect( hWin, @rc, true )
-            ListBox_GetItemRect( hWin, nLastIdx, @rc )
-            InvalidateRect( hWin, @rc, true )
-            nLastIdx = idx
-         end if
-                     
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
+         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         ' client area.
+         if hiword(idx) <> 1 then
+            if idx <> nLastIdx then
+               ListBox_GetItemRect( hWin, idx, @rc )
+               InvalidateRect( hWin, @rc, true )
+               ListBox_GetItemRect( hWin, nLastIdx, @rc )
+               InvalidateRect( hWin, @rc, true )
+               nLastIdx = idx
+            end if
+        end if
+                           
       case WM_MOUSEHOVER
-'         dim as CWSTR wszTooltip 
-'         if IsWindow(hTooltip) = 0 then hTooltip = AfxAddTooltip( hWin, "", false, false )
-'         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-'         dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
-'         if pDoc then wszTooltip = pDoc->DiskFilename
-'         ' Display the tooltip
-'         AfxSetTooltipText( hTooltip, hWin, wszTooltip )
-'         AfxRedrawWindow( hWin )
+         dim as CWSTR wszTooltip 
+         if IsWindow(hTooltip) = 0 then hTooltip = AfxAddTooltip( hWin, "", false, false )
+         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
+         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         ' client area.
+         if hiword(idx) <> 1 then
+            dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
+            if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
+               dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
+               if pDoc then wszTooltip = pDoc->DiskFilename
+               ' Display the tooltip
+               AfxSetTooltipText( hTooltip, hWin, wszTooltip )
+               AfxRedrawWindow( hWin )
+            end if
+         end if
          
       case WM_MOUSELEAVE
          nLastIdx = -1
          AfxRedrawWindow(hWin)   
          
-'      case WM_RBUTTONDOWN
-'         ' Create the popup menu
-'         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-'         dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
-'         if pDoc then
-'            ListBox_SetSel( hWin, true, idx )
-'            dim as HMENU hPopupMenu = CreateBookmarksContextMenu(pDoc)
-'            dim as POINT pt: GetCursorPos( @pt )
-'            dim as long id = TrackPopupMenu(hPopUpMenu, TPM_RETURNCMD, pt.x, pt.y, 0, HWND_FRMMAIN, byval null)
-'            ' process the selected rows. Need to save the current state of selected
-'            ' rows prior to processing because as the items are processed some of the
-'            ' actions may reset the state of listbox. We save the pDoc's in an array
-'            ' rather than index values because the listbox may get reloaded during
-'            ' some actions invalidating some indexes. 
-'            dim as long nSelCount = SendMessage( hWin, LB_GETSELCOUNT, 0, 0 )
-'            dim pDocArray(nSelCount-1) as clsDocument ptr 
-'            dim as long nextIdx = 0
-'            for i as long = 0 to ListBox_GetCount( hWin ) - 1
-'               if ListBox_GetSel( hWin, i ) then
-'                  dim as CWSTR wszCaption = AfxGetListBoxText( hWin, i )
-'                  if left(wszCaption, 1) = "%" then 
-'                     pDocArray(nextIdx) = 0
-'                  else   
-'                     pDocArray(nextIdx) = cast(clsDocument ptr, ListBox_GetItemData( hWin, i ))
-'                  end if
-'                  nextIdx = nextIdx + 1
-'               end if
-'            next         
-'            ' Process our array of selected pDoc's.
-'            for i as long = lbound(pDocArray) to ubound(pDocArray)
-'               if pDocArray(i) = 0 then continue for
-'               select case id
-'                  case IDM_FILEOPEN_EXPLORERLISTBOX, IDM_FILECLOSE_EXPLORERLISTBOX, _
-'                       IDM_FILESAVE_EXPLORERLISTBOX, IDM_FILESAVEAS_EXPLORERLISTBOX
-'                       OnCommand_FileExplorerMessage( id, pDocArray(i) )
-'                  case IDM_REMOVEFILEFROMPROJECT_EXPLORERLISTBOX
-'                       OnCommand_ProjectRemove( id, pDocArray(i) )
-'                  case IDM_SETFILEMAIN_EXPLORERTREEVIEW, IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
-'                       IDM_SETFILEHEADER_EXPLORERTREEVIEW, IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
-'                       IDM_SETFILENORMAL_EXPLORERTREEVIEW 
-'                       OnCommand_ProjectSetFileType( id, pDocArray(i) )
-'                  case is > IDM_SETCATEGORY     
-'                       OnCommand_ProjectSetFileType( id, pDocArray(i) )
-'               end select
-'            next
-'            LoadExplorerFiles()
-'            frmBookmarks_UnSelectListBox() 
-'            DestroyMenu( hPopUpMenu )
-'            Return true   ' prevent further processing that leads to WM_CONTEXTMENU
-'         end if
+      case WM_RBUTTONDOWN
+         ' Create the popup menu
+         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
+         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         ' client area.
+         if hiword(idx) <> 1 then
+            dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
+            if pDoc then
+               dim as HMENU hPopupMenu
+               dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
+               if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
+                  hPopupMenu = CreateBookmarksHeaderNodeContextMenu()
+               else
+                  hPopupMenu = CreateBookmarksBookmarkNodeContextMenu()   
+               end if
+               dim as POINT pt: GetCursorPos( @pt )
+               dim as long id = TrackPopupMenu(hPopUpMenu, TPM_RETURNCMD, pt.x, pt.y, 0, HWND_FRMMAIN, byval null)
+               select case id
+                  case IDM_CLEARALLBOOKMARKNODE
+                     if IsWindow(pDoc->hWindow(0)) then
+                        SciExec( pDoc->hWindow(0), SCI_MARKERDELETEALL, -1, 0 )
+                     else
+                        erase pDoc->wszOnLoadBookmarks
+                     end if      
+                  case IDM_REMOVEBOOKMARKNODE
+                     dim as long nLineNum = val(AfxStrParse(wszCaption, 1, "%"))
+                     if IsWindow(pDoc->hWindow(0)) then
+                        pDoc->ToggleBookmark( nLineNum )
+                     else
+                        dim as long nFoundAt = -1
+                        for ii as long = lbound(pDoc->wszOnLoadBookmarks) to ubound(pDoc->wszOnLoadBookmarks)
+                           if nLineNum = val(AfxStrParse(pDoc->wszOnLoadBookmarks(ii), 1, "|")) then
+                              nFoundAt = ii: exit for
+                           end if   
+                        next
+                        if nFoundAt <> -1 then
+                           dim as long ub = ubound(pDoc->wszOnLoadBookmarks)
+                           for ii as long = nFoundAt to ub - 1
+                              pDoc->wszOnLoadBookmarks(ii) = pDoc->wszOnLoadBookmarks(ii+1)
+                           next
+                           redim preserve pDoc->wszOnLoadBookmarks(ub-1)
+                        end if   
+                     end if
+               end select
+               LoadBookmarksFiles()
+               DestroyMenu( hPopUpMenu )
+               Return true   ' prevent further processing that leads to WM_CONTEXTMENU
+            end if
+         end if
          
       case WM_LBUTTONUP
          ' determine if we clicked on a regular file or a node header
@@ -517,7 +531,7 @@ function frmBookmarks_Show( byval hWndParent as HWnd ) as LRESULT
    dim pWindow as CWindow ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   HWND_FRMBOOKMARKS = pWindow->Create( hWndParent, "Explorer Window", @frmBookmarks_WndProc, _
+   HWND_FRMBOOKMARKS = pWindow->Create( hWndParent, "Bookmarks Window", @frmBookmarks_WndProc, _
         0, 0, 0, 0, _
         WS_CHILD or WS_CLIPSIBLINGS or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT or WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR)
@@ -542,7 +556,6 @@ end function
 ' LoadBookmarksFiles
 ' This will clear the current list of files in the listbox and repopulate it
 ' with the latest list of filenames that are stored in the hidden FunctionList treeview.
-' Files are excluded from being added based on the state of the global array gConfig.Cat()
 ' ========================================================================================
 function LoadBookmarksFiles() as long
    dim as HWND hList = GetDlgItem(HWND_FRMBOOKMARKS, IDC_FRMBOOKMARKS_LISTBOX)
@@ -573,9 +586,7 @@ function LoadBookmarksFiles() as long
       dim as long idx, nLineNum, nCount
       dim as string sBookmarks 
       
-      ' Only search documents that have been loaded and have valid Scintilla
-      ' window. Some files do not get immediately loaded so their Scintilla handles
-      ' will be null.
+      ' Search documents that have been loaded and have valid Scintilla window. 
       if pDoc->hWindow(0) <> null then
          sBookmarks = pDoc->GetBookmarks()
       end if
@@ -583,7 +594,7 @@ function LoadBookmarksFiles() as long
       if len(sBookmarks) then
          wszText = wstr(pDoc->bBookmarkExpanded)
          idx = Listbox_AddString( hList, @wszText )
-         ListBox_SetItemData( hList, idx, cast(long, pDoc) )
+         ListBox_SetItemData( hList, idx, pDoc )
 
          if pDoc->bBookmarkExpanded then
             nCount = AfxStrParseCount( sBookmarks, "," )
@@ -592,11 +603,29 @@ function LoadBookmarksFiles() as long
                wszText = wstr(nLineNum) & _
                          "%" & ltrim(pDoc->GetLine(nLineNum))
                idx = Listbox_AddString( hList, @wszText )
-               ListBox_SetItemData( hList, idx, cast(long, pDoc) )
+               ListBox_SetItemData( hList, idx, pDoc )
             next
          end if    
       end if
-     
+      
+      ' Some files do not get immediately loaded so their Scintilla handles
+      ' will be null but the Bookmark preview would have been previously
+      ' saved in the project file and re-loaded into pDoc->wszOnLoadBookmarks().
+      if ubound(pDoc->wszOnLoadBookmarks) <> -1 then
+         wszText = wstr(pDoc->bBookmarkExpanded)
+         idx = Listbox_AddString( hList, @wszText )
+         ListBox_SetItemData( hList, idx, pDoc )
+         if pDoc->bBookmarkExpanded then
+            for ii as long = lbound(pDoc->wszOnLoadBookmarks) to ubound(pDoc->wszOnLoadBookmarks)
+               dim as long f = instr(pDoc->wszOnLoadBookmarks(ii), "|")
+               wszText = left(pDoc->wszOnLoadBookmarks(ii), f - 1) & _
+                         "%" & mid(pDoc->wszOnLoadBookmarks(ii), f + 1)
+               idx = Listbox_AddString( hList, @wszText )
+               ListBox_SetItemData( hList, idx, pDoc )
+            next
+         end if    
+      end if
+      
       pDoc = pDoc->pDocNext
    loop
    

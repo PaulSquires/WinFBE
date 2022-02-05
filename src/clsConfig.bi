@@ -79,22 +79,22 @@ type TYPE_BUILDS
 end type
 
 type TYPE_CATEGORIES
-   id             as string    ' GUID or special node value
+   idFileType     as string    ' GUID or special node value (FILETYPE_*)
    wszDescription as CWSTR
    hNodeExplorer  as HTREEITEM
-   bShow          as boolean
+   bShow          as boolean = true
 end type
 
 ' NOTE: These node types are different values than the FileType defines from
 ' the clsDocument.bi file so we could not reuse those equates. These nodetype
 ' equates defined the order in which the files will be displayed in the 
 ' explorer listbox.
- #define NODETYPE_FILES             0
- #define NODETYPE_MAIN              1
- #define NODETYPE_RESOURCE          2
- #define NODETYPE_HEADER            3
- #define NODETYPE_MODULE            4
- #define NODETYPE_NORMAL            5
+ #define CATINDEX_FILES             0
+ #define CATINDEX_MAIN              1
+ #define CATINDEX_RESOURCE          2
+ #define CATINDEX_HEADER            3
+ #define CATINDEX_MODULE            4
+ #define CATINDEX_NORMAL            5
 
 ' Structure used to save codetip cache database information to disk. This
 ' data is checked when loading the codetip cache to see if any of the original

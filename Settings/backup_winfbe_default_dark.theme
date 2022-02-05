@@ -1,4 +1,4 @@
-general.description: Visual Studio Code (Dark)
+general.description: WinFBE Default (Dark) Theme
 general.version: 1.0.0
 
 # all colors are specified using RGB syntax (red,green,blue)
@@ -39,14 +39,19 @@ editor.identifiers.background: %LIGHT_BLACK
 editor.identifiers.bold: false
 editor.identifiers.italic: false
 editor.identifiers.underline: false
-editor.keyword.foreground: 148,202,240         # powder blue
+editor.keyword.foreground: 148,202,240         # FreeBasic (powder blue)
 editor.keyword.background: %LIGHT_BLACK
 editor.keyword.bold: false
 editor.keyword.italic: false
 editor.keyword.underline: false
+editor.keyword2.foreground: 187,111,78         # Windows Api (dark orange)
+editor.keyword2.background: %LIGHT_BLACK
+editor.keyword2.bold: false
+editor.keyword2.italic: false
+editor.keyword2.underline: false
 editor.foldmargin.foreground: %LIGHT_BLACK
-editor.foldsymbol.foreground: %LIGHT_BLACK
-editor.foldsymbol.background: %EVENING_BLACK
+editor.foldsymbol.foreground: 99,109,131
+editor.foldsymbol.background: %LIGHT_BLACK
 editor.linenumbers.foreground: 99,109,131
 editor.linenumbers.background: %LIGHT_BLACK
 editor.linenumbers.bold: false
@@ -75,29 +80,19 @@ editor.bracegood.foreground: 000,128,000       # green
 editor.bracebad.foreground: 196,000,000        # red
 editor.occurrence.foreground: 53,59,69
 
-explorer.panel.background: %EVENING_BLACK
-explorer.nodetext.foreground: %LIGHT_WHITE
-explorer.nodetext.background: %EVENING_BLACK
-explorer.text.foreground: %LIGHT_WHITE
-explorer.text.background: %EVENING_BLACK
-explorer.texthot.foreground: %LIGHT_GRAY
-explorer.texthot.background: 44,49,58
-explorer.scrollbar.foreground: 53,59,69
-explorer.scrollbar.background: %EVENING_BLACK
-
-menubar.panel.background: %EVENING_BLACK
-menubar.text.foreground: %GRAY
-menubar.text.background: %EVENING_BLACK
-menubar.texthot.foreground: %GRAY
-menubar.texthot.background: 56,59,65
-
-menu.panel.background: 53,59,69
-menuitem.text.foreground: %WHITE
-menuitem.text.background: 53,59,69
-menuitem.texthot.foreground: %WHITE
-menuitem.texthot.background: 44,49,58
-menuitem.textdisabled.foreground: %GRAY
-menuitem.textdisabled.background: 53,59,69
+# panel holds Explorer, FunctionList, Bookmarks
+panel.panel.background: %EVENING_BLACK
+panel.text.foreground: %LIGHT_WHITE
+panel.text.background: %EVENING_BLACK
+panel.texthot.foreground: %LIGHT_GRAY
+panel.texthot.background: 44,49,58
+panel.scrollbar.foreground: 53,59,69
+panel.scrollbar.background: %EVENING_BLACK
+panel.divider.foreground: 24,26,31
+panel.button.foreground: %LIGHT_WHITE
+panel.button.background: %LIGHT_BLACK
+panel.buttonhot.foreground: %LIGHT_WHITE
+panel.buttonhot.background: 53,59,69
 
 toptabs.panel.background: %EVENING_BLACK
 toptabs.text.foreground: 124,127,133
@@ -107,8 +102,43 @@ toptabs.texthot.background: %LIGHT_BLACK
 toptabs.divider.foreground: 24,26,31
 toptabs.closehot.background: 56,59,65
 
+menubar.panel.background: %EVENING_BLACK
+menubar.text.foreground: %GRAY
+menubar.text.background: %EVENING_BLACK
+menubar.texthot.foreground: %GRAY
+menubar.texthot.background: 56,59,65
+
+topmenu.panel.background: 53,59,69
+topmenu.text.foreground: %WHITE
+topmenu.text.background: 53,59,69
+topmenu.texthot.foreground: %WHITE
+topmenu.texthot.background: 44,49,58
+topmenu.textdisabled.foreground: %GRAY
+topmenu.textdisabled.background: 53,59,69
+
 statusbar.panel.background: %EVENING_BLACK
 statusbar.text.foreground: %GRAY
 statusbar.text.background: %EVENING_BLACK
 statusbar.texthot.foreground: %GRAY
 statusbar.texthot.background: 44,49,58
+
+findreplace.panel.background: %EVENING_BLACK
+findreplace.text.foreground: %LIGHT_WHITE
+findreplace.text.background: %EVENING_BLACK
+findreplace.texthot.foreground: %LIGHT_WHITE
+findreplace.texthot.background: 56,59,65
+findreplace.leftedge.foreground: 58,63,75
+findreplace.iconhot.background: 56,59,65
+findreplace.iconselected.background: 49,73,123      # blue
+findreplace.textnotfound.foreground: 244,135,113    # salmon
+findreplace.textbox.foreground: %LIGHT_WHITE
+findreplace.textbox.background: 27,29,35
+findreplace.cuebanner.foreground: 115,116,119
+
+output.panel.background: %LIGHT_BLACK
+output.text.foreground: 124,127,133
+output.text.background: %LIGHT_BLACK
+output.texthot.foreground: %LIGHT_WHITE
+output.texthot.background: %LIGHT_BLACK
+output.divider.foreground: 124,127,133
+output.closehot.background: 56,59,65

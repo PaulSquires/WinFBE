@@ -73,6 +73,7 @@ type PROJECT_FILELOAD_DATA
    nPosition1     as long         ' current position of second view
    nSplitPosition as long         ' pDoc->SplitY
    nFocusEdit     as long         ' View 0 or View 1
+   OnLoadBookmarks(any) as CWSTR  ' late load bookmarks
 end type
 
 
@@ -144,8 +145,9 @@ type clsDocument
       AutoSaveFilename  as wstring * MAX_PATH    '#filename#
       AutoSaveRequired  as boolean
       DateFileTime      as FILETIME  
-      hNodeExplorer     as HTREEITEM
-      bBookmarkExpanded as boolean = true    ' Bookmarks list expand/collapse state
+      bBookmarkExpanded as boolean = true     ' Bookmarks list expand/collapse state
+      bFunctionsExpanded as boolean = true    ' Functions list expand/collapse state
+      bHasFunctions     as boolean = false    ' FunctionList to determine if click will display the File
       FileEncoding      as long       
       bNeedsParsing     as boolean     ' Document requires to be parsed due to changes.
       DeletedButKeep    as boolean     ' file no longer exists but keep open anyway
@@ -155,8 +157,8 @@ type clsDocument
       AutoCStartPos     as long
       lastCaretPos      as long        ' used for checking in SCN_UPDATEUI
       
-      wszOnLoadBookmarks  as CWSTR     ' saved from project load for files that are not immediately shown in open tab      
-      wszOnLoadFoldPoints as CWSTR     ' saved from project load for files that are not immediately shown in open tab      
+      wszOnLoadBookmarks(any) as CWSTR  ' saved from project load for files that are not immediately shown in open tab      
+      wszOnLoadFoldPoints as CWSTR      ' saved from project load for files that are not immediately shown in open tab      
       
       ' Following used for split edit views
       hScrollBar        as hwnd

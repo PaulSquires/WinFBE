@@ -14,8 +14,25 @@
 #pragma once
 
 
-#define IDC_FRMFUNCTIONS_LISTBOX       1000
+#define IDC_FRMFUNCTIONS_LISTBOX   1000
+
+type FUNCTION_NODE_TYPE
+   wszFunctionName as CWSTR
+   nLineNumber as long
+end type
+
+enum FunctionsDisplayState
+   ViewAsTree = 0
+   ViewAsList 
+end enum
+
+dim shared gFunctionsDisplay as FunctionsDisplayState = FunctionsDisplayState.ViewAsTree
 
 declare function frmFunctions_Show( byval hWndParent as HWnd ) as LRESULT
-declare function LoadFunctionsFiles() as long
+declare function frmFunctions_ReparseFiles() as Long
 declare function frmFunctions_SelectItemData( byval pDoc as clsDocument ptr ) as boolean
+declare function LoadFunctionsFiles() as long
+declare function frmFunctions_ViewAsTree() as long
+declare function frmFunctions_ViewAsList() as long
+declare function QuickSortpDocs( pDocs() As clsDocument ptr, lo as long, hi as long ) as long
+

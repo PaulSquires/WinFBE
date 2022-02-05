@@ -9,14 +9,14 @@
 '    This program is distributed in the hope that it will be useful,
 '    but WITHOUT any WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
-'    GNU General Public License for more details.
-  
+'    GNU General Public License for more details.  
 
 ''
 ''  frmExplorer.inc
 ''   
 
 #include once "frmExplorer.bi"
+#include once "frmFunctions.bi"
 #include once "clsDB2.bi"
 
 #define NODE_INDEX_SIZE    5     ' size of field holding array index into gConfig.Cat()
@@ -539,7 +539,7 @@ function frmExplorerListBox_SubclassProc ( _
          end if
                   
       case WM_LBUTTONDBLCLK 
-         ' determine if we clicked on a regular file or a node header. if it is a regular
+         ' determine if we clicked on a regular file or a node header. If it is a regular
          ' file then load it.
          dim as RECT rc
          dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
@@ -552,7 +552,7 @@ function frmExplorerListBox_SubclassProc ( _
                dim as CWSTR wszFilename
                dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
                if pDoc then
-                  frmFunctionList_GetFileNameFunctionName( pDoc->hNodeExplorer, wszFilename, "" )
+                  wszFilename = pDoc->DiskFilename
                   OpenSelectedDocument( wszFilename, "" )
                end if   
             end if
@@ -639,8 +639,8 @@ end function
 ' Files are excluded from being added based on the state of the global array gConfig.Cat()
 ' ========================================================================================
 function LoadExplorerFiles() as long
-   dim as HWND hList = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_LISTBOX)
-   dim as Hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
+   dim as HWND hList = HWND_FRMEXPLORER_LISTBOX 
+   redim pDocs(any) as clsDocument ptr
     
    ' Hide the listbox while it is loading so that we don't get the unpainted
    ' white background from the empty listbox
@@ -658,24 +658,16 @@ function LoadExplorerFiles() as long
    ListBox_ResetContent(hList)
    
    ' Add the list of filenames (allow the treeview to sort the data for us)
-   dim as HTREEITEM hParent
-   dim as long p, nStart, nEnd
+   dim as long idx, nStart, nEnd
    dim wszText as wstring * MAX_PATH
 
-   '#define NODETYPE_FILES             0
-   '#define NODETYPE_MAIN              1
-   '#define NODETYPE_RESOURCE          2
-   '#define NODETYPE_HEADER            3
-   '#define NODETYPE_MODULE            4
-   '#define NODETYPE_NORMAL            5
-
    if gApp.IsProjectActive then
-      nStart = NODETYPE_MAIN
+      nStart = CATINDEX_MAIN
       nEnd = ubound(gConfig.Cat)
    else   
       ' no project active so just "files"
-      nStart = NODETYPE_FILES
-      nEnd = NODETYPE_FILES
+      nStart = CATINDEX_FILES
+      nEnd = CATINDEX_FILES
    end if
 
    for ii as long = nStart to nEnd
@@ -703,28 +695,39 @@ function LoadExplorerFiles() as long
       end if
 
       ' Add the header description to the listbox
-      p = Listbox_AddString( hList, @wszText )
+      idx = Listbox_AddString( hList, @wszText )
 
       ' Check to see if these types of files should be loaded into the listbox.
       if gConfig.Cat(ii).bShow = false then continue for
       
-      Treeview_SortChildren( hTree, gConfig.Cat(ii).hNodeExplorer, 0 )
-      hParent = Treeview_GetChild( hTree, gConfig.Cat(ii).hNodeExplorer)
-      do until hParent = 0 
-         ' Filename
-         Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
-         dim as clsDocument ptr pDoc = cast(clsDocument ptr, TreeView_GetlParam(hTree, hParent))
-         p = Listbox_AddString( hList, @wszText )
-         ' pDoc item is stored in ListBox ItemData
-         ListBox_SetItemData( hList, p, pDoc )    
-         if pDoc then pDoc->hNodeExplorer = hParent
-         if pDocActive then 
-            if hParent = pDocActive->hNodeExplorer then idxRestore = p
+      ' Iterate all pDoc in the project/files list. Create an array and then
+      ' sort it alphabetically.
+      dim as long ub
+      
+      erase pDocs
+      
+      dim pDoc as clsDocument ptr = gApp.pDocList
+      do until pDoc = 0
+         if pDoc->ProjectFiletype = gConfig.Cat(ii).idFileType then
+            ub = ubound(pDocs) + 1
+            redim preserve pDocs(ub)
+            pDocs(ub) = pDoc
          end if
-         ' Get the next filename
-         hParent = Treeview_GetNextSibling(hTree, hParent)
-      loop 
+         pDoc = pDoc->pDocNext
+      loop
+
+      QuickSortpDocs( pDocs(), lbound(pDocs), ubound(pDocs) )
    
+      for i as long = lbound(pDocs) to ubound(pDocs)
+         wszText = AfxStrPathName( "NAMEX", pDocs(i)->DiskFilename )
+         idx = Listbox_AddString( hList, @wszText )
+         ' pDoc item is stored in ListBox ItemData
+         ListBox_SetItemData( hList, idx, pDocs(i) )    
+         if pDocActive then 
+            if pDocs(i) = pDocActive then idxRestore = idx
+         end if
+      next   
+     
    next
 
    ' Restore the top index so the list displays like it did before being reset

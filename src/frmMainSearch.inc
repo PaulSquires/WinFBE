@@ -261,7 +261,7 @@ function OnCommand_SearchBookmarks( _
             if hEdit then
                SciExec( hEdit, SCI_MARKERDELETEALL, -1, 0 )
             else
-               pDoc->wszOnLoadBookmarks = ""   
+               erase pDoc->wszOnLoadBookmarks
             end if
             pDoc = pDoc->pDocNext
          loop

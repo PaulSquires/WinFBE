@@ -993,7 +993,6 @@ function frmMain_OpenFileSafely( _
      
    dim as long iTab = -1
    dim pDoc as clsDocument ptr 
-   dim as Hwnd hTree = GetDlgItem( HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE )
    
    ' This function opens/creates various types of files depending on the situation. 
    ' - New documents
@@ -1015,9 +1014,8 @@ function frmMain_OpenFileSafely( _
          ParseDocument( pDoc )
       end if
       pDoc->ProjectFileType = wszFileType
-      ' Add the document data to the Explorer treeview   
-      pDoc->hNodeExplorer = frmFunctionList_AddParentNode( pDoc )
-      frmFunctionList_AddChildNodes( pDoc )
+      LoadExplorerFiles()
+      LoadFunctionsFiles()
    end if
 
    
@@ -1031,8 +1029,6 @@ function frmMain_OpenFileSafely( _
          dim as CWSTR wszFileType = pDocIn->ProjectFileType
          pDocIn->CreateCodeWindow( HWnd, false, false, pDocIn->DiskFilename )
          pDocIn->ProjectFileType = wszFileType
-         ' This document would already have its data added to the Explorer treeview so
-         ' no need to do that again.
       end if
       pDoc = pDocIn     
    end if
@@ -1274,9 +1270,6 @@ function frmMain_OnActivateApp( _
                                           0 )         ' pDocIn
                   
                   pDocLoad->ProjectFileType = wszFileType
-                  pDocLoad->hNodeExplorer = frmFunctionList_AddParentNode( pDocLoad )
-                  frmFunctionList_AddChildNodes( pDocLoad )
-                  
                end if                
             end if
             pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
@@ -1877,15 +1870,12 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
    frmStatusBar_Show( HWND_FRMMAIN )
   
    ' Create the various child windows
-   frmFunctionList_Show( HWND_FRMMAIN )
    frmPanel_Show( HWND_FRMMAIN )
    frmPanelVScroll_Show( HWND_FRMMAIN )
    frmOutput_Show( HWND_FRMMAIN )
 
-
    ' Create the UserTools accelerator table
    frmUserTools_CreateAcceleratorTable            
-   
 
    ' SET STARTUP POSITION
    ' if no valid window size exists then set to the default working area of the screen
@@ -2006,7 +1996,6 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
    pWindow = AfxCWindowPtr( HWND_FRMPANEL ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMPANEL_VSCROLLBAR ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ): delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMFUNCTIONLIST ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMMAIN ): delete pWindow
 
 end function

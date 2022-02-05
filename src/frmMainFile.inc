@@ -94,7 +94,8 @@ Function OnCommand_FileOpen( _
    pItems->lpVtbl->Release(pItems)
    
    LoadExplorerFiles()
-
+   LoadFunctionsFiles()
+   
    ' Display all of the tabs
    dim as long iTab = -1
    For i = LBound(pDocTabs) To UBound(pDocTabs)
@@ -154,7 +155,6 @@ Function OnCommand_FileSave( _
       ' Regenerate code to ensure that any missing body functions are now present
       pDoc->bRegenerateCode = true
       SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-      frmFunctionList_AddChildNodes( pDoc )
    end if
           
    ' Do the actual saving to disk
@@ -164,31 +164,21 @@ Function OnCommand_FileSave( _
       ParseDocument( pDoc )
       ' Apply document properties to this file because the file extension may have
       ' changed. For example from Untitled to *.bas
-      ' Reload the main form files combobox in case names have changed. 
       if pDoc->DiskFilename <> wszFilename then
          If gApp.IsProjectActive Then
             gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
-            pDoc->hNodeExplorer = frmFunctionList_AddParentNode( pDoc )
-            dim as hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
-            SetWindowRedraw( hTree, false )
-            Treeview_SortChildren( hTree, TreeView_GetParent(hTree, pDoc->hNodeExplorer), 0 )
-            Treeview_SelectItem( hTree, pDoc->hNodeExplorer )
-            Treeview_EnsureVisible( hTree, pDoc->hNodeExplorer )
-            SetWindowRedraw( hTree, true )
-            AfxRedrawWindow( hTree )
          end if
       end if
-      frmFunctionList_AddChildNodes( pDoc )
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed
    gTTabCtl.SetTabText(-1)
    LoadExplorerFiles()
+   LoadFunctionsFiles()
 
    ' Highlight the selected tab file in the Explorer listbox
    frmExplorer_SelectItemData( pDoc )
    frmMain_SetFocusToCurrentCodeWindow
-   frmFunctionList_UpdateListBox()
 
    Function = 0
 End Function
@@ -219,7 +209,6 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          ' Regenerate code to ensure that any missing body functions are now present
          pDoc->bRegenerateCode = true
          SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-         frmFunctionList_AddChildNodes( pDoc )
       end if
 
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
@@ -235,11 +224,10 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          gTTabCtl.SetTabText(i)  ' make sure "*" updates
          ' Parse the code for sub/function listing and create list
          ParseDocument(pDoc)
-         frmFunctionList_AddChildNodes( pDoc )
       End If   
    Next
+   LoadFunctionsFiles()
    frmMain_SetFocusToCurrentCodeWindow
-   frmFunctionList_UpdateListBox()
 
    Function = 0
 End Function
@@ -347,9 +335,6 @@ Function OnCommand_FileClose( _
       end if
 
       if bRemoveFile then
-         ' Remove it from the Explorer
-         Dim As Hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
-         Treeview_DeleteItem( hTree, pDoc->hNodeExplorer)
          ' Remove all references from the gdb2 database. Only remove the reference
          ' if the file is not part of an active project, otherwise, we will lose
          ' references to function names, etc.
@@ -396,9 +381,7 @@ function OnCommand_FileExplorerMessage( _
       ) as LRESULT
    
    if id = IDM_FILEOPEN_EXPLORERLISTBOX then
-      dim as CWSTR wszFilename, wszFunctionName
-      frmFunctionList_GetFileNameFunctionName( pDoc->hNodeExplorer, wszFilename, wszFunctionName )
-      OpenSelectedDocument( wszFilename, wszFunctionName )
+      OpenSelectedDocument( pDoc->DiskFilename, "" )
 
    elseif id = IDM_FILESAVE_EXPLORERLISTBOX then
       OnCommand_FileSave( HWND_FRMMAIN, pDoc, False )

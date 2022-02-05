@@ -1,0 +1,68 @@
+general.description: WinFBE Default (Light) Theme
+general.version: 1.0.0
+
+# all colors are specified using RGB syntax (red,green,blue)
+
+# simple macros that can be used instead of literal values
+%GRAY: 127,127,127
+%BLACK: 0,0,0
+%WHITE: 255,255,255
+
+editor.window.background: %WHITE
+editor.caret.foreground: %BLACK
+editor.currentline.foreground: 255,255,0    # yellow
+editor.text.foreground: %BLACK
+editor.text.background: %WHITE
+editor.text.bold: false
+editor.text.italic: false
+editor.text.underline: false
+editor.numbers.foreground: %BLACK
+editor.numbers.background: %WHITE
+editor.numbers.bold: false
+editor.numbers.italic: false
+editor.numbers.underline: false
+editor.comments.foreground: 0,128,0        # green
+editor.comments.background: %WHITE
+editor.comments.bold: false
+editor.comments.italic: false
+editor.comments.underline: false
+editor.identifiers.foreground: %BLACK
+editor.identifiers.background: %WHITE
+editor.identifiers.bold: false
+editor.identifiers.italic: false
+editor.identifiers.underline: false
+editor.keyword.foreground: 0,0,255          # blue
+editor.keyword.background: %WHITE
+editor.keyword.bold: false
+editor.keyword.italic: false
+editor.keyword.underline: false
+editor.foldmargin.foreground: 237,236,235       # pale gray
+editor.foldsymbol.foreground: %WHITE
+editor.foldsymbol.background: %BLACK
+editor.linenumbers.foreground: %GRAY            # gray
+editor.linenumbers.background: %WHITE
+editor.linenumbers.bold: false
+editor.linenumbers.italic: false
+editor.linenumbers.underline: false
+editor.operators.foreground: 196,0,0            # red
+editor.operators.background: %WHITE
+editor.operators.bold: false
+editor.operators.italic: false
+editor.operators.underline: false
+editor.indentguides.foreground: %WHITE
+editor.indentguides.background: %BLACK
+editor.preprocessor.foreground: 196,0,0         # red
+editor.preprocessor.background: %WHITE
+editor.preprocessor.bold: false
+editor.preprocessor.italic: false
+editor.preprocessor.underline: false
+editor.selection.foreground: %WHITE
+editor.selection.background: 038,079,120       # light blue
+editor.strings.foreground: 173,0,173           # Purple (little darker than Magenta)
+editor.strings.background: %WHITE
+editor.strings.bold: false
+editor.strings.italic: false
+editor.strings.underline: false
+editor.bracegood.foreground: 000,128,000       # green
+editor.bracebad.foreground: 196,000,000        # red
+editor.occurrence.foreground: 148,202,240      # powder blue

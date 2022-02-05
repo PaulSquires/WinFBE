@@ -10,7 +10,6 @@
 '    but WITHOUT any WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
-  
 
 ''
 ''  frmFunctions.inc
@@ -19,83 +18,70 @@
 #include once "frmFunctions.bi"
 #include once "clsDB2.bi"
 
-function getFunctionsNodeHeaderIndex( byval wszCaption as CWSTR ) as long
-   ' wszCaption will be in this formt:
-   '  %NODE_INDEX_SIZE%NODE_STATE_SIZE%Description
-      '       %    0%1%Files
-      '       %    1%1%Main
-      '       %    2%1%Resource
-      '       %    3%0%Header
-      '       %    4%0%Module
-      '       %    5%1%Normal
-   dim as long idx = val(mid(wszCaption, 2, NODE_INDEX_SIZE))
-   ' Make sure array index is valid
-   if (idx < lbound(gConfig.Cat)) orelse (idx > ubound(gConfig.Cat)) then
-      return -1
-   else
-      return idx   
-   end if
-end function
-
-function getFunctionsNodeHeaderState( byval wszCaption as CWSTR ) as long
-   ' wszCaption will be in this formt:
-   '  %NODE_INDEX_SIZE%NODE_STATE_SIZE%Description
-      '       %    0%1%Files
-      '       %    1%1%Main
-      '       %    2%1%Resource
-      '       %    3%0%Header
-      '       %    4%0%Module
-      '       %    5%1%Normal
-   dim as long nState = val(mid(wszCaption, 2 + NODE_INDEX_SIZE + 1, NODE_STATE_SIZE))
-   ' nState will be 0 collapsed, or 1 expanded
-   return nState
-end function
-
-function getFunctionsNodeHeaderDescription( byval wszCaption as CWSTR ) as CWSTR
-   ' wszCaption will be in this formt:
-   '  %NODE_INDEX_SIZE%NODE_STATE_SIZE%Description
-      '       %    0%1%Files
-      '       %    1%1%Main
-      '       %    2%1%Resource
-      '       %    3%0%Header
-      '       %    4%0%Module
-      '       %    5%1%Normal
-   return mid(wszCaption, 4 + NODE_INDEX_SIZE + NODE_STATE_SIZE)
+' ========================================================================================
+' Reparse any dirty files
+' ========================================================================================
+function frmFunctions_ReparseFiles() as Long
+   '  Need to re-parse any dirty files. This is especially important for QuickRun scenarios
+   '  where the file is never physically saved.
+   Dim pDoc As clsDocument Ptr = gApp.pDocList
+   do until pDoc = 0
+      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+         pDoc->bNeedsParsing = true
+         ParseDocument(pDoc)
+      end if
+      pDoc = pDoc->pDocNext
+   loop   
+   function = 0
 end function
 
 ' ========================================================================================
-' Expand/Collapse all Explorer Nodes
+' Get the Functions line number from the Listbox line
+' ========================================================================================
+function getFunctionsLineNumber( byval wszCaption as CWSTR ) as long
+   ' do not use Parse for this because line may contain embedded % in description
+   dim as long nLineNum 
+   dim as long f1
+   f1 = instr(wszCaption, "%")
+   if f1 then nLineNum = val(left(wszCaption, f1-1))
+   function = nLineNum
+end function
+
+' ========================================================================================
+' Get the Functions function name from the Listbox line
+' ========================================================================================
+function getFunctionsFunctionName( byval wszCaption as CWSTR ) as CWSTR
+   ' do not use Parse for this because line may contain embedded % in description
+   dim as CWSTR wszTemp
+   dim as long f1
+   f1 = instr(wszCaption, "%")
+   if f1 then wszTemp = mid(wszCaption, f1 + 1)
+   function = wszTemp
+end function
+
+
+' ========================================================================================
+' Expand/Collapse all Functions Nodes
 ' ========================================================================================
 function frmFunctions_ExpandAll() as long
-   for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
-      gConfig.Cat(i).bShow = true
-   next
-   LoadExplorerFiles()
+   dim pDoc as clsDocument ptr = gApp.pDocList
+   do until pDoc = 0
+      pDoc->bFunctionsExpanded = true
+      pDoc = pDoc->pDocNext
+   loop
+   LoadFunctionsFiles()
    function = 0
 end function
 
 function frmFunctions_CollapseAll() as long
-   for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
-      gConfig.Cat(i).bShow = false
-   next
-   LoadExplorerFiles()
+   dim pDoc as clsDocument ptr = gApp.pDocList
+   do until pDoc = 0
+      pDoc->bFunctionsExpanded = false
+      pDoc = pDoc->pDocNext
+   loop
+   LoadFunctionsFiles()
    function = 0
 end function   
-
-
-' ========================================================================================
-' Unselect all items in the multiselect listbox and reset it to the currently
-' active top tab (if any)
-' ========================================================================================
-function frmFunctions_UnSelectListBox() as long
-   for i as long = 0 to ListBox_GetCount( HWND_FRMFUNCTIONS_LISTBOX ) - 1 
-      ListBox_SetSel( HWND_FRMFUNCTIONS_LISTBOX, false, i )
-   next 
-   ' force a listbox selection for the currently active tab                   
-   dim as long idx = gTTabCtl.CurSel: gTTabCtl.CurSel = -1
-   gTTabCtl.SetFocusTab(idx)
-   function = 0
-end function
 
 ' ========================================================================================
 ' Select the listbox item that matches the incoming pDoc item. Do not open nodes to
@@ -103,22 +89,18 @@ end function
 ' and we should not re-open it automatically.
 ' ========================================================================================
 function frmFunctions_SelectItemData( byval pDoc as clsDocument ptr ) as boolean
-   ' Select the Explorer listbox item where the ItemData holds the pDoc handle.
-   ' Reset any other single or multiple selections. Process entire listbox. 
-   dim as long idx = -1
+   ' Select the Function List listbox item where the ItemData holds the pDoc handle.
    for i as long = 0 to ListBox_GetCount( HWND_FRMFUNCTIONS_LISTBOX ) - 1 
-      ListBox_SetSel( HWND_FRMFUNCTIONS_LISTBOX, false, i )
       if ListBox_GetItemData(HWND_FRMFUNCTIONS_LISTBOX, i) = pDoc then
-         idx = i
+         ListBox_SetCurSel( HWND_FRMFUNCTIONS_LISTBOX, i )
+         if ListBox_GetTopIndex( HWND_FRMFUNCTIONS_LISTBOX ) <> i then
+            ListBox_SetTopIndex( HWND_FRMFUNCTIONS_LISTBOX, i )
+         end if   
+         AfxRedrawWindow( HWND_FRMFUNCTIONS_LISTBOX )
+         return true
       end if   
    next 
-
-   if idx <> -1 then
-      ListBox_SetSel( HWND_FRMFUNCTIONS_LISTBOX, true, idx )
-      AfxRedrawWindow( HWND_FRMFUNCTIONS_LISTBOX )
-   end if
-   
-   if idx >= 0 then function = true   
+   return false
 end function
 
 
@@ -238,24 +220,29 @@ function frmFunctions_OnDrawItem( _
       ' if mouse is over VScrollBar then reset hot
       if isMouseOverWindow( HWND_FRMPANEL_VSCROLLBAR ) then IsHot = false
          
-      if ListBox_GetSel(lpdis->hwndItem, lpdis->itemID) then IsHot = true
+      if ListBox_GetCurSel(lpdis->hwndItem) = lpdis->itemID then IsHot = true
 
       hBrush = iif( IsHot, ghPanel.hBackBrushHot, ghPanel.hBackBrush)
       backclr = iif( IsHot, ghPanel.BackColorHot, ghPanel.BackColor)
       foreclr = iif( IsHot, ghPanel.ForeColorHot, ghPanel.ForeColor)
 
       dim as CWSTR wszCaption = AfxGetListBoxText(lpdis->hwndItem, lpdis->ItemID)
+      dim as clsDocument ptr pDoc = cast(clsDocument ptr, lpdis->itemData)
 
-      ' if this is a "node" header then use those colors
-      if left(wszCaption, 1) = "%" then isNodeHeader = true
-      if getFunctionsNodeHeaderState(wszCaption) = 1 then isIconDown = true
+      ' if this is a "node" header 
+      if left(wszCaption, 4) = "true" then 
+         isNodeHeader = true
+         isIconDown = true
+         if pDoc then wszCaption = AfxStrPathName( "NAMEX", pDoc->DiskFilename )
+      elseif left(wszCaption, 5) = "false" then 
+         isNodeHeader = true
+         isIconDown = false
+         if pDoc then wszCaption = AfxStrPathName( "NAMEX", pDoc->DiskFilename )
+      else
+         ' must be a function line 
+          wszCaption = getFunctionsFunctionName( wszCaption )
+      end if
       
-'      if isNodeHeader then
-'         hBrush = iif( IsHot, ghPanel.hBackBrushHot, ghPanel.hBackBrushNode)
-'         backclr = iif( IsHot, ghPanel.BackColorHot, ghPanel.BackColorNode)
-'         foreclr = iif( IsHot, ghPanel.ForeColorNode, ghPanel.ForeColorNode)
-'      end if
-         
       ' Paint the entire background
       ' Create our rect that works with the entire line
       SetRect( @rc, 0, 0, nWidth, nHeight )
@@ -279,14 +266,16 @@ function frmFunctions_OnDrawItem( _
          else   
             DrawText( memDC, wszChevronRight, -1, cast(lpRect, @rcBitmap), wsStyle )
          end if
-         wszCaption = getFunctionsNodeHeaderDescription(wszCaption)
+         wszCaption = wszCaption
          rcText.left = rcBitmap.right
          SelectObject( memDC, ghMenuBar.hFontMenuBar )
          wsStyle = DT_NOPREFIX or DT_LEFT or DT_VCENTER or DT_SINGLELINE  
          DrawText( memDC, wszCaption.sptr, -1, cast(lpRect, @rcText), wsStyle )
       else
-         ' This would be a regular file.
-         rcBitmap.left = rcText.left + pWindow->ScaleX(20)
+         ' This would be a function name.
+         if gFunctionsDisplay = FunctionsDisplayState.ViewAsTree then
+            rcBitmap.left = rcText.left + pWindow->ScaleX(20)
+         end if
          rcBitmap.right = rcBitmap.left + pWindow->ScaleX(20) 
 
          SelectObject( memDC, ghMenuBar.hFontSymbol )
@@ -384,8 +373,8 @@ function frmFunctionsListBox_SubclassProc ( _
    static as long nLastIdx = -1
       
    select case uMsg
-'      case MSG_USER_LOAD_EXPLORERFILES
-'         LoadExplorerFiles()
+      case MSG_USER_LOAD_FUNCTIONSFILES
+         LoadFunctionsFiles()
 
       Case WM_MOUSEWHEEL
          ' accumulate delta until scroll one line (up +120, down -120). 
@@ -395,6 +384,7 @@ function frmFunctionsListBox_SubclassProc ( _
          accumDelta = accumDelta + zDelta
          if accumDelta >= 120 then       ' scroll up 3 lines
             nTopIndex = nTopIndex - 3
+            nTopIndex = max( 0, nTopIndex )
             SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 ) 
             accumDelta = 0
             frmPanelVScroll_PositionWindows( SW_SHOWNA )
@@ -418,123 +408,70 @@ function frmFunctionsListBox_SubclassProc ( _
          ' that instead of the entire listbox
          dim as RECT rc
          dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         if idx <> nLastIdx then
-            ListBox_GetItemRect( hWin, idx, @rc )
-            InvalidateRect( hWin, @rc, true )
-            ListBox_GetItemRect( hWin, nLastIdx, @rc )
-            InvalidateRect( hWin, @rc, true )
-            nLastIdx = idx
-         end if
-                     
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
+         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         ' client area.
+         if hiword(idx) <> 1 then
+            if idx <> nLastIdx then
+               ListBox_GetItemRect( hWin, idx, @rc )
+               InvalidateRect( hWin, @rc, true )
+               ListBox_GetItemRect( hWin, nLastIdx, @rc )
+               InvalidateRect( hWin, @rc, true )
+               nLastIdx = idx
+            end if
+        end if
+                           
       case WM_MOUSEHOVER
          dim as CWSTR wszTooltip 
          if IsWindow(hTooltip) = 0 then hTooltip = AfxAddTooltip( hWin, "", false, false )
          dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
-         if pDoc then wszTooltip = pDoc->DiskFilename
-         ' Display the tooltip
-         AfxSetTooltipText( hTooltip, hWin, wszTooltip )
-         AfxRedrawWindow( hWin )
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
+         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         ' client area.
+         if hiword(idx) <> 1 then
+            wszTooltip = ""
+            dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
+            if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
+               dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
+               if pDoc then wszTooltip = pDoc->DiskFilename
+            end if
+            ' Display the tooltip
+            AfxSetTooltipText( hTooltip, hWin, wszTooltip )
+            AfxRedrawWindow( hWin )
+         end if
          
       case WM_MOUSELEAVE
          nLastIdx = -1
          AfxRedrawWindow(hWin)   
          
-      case WM_RBUTTONDOWN
-         ' Create the popup menu
-'         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-'         dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
-'         if pDoc then
-'            ListBox_SetSel( hWin, true, idx )
-'            dim as HMENU hPopupMenu = CreateFunctionsContextMenu(pDoc)
-'            dim as POINT pt: GetCursorPos( @pt )
-'            dim as long id = TrackPopupMenu(hPopUpMenu, TPM_RETURNCMD, pt.x, pt.y, 0, HWND_FRMMAIN, byval null)
-'            ' process the selected rows. Need to save the current state of selected
-'            ' rows prior to processing because as the items are processed some of the
-'            ' actions may reset the state of listbox. We save the pDoc's in an array
-'            ' rather than index values because the listbox may get reloaded during
-'            ' some actions invalidating some indexes. 
-'            dim as long nSelCount = SendMessage( hWin, LB_GETSELCOUNT, 0, 0 )
-'            dim pDocArray(nSelCount-1) as clsDocument ptr 
-'            dim as long nextIdx = 0
-'            for i as long = 0 to ListBox_GetCount( hWin ) - 1
-'               if ListBox_GetSel( hWin, i ) then
-'                  dim as CWSTR wszCaption = AfxGetListBoxText( hWin, i )
-'                  if left(wszCaption, 1) = "%" then 
-'                     pDocArray(nextIdx) = 0
-'                  else   
-'                     pDocArray(nextIdx) = cast(clsDocument ptr, ListBox_GetItemData( hWin, i ))
-'                  end if
-'                  nextIdx = nextIdx + 1
-'               end if
-'            next         
-'            ' Process our array of selected pDoc's.
-'            for i as long = lbound(pDocArray) to ubound(pDocArray)
-'               if pDocArray(i) = 0 then continue for
-'               select case id
-'                  case IDM_FILEOPEN_EXPLORERLISTBOX, IDM_FILECLOSE_EXPLORERLISTBOX, _
-'                       IDM_FILESAVE_EXPLORERLISTBOX, IDM_FILESAVEAS_EXPLORERLISTBOX
-'                       OnCommand_FileExplorerMessage( id, pDocArray(i) )
-'                  case IDM_REMOVEFILEFROMPROJECT_EXPLORERLISTBOX
-'                       OnCommand_ProjectRemove( id, pDocArray(i) )
-'                  case IDM_SETFILEMAIN_EXPLORERTREEVIEW, IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
-'                       IDM_SETFILEHEADER_EXPLORERTREEVIEW, IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
-'                       IDM_SETFILENORMAL_EXPLORERTREEVIEW 
-'                       OnCommand_ProjectSetFileType( id, pDocArray(i) )
-'                  case is > IDM_SETCATEGORY     
-'                       OnCommand_ProjectSetFileType( id, pDocArray(i) )
-'               end select
-'            next
-'            LoadExplorerFiles()
-'            frmFunctions_UnSelectListBox() 
-'            DestroyMenu( hPopUpMenu )
-'            Return true   ' prevent further processing that leads to WM_CONTEXTMENU
-'         end if
-         
       case WM_LBUTTONUP
-         ' Prevent this programmatic selection if Ctrl or Shift is active
-         ' because we want the listbox to select the listbox item rather for
-         ' us to mess with that selection via SetTabIndexByDocumentPtr().
-         dim as boolean isCtrl = (GetAsyncKeyState(VK_CONTROL) and &H8000)
-         dim as boolean isShift = (GetAsyncKeyState(VK_SHIFT) and &H8000) 
-         if (isCtrl = false) andalso (isShift = false) then
-            ' determine if we clicked on a regular file or a node header
-            dim as RECT rc
-            dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-            dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
-            if left(wszCaption, 1) = "%" then
-               ' Toggle the show/hide of files under this node
-               dim as long idxArray = getFunctionsNodeHeaderIndex(wszCaption)
-               if idxArray <> -1 then
-                  gConfig.Cat(idxArray).bShow = not gConfig.Cat(idxArray).bShow
-               end if   
-               ' allow listbox click event to fully process before loading new explorer files
-               ' so that we can correctly select the current item.
-'               PostMessage( hWin, MSG_USER_LOAD_EXPLORERFILES, 0, 0 )
-            else
-               ' if the file is already showing in the Top tabs then switch to that tab.
-               ' We do not open a new tab on single click. Only double click or ENTER will
-               ' open a new tab. 
-               dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
-               gTTabCtl.SetTabIndexByDocumentPtr( pDoc )
-            end if
-         end if
-                  
-      case WM_LBUTTONDBLCLK 
-         ' determine if we clicked on a regular file or a node header. if it is a regular
-         ' file then load it.
+         ' determine if we clicked on a function name or a node header
          dim as RECT rc
          dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
-         if left(wszCaption, 1) <> "%" then
-            dim as CWSTR wszFilename
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
+         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         ' client area.
+         if hiword(idx) <> 1 then
             dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
-            if pDoc then
-'               frmFunctionList_GetFileNameFunctionName( pDoc->hNodeExplorer, wszFilename, "" )
-'               OpenSelectedDocument( wszFilename, "" )
-            end if   
+            dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
+            if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
+               ' Toggle the show/hide of bookmarks under this node
+               if pDoc then pDoc->bFunctionsExpanded = not pDoc->bFunctionsExpanded
+               if (pDoc->bFunctionsExpanded) orelse (pDoc->bHasFunctions = false) then
+                  OpenSelectedDocument( pDoc->DiskFilename, "", -1 )
+               end if   
+               ' allow listbox click event to fully process 
+               PostMessage( hWin, MSG_USER_LOAD_FUNCTIONSFILES, 0, 0 )
+            else
+               ' Attempt to show the function name
+               dim as long nLineNum = getFunctionsLinenumber( wszCaption )
+               dim as CWSTR wszFunctionName = getFunctionsFunctionName( wszCaption )
+               dim as CWSTR wszDiskFilename 
+               if pDoc then wszDiskFilename = pDoc->DiskFilename
+               OpenSelectedDocument( wszDiskFilename, wszFunctionName, nLineNum )
+            end if
          end if
-         
+                        
       case WM_ERASEBKGND
          ' if the number of lines in the listbox maybe less than the number per page then 
          ' calculate from last item to bottom of listbox, otherwise calculate based on
@@ -609,14 +546,56 @@ end function
 
 
 ' ========================================================================================
-' LoadFunctionsFiles
-' This will clear the current list of files in the listbox and repopulate it
-' with the latest list of filenames that are stored in the hidden FunctionList treeview.
-' Files are excluded from being added based on the state of the global array gConfig.Cat()
+' Simple QuickSort of Filename array
 ' ========================================================================================
-function LoadFunctionsFiles() as long
+function QuickSortpDocs( pDocs() As clsDocument ptr, lo as long, hi as long ) as long
+   dim as long i, j
+   dim as CWSTR pivot
+    
+   if lo < hi then
+      i = lo : j = hi
+      pivot = ucase( pDocs( (lo+hi)/2 )->DiskFilename )
+      do
+         while ucase(pDocs(i)->DiskFilename) < pivot and i < hi: i += 1: wend
+         while ucase(pDocs(j)->DiskFilename) > Pivot and j > lo: j -= 1: wend
+         if i <= j then swap pDocs(i), pDocs(j): i += 1: j -= 1
+      loop while i <= j
+      if lo < j then QuickSortpDocs( pDocs(), lo, j )
+      if hi > i then QuickSortpDocs( pDocs(), i, hi )
+    end if
+ 
+   function = 0
+end function
+
+' ========================================================================================
+' Simple QuickSort of Function Name array
+' ========================================================================================
+function QuickSortFuncs( a() as FUNCTION_NODE_TYPE, lo as long, hi as long ) as long
+   dim as long i, j
+   dim as CWSTR pivot
+    
+   if lo < hi then
+      i = lo : j = hi
+      pivot = ucase( a( (lo+hi)/2 ).wszFunctionName )
+      do
+         while ucase(a(i).wszFunctionName) < pivot and i < hi: i += 1: wend
+         while ucase(a(j).wszFunctionName) > Pivot and j > lo: j -= 1: wend
+         if i <= j then swap a(i), a(j): i += 1: j -= 1
+      loop while i <= j
+      if lo < j then QuickSortFuncs( a(), lo, j )
+      if hi > i then QuickSortFuncs( a(), i, hi )
+    end if
+ 
+   function = 0
+end function
+
+
+' ========================================================================================
+' LoadFilesAndFunctions
+' This will clear the current list of files in the listbox and repopulate it.
+' ========================================================================================
+function LoadFilesAndFunctions() as long
    dim as HWND hList = GetDlgItem(HWND_FRMFUNCTIONS, IDC_FRMFUNCTIONS_LISTBOX)
-   dim as Hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
     
    ' Hide the listbox while it is loading so that we don't get the unpainted
    ' white background from the empty listbox
@@ -625,106 +604,97 @@ function LoadFunctionsFiles() as long
    ' Save the topindex because we will restore it after filling the new contents 
    dim as long nTopIndex = SendMessage( hList, LB_GETTOPINDEX, 0, 0 ) 
 
-   dim pDocActive as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
-   
-   dim as long idxRestore = -1
-   dim as long idxCaret = ListBox_GetCaretIndex( hList )
-
    ' Clear all content from the listbox
    ListBox_ResetContent(hList)
    
-   ' Add the list of filenames (allow the treeview to sort the data for us)
-   dim as HTREEITEM hParent
-   dim as long p, nStart, nEnd
    dim wszText as wstring * MAX_PATH
 
-   '#define NODETYPE_FILES             0
-   '#define NODETYPE_MAIN              1
-   '#define NODETYPE_RESOURCE          2
-   '#define NODETYPE_HEADER            3
-   '#define NODETYPE_MODULE            4
-   '#define NODETYPE_NORMAL            5
+   dim pData as DB2_DATA ptr
+   dim as CWSTR wszNodeName
+    
+   ' Filename node line format. The drawing routine will parse this string to determine
+   ' what glyph to display as well as the filename only portion of the diskfilename.
+   ' true     ' expanded node
+   ' false    ' collapsed node
+   ' Function node line format. 
+   ' 231%FunctionName  ' function starts at line 231 of the file
 
-   if gApp.IsProjectActive then
-      nStart = NODETYPE_MAIN
-      nEnd = ubound(gConfig.Cat)
-   else   
-      ' no project active so just "files"
-      nStart = NODETYPE_FILES
-      nEnd = NODETYPE_FILES
-   end if
+   ' Iterate all pDoc in the project/files list. Create an array and then
+   ' sort it alphabetically.
+   dim as long ub, idx
+   redim pDocs(any) as clsDocument ptr
+   
+   dim pDoc as clsDocument ptr = gApp.pDocList
+   do until pDoc = 0
+      ub = ubound(pDocs) + 1
+      redim preserve pDocs(ub)
+      pDocs(ub) = pDoc
+      pDoc = pDoc->pDocNext
+   loop
 
-   for ii as long = nStart to nEnd
-      ' The node header description starts with a % in order for the
-      ' drawing routine to know that it is a node header and not a
-      ' regular file.
-      ' e.g.
-      '       %    0%1%Files
-      '       %    1%1%Main
-      '       %    2%1%Resource
-      '       %    3%0%Header
-      '       %    4%0%Module
-      '       %    5%1%Normal
-      ' The value after the % is the array index into gConfig.Cat(i).bShow
-      ' that allows the mouse routines to toggle on/off displaying of
-      ' the files. The value after the second % indicates to the drawing 
-      ' routine that files exist ("1") under the node, or ("0") that 
-      ' no files exist. This will then dictate what icon to show next
-      ' to the line.
-      wszText = "%" & AfxStrRSet(str(ii), NODE_INDEX_SIZE) & "%"
-      if gConfig.Cat(ii).bShow = false then 
-         wszText = wszText & AfxStrRSet("0", NODE_STATE_SIZE) & "%" & gConfig.Cat(ii).wszDescription
-      else   
-         wszText = wszText & AfxStrRSet("1", NODE_STATE_SIZE) & "%" & gConfig.Cat(ii).wszDescription
+   QuickSortpDocs( pDocs(), lbound(pDocs), ubound(pDocs) )
+   
+   ' Get the functions (and sort them) for each file
+   redim arrFuncs(any) as FUNCTION_NODE_TYPE
+   
+   for i as long = lbound(pDocs) to ubound(pDocs)
+   
+      dim as CWSTR wszFilename = ucase(pDocs(i)->DiskFilename)
+
+      wszText = wstr(pDocs(i)->bFunctionsExpanded)
+      idx = Listbox_AddString( hList, @wszText )
+      ListBox_SetItemData( hList, idx, pDocs(i) )
+      pDocs(i)->bHasFunctions = false
+      
+      if pDocs(i)->bFunctionsExpanded then
+         gdb2.dbRewind()
+         do 
+            pData = gdb2.dbGetNext
+            if pData = 0 THEN exit do
+            if pData->deleted then continue do
+            if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
+            select case pData->id 
+               case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
+                  if wszFilename = ucase(pData->fileName) THEN
+                     wszNodeName = pData->ElementName
+                     select case pData->GetSet 
+                        case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"
+                        case ClassProperty.Setter: wszNodeName = wszNodeName & " (set)"
+                        case ClassProperty.ctor:   wszNodeName = wszNodeName & " (ctor)"
+                        case ClassProperty.dtor:   wszNodeName = wszNodeName & " (dtor)"
+                     end select      
+                     ub = ubound(arrFuncs) + 1
+                     redim preserve arrFuncs(ub)
+                     arrFuncs(ub).wszFunctionName = wszNodeName
+                     arrFuncs(ub).nLineNumber = pData->nLineNum
+                  end if
+            end select
+         loop      
+         
+         quickSortFuncs( arrFuncs(), lbound(arrFuncs), ubound(arrFuncs) )
+
+         for ii as long = lbound(arrFuncs) to ubound(arrFuncs)
+            wszText = wstr(arrFuncs(ii).nLineNumber) & _
+                      "%" & ltrim(arrFuncs(ii).wszFunctionName)
+            idx = Listbox_AddString( hList, @wszText )
+            ListBox_SetItemData( hList, idx, pDocs(i) )
+            pDocs(i)->bHasFunctions = true
+         next 
+         erase arrFuncs  
       end if
 
-      ' Add the header description to the listbox
-      p = Listbox_AddString( hList, @wszText )
-
-      ' Check to see if these types of files should be loaded into the listbox.
-      if gConfig.Cat(ii).bShow = false then continue for
-      
-      Treeview_SortChildren( hTree, gConfig.Cat(ii).hNodeExplorer, 0 )
-      hParent = Treeview_GetChild( hTree, gConfig.Cat(ii).hNodeExplorer)
-      do until hParent = 0 
-         ' Filename
-         Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
-         dim as clsDocument ptr pDoc = cast(clsDocument ptr, TreeView_GetlParam(hTree, hParent))
-         p = Listbox_AddString( hList, @wszText )
-         ' pDoc item is stored in ListBox ItemData
-         ListBox_SetItemData( hList, p, pDoc )    
-         if pDoc then pDoc->hNodeExplorer = hParent
-         if pDocActive then 
-            if hParent = pDocActive->hNodeExplorer then idxRestore = p
-         end if
-         ' Get the next filename
-         hParent = Treeview_GetNextSibling(hTree, hParent)
-      loop 
-   
-   next
+   next      
 
    ' Restore the top index so the list displays like it did before being reset
    SendMessage( hList, LB_SETTOPINDEX, nTopIndex, 0 ) 
 
    ' Ensure that Listbox is now properly sized and then show 
-   ' the listbox now that it is fully populated
-   ShowWindow( hList, SW_SHOW )
+   ' the listbox now that it is fully populated (only if it contains any
+   ' items because zero items can produce white background).
+   if ListBox_GetCount( hList ) then ShowWindow( hList, SW_SHOW )
    frmFunctions_PositionWindows()
 
-   ' Set current selection to the item that was selected  prior
-   ' to us reloading the listbox
-   if idxRestore <> -1 then
-      ListBox_SetSel( hList, true, idxRestore )
-   else
-      ' Most likely a header node was collapsed/expanded so attempt to
-      ' reposition to saved caret index
-      if idxCaret <> -1 then
-         ListBox_SetCaretIndex( hList, idxCaret )
-         ListBox_SetAnchorIndex( hList, idxCaret )
-         ListBox_SetSel( hList, true, idxCaret )
-      end if   
-   end if
-   AfxRedrawWindow(hList)
+   AfxRedrawWindow( hList )
 
    ' Determine if the VScroll bar has changed size or is now hidden/shown
    frmPanelVScroll_PositionWindows( SW_HIDE )
@@ -732,4 +702,115 @@ function LoadFunctionsFiles() as long
    function = 0
 end function
 
+
+' ========================================================================================
+' LoadFunctionsOnly
+' This will clear the current list of files in the listbox and repopulate it.
+' ========================================================================================
+function LoadFunctionsOnly() as long
+   dim as HWND hList = GetDlgItem(HWND_FRMFUNCTIONS, IDC_FRMFUNCTIONS_LISTBOX)
+    
+   ' Hide the listbox while it is loading so that we don't get the unpainted
+   ' white background from the empty listbox
+   ShowWindow( hList, SW_HIDE )
    
+   ' Save the topindex because we will restore it after filling the new contents 
+   dim as long nTopIndex = SendMessage( hList, LB_GETTOPINDEX, 0, 0 ) 
+
+   ' Clear all content from the listbox
+   ListBox_ResetContent(hList)
+   
+   dim wszText as wstring * MAX_PATH
+
+   dim pData as DB2_DATA ptr
+   dim as CWSTR wszNodeName
+   dim as long ub, idx
+    
+   ' 231%FunctionName  ' function starts at line 231 of the file
+
+   ' Get the functions (and sort them) 
+   redim arrFuncs(any) as FUNCTION_NODE_TYPE
+   
+   gdb2.dbRewind()
+   do 
+      pData = gdb2.dbGetNext
+      if pData = 0 THEN exit do
+      if pData->deleted then continue do
+      if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
+      select case pData->id 
+         case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
+            wszNodeName = pData->ElementName
+            select case pData->GetSet 
+               case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"
+               case ClassProperty.Setter: wszNodeName = wszNodeName & " (set)"
+               case ClassProperty.ctor:   wszNodeName = wszNodeName & " (ctor)"
+               case ClassProperty.dtor:   wszNodeName = wszNodeName & " (dtor)"
+            end select      
+            ub = ubound(arrFuncs) + 1
+            redim preserve arrFuncs(ub)
+            arrFuncs(ub).wszFunctionName = wszNodeName
+            arrFuncs(ub).nLineNumber = pData->nLineNum
+      end select
+   loop      
+         
+   quickSortFuncs( arrFuncs(), lbound(arrFuncs), ubound(arrFuncs) )
+
+   for ii as long = lbound(arrFuncs) to ubound(arrFuncs)
+      wszText = wstr(arrFuncs(ii).nLineNumber) & _
+                "%" & ltrim(arrFuncs(ii).wszFunctionName)
+      idx = Listbox_AddString( hList, @wszText )
+      ListBox_SetItemData( hList, idx, 0 )
+   next 
+   erase arrFuncs  
+
+   ' Restore the top index so the list displays like it did before being reset
+   SendMessage( hList, LB_SETTOPINDEX, nTopIndex, 0 ) 
+
+   ' Ensure that Listbox is now properly sized and then show 
+   ' the listbox now that it is fully populated (only if it contains any
+   ' items because zero items can produce white background).
+   if ListBox_GetCount( hList ) then ShowWindow( hList, SW_SHOW )
+   frmFunctions_PositionWindows()
+
+   AfxRedrawWindow( hList )
+
+   ' Determine if the VScroll bar has changed size or is now hidden/shown
+   frmPanelVScroll_PositionWindows( SW_HIDE )
+
+   function = 0
+end function
+
+' ========================================================================================
+' LoadFunctionsFiles
+' This will clear the current list of files in the listbox and repopulate it.
+' ========================================================================================
+function LoadFunctionsFiles() as long
+   ' Call the specific function to load the listbox based on whether we want to
+   ' to show Files & Functions, or just Functions only.
+   if gFunctionsDisplay = FunctionsDisplayState.ViewAsTree then
+      LoadFilesAndFunctions()   
+   elseif gFunctionsDisplay = FunctionsDisplayState.ViewAsList then
+      LoadFunctionsOnly()   
+   end if
+   function = 0
+end function
+
+' ========================================================================================
+' frmFunctions_ViewAsTree / frmFunctions_ViewAsList
+' Set the global view state for the list and then reload the list.
+' ========================================================================================
+function frmFunctions_ViewAsTree() as long
+   if gFunctionsDisplay = FunctionsDisplayState.ViewAsTree then exit function
+   gFunctionsDisplay = FunctionsDisplayState.ViewAsTree 
+   LoadFunctionsFiles()
+   function = 0
+end function
+
+function frmFunctions_ViewAsList() as long
+   if gFunctionsDisplay = FunctionsDisplayState.ViewAsList then exit function
+   gFunctionsDisplay = FunctionsDisplayState.ViewAsList
+   LoadFunctionsFiles()
+   function = 0
+end function
+
+

@@ -55,9 +55,6 @@ end function
 ' View FunctionList, Explorer, Output, Bookmarks windows
 ' ========================================================================================
 function OnCommand_ViewFunctionList() as LRESULT
-' TODO: Remove legacy FunctionList call
-   if gApp.GetDocumentCount then ShowFunctionList()
-   
    ' If FunctionList is already visible and active then toggle it closed
    if IsWindowVisible(HWND_FRMFUNCTIONS) andalso (gPanel.hActiveChild = HWND_FRMFUNCTIONS) then
       ShowWindow( HWND_FRMPANEL, SW_HIDE )

@@ -154,6 +154,8 @@ Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
       
       ' Highlight the selected tab file in the Explorer listbox
       frmExplorer_SelectItemData( this.tabs(idx).pDoc )
+      ' Highlight the selected tab file in the Function List listbox
+      frmFunctions_SelectItemData( this.tabs(idx).pDoc )
    end if
 
    function = this.CurSel
@@ -274,11 +276,6 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
       If wszText <> this.tabs(idx).wszText Then
          this.tabs(idx).wszText = wszText
          frmTopTabs_PositionWindows()
-         ' Also update the hidden FunctionList node's filename
-         if pDoc->hNodeExplorer then
-            Dim As Hwnd hTree = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TREE)
-            TreeView_SetItemText( hTree, pDoc->hNodeExplorer, @wszText )
-         end if   
       End If
    End If
    

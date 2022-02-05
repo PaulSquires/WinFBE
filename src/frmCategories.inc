@@ -87,7 +87,7 @@ function frmCategories_LoadBuildListBox( byval hParent as hwnd ) as Long
    idx = ListBox_AddString( hList1, wszText.sptr )
    ListBox_SetItemData( hList1, idx, -1 )
    for i as long = lbound(gConfig.CatTemp) to ubound(gConfig.CatTemp)
-      if left(gConfig.CatTemp(i).id, 1) <> "{" then
+      if left(gConfig.CatTemp(i).idFileType, 1) <> "{" then
          idx = ListBox_AddString( hList1, gConfig.CatTemp(i).wszDescription.sptr )
          ListBox_SetItemData( hList1, idx, -1 )
       end if
@@ -98,7 +98,7 @@ function frmCategories_LoadBuildListBox( byval hParent as hwnd ) as Long
    ListBox_SetItemData( hList1, idx, -1 )
    for i as long = lbound(gConfig.CatTemp) to ubound(gConfig.CatTemp)
       ' User defined categories will have an GUID id. Starts with an {
-      if left(gConfig.CatTemp(i).id, 1) = "{" then
+      if left(gConfig.CatTemp(i).idFileType, 1) = "{" then
          idx = ListBox_AddString( hList1, gConfig.CatTemp(i).wszDescription.sptr )
          ListBox_SetItemData( hList1, idx, i )
       end if
@@ -427,7 +427,7 @@ Function frmCategories_OnCommand( _
          if codeNotify = BN_CLICKED THEN
             dim as long ub = ubound(gConfig.CatTemp) + 1
             redim preserve gConfig.CatTemp(ub)
-            gConfig.CatTemp(ub).Id = AfxGuidText(AfxGuid())
+            gConfig.CatTemp(ub).idFileType = AfxGuidText(AfxGuid())
             gConfig.CatTemp(ub).wszDescription = ""
             ' reload the listbox
             frmCategories_LoadBuildListBox(HWND)

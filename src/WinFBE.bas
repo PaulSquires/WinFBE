@@ -129,7 +129,6 @@ dim shared gLasso   as clsLasso
 #include once "frmOptionsKeywordsWinApi.inc"
 #include once "frmOptions.inc"
 #include once "frmTemplates.inc"
-#include once "frmFunctionList.inc"
 #include once "frmGoto.inc"
 #include once "frmCommandLine.inc"
 #include once "frmFindInFiles.inc"

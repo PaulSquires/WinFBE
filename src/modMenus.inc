@@ -356,7 +356,7 @@ Function AddProjectFileTypesToMenu( _
       AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(439,"User Defined Categories")
       for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
          ' User defined categories will have an GUID id. Starts with an {
-         if left(gConfig.Cat(i).id, 1) = "{" then
+         if left(gConfig.Cat(i).idFileType, 1) = "{" then
             AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_SETCATEGORY + i, gConfig.Cat(i).wszDescription
          end if
       next
@@ -617,6 +617,22 @@ End Function
 
 ''
 ''
+Function CreateFunctionsActionButtonContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   dim as CWSTR wszCaption
+   
+   hPopUpMenu = CreatePopupMenu
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONS_EXPANDALL, L(441,"Expand All") 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONS_COLLAPSEALL, L(442,"Collapse All") 
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONS_VIEWASTREE, L(445,"View as Tree") 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONS_VIEWASLIST, L(446,"View as List") 
+
+   Function = hPopupMenu
+End Function
+
+''
+''
 Function CreateBookmarksActionButtonContextMenu() As HMENU
    Dim hPopUpMenu As HMENU
    dim as CWSTR wszCaption
@@ -630,6 +646,29 @@ Function CreateBookmarksActionButtonContextMenu() As HMENU
    Function = hPopupMenu
 End Function
 
+''
+''
+Function CreateBookmarksHeaderNodeContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   dim as CWSTR wszCaption
+   
+   hPopUpMenu = CreatePopupMenu
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_CLEARALLBOOKMARKNODE, L(53,"Clear Bookmarks") 
+
+   Function = hPopupMenu
+End Function
+
+''
+''
+Function CreateBookmarksBookmarkNodeContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   dim as CWSTR wszCaption
+   
+   hPopUpMenu = CreatePopupMenu
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_REMOVEBOOKMARKNODE, L(444,"Remove Bookmark") 
+
+   Function = hPopupMenu
+End Function
 
 ''
 ''

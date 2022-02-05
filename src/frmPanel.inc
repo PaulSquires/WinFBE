@@ -45,6 +45,11 @@ function frmPanel_PositionWindows() as LRESULT
    gPanelButton(0).rc.bottom = gPanelButton(1).rc.top 
    gPanelButton(0).rc.top = gPanelButton(1).rc.top - pWindow->ScaleY(TOPTABS_HEIGHT)
 
+   if gApp.GetDocumentCount = 0 then
+      SetRectEmpty( @gPanelButton(0).rc )
+      SetRectEmpty( @gPanelButton(1).rc )
+   end if
+
    ' show/hide of the child window is done separately in order to prevent blank client area from 
    ' painting before the lists are loaded. Allow a 2 pixel right border between listbox and
    ' form edge in order to allow for panel resizing. 
@@ -355,6 +360,8 @@ function frmPanel_WndProc( _
          select case gPanel.hActiveChild
             case HWND_FRMEXPLORER
                hPopupMenu = CreateExplorerActionButtonContextMenu()
+            case HWND_FRMFUNCTIONS
+               hPopupMenu = CreateFunctionsActionButtonContextMenu()
             case HWND_FRMBOOKMARKS
                hPopupMenu = CreateBookmarksActionButtonContextMenu()
          end select

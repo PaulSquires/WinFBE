@@ -103,7 +103,6 @@ end function
 ' ========================================================================================
 function DisableAllModeless() as long
    ' No need to enable/disable the modeless Help form.
-   if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, false)
    if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, false)
    if IsWindowVisible(HWND_FRMVDTOOLBOX)    then EnableWindow(HWND_FRMVDTOOLBOX, false)
    EnableWindow(HWND_FRMMAIN, false)
@@ -116,7 +115,6 @@ end function
 ' ========================================================================================
 function EnableAllModeless() as long
    ' No need to enable/disable the modeless Help form.
-   if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, true)
    if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, true)
    if IsWindowVisible(HWND_FRMVDTOOLBOX)    then EnableWindow(HWND_FRMVDTOOLBOX, true)
    EnableWindow(HWND_FRMMAIN, true)
@@ -648,8 +646,14 @@ function OpenSelectedDocument( _
       ' If this was a previously saved project/session file that may have had an active
       ' Scintilla at one point then bookmarks/foldpoints may have existed. Now that the
       ' document is finally being opened then we can try to restore those states.
-      pDoc->SetBookmarks(pDoc->wszOnLoadBookmarks)
       pDoc->SetFoldPoints(pDoc->wszOnLoadFoldPoints)
+      dim as string sBookmarks
+      for ii as long = lbound(pDoc->wszOnLoadBookmarks) to ubound(pDoc->wszOnLoadBookmarks)
+         sBookmarks = sBookmarks & AfxStrParse(pDoc->wszOnLoadBookmarks(ii), 1, "|") & ","
+      next
+      sBookmarks = trim(sBookmarks, ",")
+      erase pDoc->wszOnLoadBookmarks    ' we no longer require this array
+      pDoc->SetBookmarks(sBookmarks)
 
       ' Do not reposition if incoming LineNumber is -1 because that value represents
       ' the caller specifically not wanting a repositioning.

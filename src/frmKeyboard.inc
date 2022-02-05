@@ -169,6 +169,8 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
    frmKeyBoard_AddKeyBinding( "View", IDM_VIEWTODO, "IDM_VIEWTODO", "List of TODO's for this file or project", "", "" )
    frmKeyBoard_AddKeyBinding( "View", IDM_EXPLORER_EXPANDALL, "IDM_EXPLORER_EXPANDALL", "Expand all nodes in the Explorer window", "", "" )
    frmKeyBoard_AddKeyBinding( "View", IDM_EXPLORER_COLLAPSEALL, "IDM_EXPLORER_COLLAPSEALL", "Collapse all nodes in the Explorer window", "", "" )
+   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONS_EXPANDALL, "IDM_FUNCTIONS_EXPANDALL", "Expand all nodes in the Function List window", "", "" )
+   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONS_COLLAPSEALL, "IDM_FUNCTIONS_COLLAPSEALL", "Collapse all nodes in the Function List window", "", "" )
    frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_EXPANDALL, "IDM_BOOKMARKS_EXPANDALL", "Expand all nodes in the Bookmarks window", "", "" )
    frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_COLLAPSEALL, "IDM_BOOKMARKS_COLLAPSEALL", "Collapse all nodes in the Bookmarks window", "", "" )
 

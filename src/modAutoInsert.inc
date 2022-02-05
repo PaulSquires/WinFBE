@@ -18,7 +18,7 @@
 ''
 
 #include once "modAutoInsert.bi"
-#include once "frmFunctionList.bi"
+#include once "frmFunctions.bi"
 
 
 ' ========================================================================================
@@ -356,7 +356,7 @@ public function AttemptAutoInsert() as Long
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
-      frmFunctionList_ReparseFiles()
+      frmFunctions_ReparseFiles()
       exit function
    end if
 
@@ -372,7 +372,7 @@ public function AttemptAutoInsert() as Long
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
-      frmFunctionList_ReparseFiles()
+      frmFunctions_ReparseFiles()
       exit function
    end if
 
