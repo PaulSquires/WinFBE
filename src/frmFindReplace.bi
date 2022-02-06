@@ -16,6 +16,6 @@
 #Define IDC_FRMFINDREPLACE_TXTFIND                  1000
 #Define IDC_FRMFINDREPLACE_TXTREPLACE               1001
 
-declare function frmFindReplace_HighlightSearches() as long
+declare function frmFindReplace_HighlightSearches( byval bRepositionCaret as boolean ) as long
 declare Function frmFindReplace_PositionWindows() As LRESULT
 declare Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BOOLEAN ) As LRESULT

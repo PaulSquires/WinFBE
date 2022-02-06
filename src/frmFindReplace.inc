@@ -38,7 +38,7 @@ end function
 ' ========================================================================================
 ' frmFindReplace_PositionWindows
 ' ========================================================================================
-public function frmFindReplace_PositionWindows() as LRESULT
+function frmFindReplace_PositionWindows() as LRESULT
 
    ' make sure that the shadows under the top tabs are showing and if the main form
    ' has moved, that the shadows move with it. 
@@ -169,9 +169,10 @@ end function
 ' ========================================================================================
 ' Find next/prev selection based on current document position
 ' ========================================================================================
-private function frmFindReplace_NextSelection( _
+function frmFindReplace_NextSelection( _
       byval StartPos as long, _
-      byval bGetnext as boolean _
+      byval bGetnext as boolean, _
+      byval bRepositionCaret as boolean _
       ) as boolean
 
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -227,9 +228,11 @@ private function frmFindReplace_NextSelection( _
    ' Highlight the selection
    if gFind.foundCount > 0 then
       ' make sure target line is unfolded
-      dim as long currentLine = SciExec( hEdit, SCI_LINEFROMPOSITION, iPositions(mainIdx), 0)
-      SciExec( hEdit, SCI_ENSUREVISIBLE, currentLine, 0) 
-      SciExec( hEdit, SCI_SETSEL, iPositions(mainIdx), iPositions(mainIdx) + lenFind)
+      if bRepositionCaret then
+         dim as long currentLine = SciExec( hEdit, SCI_LINEFROMPOSITION, iPositions(mainIdx), 0)
+         SciExec( hEdit, SCI_ENSUREVISIBLE, currentLine, 0) 
+         SciExec( hEdit, SCI_SETSEL, iPositions(mainIdx), iPositions(mainIdx) + lenFind)
+      end if
       gFind.wszResults = mainIdx & " of " & gFind.foundCount
       return true
    else
@@ -243,7 +246,7 @@ end function
 ' ========================================================================================
 ' Replace current selection or all selections
 ' ========================================================================================
-private function frmFindReplace_DoReplace( _
+function frmFindReplace_DoReplace( _
       byval fReplaceAll as boolean = false, _
       byval fMovenext as boolean = true _
       ) as long
@@ -321,7 +324,7 @@ private function frmFindReplace_DoReplace( _
       ' phrase that we want to replace. if not, then move to the closest selection.
       if ucase(pDoc->GetSelText) <> ucase(txtFind) then
          startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-         frmFindReplace_nextSelection(startPos, fMovenext)
+         frmFindReplace_NextSelection(startPos, fMoveNext, true)
          exit function
       end if
       SciExec( hEdit, SCI_TARGETFROMSELECTION, 0, 0)
@@ -343,7 +346,7 @@ private function frmFindReplace_DoReplace( _
          SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
          startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + len(txtReplace)
       end if
-      frmFindReplace_nextSelection(startPos, fMovenext)
+      frmFindReplace_NextSelection(startPos, fMoveNext, true)
    end if
       
    ' Need to reparse because some of the function names may been replaced
@@ -358,7 +361,7 @@ end function
 ' ========================================================================================
 ' Highlight the found selections
 ' ========================================================================================
-public function frmFindReplace_HighlightSearches() as long
+function frmFindReplace_HighlightSearches( byval bRepositionCaret as boolean ) as long
 
    dim as long r, startPos, endPos, findFlags, nLength
    dim as hwnd hWndFind = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
@@ -416,7 +419,7 @@ public function frmFindReplace_HighlightSearches() as long
    end if
 
    startPos = iif(startPos < 0, 0, startPos)
-   frmFindReplace_nextSelection(startPos, true)
+   frmFindReplace_NextSelection(startPos, true, bRepositionCaret)
    
    function = 0
 
@@ -426,7 +429,7 @@ end function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmFindReplace
 ' ========================================================================================
-private function frmFindReplace_OnCommand( _
+function frmFindReplace_OnCommand( _
       byval HWnd as HWnd, _
       byval id as Long, _
       byval hwndCtl as HWnd, _
@@ -443,7 +446,7 @@ private function frmFindReplace_OnCommand( _
       case IDC_FRMFINDREPLACE_TXTFIND
          if (codeNotify = EN_CHANGE) then
             gFind.txtFind = AfxGetWindowText(hwndCtl)
-            frmFindReplace_HighlightSearches
+            frmFindReplace_HighlightSearches( true )
             AfxRedrawWindow( hWnd )
          elseif (codeNotify = EN_SETFOCUS) then
             AfxRedrawWindow( hWnd )
@@ -463,7 +466,7 @@ end function
 ' ========================================================================================
 ' Process WM_PAINT message for window/dialog: frmFindReplace
 ' ========================================================================================
-private function frmFindReplace_OnPaint( byval HWnd as HWND) as LRESULT
+function frmFindReplace_OnPaint( byval HWnd as HWND) as LRESULT
             
    dim as PAINTSTRUCT ps
    dim as HPEN hPen
@@ -733,7 +736,7 @@ end function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmFindReplace
 ' ========================================================================================
-private function frmFindReplace_OnClose( byval HWnd as HWnd ) as LRESULT
+function frmFindReplace_OnClose( byval HWnd as HWnd ) as LRESULT
    DestroyWindow HWnd
    function = 0
 end function
@@ -742,7 +745,7 @@ end function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmFindReplace
 ' ========================================================================================
-private function frmFindReplace_OnDestroy( byval HWnd as HWnd ) as LRESULT 
+function frmFindReplace_OnDestroy( byval HWnd as HWnd ) as LRESULT 
     
    ' Remove selected attributes (Attribute #8). We need to remove it from all
    ' open documents because the user may have tabbed between documents while
@@ -771,7 +774,7 @@ end function
 ' ========================================================================================
 ' frmFindReplaceShadow_WndProc Window procedure
 ' ========================================================================================
-private function frmFindReplaceShadow_WndProc( _
+function frmFindReplaceShadow_WndProc( _
       byval HWnd   as HWnd, _
       byval uMsg   as UINT, _
       byval wParam as WPARAM, _
@@ -794,7 +797,7 @@ end function
 ' ========================================================================================
 ' frmFindReplace Window procedure
 ' ========================================================================================
-private function frmFindReplace_WndProc( _
+function frmFindReplace_WndProc( _
       byval HWnd   as HWnd, _
       byval uMsg   as UINT, _
       byval wParam as WPARAM, _
@@ -877,12 +880,12 @@ private function frmFindReplace_WndProc( _
 
       elseif isMouseOverRECT( HWnd, gFind.rcMatchCase ) then
          gFind.nMatchCase = not gFind.nMatchCase
-         frmFindReplace_HighlightSearches
+         frmFindReplace_HighlightSearches( true )
          AfxRedrawWindow(HWnd)
 
       elseif isMouseOverRECT( HWnd, gFind.rcWholeWord ) then
          gFind.nWholeWord = not gFind.nWholeWord
-         frmFindReplace_HighlightSearches
+         frmFindReplace_HighlightSearches( true )
          AfxRedrawWindow(HWnd)
 
       elseif isMouseOverRECT( HWnd, gFind.rcUpArrow ) then
@@ -903,7 +906,7 @@ private function frmFindReplace_WndProc( _
          else   
             pDoc->RemoveMarkerHighlight
          end if
-         frmFindReplace_HighlightSearches
+         frmFindReplace_HighlightSearches( true )
          AfxRedrawWindow(HWnd)
 
       elseif isMouseOverRECT( HWnd, gFind.rcPreserve ) then
@@ -1003,7 +1006,7 @@ end function
 ' ========================================================================================
 ' frmFindReplace_Show
 ' ========================================================================================
-public function frmFindReplace_Show( _
+function frmFindReplace_Show( _
       byval hWndParent as HWnd, _
       byval fShowReplace as BOOLEAN _
       ) as LRESULT
@@ -1102,7 +1105,7 @@ public function frmFindReplace_Show( _
       hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND )
    end if   
 
-   frmFindReplace_HighlightSearches
+   frmFindReplace_HighlightSearches( true )
    if len(AfxGetWindowText(hCtl)) then Edit_SetSel(hCtl, 0, -1)
 
    SetFocus hCtl 

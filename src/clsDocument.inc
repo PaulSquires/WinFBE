@@ -1477,11 +1477,11 @@ end function
 function clsDocument.ToggleBookmark( byval nLine as long ) as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    dim fMark as long  ' must be a 32 bit value
-   fMark = SciMsg( pSci, SCI_MARKERGET, nLine, 0) 
+   fMark = SciMsg( pSci, SCI_MARKERGET, nLine, 0 ) 
    if bit(fMark, 0) = -1 then
-      SciMsg( pSci, SCI_MARKERDELETE, nLine, 0)
+      SciMsg( pSci, SCI_MARKERDELETE, nLine, 0 )
    else
-      SciMsg( pSci, SCI_MARKERADD, nLine, 0)
+      SciMsg( pSci, SCI_MARKERADD, nLine, 0 )
    end if
    function = 0
 end function
@@ -1828,7 +1828,7 @@ function clsDocument.ApplyProperties() as long
          SciMsg( m_pSci(i), SCI_SETUSETABS, Ctrue, 0 )
       end if
 
-
+        
       ''
       ''  SELECTIONS FILL ENTIRE SCREEN SPACE
       SciMsg( m_pSci(i), SCI_SETSELEOLFILLED, Ctrue, 0 )

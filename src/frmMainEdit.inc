@@ -366,7 +366,7 @@ function OnCommand_EditFindActions( _
          if (GetForeGroundWindow = HWND_FRMFINDREPLACE) then
             if gFind.foundCount = 0 then exit function
             dim as long startPos = SendMessage( hEdit, SCI_GETANCHOR, 0, 0) 
-            if frmFindReplace_NextSelection(startPos, false) then pDoc->CenterCurrentLine
+            if frmFindReplace_NextSelection(startPos, false, true) then pDoc->CenterCurrentLine
             AfxRedrawWindow( HWND_FRMFINDREPLACE )
          end if
 
@@ -374,7 +374,7 @@ function OnCommand_EditFindActions( _
          if (GetForeGroundWindow = HWND_FRMFINDREPLACE) then
             if gFind.foundCount = 0 then exit function
             dim as long startPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-            if frmFindReplace_NextSelection(startPos, true) then pDoc->CenterCurrentLine
+            if frmFindReplace_NextSelection(startPos, true, true) then pDoc->CenterCurrentLine
             AfxRedrawWindow( HWND_FRMFINDREPLACE )
          end if
 
@@ -455,7 +455,7 @@ function OnCommand_EditReplaceActions( _
             elseif id = IDM_REPLACEALL then 
                frmFindReplace_DoReplace( true, true )
             end if   
-            frmFindReplace_HighlightSearches
+            frmFindReplace_HighlightSearches( true )
             pDoc->CenterCurrentLine
             AfxRedrawWindow( HWND_FRMFINDREPLACE )
          end if

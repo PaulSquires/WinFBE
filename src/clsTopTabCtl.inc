@@ -145,12 +145,12 @@ Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
       this.CurSel = idx
       SendMessage( HWND_FRMMAIN, MSG_USER_TOPTABS_CHANGED, 0, 0 )
       
-      ' V3.0.0 Disable the highlighting of searches when a user switches tabs. Report
+      ' V3.0.0 Disable the highlighting of searches when a user switches tabs? Report
       ' from user that such action disrupts the user's train of thought because the spot
       ' is lost within the file. Other users may feel differently?
-      'if IsWindowVisible(HWND_FRMFINDREPLACE) then
-      '   frmFindReplace_HighlightSearches
-      'end if
+      if IsWindowVisible(HWND_FRMFINDREPLACE) then
+         frmFindReplace_HighlightSearches( false )
+      end if
       
       ' Highlight the selected tab file in the Explorer listbox
       frmExplorer_SelectItemData( this.tabs(idx).pDoc )
