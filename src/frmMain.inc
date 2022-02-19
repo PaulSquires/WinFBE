@@ -83,12 +83,13 @@ function frmMain_SetStatusbar() as long
          if endPos - startPos then  ' there is selected text
             wszText = wszText + " (" + str(endPos - startPos) + " selected)"
          end if 
-         pDoc->ScrInfo.nMax = SciExec(hEdit, SCI_GETLINECOUNT, 0, 0) - 1    
-         pDoc->ScrInfo.nPos = SciExec(hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
-         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, true) 
 
          ' Should we display the "shadow" under the tabcontrol
          frmTopTabs_ShowShadow()
+
+         ' Update the vertical scrollbar
+         frmEditorVScroll_calcVThumbRect(pDoc)
+         AfxRedrawWindow( iif( hEdit = pDoc->hWindow(0), HWND_FRMEDITOR_VSCROLLBAR(0), HWND_FRMEDITOR_VSCROLLBAR(1)) )
 
       end if
       ' PANEL (2) Line/Col/Sel -or- VD coordinates
@@ -249,7 +250,7 @@ function frmMain_HighlightWord( _
    '// so we'll use indicator 10 to highlight words.
    dim as long NUM = 10
 
-   '// Remove all uses of our indicator
+   '// Remove all uses of our Occurrence indicator
    dim as long nLength = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
    SciMsg( pSci, SCI_SETINDICATORCURRENT, 10, 0)
    SciMsg( pSci, SCI_INDICATORCLEARRANGE, 0, nLength)
@@ -258,9 +259,7 @@ function frmMain_HighlightWord( _
 
    '// Update indicator appearance
    SciMsg( pSci, SCI_INDICSETSTYLE, NUM, INDIC_STRAIGHTBOX )
-   dim pTheme as THEME_TYPE ptr = getThemePtr("editor.occurrence")
-   SciMsg( pSci, SCI_INDICSETFORE, NUM, pTheme->foreground) 
-   SciMsg( pSci, SCI_INDICSETOUTLINEALPHA, NUM, 50 )
+   SciMsg( pSci, SCI_INDICSETFORE, NUM, ghEditor.ForeColorOccurrence ) 
    SciMsg( pSci, SCI_INDICSETALPHA, NUM, 80 )   
 
    '// Search the document
@@ -429,26 +428,11 @@ function Scintilla_OnNotify( _
          
       case SCN_UPDATEUI    
          if gApp.SuppressNotify then return true
-         pDoc = gTTabCtl.GetActiveDocumentPtr()
+         pDoc = gApp.GetDocumentPtrByWindow( pNSC->hdr.hwndFrom )
          if pDoc then 
             if pDoc->IsValidScintillaID( pNSC->hdr.idFrom ) then
-               ' This code will position our substitute scrollbar thumbs only when the 
-               ' caret position crosses a page boundry via keyboard input
-               if pNSC->updated and SC_UPDATE_SELECTION then 'And pNSC->updated > SC_UPDATE_SELECTION then
-                  pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
-                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, true)
-               end if
-
-               select case pNSC->updated
-               case SC_UPDATE_V_SCROLL
-                  ' if there's only a V scroll update w/no selection update, then mousewheel was used - adj thumb pos.
-                  ' Scintilla eats the WM_VSCROLL msg from a mousewheel so we never get one to process. We do it here.
-                  pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
-                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, true)
-               end select 
                frmMain_SetStatusbar
- 
-                              
+                               
                '// Has the caret changed position
                var caretPos = SciExec( pDoc->hWndActiveScintilla, SCI_GETCURRENTPOS, 0, 0)
 
@@ -464,7 +448,6 @@ function Scintilla_OnNotify( _
                      end if
                   end if
                   
-                  
                   if gConfig.BraceHighlight then
                      var bracePos1 = -1
                      var bracePos2 = -1
@@ -477,22 +460,17 @@ function Scintilla_OnNotify( _
                      end if
                      
                      if bracePos1 >= 0 then
-                        dim pTheme as THEME_TYPE ptr 
                         '// Find the matching brace
                         bracePos2 = SciExec( pDoc->hWndActiveScintilla, SCI_BRACEMATCH, bracePos1, 0)
                         if bracePos2 = -1 then
-                           pTheme = getThemePtr("editor.bracebad")
-                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->foreground )
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, ghEditor.ForeColorBracebad )
                            SciExec( pDoc->hWndActiveScintilla, SCI_BRACEBADLIGHT, bracePos1, 0 )
                         else
-                           pTheme = getThemePtr("editor.bracegood")
-                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->foreground )
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, ghEditor.ForeColorBracegood )
                            SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, bracePos1, bracePos2 )
                         end if
-                        'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 255 ) ' transparency of outline
-                        'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 127 )        ' transparency of interior      
-                        SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 50 ) ' transparency of outline
-                        SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 30 )        ' transparency of interior      
+                        SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 127 ) ' transparency of outline
+                        SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 127 )        ' transparency of interior      
                      else
                         '// Turn off brace matching
                         SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, -1, -1 )
@@ -724,21 +702,21 @@ function frmMain_OnPaint( byval HWnd as HWnd ) as LRESULT
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    if pDoc then
       ' Get location of vertical scrollbar and draw splitter button right above it.
-      if IsWindowVisible(pDoc->hScrollbar) then
-         GetWindowRect(pDoc->hScrollbar, @rc)
-         rc.top = rc.top - SPLITSIZE: rc.bottom = rc.top + SPLITSIZE
-         MapWindowPoints(0, HWND_FRMMAIN, cast(POINT ptr, @rc), 2)
-         pDoc->rcSplitButton = rc
-         if IsWindowVisible(pDoc->hWindow(1)) then 
-            ' if the window is visible then we need to extend the splitter hit
-            ' area to include all the way to left edge of the client area.
-            if IsWindowVisible(HWND_FRMPANEL) then 
-               rc.left = AfxGetWindowWidth( HWND_FRMPANEL )
-               pDoc->rcSplitButton.left = rc.left
-            end if   
-         end if
-         DrawFrameControl( hDC, @rc, DFC_BUTTON, DFCS_BUTTONPUSH)
-      end if
+'      if IsWindowVisible(pDoc->hScrollbar) then
+'         GetWindowRect(pDoc->hScrollbar, @rc)
+'         rc.top = rc.top - SPLITSIZE: rc.bottom = rc.top + SPLITSIZE
+'         MapWindowPoints(0, HWND_FRMMAIN, cast(POINT ptr, @rc), 2)
+'         pDoc->rcSplitButton = rc
+'         if IsWindowVisible(pDoc->hWindow(1)) then 
+'            ' if the window is visible then we need to extend the splitter hit
+'            ' area to include all the way to left edge of the client area.
+'            if IsWindowVisible(HWND_FRMPANEL) then 
+'               rc.left = AfxGetWindowWidth( HWND_FRMPANEL )
+'               pDoc->rcSplitButton.left = rc.left
+'            end if   
+'         end if
+'         DrawFrameControl( hDC, @rc, DFC_BUTTON, DFCS_BUTTONPUSH)
+'      end if
 
    end if
    
@@ -828,20 +806,16 @@ function frmMain_PositionWindows() as LRESULT
 
    if pDoc then 
       ' Position the Scintilla child edit windows
-      dim as RECT rcClient
+      dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMMAIN)
+      dim as RECT rcDoc
       ' Reduce the height of the client area by the size of the statusbar and menubar.
-      rcClient.left = nLeft
-      rcClient.top = nTop + nHeightTabControl 
-      rcClient.right = rc.Right - nWidthPanel
-      rcClient.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
+      rcDoc.left = nLeft
+      rcDoc.top = nTop + nHeightTabControl 
+      rcDoc.right = rc.Right
+      rcDoc.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
       
-      dim as long iScrollbarWidth  = GetSystemMetrics(SM_CXVSCROLL)
-      dim as long iScrollbarHeight = GetSystemMetrics(SM_CXHSCROLL)
-      dim as long iWidth = rcClient.right - iScrollbarWidth
-
       dim as long nDesignCodeTabHeight = 0
       if pDoc->IsDesigner then
-         dim pWindow as CWindow ptr = AfxCWindowPtr(pDoc->hWndDesigner)
          nDesignCodeTabHeight = pWindow->ScaleY(24)
       end if
       
@@ -850,8 +824,10 @@ function frmMain_PositionWindows() as LRESULT
       
       if pDoc->IsDesigner then
          SetWindowPos( pDoc->hDesignTabCtrl, 0, _
-                       rcClient.left, rcClient.bottom - nDesignCodeTabHeight, _
-                       rcClient.right, rcClient.bottom - nDesignCodeTabHeight, _
+                       rcDoc.left, _
+                       rcDoc.bottom - nDesignCodeTabHeight, _
+                       rcDoc.right, _
+                       rcDoc.bottom - nDesignCodeTabHeight, _
                        lStyle )
       else   
          ShowWindow( pDoc->hDesignTabCtrl, SW_HIDE )
@@ -861,59 +837,65 @@ function frmMain_PositionWindows() as LRESULT
          ' if the DesignView has been set to show the visual designer rather than the code
          ' window then ensure that DesignMain is shown.
          SetWindowPos( pDoc->hWndDesigner, 0, _
-                       rcClient.left, rcClient.top, _
-                       rcClient.right, rcClient.bottom - rcClient.top - nDesignCodeTabHeight, _
+                       rcDoc.left, rcDoc.top, _
+                       rcDoc.right - rcDoc.left, _
+                       rcDoc.bottom - rcDoc.top - nDesignCodeTabHeight, _
                        lStyle )
 
          ' Display the ToolBox/PropertyList
          frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW )
          DisplayPropertyList( pDoc )
          ShowWindow( HWND_FRMVDTOOLBOX, SW_SHOWNORMAL )
-         
          ShowWindow( pDoc->hWindow(0), SW_HIDE )
          ShowWindow( pDoc->hWindow(1), SW_HIDE )
-         ShowWindow( pDoc->hScrollbar, SW_HIDE )
       else
       
          ShowWindow( pDoc->hWndDesigner, SW_HIDE )
          ShowWindow( HWND_FRMVDTOOLBOX, SW_HIDE )
 
-         rcClient.top = rcClient.top + pWindow->ScaleY(4)
+         rcDoc.top = rcDoc.top + pWindow->ScaleY(4)
+
          dim as long nSplitSize 
-         
-         ' Position top (optional) edit window
-         if pDoc->SplitY - rcClient.top <= 0 then 
+         dim as long iScrollbarWidth = AfxGetWindowWidth(HWND_FRMEDITOR_VSCROLLBAR(0)) 
+
+         ' TOP EDIT WINDOW (optional)
+         if pDoc->SplitY - rcDoc.top <= 0 then 
             ShowWindow( pDoc->hWindow(1), SW_HIDE )      
             nSplitSize = 0              
          Else
             SetWindowPos( pDoc->hWindow(1), 0, _
-                          rcClient.left, rcClient.top, _
-                          rcClient.right, pDoc->SplitY - rcClient.top, _ 
+                          rcDoc.left, rcDoc.top, _
+                          rcDoc.right - rcDoc.left, _
+                          pDoc->SplitY - rcDoc.top, _ 
                           lStyle )
-            nSplitSize = SPLITSIZE              
+            nSplitSize = SPLITSIZE 
+            pDoc->origPosition(1) = AfxGetWindowRect(pDoc->hWindow(1))             
          end if
          
-         dim as long nTop = Max( rcClient.top, pDoc->SplitY )
+         ' BOTTOM (MAIN) EDIT WINDOW
+         dim as long nTop = Max( rcDoc.top, pDoc->SplitY )
 
-         ' Position main edit window
          SetWindowPos( pDoc->hWindow(0), 0, _
-                       rcClient.left, nTop + nSplitSize, _
-                       iWidth, rcClient.bottom - nTop - nSplitSize - nDesignCodeTabHeight, _
+                       rcDoc.left, nTop + nSplitSize, _
+                       rcDoc.right - rcDoc.left - iScrollbarWidth, _
+                       rcDoc.bottom - nTop - nSplitSize - nDesignCodeTabHeight, _
                        lStyle )
+         pDoc->origPosition(0) = AfxGetWindowRect(pDoc->hWindow(0))             
 
          ' Position the main view vertical scroll bar
-         SetWindowPos( pDoc->hScrollbar, 0, _ 
-                       rcClient.left + iWidth, _
-                       nTop + SPLITSIZE, _
-                       iScrollbarWidth, _
-                       rcClient.bottom - SPLITSIZE - nTop  - nDesignCodeTabHeight, _ 
-                       lStyle )
-
-         ' Update vertical scroll bar page value
-         pDoc->ScrInfo.nPage = SciExec( pDoc->hWindow(0), SCI_LINESONSCREEN, 0, 0 )
-         pDoc->ScrInfo.nMax  = SciExec( pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0 ) - 1    
-         pDoc->ScrInfo.nPos  = SciExec( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0 )
-         SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, true )
+         ' Determine if the VScrollBar should be displayed
+         if pDoc->GetLineCount > pDoc->LinesPerPage(0) then
+            SetWindowPos( HWND_FRMEDITOR_VSCROLLBAR(0), 0, _ 
+                          rcDoc.right - iScrollbarWidth, nTop + SPLITSIZE, _
+                          iScrollbarWidth, _
+                          rcDoc.bottom - nTop - SPLITSIZE - nDesignCodeTabHeight, _ 
+                          lStyle )
+         else
+            ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(0), SW_HIDE )
+         end if
+            
+         ' Update editor vertical scrollbars
+         frmEditorVScroll_calcVThumbRect( pDoc )
          
          ' if the FIND/REPLACE window is open then ensure that it is positioned correctly
          ' especially important if the Main window is resized.
@@ -1794,32 +1776,32 @@ function frmMain_WndProc( _
          dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
          if pDoc = 0 then return 0
 
-         dim as long OldPos = pDoc->ScrInfo.nPos
+'         dim as long OldPos = pDoc->ScrInfo.nPos
 
-         select case loword(wParam)
-            case SB_THUMBTRACK
-               GetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo)
-               pDoc->ScrInfo.nPos = pDoc->ScrInfo.nTrackPos
-            case SB_LINEDOWN:   pDoc->ScrInfo.nPos += 1
-            case SB_LINEUP:     pDoc->ScrInfo.nPos -= 1
-            case SB_PAGEDOWN:   pDoc->ScrInfo.nPos += pDoc->ScrInfo.nPage - 1  
-            case SB_PAGEUP:     pDoc->ScrInfo.nPos -= pDoc->ScrInfo.nPage - 1  
-         end select  
+'         select case loword(wParam)
+'            case SB_THUMBTRACK
+'               GetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo)
+'               pDoc->ScrInfo.nPos = pDoc->ScrInfo.nTrackPos
+'            case SB_LINEDOWN:   pDoc->ScrInfo.nPos += 1
+'            case SB_LINEUP:     pDoc->ScrInfo.nPos -= 1
+'            case SB_PAGEDOWN:   pDoc->ScrInfo.nPos += pDoc->ScrInfo.nPage - 1  
+'            case SB_PAGEUP:     pDoc->ScrInfo.nPos -= pDoc->ScrInfo.nPage - 1  
+'         end select  
           
-         ' if the current position hasn't changed, do nothing.
-         if pDoc->ScrInfo.nPos = oldPos then return true
+'         ' if the current position hasn't changed, do nothing.
+'         if pDoc->ScrInfo.nPos = oldPos then return true
 
-         ' Don't exceed range boundries
-         if pDoc->ScrInfo.nPos < pDoc->ScrInfo.nMin then
-            pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMin         
-         end if
-         if pDoc->ScrInfo.nPos > pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1 then
-            pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1        
-         end if
+'         ' Don't exceed range boundries
+'         if pDoc->ScrInfo.nPos < pDoc->ScrInfo.nMin then
+'            pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMin         
+'         end if
+'         if pDoc->ScrInfo.nPos > pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1 then
+'            pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1        
+'         end if
 
-         dim as long lParm = pDoc->ScrInfo.nPos - oldPos        ' Amount/direction to V scroll
-         SciExec(pDoc->hWindow(0), SCI_LINESCROLL, 0, lParm)
-         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, true)
+'         dim as long lParm = pDoc->ScrInfo.nPos - oldPos        ' Amount/direction to V scroll
+'         SciExec(pDoc->hWindow(0), SCI_LINESCROLL, 0, lParm)
+'         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, true)
 
    end select 
 
@@ -1873,7 +1855,9 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
    frmPanel_Show( HWND_FRMMAIN )
    frmPanelVScroll_Show( HWND_FRMMAIN )
    frmOutput_Show( HWND_FRMMAIN )
-
+   frmEditorHScroll_Show( HWND_FRMMAIN )
+   frmEditorVScroll_Show( HWND_FRMMAIN )
+   
    ' Create the UserTools accelerator table
    frmUserTools_CreateAcceleratorTable            
 
@@ -1995,6 +1979,10 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
    pWindow = AfxCWindowPtr( HWND_FRMHELPVIEWER ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMPANEL ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMPANEL_VSCROLLBAR ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEDITOR_HSCROLLBAR(0) ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEDITOR_HSCROLLBAR(1) ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEDITOR_VSCROLLBAR(0) ): delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEDITOR_VSCROLLBAR(1) ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ): delete pWindow
    pWindow = AfxCWindowPtr( HWND_FRMMAIN ): delete pWindow
 

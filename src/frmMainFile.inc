@@ -312,7 +312,6 @@ Function OnCommand_FileClose( _
       for ii as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
          ShowWindow( pDoc->hWindow(ii), SW_HIDE)
       NEXT
-      ShowWindow( pDoc->hScrollBar, SW_HIDE )
       SetRectEmpty( @pDoc->rcSplitButton )
        ' Hide visual designer window
       if pDoc->IsDesigner THEN 

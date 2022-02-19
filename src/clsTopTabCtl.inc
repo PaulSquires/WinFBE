@@ -233,7 +233,6 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
       ' Scintilla windows and scrollbars
       ShowWindow(pDoc->hWindow(0), SW_HIDE)
       ShowWindow(pDoc->hWindow(1), SW_HIDE)
-      ShowWindow(pDoc->hScrollbar, SW_HIDE)
       if pDoc->IsDesigner THEN 
          ShowWindow(pDoc->hWndDesigner, SW_HIDE)
          ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
@@ -249,7 +248,6 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
       ' Show/Hide our current active Scintilla window and scrollbar
       ShowWindow(pDocShow->hWindow(0), Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
       ShowWindow(pDocShow->hWindow(1), Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
-      ShowWindow(pDocShow->hScrollbar, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
    end if
    
    Function = 0

@@ -37,6 +37,7 @@ Type clsTopTabCtl
       rcActionButton   as RECT
       rcPrevTabs       as RECT
       rcNextTabs       as RECT
+      rcSplitEditor    as RECT
       tabs(any)        as TOPTABS_TYPE
       
       declare function IsSafeIndex( byval idx as long ) as boolean

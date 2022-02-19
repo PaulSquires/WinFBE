@@ -11,7 +11,13 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-declare function frmTopTabs_PositionWindows() as LRESULT
 
+type EDITOR_VSCROLL_TYPE
+   numLines as long 
+   linesPerPage as long
+   thumbHeight as long
+   rc as RECT
+end type
+dim shared gEditorVScroll(1) as EDITOR_VSCROLL_TYPE
 
-
+declare function frmEditorVScroll_calcVThumbRect( byval pDoc as clsDocument ptr ) as boolean

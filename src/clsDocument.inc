@@ -36,7 +36,6 @@ destructor clsDocument
    for i as long = lbound(this.hWindow) to ubound(this.hWindow)
       DestroyWindow this.hWindow(i)    ' destroy the scintilla/designer windows
    next
-   DestroyWindow this.hScrollbar       ' destroy the scrollbar
    if this.IsDesigner then
       ' Remove all controls
       dim pCtrl as clsControl ptr 
@@ -271,18 +270,11 @@ function clsDocument.CreateCodeWindow( _
       end if
    next
    
-   ' Disable main scintilla control's vertical scroll bar (wParam = 1 to enable)
+   ' Disable scintilla vertical scroll bar (wParam = 1 to enable)
    SciMsg( m_pSci(0), SCI_SETVSCROLLBAR, 0, 0 )
-
-   ' Create our substitute vertical scrollbar
-   dim pWindow as CWindow
-   this.hScrollbar = pWindow.AddControl("VSCROLLBAR", hWndParent, IDC_SCROLLV)
-   ShowWindow(this.hScrollbar, SW_HIDE)
-   
-   ' Initialize scroll bar information
-   this.ScrInfo.cbSize  = sizeof(SCROLLINFO)
-   this.ScrInfo.fMask   = SIF_ALL
-
+   SciMsg( m_pSci(0), SCI_SETHSCROLLBAR, 0, 0 )
+   SciMsg( m_pSci(1), SCI_SETVSCROLLBAR, 0, 0 )
+   SciMsg( m_pSci(1), SCI_SETHSCROLLBAR, 0, 0 )
 
    ' Get the document pointer from our main control and assign it to the other split windows
    dim as any ptr pDoc = cast(any ptr, SciMsg(m_pSci(0), SCI_GETDOCPOINTER, 0, 0))
@@ -965,8 +957,7 @@ function clsDocument.SetMarkerHighlight() as long
          function = SciMsg( pSci, SCI_MARKERADD, i, 10)    ' add defined marker #10 to each line
       next
       ' set backcolor of marker #10 
-      dim pTheme as THEME_TYPE ptr = getThemePtr("editor.selection")
-      dim as COLORREF clr = pTheme->background 
+      dim as COLORREF clr = ghEditor.BackColorSelection
       SciMsg( pSci, SCI_MARKERSETBACK, 10, clr) 
    end if
 end function
@@ -987,7 +978,7 @@ function clsDocument.FirstMarkerHighlight() as long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    dim as long markerMask 
    markerMask = bitset(markerMask, 10)
-   function = SciMsg( pSci, SCI_MARKERnext, 0, markerMask)
+   function = SciMsg( pSci, SCI_MARKERNEXT, 0, markerMask)
 end function
 
 ''
@@ -1745,7 +1736,6 @@ function clsDocument.ApplyProperties() as long
    
    ' Must apply all settings/styles to each Scintilla split window to ensure that
    ' they all appear and act the same. 
-   dim pTheme as THEME_TYPE ptr
    
    for i as long = lbound(m_pSci) to ubound(m_pSci)
 
@@ -1764,12 +1754,11 @@ function clsDocument.ApplyProperties() as long
       SciMsg( m_pSci(i), SCI_SETEXTRADESCENT, nFontExtraSpace, 0 )
       SciMsg( m_pSci(i), SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, GetFontCharSetID(gConfig.EditorFontCharset) )
 
-      pTheme = getThemePtr("editor.text")
-      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_DEFAULT, pTheme->foreground)
-      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_DEFAULT, pTheme->background)
-      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_DEFAULT, pTheme->bold )
-      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_DEFAULT, pTheme->italic )
-      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_DEFAULT, pTheme->underline )
+      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_DEFAULT, ghEditor.ForeColorText)
+      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_DEFAULT, ghEditor.BackColorText)
+      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_DEFAULT, ghEditor.TextBold )
+      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_DEFAULT, ghEditor.TextItalic )
+      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_DEFAULT, ghEditor.TextUnderline )
       SciMsg( m_pSci(i), SCI_STYLECLEARALL, 0, 0 )  ' Copies global style to all others
           
       ' Set the style for the AutoComplete popup list
@@ -1779,15 +1768,14 @@ function clsDocument.ApplyProperties() as long
 
       ''
       ''  MARGIN 0: Line Numbering (defaults to width 0)
-      pTheme = getThemePtr("editor.linenumbers")
       nPixels = SciMsg( m_pSci(i), SCI_TEXTWIDTH, 0, cast(LPARAM, @"_99999"))
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER )
-      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_LINENUMBER, pTheme->foreground )
-      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_LINENUMBER, pTheme->background )
+      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_LINENUMBER, ghEditor.ForeColorLinenumbers )
+      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_LINENUMBER, ghEditor.BackColorLinenumbers )
       SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 0, iif(gConfig.LineNumbering, nPixels, 0) )
-      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_LINENUMBER, pTheme->bold )
-      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_LINENUMBER, pTheme->italic )
-      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_LINENUMBER, pTheme->underline )
+      SciMsg( m_pSci(i), SCI_STYLESETBOLD, STYLE_LINENUMBER, ghEditor.LineNumbersBold )
+      SciMsg( m_pSci(i), SCI_STYLESETITALIC, STYLE_LINENUMBER, ghEditor.LineNumbersItalic )
+      SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, STYLE_LINENUMBER, ghEditor.LineNumbersUnderline )
    
       ''
       ''  MARGIN 1: Non-Folding symbols (defaults to width 16) (Bookmark symbol, etc) (will be same color as line numbering)
@@ -1797,11 +1785,10 @@ function clsDocument.ApplyProperties() as long
                  
       ''
       ''  MARGIN 2: Folding symbols (defaults to width 0)
-      pTheme = getThemePtr("editor.foldmargin")
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 2, SC_MARGIN_SYMBOL )
       SciMsg( m_pSci(i), SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS )
-      SciMsg( m_pSci(i), SCI_SETFOLDMARGINCOLOUR, Ctrue, pTheme->foreground )
-      SciMsg( m_pSci(i), SCI_SETFOLDMARGINHICOLOUR, Ctrue, pTheme->foreground )
+      SciMsg( m_pSci(i), SCI_SETFOLDMARGINCOLOUR, Ctrue, ghEditor.ForeColorFoldmargin )
+      SciMsg( m_pSci(i), SCI_SETFOLDMARGINHICOLOUR, Ctrue, ghEditor.ForeColorFoldmargin )
       SciMsg( m_pSci(i), SCI_SETMARGINSENSITIVEN, 2, 1 )
       SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 2, iif(gConfig.FoldMargin, 16 * rxRatio, 0) )
 
@@ -1845,14 +1832,12 @@ function clsDocument.ApplyProperties() as long
       else
          SciMsg( m_pSci(i), SCI_SETINDENTATIONGUIDES, false, 0)
       end if
-      pTheme = getThemePtr("editor.indentguides")
-      SciMsg( m_pSci(i), SCI_SETSELFORE, STYLE_INDENTGUIDE, pTheme->foreground )
-      SciMsg( m_pSci(i), SCI_SETSELBACK, STYLE_INDENTGUIDE, pTheme->background )
+      SciMsg( m_pSci(i), SCI_SETSELFORE, STYLE_INDENTGUIDE, ghEditor.ForeColorIndentguides )
+      SciMsg( m_pSci(i), SCI_SETSELBACK, STYLE_INDENTGUIDE, ghEditor.BackColorIndentguides )
       
       ''
       ''  CARET
-      pTheme = getThemePtr("editor.caret")
-      SciMsg( m_pSci(i), SCI_SETCARETFORE, pTheme->foreground, 0 )
+      SciMsg( m_pSci(i), SCI_SETCARETFORE, ghEditor.ForeColorCaret, 0 )
       SciMsg( m_pSci(i), SCI_SETCARETWIDTH, 2, 0 )       ' 2 pixels
 
       ''
@@ -1865,14 +1850,12 @@ function clsDocument.ApplyProperties() as long
 
       ''
       ''  CARET LINE COLOR
-      pTheme = getThemePtr("editor.currentline")
-      SciMsg( m_pSci(i), SCI_SETCARETLINEBACK, pTheme->background, 0 )
+      SciMsg( m_pSci(i), SCI_SETCARETLINEBACK, ghEditor.BackColorCurrentline, 0 )
       
       ''
       ''  SELECTION COLORS
-      pTheme = getThemePtr("editor.selection")
-      SciMsg( m_pSci(i), SCI_SETSELFORE, Ctrue, pTheme->foreground)
-      SciMsg( m_pSci(i), SCI_SETSELBACK, Ctrue, pTheme->background)
+      SciMsg( m_pSci(i), SCI_SETSELFORE, Ctrue, ghEditor.ForeColorSelection )
+      SciMsg( m_pSci(i), SCI_SETSELBACK, Ctrue, ghEditor.BackColorSelection )
    
       ''
       ''  MULTIPLE SELECTIONS
@@ -1932,78 +1915,69 @@ function clsDocument.ApplyProperties() as long
          
          if gConfig.SyntaxHighlighting then
             ' Set the Multiline Comments style
-            pTheme = getThemePtr("editor.comments")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_MULTILINECOMMENT, pTheme->foreground )
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_MULTILINECOMMENT, pTheme->background )
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_MULTILINECOMMENT, pTheme->bold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_MULTILINECOMMENT, pTheme->italic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_MULTILINECOMMENT, pTheme->underline )
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_MULTILINECOMMENT, ghEditor.ForeColorComments )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_MULTILINECOMMENT, ghEditor.BackColorComments )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_MULTILINECOMMENT, ghEditor.CommentsBold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_MULTILINECOMMENT, ghEditor.CommentsItalic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_MULTILINECOMMENT, ghEditor.CommentsUnderline )
 
             ' Set the Comments style
-            pTheme = getThemePtr("editor.comments")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_COMMENT, pTheme->foreground )
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_COMMENT, pTheme->background )
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_COMMENT, pTheme->bold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_COMMENT, pTheme->italic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_COMMENT, pTheme->underline )
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_COMMENT, ghEditor.ForeColorComments )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_COMMENT, ghEditor.BackColorComments )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_COMMENT, ghEditor.CommentsBold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_COMMENT, ghEditor.CommentsItalic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_COMMENT, ghEditor.CommentsUnderline )
 
             ' Set the Keywords style (FreeBasic)
-            pTheme = getThemePtr("editor.keyword")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_KEYWORD, pTheme->foreground)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_KEYWORD, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_KEYWORD, ghEditor.ForeColorKeyword )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_KEYWORD, ghEditor.BackColorKeyword )
             SciMsg( m_pSci(i), SCI_STYLESETCASE, SCE_B_KEYWORD, nFontcase )
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_KEYWORD, pTheme->bold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD, pTheme->italic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD, pTheme->underline )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_KEYWORD, ghEditor.KeywordBold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD, ghEditor.KeywordItalic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD, ghEditor.KeywordUnderline )
 
             ' Set the Keywords style (Windows Api)
-            pTheme = getThemePtr("editor.keyword2")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_KEYWORD2, pTheme->foreground)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_KEYWORD2, pTheme->background)
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_KEYWORD2, ghEditor.ForeColorKeyword2 )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_KEYWORD2, ghEditor.BackColorKeyword2 )
             SciMsg( m_pSci(i), SCI_STYLESETCASE, SCE_B_KEYWORD2, nFontcase )
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_KEYWORD2, pTheme->bold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD2, pTheme->italic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD2, pTheme->underline )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_KEYWORD2, ghEditor.KeywordBold2 )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD2, ghEditor.KeywordItalic2 )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD2, ghEditor.KeywordUnderline2 )
 
             ' Set the Identifiers style
-            pTheme = getThemePtr("editor.identifiers")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_IDENTIFIER, pTheme->foreground)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_IDENTIFIER, pTheme->background)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_IDENTIFIER, pTheme->bold)
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_IDENTIFIER, pTheme->italic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_IDENTIFIER, pTheme->underline )
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_IDENTIFIER, ghEditor.ForeColorIdentifiers )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_IDENTIFIER, ghEditor.BackColorIdentifiers )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_IDENTIFIER, ghEditor.IdentifiersBold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_IDENTIFIER, ghEditor.IdentifiersItalic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_IDENTIFIER, ghEditor.IdentifiersUnderline )
 
             ' Set the Numbers style
-            pTheme = getThemePtr("editor.numbers")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_NUMBER, pTheme->foreground)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_NUMBER, pTheme->background)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_NUMBER, pTheme->bold)
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_NUMBER, pTheme->italic)
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_NUMBER, pTheme->underline)
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_NUMBER, ghEditor.ForeColorNumbers )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_NUMBER, ghEditor.BackColorNumbers )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_NUMBER, ghEditor.NumbersBold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_NUMBER, ghEditor.NumbersItalic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_NUMBER, ghEditor.NumbersUnderline)
 
             ' Set the Operators style
-            pTheme = getThemePtr("editor.operators")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_OPERATOR, pTheme->foreground)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_OPERATOR, pTheme->background)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_OPERATOR, pTheme->bold)
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_OPERATOR, pTheme->italic)
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_OPERATOR, pTheme->underline)
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_OPERATOR, ghEditor.ForeColorOperators )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_OPERATOR, ghEditor.BackColorOperators )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_OPERATOR, ghEditor.OperatorsBold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_OPERATOR, ghEditor.OperatorsItalic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_OPERATOR, ghEditor.OperatorsUnderline)
 
             ' Set the Preprocessor style
-            pTheme = getThemePtr("editor.preprocessor")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_PREPROCESSOR, pTheme->foreground)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_PREPROCESSOR, pTheme->background)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_PREPROCESSOR, pTheme->bold)
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_PREPROCESSOR, pTheme->italic)
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_PREPROCESSOR, pTheme->underline)
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_PREPROCESSOR, ghEditor.ForeColorPreprocessor )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_PREPROCESSOR, ghEditor.BackColorPreprocessor )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_PREPROCESSOR, ghEditor.PreprocessorBold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_PREPROCESSOR, ghEditor.PreprocessorItalic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_PREPROCESSOR, ghEditor.PreprocessorUnderline)
 
             ' Set the strings style
-            pTheme = getThemePtr("editor.strings")
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_string, pTheme->foreground)
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_string, pTheme->background)
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_string, pTheme->bold)
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_string, pTheme->Italic)
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_string, pTheme->underline)
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_string, ghEditor.ForeColorStrings )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_string, ghEditor.BackColorStrings )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_string, ghEditor.StringsBold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_string, ghEditor.StringsItalic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_string, ghEditor.StringsUnderline)
 
          end if
       end if
@@ -2028,9 +2002,8 @@ function clsDocument.ApplyProperties() as long
          SciMsg( m_pSci(i), SCI_SETFOLDFLAGS, 16, 0 )
 
          ' Colors for folders closed and folders opened
-         pTheme = getThemePtr("editor.foldsymbol")
-         dim as COLORREF clrFore = pTheme->foreground   
-         dim as COLORREF clrBack = pTheme->background  
+         dim as COLORREF clrFore = ghEditor.ForeColorFoldsymbol
+         dim as COLORREF clrBack = ghEditor.BackColorFoldsymbol
 
          SciMsg( m_pSci(i), SCI_MARKERSETFORE, SC_MARKNUM_FOLDER, clrBack)
          SciMsg( m_pSci(i), SCI_MARKERSETBACK, SC_MARKNUM_FOLDER, clrFore)
@@ -2191,6 +2164,18 @@ function clsDocument.LineDuplicate() as long
       SciMsg( pSci, SCI_SELECTIONDUPLICATE, 0, 0)
    end if
    function = 0
+end function
+
+
+''
+''
+function clsDocument.LinesPerPage( byval idxWindow as long ) as long
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   ' SCI_LINESONSCREEN is not a reliable count of lines per screen because
+   ' it does not take into account any extra ascent or descent value.
+   dim as long nLineHeight = SciMsg( pSci, SCI_TEXTHEIGHT, 0, 0 )
+   dim as long nHeight = this.origPosition(idxWindow).bottom - this.origPosition(idxWindow).top
+   function = (nHeight / nLineHeight)
 end function
 
 

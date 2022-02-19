@@ -59,13 +59,13 @@ function frmFindReplace_PositionWindows() as LRESULT
    dim as RECT rc = AfxGetWindowRect( hCtrl )
    SetWindowPos( HWND_FRMFINDREPLACE_SHADOW, HWND_TOP, _
                   rc.right - AfxGetWindowWidth(HWND_FRMFINDREPLACE) - _
-                      pWindow->ScaleX(SCROLLBAR_WIDTH*3) - pWindow->ScaleX(3), _
+                      pWindow->ScaleX(SCROLLBAR_WIDTH_EDITOR*3) - pWindow->ScaleX(3), _
                   rc.bottom, _
                   AfxGetWindowWidth(HWND_FRMFINDREPLACE) + pWindow->ScaleY(6), _
                   AfxGetWindowHeight(HWND_FRMFINDREPLACE) + pWindow->ScaleY(3), _
                   SWP_SHOWWINDOW )
    SetWindowPos( HWND_FRMFINDREPLACE, HWND_TOP, _
-                  rc.right - AfxGetWindowWidth(HWND_FRMFINDREPLACE) - pWindow->ScaleX(SCROLLBAR_WIDTH * 3), _
+                  rc.right - AfxGetWindowWidth(HWND_FRMFINDREPLACE) - pWindow->ScaleX(SCROLLBAR_WIDTH_EDITOR * 3), _
                   rc.bottom, 0, 0, SWP_SHOWWINDOW or SWP_NOSIZE )
 
    dim as long frmWidth   = AfxGetWindowWidth( HWND_FRMFINDREPLACE )
@@ -373,6 +373,8 @@ function frmFindReplace_HighlightSearches( byval bRepositionCaret as boolean ) a
    SciExec( hEdit, SCI_SETADDITIONALCARETSVISIBLE, false, 0) 
    SciExec( hEdit, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
    SciExec( hEdit, SCI_SETINDICATORCURRENT, 8, 0)
+   SciExec( hEdit, SCI_INDICSETFORE, 8, ghEditor.ForeColorOccurrence ) 
+   SciExec( hEdit, SCI_INDICSETALPHA, 8, 60 )   
    
    dim txtFind as string = str(AfxGetWindowText(hWndFind))
       

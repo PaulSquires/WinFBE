@@ -38,14 +38,15 @@ end function
 
 function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
    ' Determine if the mouse has moved over (or away from) a window that should invoke
-   ' showing or hiding our custom VScroll and/or HScroll scrollbars.
+   ' showing or hiding our custom Panel VScroll.
    if (uMsg.message = WM_MOUSEMOVE) orelse (uMsg.message = WM_NCMOUSEMOVE) then
       ' if mouse is currently in drag operation then simply exit
       if gApp.bDragActive then return false
       ' if mouse is currently scrolling through top menus then exit
       if IsWindowVisible( HWND_MENU(0) ) then return false
-
-      ' HIT TEST for VSCROLLBAR in EXPLORER
+      if IsWindowVisible( HWND_FRMPANEL ) = 0 then return false
+   
+      ' HIT TEST for VSCROLLBAR in PANEL
       dim as boolean isVisible = IsWindowVisible(HWND_FRMPANEL_VSCROLLBAR)
       dim as long curState = iif(isVisible, SW_SHOWNA, SW_HIDE)
       dim as long newState = SW_HIDE
@@ -54,7 +55,25 @@ function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
          newState = SW_SHOWNA
       end if
       if newState <> curState then frmPanelVScroll_PositionWindows( newState )
+   end if      
+
+   ' Should we show an Editor HScrollbar
+   dim as clsDocument ptr pDoc = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc then
+      for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
+         dim as boolean isVisible = IsWindowVisible( HWND_FRMEDITOR_HSCROLLBAR(i) )
+         dim as long curState = iif(isVisible, SW_SHOWNA, SW_HIDE)
+         dim as long newState = SW_HIDE
+         if isMouseOverWindow( pDoc->hWindow(i) ) orelse _
+            isMouseOverWindow( HWND_FRMEDITOR_HSCROLLBAR(i) ) then 
+            newState = SW_SHOWNA
+         end if
+         if newState <> curState then 
+            frmEditorHScroll_RepositionEditor( HWND_FRMEDITOR_HSCROLLBAR(i), newState, pDoc, i )
+         end if
+      next
    end if
+   
    ' we want our mouse message to continue so return FALSE
    return false
 end function

@@ -115,7 +115,11 @@ Function frmMain_OnCommand( _
             loop   
          end if
    
-      Case IDM_OPENINCLUDE:           OpenSelectedDocument( gApp.IncludeFilename )
+      case IDM_CLOSEPANEL
+         ShowWindow( HWND_FRMPANEL, SW_HIDE )
+         frmMain_PositionWindows()
+         
+      case IDM_OPENINCLUDE:           OpenSelectedDocument( gApp.IncludeFilename )
       case IDM_SETFOCUSEDITOR:        frmMain_SetFocusToCurrentCodeWindow()   
       case IDM_EXPLORER_EXPANDALL:    frmExplorer_ExpandAll()   
       case IDM_EXPLORER_COLLAPSEALL:  frmExplorer_CollapseAll()   

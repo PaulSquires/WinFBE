@@ -611,6 +611,8 @@ Function CreateExplorerActionButtonContextMenu() As HMENU
    hPopUpMenu = CreatePopupMenu
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_EXPLORER_EXPANDALL, L(441,"Expand All") 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_EXPLORER_COLLAPSEALL, L(442,"Collapse All") 
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_CLOSEPANEL, L(161,"Close") 
 
    Function = hPopupMenu
 End Function
@@ -627,6 +629,8 @@ Function CreateFunctionsActionButtonContextMenu() As HMENU
    AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONS_VIEWASTREE, L(445,"View as Tree") 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONS_VIEWASLIST, L(446,"View as List") 
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_CLOSEPANEL, L(161,"Close") 
 
    Function = hPopupMenu
 End Function
@@ -642,6 +646,8 @@ Function CreateBookmarksActionButtonContextMenu() As HMENU
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKS_COLLAPSEALL, L(442,"Collapse All") 
    AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKCLEARALLDOCS, L(53,"Clear Bookmarks") 
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_CLOSEPANEL, L(161,"Close") 
 
    Function = hPopupMenu
 End Function

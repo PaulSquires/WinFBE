@@ -31,6 +31,77 @@ type GENERAL_HANDLES_TYPE
 end type
 dim shared ghGeneral as GENERAL_HANDLES_TYPE
 
+type EDITOR_HANDLES_TYPE
+   ForeColorCaret as COLORREF
+   BackColorCurrentLine as COLORREF
+   ForeColorText as COLORREF
+   BackColorText as COLORREF
+   TextBold as boolean
+   TextItalic as boolean
+   TextUnderline as boolean
+   ForeColorNumbers as COLORREF
+   BackColorNumbers as COLORREF
+   NumbersBold as boolean
+   NumbersItalic as boolean
+   NumbersUnderLine as boolean
+   ForeColorComments as COLORREF
+   BackColorComments as COLORREF
+   CommentsBold as boolean
+   CommentsItalic as boolean
+   CommentsUnderline as boolean
+   ForeColorIdentifiers as COLORREF
+   BackColorIdentifiers as COLORREF
+   IdentifiersBold as boolean
+   IdentifiersItalic as boolean
+   IdentifiersUnderline as boolean
+   ForeColorKeyword as COLORREF
+   BackColorKeyword as COLORREF
+   KeywordBold as boolean
+   KeywordItalic as boolean
+   KeywordUnderline as boolean
+   ForeColorKeyword2 as COLORREF
+   BackColorKeyword2 as COLORREF
+   KeywordBold2 as boolean
+   KeywordItalic2 as boolean
+   KeywordUnderline2 as boolean
+   ForeColorFoldmargin as COLORREF
+   ForeColorFoldsymbol as COLORREF
+   BackColorFoldsymbol as COLORREF
+   ForeColorLinenumbers as COLORREF
+   BackColorLinenumbers as COLORREF
+   LinenumbersBold as boolean
+   LinenumbersItalic as boolean
+   LinenumbersUnderline as boolean
+   ForeColorOperators as COLORREF
+   BackColorOperators as COLORREF
+   OperatorsBold as boolean
+   OperatorsItalic as boolean
+   OperatorsUnderline as boolean
+   ForeColorIndentguides as COLORREF
+   BackColorIndentguides as COLORREF
+   ForeColorPreprocessor as COLORREF
+   BackColorPreprocessor as COLORREF
+   PreprocessorBold as boolean
+   PreprocessorItalic as boolean
+   PreprocessorUnderline as boolean
+   ForeColorSelection as COLORREF
+   BackColorSelection as COLORREF
+   ForeColorStrings as COLORREF
+   BackColorStrings as COLORREF
+   StringsBold as boolean
+   StringsItalic as boolean
+   StringsUnderline as boolean
+   ForeColorBracegood as COLORREF
+   ForeColorBracebad as COLORREF
+   ForeColorOccurrence as COLORREF
+   hBackBrushScrollBar as HBRUSH
+   BackColorScrollBar as COLORREF
+   ForeColorScrollBar as COLORREF
+   hBackBrushThumb as HBRUSH
+   Divider as COLORREF
+end type
+dim shared ghEditor as EDITOR_HANDLES_TYPE
+
 type PANEL_HANDLES_TYPE
    hPanelBrush as HBRUSH
    hBackBrushScrollBar as HBRUSH
@@ -129,29 +200,6 @@ type FINDREPLACE_HANDLES_TYPE
    CueBannerForeColor as COLORREF
 end type
 dim shared ghFindReplace as FINDREPLACE_HANDLES_TYPE
-
-'type FUNCTIONLIST_HANDLES_TYPE
-'   PanelColor as COLORREF
-'   hPanelBrush as HBRUSH
-'   hBackBrushScrollBar as HBRUSH
-'   BackColorScrollBar as COLORREF
-'   ForeColorScrollBar as COLORREF
-'   hBackBrushThumb as HBRUSH
-'   hBackBrushNode as HBRUSH
-'   BackColorNode as COLORREF
-'   ForeColorNode as COLORREF
-'   hBackBrush as HBRUSH
-'   BackColor as COLORREF
-'   ForeColor as COLORREF
-'   hBackBrushHot as HBRUSH
-'   BackColorHot as COLORREF
-'   ForeColorHot as COLORREF
-'   hBackBrushTextBox as HBRUSH
-'   TextBoxForeColor as COLORREF
-'   TextBoxBackColor as COLORREF
-'   CueBannerForeColor as COLORREF
-'end type
-'dim shared ghFunctionList as FUNCTIONLIST_HANDLES_TYPE
 
 type OUTPUT_HANDLES_TYPE
    hPanelBrush as HBRUSH
@@ -308,6 +356,97 @@ function LoadThemeFile() as boolean
    ghGeneral.iconsuccess = pTheme->foreground
    pTheme = getThemePtr("compile.iconfail")
    ghGeneral.iconfail = pTheme->foreground
+
+   pTheme = getThemePtr("editor.text")
+   ghEditor.BackColorText = pTheme->background
+   ghEditor.ForeColorText = pTheme->foreground
+   ghEditor.TextBold = pTheme->bold
+   ghEditor.TextItalic = pTheme->italic
+   ghEditor.TextUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.linenumbers")
+   ghEditor.BackColorLinenumbers = pTheme->background
+   ghEditor.ForeColorLinenumbers = pTheme->foreground
+   ghEditor.LinenumbersBold = pTheme->bold
+   ghEditor.LinenumbersItalic = pTheme->italic
+   ghEditor.LinenumbersUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.foldmargin")
+   ghEditor.ForeColorFoldmargin = pTheme->foreground
+   pTheme = getThemePtr("editor.indentguides")
+   ghEditor.BackColorIndentguides = pTheme->background
+   ghEditor.ForeColorIndentguides = pTheme->foreground
+   pTheme = getThemePtr("editor.caret")
+   ghEditor.ForeColorCaret = pTheme->foreground
+   pTheme = getThemePtr("editor.currentline")
+   ghEditor.BackColorCurrentline = pTheme->background
+   pTheme = getThemePtr("editor.selection")
+   ghEditor.BackColorSelection = pTheme->background
+   ghEditor.ForeColorSelection = pTheme->foreground
+   pTheme = getThemePtr("editor.comments")
+   ghEditor.BackColorComments = pTheme->background
+   ghEditor.ForeColorComments = pTheme->foreground
+   ghEditor.CommentsBold = pTheme->bold
+   ghEditor.CommentsItalic = pTheme->italic
+   ghEditor.CommentsUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.keyword")
+   ghEditor.BackColorKeyword = pTheme->background
+   ghEditor.ForeColorKeyword = pTheme->foreground
+   ghEditor.KeywordBold = pTheme->bold
+   ghEditor.KeywordItalic = pTheme->italic
+   ghEditor.KeywordUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.keyword2")
+   ghEditor.BackColorKeyword2 = pTheme->background
+   ghEditor.ForeColorKeyword2 = pTheme->foreground
+   ghEditor.KeywordBold2 = pTheme->bold
+   ghEditor.KeywordItalic2 = pTheme->italic
+   ghEditor.KeywordUnderline2 = pTheme->underline
+   pTheme = getThemePtr("editor.identifiers")
+   ghEditor.BackColorIdentifiers = pTheme->background
+   ghEditor.ForeColorIdentifiers = pTheme->foreground
+   ghEditor.IdentifiersBold = pTheme->bold
+   ghEditor.IdentifiersItalic = pTheme->italic
+   ghEditor.IdentifiersUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.numbers")
+   ghEditor.BackColorNumbers = pTheme->background
+   ghEditor.ForeColorNumbers = pTheme->foreground
+   ghEditor.NumbersBold = pTheme->bold
+   ghEditor.NumbersItalic = pTheme->italic
+   ghEditor.NumbersUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.operators")
+   ghEditor.BackColorOperators = pTheme->background
+   ghEditor.ForeColorOperators = pTheme->foreground
+   ghEditor.OperatorsBold = pTheme->bold
+   ghEditor.OperatorsItalic = pTheme->italic
+   ghEditor.OperatorsUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.preprocessor")
+   ghEditor.BackColorPreprocessor = pTheme->background
+   ghEditor.ForeColorPreprocessor = pTheme->foreground
+   ghEditor.PreprocessorBold = pTheme->bold
+   ghEditor.PreprocessorItalic = pTheme->italic
+   ghEditor.PreprocessorUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.strings")
+   ghEditor.BackColorStrings = pTheme->background
+   ghEditor.ForeColorStrings = pTheme->foreground
+   ghEditor.StringsBold = pTheme->bold
+   ghEditor.StringsItalic = pTheme->italic
+   ghEditor.StringsUnderline = pTheme->underline
+   pTheme = getThemePtr("editor.foldsymbol")
+   ghEditor.BackColorFoldsymbol = pTheme->background
+   ghEditor.ForeColorFoldsymbol = pTheme->foreground
+   pTheme = getThemePtr("editor.scrollbar")
+   if ghEditor.hBackBrushScrollBar then DeleteObject(ghEditor.hBackBrushScrollBar)
+   ghEditor.hBackBrushScrollBar = CreateSolidBrush(pTheme->background)
+   if ghEditor.hBackBrushThumb then DeleteObject(ghEditor.hBackBrushThumb)
+   ghEditor.hBackBrushThumb = CreateSolidBrush(pTheme->foreground)
+   ghEditor.ForeColorScrollBar = pTheme->foreground
+   ghEditor.BackColorScrollBar = pTheme->background
+   pTheme = getThemePtr("editor.bracegood")
+   ghEditor.ForeColorBracegood = pTheme->foreground
+   pTheme = getThemePtr("editor.bracebad")
+   ghEditor.ForeColorBracebad = pTheme->foreground
+   pTheme = getThemePtr("editor.occurrence")
+   ghEditor.ForeColorOccurrence = pTheme->foreground
+   pTheme = getThemePtr("editor.divider")
+   ghEditor.Divider = pTheme->foreground
 
    pTheme = getThemePtr("panel.panel")
    if ghPanel.hPanelBrush then DeleteObject(ghPanel.hPanelBrush)

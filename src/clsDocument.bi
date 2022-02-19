@@ -15,7 +15,6 @@
 
 '  Scintilla Control identifiers
 #define IDC_SCINTILLA              100
-#define IDC_SCROLLV                200
 
 ' File encodings
 #define FILE_ENCODING_ANSI         0
@@ -96,6 +95,7 @@ type clsDocument
       ' hWindow(0) is our MAIN control (bottom)
       ' hWindow(1) is our split control (top)
       hWindow(1)        as HWnd   ' Scintilla split edit windows 
+      origPosition(1)   as RECT   ' original Scintilla position to restore when HScroll show/hide
       
       ' Visual designer related
       MenuItems(any)    as clsMenuItem
@@ -161,8 +161,6 @@ type clsDocument
       wszOnLoadFoldPoints as CWSTR      ' saved from project load for files that are not immediately shown in open tab      
       
       ' Following used for split edit views
-      hScrollBar        as hwnd
-      ScrInfo           as SCROLLINFO  ' Scrollbar parameters array
       rcSplitButton     as RECT        ' Split gripper vertical for Scintilla window
       SplitY            as long        ' Y coordinate of vertical splitter
       
@@ -229,6 +227,7 @@ type clsDocument
       declare function HasMarkerHighlight() as boolean
       declare function FirstMarkerHighlight() as long
       declare function LastMarkerHighlight() as long
+      declare function LinesPerPage( byval idxWindow as long ) as long
       declare function CompileDirectives( Directives() as COMPILE_DIRECTIVES) as long
       declare destructor
 end type

@@ -173,6 +173,7 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
    frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONS_COLLAPSEALL, "IDM_FUNCTIONS_COLLAPSEALL", "Collapse all nodes in the Function List window", "", "" )
    frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_EXPANDALL, "IDM_BOOKMARKS_EXPANDALL", "Expand all nodes in the Bookmarks window", "", "" )
    frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_COLLAPSEALL, "IDM_BOOKMARKS_COLLAPSEALL", "Collapse all nodes in the Bookmarks window", "", "" )
+   frmKeyBoard_AddKeyBinding( "View", IDM_CLOSEPANEL, "IDM_CLOSEPANEL", "Close left side panel", "", "" )
 
    '' PROJECT MENU
    frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTNEW, "IDM_PROJECTNEW", "New project", "", "" )

@@ -108,7 +108,7 @@ Function frmTopTabs_PositionWindows() As LRESULT
    gTTabCtl.rcActionPanel = rc
    gTTabCtl.rcActionPanel.left = gTTabCtl.rcActionPanel.right - pWindow->ScaleX( ActionPanelWidth )
    
-   ' caclulate the Prev and Next Tabs buttons
+   ' calculate the Prev and Next Tabs buttons
    dim as long vmargin = (TabHeight - PrevTabsButtonHeight) / 2
    gTTabCtl.rcPrevTabs.left = gTTabCtl.rcActionPanel.left + pWindow->ScaleX( hmargin * 2)
    gTTabCtl.rcPrevTabs.top = rc.top + pWindow->ScaleY(vmargin)

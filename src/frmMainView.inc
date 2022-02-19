@@ -55,39 +55,24 @@ end function
 ' View FunctionList, Explorer, Output, Bookmarks windows
 ' ========================================================================================
 function OnCommand_ViewFunctionList() as LRESULT
-   ' If FunctionList is already visible and active then toggle it closed
-   if IsWindowVisible(HWND_FRMFUNCTIONS) andalso (gPanel.hActiveChild = HWND_FRMFUNCTIONS) then
-      ShowWindow( HWND_FRMPANEL, SW_HIDE )
-   else   
-      ShowWindow( HWND_FRMPANEL, SW_SHOW )
-      gPanel.hActiveChild = HWND_FRMFUNCTIONS
-   end if
+   ShowWindow( HWND_FRMPANEL, SW_SHOW )
+   gPanel.hActiveChild = HWND_FRMFUNCTIONS
    frmPanel_PositionWindows
    frmMain_PositionWindows
    function = 0
 end function
 
 function OnCommand_ViewExplorer() as LRESULT
-   ' If Explorer is already visible and active then toggle it closed
-   if IsWindowVisible(HWND_FRMPANEL) andalso (gPanel.hActiveChild = HWND_FRMEXPLORER) then
-      ShowWindow( HWND_FRMPANEL, SW_HIDE )
-   else   
-      ShowWindow( HWND_FRMPANEL, SW_SHOW )
-      gPanel.hActiveChild = HWND_FRMEXPLORER
-   end if
+   ShowWindow( HWND_FRMPANEL, SW_SHOW )
+   gPanel.hActiveChild = HWND_FRMEXPLORER
    frmPanel_PositionWindows
    frmMain_PositionWindows
    function = 0
 end function
 
 function OnCommand_ViewBookmarksList() as LRESULT
-   ' If Bookmarks is already visible and active then toggle it closed
-   if IsWindowVisible(HWND_FRMPANEL) andalso (gPanel.hActiveChild = HWND_FRMBOOKMARKS) then
-      ShowWindow( HWND_FRMPANEL, SW_HIDE )
-   else   
-      ShowWindow( HWND_FRMPANEL, SW_SHOW )
-      gPanel.hActiveChild = HWND_FRMBOOKMARKS
-   end if
+   ShowWindow( HWND_FRMPANEL, SW_SHOW )
+   gPanel.hActiveChild = HWND_FRMBOOKMARKS
    frmPanel_PositionWindows
    frmMain_PositionWindows
    function = 0

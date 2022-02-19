@@ -335,6 +335,13 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define INDIC_DOTBOX                                    12
 #Define INDIC_SQUIGGLEPIXMAP                            13
 #Define INDIC_COMPOSITIONTHICK                          14
+#define INDIC_COMPOSITIONTHIN                           15
+#define INDIC_FULLBOX                                   16
+#define INDIC_TEXTFORE                                  17
+#define INDIC_POINT                                     18
+#define INDIC_POINTCHARACTER                            19
+#define INDIC_GRADIENT                                  20
+#define INDIC_GRADIENTCENTRE                            21
 #Define INDIC_MAX                                       31
 #Define INDIC_CONTAINER                                 8
 #Define INDIC0_MASK                                     &H20

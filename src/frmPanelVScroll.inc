@@ -111,7 +111,7 @@ function frmPanelVScroll_PositionWindows( byval nShowState as long ) as LRESULT
    
    ' Position the VScrollBar relative to the Explorer Listbox using screen coordinates
    dim as Rect rc = AfxGetWindowRect( gPanelVScroll.hListBox )
-   dim as long nScrollWidth = pWindow->ScaleX(SCROLLBAR_WIDTH)
+   dim as long nScrollWidth = pWindow->ScaleX(SCROLLBAR_WIDTH_PANEL)
  
    SetWindowPos( HWND_FRMPANEL_VSCROLLBAR, HWND_TOP, _
                   rc.right - nScrollWidth, _
@@ -260,7 +260,7 @@ function frmPanelVScroll_Show( byval hWndParent as HWND ) as LRESULT
    end if
    
    HWND_FRMPANEL_VSCROLLBAR = pWindow->Create( hWndParent, _
-        "", @frmPanelVScroll_WndProc, 0, 0, SCROLLBAR_WIDTH, 0, _
+        "", @frmPanelVScroll_WndProc, 0, 0, SCROLLBAR_WIDTH_PANEL, 0, _
         WS_POPUP or WS_CLIPSIBLINGS or WS_CLIPCHILDREN, _
         ExStyles )
    pWindow->Brush = ghPanel.hBackBrushScrollBar

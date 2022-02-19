@@ -30,7 +30,7 @@ Resources:
 - Visit http://www.planetsquires.com/protect/forum/index.php for support forum.
 
 WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
+Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 
 The WinFBE editor is licensed under the GNU GPLv3 or later.
 

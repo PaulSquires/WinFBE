@@ -108,6 +108,8 @@ dim shared gLasso   as clsLasso
 #include once "frmStatusBar.inc"
 #include once "frmImageManager.inc" 
 #include once "frmPanelVScroll.inc" 
+#include once "frmEditorHScroll.inc" 
+#include once "frmEditorVScroll.inc" 
 #include once "frmPanel.inc" 
 #include once "frmExplorer.inc" 
 #include once "frmBookmarks.inc" 

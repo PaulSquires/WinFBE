@@ -261,11 +261,12 @@ function frmFunctions_OnDrawItem( _
          rcBitmap.right = rcBitmap.left + pWindow->ScaleX(20)
          SelectObject( memDC, ghMenuBar.hFontSymbol )
          wsStyle = DT_NOPREFIX or DT_CENTER or DT_TOP or DT_SINGLELINE  
-         if isIconDown then 
-            DrawText( memDC, wszChevronDown, -1, cast(lpRect, @rcBitmap), wsStyle )
-         else   
-            DrawText( memDC, wszChevronRight, -1, cast(lpRect, @rcBitmap), wsStyle )
-         end if
+'         if isIconDown then 
+'            DrawText( memDC, wszChevronDown, -1, cast(lpRect, @rcBitmap), wsStyle )
+'         else   
+'            DrawText( memDC, wszChevronRight, -1, cast(lpRect, @rcBitmap), wsStyle )
+'         end if
+         DrawText( memDC, wszDocumentIcon, -1, cast(lpRect, @rcBitmap), wsStyle )
          wszCaption = wszCaption
          rcText.left = rcBitmap.right
          SelectObject( memDC, ghMenuBar.hFontMenuBar )
@@ -455,13 +456,13 @@ function frmFunctionsListBox_SubclassProc ( _
             dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
             dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
             if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
-               ' Toggle the show/hide of bookmarks under this node
-               if pDoc then pDoc->bFunctionsExpanded = not pDoc->bFunctionsExpanded
-               if (pDoc->bFunctionsExpanded) orelse (pDoc->bHasFunctions = false) then
+'               ' Toggle the show/hide of bookmarks under this node
+'               if pDoc then pDoc->bFunctionsExpanded = not pDoc->bFunctionsExpanded
+'               if (pDoc->bFunctionsExpanded) orelse (pDoc->bHasFunctions = false) then
                   OpenSelectedDocument( pDoc->DiskFilename, "", -1 )
-               end if   
-               ' allow listbox click event to fully process 
-               PostMessage( hWin, MSG_USER_LOAD_FUNCTIONSFILES, 0, 0 )
+'               end if   
+'               ' allow listbox click event to fully process 
+'               PostMessage( hWin, MSG_USER_LOAD_FUNCTIONSFILES, 0, 0 )
             else
                ' Attempt to show the function name
                dim as long nLineNum = getFunctionsLinenumber( wszCaption )
@@ -619,6 +620,13 @@ function LoadFilesAndFunctions() as long
    ' Function node line format. 
    ' 231%FunctionName  ' function starts at line 231 of the file
 
+   ' **** FEB 8, 2022. Change approach to NOT allow the Functions list to be expanded
+   ' or collapsed. This should lead to a better user experience because the now all
+   ' functions are always shown and available and the user can easily activate the base
+   ' filename by clicking on it. The user can also still always navigate between files
+   ' via the Explorer.
+   ' Leave the expand/collapse code in case it is decided later to revert this approach.
+   
    ' Iterate all pDoc in the project/files list. Create an array and then
    ' sort it alphabetically.
    dim as long ub, idx

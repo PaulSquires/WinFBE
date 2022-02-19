@@ -151,7 +151,8 @@ Enum
    IDM_FUNCTIONS_VIEWASTREE
    IDM_FUNCTIONS_VIEWASLIST
    IDM_SETCATEGORY
-   
+   IDM_CLOSEPANEL
+      
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
    IDM_CONSOLE, IDM_GUI, IDM_RESOURCE   ' used for compiler directives in code
    IDM_ADDIMAGE, IDM_REMOVEIMAGE, IDM_FORMATIMAGE, IDM_ATTACHIMAGE, IDM_DETACHIMAGE
@@ -180,6 +181,8 @@ dim shared as HWnd HWND_FRMEXPLORER, HWND_FRMEXPLORER_LISTBOX
 dim shared as HWnd HWND_FRMFUNCTIONS, HWND_FRMFUNCTIONS_LISTBOX
 dim shared as hwnd HWND_FRMBOOKMARKS, HWND_FRMBOOKMARKS_LISTBOX
 dim shared as hwnd HWND_FRMPANEL, HWND_FRMPANEL_VSCROLLBAR
+dim shared as hwnd HWND_FRMEDITOR_HSCROLLBAR(1)
+dim shared as hwnd HWND_FRMEDITOR_VSCROLLBAR(1)
 
 dim shared as HICON ghIconTick, ghIconNoTick
 dim shared as long ghIconGood, ghIconBad
@@ -268,7 +271,8 @@ const FUNCTIONLISTITEM_HEIGHT = 22
 const MENUBAR_HEIGHT = 30
 const TOPTABS_HEIGHT = 36
 const STATUSBAR_HEIGHT = 22
-const SCROLLBAR_WIDTH = 10
+const SCROLLBAR_WIDTH_PANEL = 10
+const SCROLLBAR_WIDTH_EDITOR = 12
 const SCROLLBAR_HEIGHT = 10
 
 ' array that holds the names of all fonts on the target system
@@ -298,7 +302,7 @@ dim shared as wstring * 10 _
    wszDocumentIcon, wszUpArrow, wszDownArrow, wszSelection, wszCheckmark, _
    wszClose, wszDirty, wszCompileResultIcon, wszMatchCase, wszWholeWord, _
    wszPreserveCase, wszReplace, wszReplaceAll, wszMoreActions, _
-   wszTriangleDown, wszTriangleUp
+   wszTriangleDown, wszTriangleUp, wszSplitEditor
 
 ' Symbol characters display in top menus, frmExplorer, and tab control
 if isWineActive() then
@@ -344,4 +348,5 @@ else
    wszReplace = !"\uE297"           ' replace
    wszReplaceAll = !"\uE299"        ' replace all
    wszMoreActions = !"\u22EF"       ' ...
+   wszSplitEditor = !"\u229F"       ' squared minus
 end if
