@@ -263,7 +263,7 @@ function clsDocument.CreateCodeWindow( _
             SendMessage( this.hWindow(i), SCI_SETILEXER, 0, cast(LPARAM, pLexer) )
          end if
          if SciMsg = 0 then
-            SciMsg = cast( Scintilla_Directfunction, SendMessage( this.hWindow(0), SCI_GETDIRECTfunction, 0, 0 ) )
+            SciMsg = cast( Scintilla_Directfunction, SendMessage( this.hWindow(0), SCI_GETDIRECTFUNCTION, 0, 0 ) )
          end if
          ' Call the direct function for speed purposes rather than relying on the traditional SendMessage method.
          m_pSci(i) = cast(any ptr, SendMessage( this.hWindow(i), SCI_GETDIRECTPOINTER, 0, 0 )) 
@@ -2174,7 +2174,9 @@ function clsDocument.LinesPerPage( byval idxWindow as long ) as long
    ' SCI_LINESONSCREEN is not a reliable count of lines per screen because
    ' it does not take into account any extra ascent or descent value.
    dim as long nLineHeight = SciMsg( pSci, SCI_TEXTHEIGHT, 0, 0 )
-   dim as long nHeight = this.origPosition(idxWindow).bottom - this.origPosition(idxWindow).top
+   dim as RECT rc = AfxGetWindowRect(this.hWindow(idxWindow))
+   MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 )
+   dim as long nHeight = rc.bottom - rc.top
    function = (nHeight / nLineHeight)
 end function
 

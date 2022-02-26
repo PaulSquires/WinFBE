@@ -688,6 +688,9 @@ end Function
 ' ========================================================================================
 function frmMain_OnPaint( byval HWnd as HWnd ) as LRESULT
             
+   dim pWindow as CWindow ptr = AfxCWindowPtr( HWND_FRMMAIN )
+   if pWindow = 0 then exit function
+
    dim as PAINTSTRUCT ps
    dim as HPEN hPen
    dim as HDC hDc
@@ -699,25 +702,22 @@ function frmMain_OnPaint( byval HWnd as HWnd ) as LRESULT
    
    FillRect( hDC, @ps.rcPaint, ghBrushMainBackground )
 
+   ' Draw any horizontal splitter between the two edit windows
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    if pDoc then
-      ' Get location of vertical scrollbar and draw splitter button right above it.
-'      if IsWindowVisible(pDoc->hScrollbar) then
-'         GetWindowRect(pDoc->hScrollbar, @rc)
-'         rc.top = rc.top - SPLITSIZE: rc.bottom = rc.top + SPLITSIZE
-'         MapWindowPoints(0, HWND_FRMMAIN, cast(POINT ptr, @rc), 2)
-'         pDoc->rcSplitButton = rc
-'         if IsWindowVisible(pDoc->hWindow(1)) then 
-'            ' if the window is visible then we need to extend the splitter hit
-'            ' area to include all the way to left edge of the client area.
-'            if IsWindowVisible(HWND_FRMPANEL) then 
-'               rc.left = AfxGetWindowWidth( HWND_FRMPANEL )
-'               pDoc->rcSplitButton.left = rc.left
-'            end if   
-'         end if
-'         DrawFrameControl( hDC, @rc, DFC_BUTTON, DFCS_BUTTONPUSH)
-'      end if
-
+      if pDoc->bEditorIsSplit then
+         if IsWindowVisible( pDoc->hWindow(1) ) then 
+            GetWindowRect( pDoc->hWindow(1), @rc )
+            rc.top = rc.bottom
+            rc.bottom = rc.top + pWindow->ScaleY(SPLITSIZE)
+            rc.right = rc.right + pWindow->ScaleX(SCROLLBAR_WIDTH_EDITOR)
+            MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 )
+            pDoc->rcSplitButton = rc
+            dim as HBRUSH hBackBrush = CreateSolidBrush( ghEditor.Divider )
+            FillRect( hDC, @rc, hBackBrush )
+            DeleteObject( hBackBrush )
+         end if
+      end if
    end if
    
    RestoreDC hDC, -1 
@@ -853,42 +853,70 @@ function frmMain_PositionWindows() as LRESULT
          ShowWindow( pDoc->hWndDesigner, SW_HIDE )
          ShowWindow( HWND_FRMVDTOOLBOX, SW_HIDE )
 
-         rcDoc.top = rcDoc.top + pWindow->ScaleY(4)
-
-         dim as long nSplitSize 
-         dim as long iScrollbarWidth = AfxGetWindowWidth(HWND_FRMEDITOR_VSCROLLBAR(0)) 
+         dim as long nSplitSize = pWindow->ScaleY(SPLITSIZE)
+         dim as long iVScrollbarWidth = AfxGetWindowWidth(HWND_FRMEDITOR_VSCROLLBAR(0)) 
+         dim as long iHScrollbarHeight 
 
          ' TOP EDIT WINDOW (optional)
-         if pDoc->SplitY - rcDoc.top <= 0 then 
+         if pDoc->bEditorIsSplit = false then 
             ShowWindow( pDoc->hWindow(1), SW_HIDE )      
+            ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(1), SW_HIDE )
+            ShowWindow( HWND_FRMEDITOR_HSCROLLBAR(1), SW_HIDE )
             nSplitSize = 0              
          Else
+            ' Position the TOP split editor window
+            iHScrollbarHeight = AfxGetWindowHeight(HWND_FRMEDITOR_HSCROLLBAR(1)) 
+            if IsWindowVisible(HWND_FRMEDITOR_HSCROLLBAR(1)) = 0 then iHScrollbarHeight = 0
             SetWindowPos( pDoc->hWindow(1), 0, _
                           rcDoc.left, rcDoc.top, _
-                          rcDoc.right - rcDoc.left, _
-                          pDoc->SplitY - rcDoc.top, _ 
+                          rcDoc.right - rcDoc.left - iVScrollbarWidth, _
+                          pDoc->SplitY - rcDoc.top - iHScrollbarHeight, _ 
                           lStyle )
-            nSplitSize = SPLITSIZE 
-            pDoc->origPosition(1) = AfxGetWindowRect(pDoc->hWindow(1))             
+
+            ' Position the TOP view horizontal scroll bar
+            if IsWindowVisible(HWND_FRMEDITOR_HSCROLLBAR(1)) then
+               SetWindowPos( HWND_FRMEDITOR_HSCROLLBAR(1), 0, _ 
+                             rcDoc.left, pDoc->SplitY - rcDoc.top - iHScrollbarHeight, _
+                             rcDoc.right - rcDoc.left - iVScrollbarWidth, iHScrollbarHeight, _
+                             SWP_NOZORDER )
+            end if
+            
+            ' Position the TOP view vertical scroll bar
+            ' Determine if the VScrollBar should be displayed
+            if pDoc->GetLineCount > pDoc->LinesPerPage(1) then
+               SetWindowPos( HWND_FRMEDITOR_VSCROLLBAR(1), 0, _ 
+                             rcDoc.right - iVScrollbarWidth, rcDoc.top, _
+                             iVScrollbarWidth, pDoc->SplitY - rcDoc.top, _ 
+                             lStyle )
+            end if
          end if
          
          ' BOTTOM (MAIN) EDIT WINDOW
-         dim as long nTop = Max( rcDoc.top, pDoc->SplitY )
+         dim as long nTop = Max( rcDoc.top, pDoc->SplitY + nSplitSize )
+         iHScrollbarHeight = AfxGetWindowHeight(HWND_FRMEDITOR_HSCROLLBAR(0)) 
+         if IsWindowVisible(HWND_FRMEDITOR_HSCROLLBAR(0)) = 0 then iHScrollbarHeight = 0
 
          SetWindowPos( pDoc->hWindow(0), 0, _
-                       rcDoc.left, nTop + nSplitSize, _
-                       rcDoc.right - rcDoc.left - iScrollbarWidth, _
-                       rcDoc.bottom - nTop - nSplitSize - nDesignCodeTabHeight, _
+                       rcDoc.left, nTop, _
+                       rcDoc.right - rcDoc.left - iVScrollbarWidth, _
+                       rcDoc.bottom - nTop - nDesignCodeTabHeight - iHScrollbarHeight, _
                        lStyle )
-         pDoc->origPosition(0) = AfxGetWindowRect(pDoc->hWindow(0))             
 
-         ' Position the main view vertical scroll bar
+         ' Position the MAIN view horizontal scroll bar
+         if IsWindowVisible(HWND_FRMEDITOR_HSCROLLBAR(0)) then
+            SetWindowPos( HWND_FRMEDITOR_HSCROLLBAR(0), 0, _ 
+                          rcDoc.left, rcDoc.bottom - nTop - nDesignCodeTabHeight - iHScrollbarHeight, _
+                          rcDoc.right - rcDoc.left - iVScrollbarWidth, iHScrollbarHeight, _
+                          SWP_NOZORDER )
+         end if
+
+         ' Position the MAIN view vertical scroll bar
          ' Determine if the VScrollBar should be displayed
          if pDoc->GetLineCount > pDoc->LinesPerPage(0) then
             SetWindowPos( HWND_FRMEDITOR_VSCROLLBAR(0), 0, _ 
-                          rcDoc.right - iScrollbarWidth, nTop + SPLITSIZE, _
-                          iScrollbarWidth, _
-                          rcDoc.bottom - nTop - SPLITSIZE - nDesignCodeTabHeight, _ 
+                          rcDoc.right - iVScrollbarWidth, nTop + SPLITSIZE, _
+                          iVScrollbarWidth, _
+                          rcDoc.bottom - nTop - nDesignCodeTabHeight, _ 
                           lStyle )
          else
             ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(0), SW_HIDE )
@@ -1505,6 +1533,15 @@ function frmMain_OnLButtonUp( _
       if pDoc->bSizing then
          pDoc->bSizing = false
          ReleaseCapture
+         ' if we try to split before the start of the code window then simply
+         ' stop the splitting altogether.
+         dim as RECT rc = AfxGetWindowRect( pDoc->hWindow(1) )
+         MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 )
+         if pDoc->SplitY <= rc.top then
+            pDoc->SplitY = 0
+            pDoc->bEditorIsSplit = false
+            frmMain_PositionWindows()
+         end if   
       end if
    end if   
    SetCursor( LoadCursor( null, IDC_ARROW ))
@@ -1532,6 +1569,7 @@ function frmMain_OnLButtonDblClk( _
          if PtInRect(@pDoc->rcSplitButton, pt) then 
             pDoc->bSizing = false
             pDoc->SplitY = 0
+            pDoc->bEditorIsSplit = false
             ReleaseCapture
             frmMain_PositionWindows
          end if

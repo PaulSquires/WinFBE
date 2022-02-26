@@ -173,10 +173,11 @@ end function
 function frmEditorHScroll_Show( ByVal hWndParent as HWnd ) as LRESULT
 
    '  Create the main window and child controls
-   dim pWindow as CWindow ptr = new CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   dim pWindow as CWindow ptr
 
    for i as long = 0 to 1
+      pWindow = new CWindow
+      pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
       HWND_FRMEDITOR_HSCROLLBAR(i) = pWindow->Create( hWndParent, _
            "", @frmEditorHScroll_WndProc, 0, 0, 0, SCROLLBAR_HEIGHT, _
            WS_CHILD or WS_CLIPSIBLINGS or WS_CLIPCHILDREN, WS_EX_NOACTIVATE )
@@ -188,73 +189,38 @@ end function
 
 
 ' ========================================================================================
-' frmEditorHScroll_RepositionEditor
+' frmEditorHScroll_NeedScrollBar
+' Determine based on visible line lengths if a scrollbar should be displayed
 ' ========================================================================================
-function frmEditorHScroll_RepositionEditor( _
-            byval hScrollBar as HWND, _
-            byval newState as long, _
+function frmEditorHScroll_NeedScrollBar( _
             byval pDoc as clsDocument ptr, _
             byval idxWindow as long _
             ) as long
-   
-   dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMMAIN)
-   if pWindow = 0 Then exit function
 
-   if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
-      exit function
-   end if
-
-   dim as long nHeightScrollbar = pWindow->ScaleY(SCROLLBAR_HEIGHT)
-   
-   ' Position the HScrollbar immediately underneath the edit window
    dim as RECT rc = AfxGetWindowRect( pDoc->hWindow(idxWindow) )
-   MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast( POINT ptr, @rc ), 2 )
-
-   ' If we are wanting to show the HScrollbar then test the visible lines to see if any
-   ' are actually wider than screen width. If not, then no need to show the HScrollbar.
+   MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 )
+   
    ' We have to use PositionFromPoint calculations because the LinesOnScreen message does
    ' not take into account extra ascent and descent values.
-   if newState = SW_SHOWNA then
-      dim as long GetFirstVisiblePos, GetLastVisiblePos, GetFirstVisibleLine, GetLastVisibleLine
-      dim as long ClientWidth = (rc.right - rc.left)
-      dim as long ClientHeight = (rc.bottom - rc.top)
-      GetFirstVisiblePos = SciExec( pDoc->hWindow(idxWindow), SCI_POSITIONFROMPOINT, 0, 0 )
-      GetLastVisiblePos = SciExec( pDoc->hWindow(idxWindow), SCI_POSITIONFROMPOINT, ClientWidth, ClientHeight )
-      GetFirstVisibleLine = SciExec( pDoc->hWindow(idxWindow), SCI_LINEFROMPOSITION, GetFirstVisiblePos, 0 )
-      GetLastVisibleLine = SciExec( pDoc->hWindow(idxWindow), SCI_LINEFROMPOSITION, GetLastVisiblePos, 0 )
+   dim as long GetFirstVisiblePos, GetLastVisiblePos, GetFirstVisibleLine, GetLastVisibleLine
+   dim as long ClientWidth = (rc.right - rc.left)
+   dim as long ClientHeight = (rc.bottom - rc.top)
+   GetFirstVisiblePos = SciExec( pDoc->hWindow(idxWindow), SCI_POSITIONFROMPOINT, 0, 0 )
+   GetLastVisiblePos = SciExec( pDoc->hWindow(idxWindow), SCI_POSITIONFROMPOINT, ClientWidth, ClientHeight )
+   GetFirstVisibleLine = SciExec( pDoc->hWindow(idxWindow), SCI_LINEFROMPOSITION, GetFirstVisiblePos, 0 )
+   GetLastVisibleLine = SciExec( pDoc->hWindow(idxWindow), SCI_LINEFROMPOSITION, GetLastVisiblePos, 0 )
 
-      dim as long GetXOffset, GetLineEndPosition, endPos
-      dim as boolean needHSB = false
-      'dim as long x = ClientWidth
-      for i as long = GetFirstVisibleLine to GetLastVisibleLine
-         ' GetXOffset adds left scroll spacing if we are already scrolled left some.
-         'GetXOffset = SciExec( pDoc->hWindow(idxWindow), SCI_GETXOFFSET, 0, 0 )
-         GetLineEndPosition = SciExec( pDoc->hWindow(idxWindow), SCI_GETLINEENDPOSITION, i, 0 )
-         endPos = SciExec( pDoc->hWindow(idxWindow), SCI_POINTXFROMPOSITION, 0, GetLineEndPosition )
-         needHSB = endPos > ClientWidth
-         if needHSB then exit for
-      next
-      if needHSB = false then newState = SW_HIDE
-   end if
-   
-   if newState = SW_SHOWNA then
-      dim as long nHeight = rc.bottom-rc.top-nHeightScrollbar
-      SetWindowPos( pDoc->hWindow(idxWindow), 0, _
-                      0, 0, rc.right-rc.left, nHeight, _
-                      SWP_NOMOVE or SWP_NOZORDER or SWP_SHOWWINDOW )
-      SetWindowPos( hScrollBar, 0, _
-                      rc.left, rc.top+nHeight, rc.right-rc.left, nHeightScrollbar, _
-                      SWP_NOZORDER )
-      ShowWindow( hScrollBar, SW_SHOWNA )                
-   else
-      ShowWindow( hScrollBar, SW_HIDE ) 
-      dim as RECT rc = pDoc->origPosition(idxWindow) 
-      MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 )              
-      SetWindowPos( pDoc->hWindow(idxWindow), 0, _
-                      0, 0, rc.right-rc.left, rc.bottom-rc.top, _
-                      SWP_NOMOVE or SWP_NOZORDER or SWP_SHOWWINDOW )
-   end if
-   
-   function = 0
-   
+   dim as long GetXOffset, GetLineEndPosition, endPos
+   dim as boolean needHSB = false
+   'dim as long x = ClientWidth
+   for i as long = GetFirstVisibleLine to GetLastVisibleLine
+      ' GetXOffset adds left scroll spacing if we are already scrolled left some.
+      'GetXOffset = SciExec( pDoc->hWindow(idxWindow), SCI_GETXOFFSET, 0, 0 )
+      GetLineEndPosition = SciExec( pDoc->hWindow(idxWindow), SCI_GETLINEENDPOSITION, i, 0 )
+      endPos = SciExec( pDoc->hWindow(idxWindow), SCI_POINTXFROMPOSITION, 0, GetLineEndPosition )
+      needHSB = endPos > ClientWidth
+      if needHSB then exit for
+   next
+   function = iif( needHSB, SW_SHOWNA, SW_HIDE )
 end function
+

@@ -1875,6 +1875,7 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
                ' Set the saved positions
                pDoc->bDesignerViewLoad = bDesignerView
                pDoc->SplitY = nSplitPosition
+               if pDoc->SplitY then pDoc->bEditorIsSplit = true
                SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
                SciExec( pDoc->hWindow(0), SCI_GOTOPOS, nPosition, 0) 
                SciExec( pDoc->hWindow(1), SCI_SETFIRSTVISIBLELINE, nFirstLine1, 0) 
@@ -2258,6 +2259,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
             ' Set the saved positions
             pDoc->bDesignerViewLoad = docData(i).IsDesignerView
             pDoc->SplitY = docData(i).nSplitPosition
+            if pDoc->SplitY then pDoc->bEditorIsSplit = true
             SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine, 0) 
             SciExec( pDoc->hWindow(0), SCI_GOTOPOS, docData(i).nPosition, 0) 
             SciExec( pDoc->hWindow(1), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine1, 0) 

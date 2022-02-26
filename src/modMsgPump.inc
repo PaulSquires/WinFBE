@@ -60,18 +60,22 @@ function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
    ' Should we show an Editor HScrollbar
    dim as clsDocument ptr pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc then
-      for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
-         dim as boolean isVisible = IsWindowVisible( HWND_FRMEDITOR_HSCROLLBAR(i) )
-         dim as long curState = iif(isVisible, SW_SHOWNA, SW_HIDE)
-         dim as long newState = SW_HIDE
-         if isMouseOverWindow( pDoc->hWindow(i) ) orelse _
-            isMouseOverWindow( HWND_FRMEDITOR_HSCROLLBAR(i) ) then 
-            newState = SW_SHOWNA
-         end if
-         if newState <> curState then 
-            frmEditorHScroll_RepositionEditor( HWND_FRMEDITOR_HSCROLLBAR(i), newState, pDoc, i )
-         end if
-      next
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
+      else
+         for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
+            dim as boolean isVisible = IsWindowVisible( HWND_FRMEDITOR_HSCROLLBAR(i) )
+            dim as long curState = iif(isVisible, SW_SHOWNA, SW_HIDE)
+            dim as long newState = SW_HIDE
+            if isMouseOverWindow( pDoc->hWindow(i) ) orelse _
+               isMouseOverWindow( HWND_FRMEDITOR_HSCROLLBAR(i) ) then 
+               newState = frmEditorHScroll_NeedScrollBar( pDoc, i )
+            end if
+            if newState <> curState then 
+               ShowWindow( HWND_FRMEDITOR_HSCROLLBAR(i), newState )
+               frmMain_PositionWindows()
+            end if
+         next
+      end if
    end if
    
    ' we want our mouse message to continue so return FALSE

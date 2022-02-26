@@ -25,9 +25,6 @@ Type LASTPOSITION_TYPE
 End Type
 Dim Shared gLastPosition As LASTPOSITION_TYPE
 
-dim shared as long SPLITSIZE 
-SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for split editing windows
-
 declare Function frmMain_GotoFile( ByVal pDoc As clsDocument Ptr, byval nMenuId as long ) As Long
 declare Function frmMain_GotoLastPosition() As Long
 declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long

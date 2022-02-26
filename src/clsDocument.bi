@@ -95,7 +95,6 @@ type clsDocument
       ' hWindow(0) is our MAIN control (bottom)
       ' hWindow(1) is our split control (top)
       hWindow(1)        as HWnd   ' Scintilla split edit windows 
-      origPosition(1)   as RECT   ' original Scintilla position to restore when HScroll show/hide
       
       ' Visual designer related
       MenuItems(any)    as clsMenuItem
@@ -163,6 +162,7 @@ type clsDocument
       ' Following used for split edit views
       rcSplitButton     as RECT        ' Split gripper vertical for Scintilla window
       SplitY            as long        ' Y coordinate of vertical splitter
+      bEditorIsSplit    as boolean
       
       static NextFileNum as long
       

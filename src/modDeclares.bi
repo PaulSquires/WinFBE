@@ -274,6 +274,9 @@ const STATUSBAR_HEIGHT = 22
 const SCROLLBAR_WIDTH_PANEL = 10
 const SCROLLBAR_WIDTH_EDITOR = 12
 const SCROLLBAR_HEIGHT = 10
+const SCROLLBAR_MINTHUMBSIZE = 30
+const SPLITSIZE = 4
+
 
 ' array that holds the names of all fonts on the target system
 dim shared gFontNames( any ) as CWSTR

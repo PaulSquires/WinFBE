@@ -29,16 +29,22 @@ function frmEditorVScroll_calcVThumbRect( byval pDoc as clsDocument ptr ) as boo
 
    ' calculate the vertical scrollbars in client coordinates
    for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
-      rc = pDoc->origPosition(i)
+      rc = AfxGetWindowRect(pDoc->hWindow(i))
       MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 ) 
       dim as long clientHeight = rc.bottom - rc.top
       dim as long firstVisibleLine = SciExec( pDoc->hWindow(i), SCI_GETFIRSTVISIBLELINE, 0, 0 )
       dim as long iScrollbarWidth = AfxGetWindowWidth(HWND_FRMEDITOR_VSCROLLBAR(i)) 
+      dim as long minThumbHeight = pWindow->ScaleY(SCROLLBAR_MINTHUMBSIZE)
       SetRectEmpty( @gEditorVScroll(i).rc )
       with gEditorVScroll(i)
          .linesPerPage = pDoc->linesPerPage(i)
          .numLines = pDoc->GetLineCount
          .thumbHeight = (.linesPerPage / .numLines) * clientHeight
+         ' If the thumb height is less than the minimum default then adjust parameters so
+         ' that the viewport can compensate for the adjustments.
+'         if .thumbHeight < minThumbHeight then
+'            .thumbHeight = minThumbHeight
+'         end if
          .rc.left = 0
          .rc.right = .rc.left + iScrollbarWidth
          .rc.top = ((firstVisibleLine / .numLines) * clientHeight)
@@ -167,16 +173,16 @@ end function
 function frmEditorVScroll_Show( ByVal hWndParent as HWnd ) as LRESULT
 
    '  Create the main window and child controls
-   dim pWindow as CWindow ptr = new CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   dim pWindow as CWindow ptr 
 
    for i as long = 0 to 1
+      pWindow = new CWindow
+      pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
       HWND_FRMEDITOR_VSCROLLBAR(i) = pWindow->Create( hWndParent, _
            "", @frmEditorVScroll_WndProc, 0, 0, SCROLLBAR_WIDTH_EDITOR + 1, 0, _
            WS_CHILD or WS_CLIPSIBLINGS or WS_CLIPCHILDREN, WS_EX_NOACTIVATE )
-      pWindow->Brush = GetSysColorBrush( COLOR_WINDOW )  'ghTopTabs.hBackBrushScrollBar
    next
-   
+
    function = 0
    
 end function
