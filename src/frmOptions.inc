@@ -181,6 +181,16 @@ Function frmOptions_OnCommand( _
       Case IDC_FRMOPTIONS_CMDOK
          If codeNotify = BN_CLICKED Then
             frmOptions_SaveEditorOptions()
+            ' Reload the theme file in case it has changed
+            LoadThemeFile()
+            ' Refresh the frmOutput controls (listviews and RichEdits)
+            AfxRedrawWindow( HWND_FRMOUTPUT )
+            frmOutput_SetControlColors()
+            frmOutput_PositionWindows()
+            ' Refresh the menubar. The rest of the GUI will refresh via frmMain_PositionWindows
+            AfxRedrawWindow( HWND_FRMMAIN_MENUBAR )
+            frmMenuBar_PositionWindows()
+            
             ' Reposition main windows in case hide toolbar/statusbar selected
             frmMain_PositionWindows
             ' Apply the newly saved options to all open Scintilla windows

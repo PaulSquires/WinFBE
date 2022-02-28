@@ -626,24 +626,25 @@ function LoadThemeFile() as boolean
    else 
       wszSymbolFontName = wszFontName
    end if
-
-   if ghMenuBar.hFontMenuBar then DeleteObject(ghMenuBar.hFontMenuBar)
-   ghMenuBar.hFontMenuBar = pWindow->CreateFont(wszFontName, 10, FW_NORMAL, , , , DEFAULT_CHARSET)
-   
-   if ghStatusBar.hFontStatusBar then DeleteObject(ghStatusBar.hFontStatusBar)
-   ghStatusBar.hFontStatusBar = pWindow->CreateFont(wszFontName, 9, FW_NORMAL, , , , DEFAULT_CHARSET)
-
-   if ghStatusBar.hFontStatusBarBold then DeleteObject(ghStatusBar.hFontStatusBarBold)
-   ghStatusBar.hFontStatusBarBold = pWindow->CreateFont(wszFontName, 9, FW_BOLD, , , , DEFAULT_CHARSET)
-
-   if ghMenuBar.hFontSymbolLargeBold then DeleteObject(ghMenuBar.hFontSymbolLargeBold)
-   ghMenuBar.hFontSymbolLargeBold = pWindow->CreateFont(wszSymbolFontName, 12, FW_BOLD, , , , DEFAULT_CHARSET)
-
-   if ghMenuBar.hFontSymbol then DeleteObject(ghMenuBar.hFontSymbol)
-   ghMenuBar.hFontSymbol = pWindow->CreateFont(wszSymbolFontName, 10, FW_NORMAL, , , , DEFAULT_CHARSET)
-
-   if ghMenuBar.hFontSymbolSmall then DeleteObject(ghMenuBar.hFontSymbolSmall)
-   ghMenuBar.hFontSymbolSmall = pWindow->CreateFont(wszSymbolFontName, 9, FW_NORMAL, , , , DEFAULT_CHARSET)
+ 
+   if ghMenuBar.hFontMenuBar = 0 then
+      ghMenuBar.hFontMenuBar = pWindow->CreateFont(wszFontName, 10, FW_NORMAL, , , , DEFAULT_CHARSET)
+   end if
+   if ghStatusBar.hFontStatusBar = 0 then
+      ghStatusBar.hFontStatusBar = pWindow->CreateFont(wszFontName, 9, FW_NORMAL, , , , DEFAULT_CHARSET)
+   end if
+   if ghStatusBar.hFontStatusBarBold = 0 then
+      ghStatusBar.hFontStatusBarBold = pWindow->CreateFont(wszFontName, 9, FW_BOLD, , , , DEFAULT_CHARSET)
+   end if
+   if ghMenuBar.hFontSymbolLargeBold = 0 then
+      ghMenuBar.hFontSymbolLargeBold = pWindow->CreateFont(wszSymbolFontName, 12, FW_BOLD, , , , DEFAULT_CHARSET)
+   end if
+   if ghMenuBar.hFontSymbol = 0 then
+      ghMenuBar.hFontSymbol = pWindow->CreateFont(wszSymbolFontName, 10, FW_NORMAL, , , , DEFAULT_CHARSET)
+   end if
+   if ghMenuBar.hFontSymbolSmall = 0 then
+      ghMenuBar.hFontSymbolSmall = pWindow->CreateFont(wszSymbolFontName, 9, FW_NORMAL, , , , DEFAULT_CHARSET)
+   end if
       
    ' set some global brush handles so that we don't always have to be
    ' recreating them every time they are used.

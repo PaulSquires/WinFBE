@@ -784,6 +784,38 @@ End Function
 
 
 ' ========================================================================================
+' Set the colors for the frmOutput controls. This is also called when the 
+' user changes the theme (dark/light)
+' ========================================================================================
+function frmOutput_SetControlColors() as long
+   dim cf as CHARFORMATW 
+   cf.cbSize = sizeof(cf)
+   cf.dwMask = CFM_COLOR
+   cf.crTextColor = ghOutput.forecolorhot
+
+   dim as HWND hCtl
+   hCtl = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE )
+   SendMessage( hCtl, EM_SETCHARFORMAT, SCF_ALL, cast(LPARAM, @cf) ) 
+   SendMessage( hCtl, EM_SETBKGNDCOLOR , 0, cast(LPARAM, ghOutput.backcolor) )
+   hCtl = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES )
+   SendMessage( hCtl, EM_SETCHARFORMAT, SCF_ALL, cast(LPARAM, @cf) ) 
+   SendMessage( hCtl, EM_SETBKGNDCOLOR , 0, cast(LPARAM, ghOutput.backcolor) )
+   hCtl = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVRESULTS )
+   ListView_SetBkColor( hCtl, ghOutput.BackColor )
+   ListView_SetTextColor( hCtl, ghOutput.ForeColorHot )
+   ListView_SetTextBkColor( hCtl, ghOutput.BackColor )
+   hCtl = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVSEARCH )
+   ListView_SetBkColor( hCtl, ghOutput.BackColor )
+   ListView_SetTextColor( hCtl, ghOutput.ForeColorHot )
+   ListView_SetTextBkColor( hCtl, ghOutput.BackColor )
+   hCtl = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO )
+   ListView_SetBkColor( hCtl, ghOutput.BackColor )
+   ListView_SetTextColor( hCtl, ghOutput.ForeColorHot )
+   ListView_SetTextBkColor( hCtl, ghOutput.BackColor )
+   function = 0
+end function
+
+' ========================================================================================
 ' frmOutput_Show
 ' ========================================================================================
 Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
@@ -807,19 +839,12 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
         cast(SUBCLASSPROC, @frmOutputTabs_SubclassProc), _
         IDC_FRMOUTPUT_TABS, cast(DWORD_PTR, @pWindow))
 
-      dim cf as CHARFORMATW 
-      cf.cbSize = sizeof(cf)
-      cf.dwMask = CFM_COLOR
-      cf.crTextColor = ghOutput.forecolorhot
-
    hCtl = pWindow->AddControl("RICHEDIT", , IDC_FRMOUTPUT_TXTLOGFILE, "", _
                  0, 0, 0, 0, _
                  WS_CHILD or WS_TABSTOP or WS_VSCROLL or _
                  ES_MULTILINE or ES_LEFT or ES_AUTOVSCROLL, _
                  WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR )
       AfxSetWindowFont( hCtl, ghStatusBar.hFontStatusBar )
-      SendMessage( hCtl, EM_SETCHARFORMAT, SCF_ALL, cast(LPARAM, @cf) ) 
-      SendMessage( hCtl, EM_SETBKGNDCOLOR , 0, cast(LPARAM, ghOutput.backcolor) )
       SendMessage( hCtl, EM_SETEVENTMASK, 0, cast(LPARAM, ENM_SELCHANGE or ENM_CHANGE) )
 
    hCtl = pWindow->AddControl("RICHEDIT", , IDC_FRMOUTPUT_TXTNOTES, "", _
@@ -828,8 +853,6 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
                  ES_MULTILINE or ES_LEFT or ES_AUTOVSCROLL or ES_WANTRETURN, _
                  WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR )
       AfxSetWindowFont( hCtl, ghStatusBar.hFontStatusBar )
-      SendMessage( hCtl, EM_SETCHARFORMAT, SCF_ALL, cast(LPARAM, @cf) ) 
-      SendMessage( hCtl, EM_SETBKGNDCOLOR , 0, cast(LPARAM, ghOutput.backcolor) )
       SendMessage( hCtl, EM_SETEVENTMASK, 0, cast(LPARAM, ENM_SELCHANGE or ENM_CHANGE) )
       frmOutput_ShowNotes()   
 
@@ -845,9 +868,6 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       dwExStyle = dwExStyle Or LVS_EX_FULLROWSELECT Or LVS_EX_DOUBLEBUFFER Or LVS_EX_FLATSB
       ListView_SetExtendedListViewStyle(hLV, dwExStyle)
       ListView_MakeHeaderFlat(hLV)
-      ListView_SetBkColor( hLV, ghOutput.BackColor )
-      ListView_SetTextColor( hLV, ghOutput.ForeColorHot )
-      ListView_SetTextBkColor( hLV, ghOutput.BackColor )
       ListView_AddColumn( hLV, 0, "", pWindow->ScaleX(20) )
       ListView_AddColumn( hLV, 1, L(253, "Line"), pWindow->ScaleX(75) )
       ListView_AddColumn( hLV, 2, L(254, "File"), pWindow->ScaleX(250) )
@@ -866,9 +886,6 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       dwExStyle = dwExStyle Or LVS_EX_FULLROWSELECT Or LVS_EX_DOUBLEBUFFER Or LVS_EX_FLATSB
       ListView_SetExtendedListViewStyle(hLV, dwExStyle)
       ListView_MakeHeaderFlat(hLV)
-      ListView_SetBkColor( hLV, ghOutput.BackColor )
-      ListView_SetTextColor( hLV, ghOutput.ForeColorHot )
-      ListView_SetTextBkColor( hLV, ghOutput.BackColor )
       ListView_AddColumn( hLV, 0, "", pWindow->ScaleX(20) )
       ListView_AddColumn( hLV, 1, L(253, "Line"), pWindow->ScaleX(75) )
       ListView_AddColumn( hLV, 2, L(254, "File"), pWindow->ScaleX(250) )
@@ -887,14 +904,12 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       dwExStyle = dwExStyle Or LVS_EX_FULLROWSELECT Or LVS_EX_DOUBLEBUFFER Or LVS_EX_FLATSB
       ListView_SetExtendedListViewStyle(hLV, dwExStyle)
       ListView_MakeHeaderFlat(hLV)
-      ListView_SetBkColor( hLV, ghOutput.BackColor )
-      ListView_SetTextColor( hLV, ghOutput.ForeColorHot )
-      ListView_SetTextBkColor( hLV, ghOutput.BackColor )
       ListView_AddColumn( hLV, 0, "", pWindow->ScaleX(20) )
       ListView_AddColumn( hLV, 1, L(253, "Line"), pWindow->ScaleX(75) )
       ListView_AddColumn( hLV, 2, L(254, "File"), pWindow->ScaleX(250) )
       ListView_AddColumn( hLV, 3, L(255, "Description"), pWindow->ScaleX(480) )
 
+   frmOutput_SetControlColors
    frmOutput_PositionWindows
    
    Function = 0

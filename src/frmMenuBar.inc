@@ -15,7 +15,7 @@
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmMenuBar_PositionWindows() As LRESULT
+function frmMenuBar_PositionWindows() As LRESULT
    
    DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
    If pWindow = 0 Then Exit Function
@@ -31,6 +31,7 @@ private Function frmMenuBar_PositionWindows() As LRESULT
       hCtrl = GetDlgItem( HWND_FRMMAIN_MENUBAR, i )
       nWidth = AfxGetWindowWidth(hCtrl)
       SetWindowPos( hCtrl, 0, nLeft, nTop, nWidth, nHeight, SWP_SHOWWINDOW Or SWP_NOZORDER )
+      AfxRedrawWindow( hCtrl )
       nLeft = nLeft + nWidth
    next
    
@@ -41,11 +42,12 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmMenuBar
 ' ========================================================================================
-private Function frmMenuBar_OnSize( ByVal HWnd As HWnd, _
-                                     ByVal state As UINT, _
-                                     ByVal cx As Long, _
-                                     ByVal cy As Long _
-                                     ) As LRESULT
+function frmMenuBar_OnSize( _
+            ByVal HWnd As HWnd, _
+            ByVal state As UINT, _
+            ByVal cx As Long, _
+            ByVal cy As Long _
+            ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
       frmMenuBar_PositionWindows
@@ -57,11 +59,12 @@ End Function
 ' ========================================================================================
 ' frmMenuBar Window procedure
 ' ========================================================================================
-private Function frmMenuBar_WndProc( ByVal HWnd   As HWnd, _
-                                     ByVal uMsg   As UINT, _
-                                     ByVal wParam As WPARAM, _
-                                     ByVal lParam As LPARAM _
-                                     ) As LRESULT
+function frmMenuBar_WndProc( _
+            ByVal HWnd   As HWnd, _
+            ByVal uMsg   As UINT, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_SIZE, frmMenuBar_OnSize)
@@ -76,9 +79,7 @@ private Function frmMenuBar_WndProc( ByVal HWnd   As HWnd, _
 
       hDC = BeginPaint(hWnd, @ps)
       GetClientRect(HWnd, @rc)
-
       FillRect( hDC, @rc, ghMenuBar.hPanelBrush )
-   
       EndPaint hWnd, @ps
    
    case WM_DRAWITEM
@@ -146,14 +147,14 @@ End Function
 ' ========================================================================================
 ' frmMenuBar_SubclassProc 
 ' ========================================================================================
-Function frmMenuBar_SubclassProc ( _
-                  ByVal hWin   As HWnd, _                 ' // Control window handle
-                  ByVal uMsg   As UINT, _                 ' // Type of message
-                  ByVal _wParam As WPARAM, _               ' // First message parameter
-                  ByVal _lParam As LPARAM, _               ' // Second message parameter
-                  ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
-                  ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
-                  ) As LRESULT
+function frmMenuBar_SubclassProc ( _
+            ByVal hWin   As HWnd, _                 ' // Control window handle
+            ByVal uMsg   As UINT, _                 ' // Type of message
+            ByVal _wParam As WPARAM, _               ' // First message parameter
+            ByVal _lParam As LPARAM, _               ' // Second message parameter
+            ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
+            ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
+            ) As LRESULT
 
    DIM pWindow AS CWindow PTR = AfxCWindowPtr(hWin)
 
@@ -219,10 +220,11 @@ End Function
 ' ========================================================================================
 ' frmMenuBar_CreateButton
 ' ========================================================================================
-function frmMenuBar_CreateButton( byval isFirstControl as boolean, _
-                                  byval pWindow as CWindow ptr, _
-                                  byval CtrlID as long _
-                                  ) As HWND
+function frmMenuBar_CreateButton( _
+            byval isFirstControl as boolean, _
+            byval pWindow as CWindow ptr, _
+            byval CtrlID as long _
+            ) As HWND
 
    dim as long dwStyle = WS_CHILD Or SS_NOTIFY or SS_OWNERDRAW or WS_VISIBLE 
    dim wszText as wstring * 200 = getMenuText(CtrlID)
@@ -237,7 +239,7 @@ end function
 ' ========================================================================================
 ' frmMenuBar_Show
 ' ========================================================================================
-public Function frmMenuBar_Show( ByVal hWndParent As HWnd ) As LRESULT
+function frmMenuBar_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
