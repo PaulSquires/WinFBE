@@ -727,7 +727,16 @@ function frmMain_OnPaint( byval HWnd as HWnd ) as LRESULT
    function = 0
 end Function
 
-
+' ========================================================================================
+' Hide the vertical & horizontal editor scrollbars
+' ========================================================================================
+function frmMain_HideScrollBars() as LRESULT
+      ShowWindow( HWND_FRMEDITOR_HSCROLLBAR(0), SW_HIDE )
+      ShowWindow( HWND_FRMEDITOR_HSCROLLBAR(1), SW_HIDE )
+      ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(0), SW_HIDE )
+      ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(1), SW_HIDE )
+   function = 0
+end function
 
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
@@ -803,7 +812,8 @@ function frmMain_PositionWindows() as LRESULT
       nHeightOutput = 0
    end if
 
-
+   if pDoc = 0 then frmMain_HideScrollBars() 
+   
    if pDoc then 
       ' Position the Scintilla child edit windows
       dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMMAIN)
@@ -829,6 +839,7 @@ function frmMain_PositionWindows() as LRESULT
                        rcDoc.right, _
                        rcDoc.bottom - nDesignCodeTabHeight, _
                        lStyle )
+         frmMain_HideScrollBars()
       else   
          ShowWindow( pDoc->hDesignTabCtrl, SW_HIDE )
       end if
@@ -930,7 +941,7 @@ function frmMain_PositionWindows() as LRESULT
          frmFindReplace_PositionWindows
          
       end if
-      AfxRedrawWindow( HWND_FRMMAIN )
+'      AfxRedrawWindow( HWND_FRMMAIN )
    end if
    
    ' Ensure that the correct notes are shown
