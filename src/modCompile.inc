@@ -361,7 +361,7 @@ public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
    if pDoc then
       if pDoc->IsDesigner then
          ' Show the code editor.
-         TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab
+         pDoc->DesignTabsCurSel = 1  ' 1 = code tab
          frmMain_PositionWindows
       end if
    END IF

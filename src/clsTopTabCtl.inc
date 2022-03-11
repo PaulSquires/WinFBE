@@ -235,14 +235,12 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
       ShowWindow(pDoc->hWindow(1), SW_HIDE)
       if pDoc->IsDesigner THEN 
          ShowWindow(pDoc->hWndDesigner, SW_HIDE)
-         ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
       END IF
       pDoc = pDoc->pDocNext
    loop
    
    if (pDocShow->IsDesigner) andalso (IsDesignerView(pDocShow)) THEN
       ShowWindow(pDocShow->hWndDesigner, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
-      ShowWindow(pDocShow->hDesignTabCtrl, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
       ShowWindow(HWND_FRMVDTOOLBOX, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
    else
       ' Show/Hide our current active Scintilla window and scrollbar

@@ -1866,11 +1866,7 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
                         wszFileType )
     
                iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
-               if bDesignerView then
-                  TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
-               else
-                  TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
-               end if
+               pDoc->DesignTabsCurSel = iif( bDesignerView, 0, 1 )
                
                ' Set the saved positions
                pDoc->bDesignerViewLoad = bDesignerView
@@ -2252,9 +2248,9 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          if docData(i).bLoadInTab then
             iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
             if docData(i).IsDesignerView then
-               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
+               pDoc->DesignTabsCurSel = 0  ' 1 = code tab, 0 = Designer
             else
-               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
+               pDoc->DesignTabsCurSel = 1  ' 1 = code tab, 0 = Designer
             end if
             ' Set the saved positions
             pDoc->bDesignerViewLoad = docData(i).IsDesignerView

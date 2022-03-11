@@ -21,7 +21,9 @@ function handleMouseScrollBar( byval uMsg as MSG ) as boolean
    select case uMsg.message 
       case WM_MOUSEMOVE, WM_LBUTTONDOWN, WM_LBUTTONUP
          if IsWindowVisible( HWND_FRMPANEL_VSCROLLBAR ) then
-            if isMouseOverWindow( HWND_FRMPANEL_VSCROLLBAR ) orelse _
+            dim as POINT pt: GetCursorPos( @pt )
+            dim as RECT rc = AfxGetWindowRect(HWND_FRMPANEL_VSCROLLBAR)
+            if PtInRect( @rc, pt ) orelse _
                GetCapture() = HWND_FRMPANEL_VSCROLLBAR then 
                ' forward the message to the scrollbar instead of say 
                ' the Explorer listbox that is underneath it

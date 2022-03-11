@@ -51,7 +51,6 @@ destructor clsDocument
       DestroyWindow(this.hWndForm)
       DestroyWindow(this.hWndFrame)
       DestroyWindow(this.hWndDesigner)
-      DestroyWindow(this.hDesignTabCtrl)
       DeleteObject(this.hFontFakeMenu)
    end if
 
@@ -168,7 +167,7 @@ function clsDocument.CreateDesignerWindow( byval hWndParent as HWnd ) as hwnd
    pMain->Create( hWndParent, "", @DesignerMain_WndProc, 0, 0, 0, 0, _
         WS_CHILD or WS_CLIPSIBLINGS or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT or WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR)
-   pMain->Brush = GetSysColorBrush(COLOR_WINDOW)
+   pMain->Brush = ghDesigner.hPanelBrush
    pMain->SetClientSize(3000, 3000)
    ' We will set our own mouse pointer as needed
    SetClassLongPtr(this.hWindow(0), GCLP_HCURSOR, 0)   
@@ -177,29 +176,7 @@ function clsDocument.CreateDesignerWindow( byval hWndParent as HWnd ) as hwnd
    dim pScrollWindow as CScrollWindow ptr = new CScrollWindow(pMain->hWindow)
    pMain->ScrollWindowPtr = pScrollWindow
    
-   ' Create a tabcontrol that allows us to switch between design/code views.
-   this.hDesignTabCtrl = _
-      pMain->AddControl("TABCONTROL", hWndParent, _
-         IDC_DESIGNTABCTRL, "", 0, 0, 0, 24, _
-         WS_CHILD or WS_TABSTOP or TCS_SINGLELINE or TCS_RAGGEDRIGHT or TCS_HOTTRACK or _
-         TCS_TABS or TCS_FOCUSNEVER, WS_EX_LEFT or WS_EX_LTRREADING )
-   
-   dim wszTemp as wstring * MAX_PATH
-   dim TB as TC_ITEM 
-   TB.Mask = TCIF_TEXT
-   
-   ' Add the two tabs. Design and Code views.
-   wszTemp = L(327, "Design")
-   TB.pszText = @wszTemp
-   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 0, cast(LPARAM, @TB) )     
 
-   wszTemp = L(328, "Code")
-   TB.pszText = @wszTemp
-   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 1, cast(LPARAM, @TB) )     
-
-   TabCtrl_SetCurSel( this.hDesignTabCtrl, 0 )
-
-   
    ' (2) Create the Design Frame window (child of the Main)
    dim pFrame as CWindow ptr = new CWindow
    pFrame->DPI = AfxCWindowPtr(hwndParent)->DPI
@@ -211,7 +188,7 @@ function clsDocument.CreateDesignerWindow( byval hWndParent as HWnd ) as hwnd
    SetWindowLongPtr( pFrame->hWindow, GWLP_ID, IDC_DESIGNFRAME )
    ' We will set our own mouse pointer as needed
    SetClassLongPtr(this.hWndFrame, GCLP_HCURSOR, 0)   
-   pFrame->Brush = GetSysColorBrush(COLOR_WINDOW)
+   pFrame->Brush = ghDesigner.hPanelBrush
    
    
    ' (3) Create the Design Form (child of the Frame)
@@ -496,7 +473,6 @@ function clsDocument.ParseFormMetaData( _
          if this.hWndForm then DestroyWindow(this.hWndForm)
          if this.hWndFrame then DestroyWindow(this.hWndFrame)
          if this.hWndDesigner then DestroyWindow(this.hWndDesigner)
-         if this.hDesignTabCtrl then DestroyWindow(this.hDesignTabCtrl)
          this.CreateDesignerWindow(hWndParent)
       end if
       numOffsetLines = 1

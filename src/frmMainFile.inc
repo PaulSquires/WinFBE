@@ -83,6 +83,18 @@ Function OnCommand_FileOpen( _
                                              *pwszName, _ ' pwszName
                                              pDocIn )     ' pDocIn
             end if
+
+            ' Give this document a default project type depending on its file extension
+            if (pDoc->IsNewFlag = false) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then
+               if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+                  if pDoc->IsDesigner then 
+                     pDoc->ProjectFileType = FILETYPE_NORMAL 
+                  else
+                     gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )
+                  end if
+               end if   
+            end if
+            
             if bShowInTab then pDocTabs(i) = pDoc
             CoTaskMemFree(pwszName)
             pwszName = Null
@@ -316,7 +328,6 @@ Function OnCommand_FileClose( _
        ' Hide visual designer window
       if pDoc->IsDesigner THEN 
          ShowWindow(pDoc->hWndDesigner, SW_HIDE)
-         ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
          ShowWindow(HWND_FRMVDTOOLBOX, SW_HIDE)
       END IF     
       

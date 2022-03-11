@@ -215,6 +215,10 @@ type OUTPUT_HANDLES_TYPE
 end type
 dim shared ghOutput as OUTPUT_HANDLES_TYPE
 
+type DESIGNER_HANDLES_TYPE
+   hPanelBrush as HBRUSH
+end type
+dim shared ghDesigner as DESIGNER_HANDLES_TYPE
 
 ''
 ''  RETRIEVE THEME ITEM FROM ARRAY
@@ -599,6 +603,10 @@ function LoadThemeFile() as boolean
    if ghOutput.hCloseBrushHot then DeleteObject(ghOutput.hCloseBrushHot)
    ghOutput.hCloseBrushHot = CreateSolidBrush(pTheme->background)
    ghOutput.CloseBackColorHot = pTheme->background
+
+   pTheme = getThemePtr("designer.panel")
+   if ghDesigner.hPanelBrush then DeleteObject(ghDesigner.hPanelBrush)
+   ghDesigner.hPanelBrush = CreateSolidBrush(pTheme->background)
 
    ' try to set the default GUI font the application depending on Windows/Wine 
    ' and use fallback options. Start with Windows options because sometimes

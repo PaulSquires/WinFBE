@@ -32,6 +32,7 @@ function frmEditorVScroll_calcVThumbRect( byval pDoc as clsDocument ptr ) as boo
       rc = AfxGetWindowRect(pDoc->hWindow(i))
       MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 ) 
       dim as long clientHeight = rc.bottom - rc.top
+      if clientHeight = 0 then continue for
       dim as long firstVisibleLine = SciExec( pDoc->hWindow(i), SCI_GETFIRSTVISIBLELINE, 0, 0 )
       dim as long iScrollbarWidth = AfxGetWindowWidth(HWND_FRMEDITOR_VSCROLLBAR(i)) 
       dim as long minThumbHeight = pWindow->ScaleY(SCROLLBAR_MINTHUMBSIZE)
@@ -42,9 +43,11 @@ function frmEditorVScroll_calcVThumbRect( byval pDoc as clsDocument ptr ) as boo
          .thumbHeight = (.linesPerPage / .numLines) * clientHeight
          ' If the thumb height is less than the minimum default then adjust parameters so
          ' that the viewport can compensate for the adjustments.
-'         if .thumbHeight < minThumbHeight then
-'            .thumbHeight = minThumbHeight
-'         end if
+         .thumbRatio = 1
+         if .thumbHeight < minThumbHeight then
+            .thumbRatio = 1 + (minThumbHeight-.thumbHeight) /.thumbHeight
+            .thumbHeight = minThumbHeight
+         end if
          .rc.left = 0
          .rc.right = .rc.left + iScrollbarWidth
          .rc.top = ((firstVisibleLine / .numLines) * clientHeight)
@@ -112,6 +115,7 @@ function frmEditorVScroll_WndProc( _
                dim as long delta = pt.y - prev_pt.y 
                ' convert to client coordinates for ease of use
                dim as RECT rc: GetClientRect( HWND_FRMEDITOR_VSCROLLBAR(idxWindow), @rc )
+               rc.bottom = rc.bottom * gEditorVScroll(idxWindow).thumbRatio
                gEditorVScroll(idxWindow).rc.top = max(0, gEditorVScroll(idxWindow).rc.top + delta)
                gEditorVScroll(idxWindow).rc.top = min(gEditorVScroll(idxWindow).rc.top, rc.bottom - gEditorVScroll(idxWindow).thumbHeight)
                gEditorVScroll(idxWindow).rc.bottom = gEditorVScroll(idxWindow).rc.top + gEditorVScroll(idxWindow).thumbHeight

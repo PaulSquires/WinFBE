@@ -113,19 +113,17 @@ end function
 ' ========================================================================================
 Function OnCommand_DesignerToggleViewCode( byval pDoc as clsDocument ptr ) As LRESULT
    if pDoc then 
-      dim as long idx = TabCtrl_GetCurSel( pDoc->hDesignTabCtrl )
-      if idx = 0 then
+      if pDoc->DesignTabsCurSel = 0 then
          ' Designer is active, switch to code
-         TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
+         pDoc->DesignTabsCurSel = 1  ' 1 = code tab, 0 = Designer
       else
          ' Code is active, switch to designer
-         TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
+         pDoc->DesignTabsCurSel = 0  ' 1 = code tab, 0 = Designer
       end if
       frmMain_PositionWindows
    end if
    function = 0
-end function
-            
+end function            
 
 
 ' ========================================================================================

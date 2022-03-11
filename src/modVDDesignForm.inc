@@ -21,7 +21,7 @@
 ' Determines if the current view should be Design or Code. This is done by checking
 ' the current selection of the design/code tabcontrol.
 ' ========================================================================================
-public function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
+function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
    if pDoc = 0 THEN exit function
 
    dim as Boolean bDesignView
@@ -29,21 +29,19 @@ public function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
    ' If this is a Visual Designer document then the display depends on what tab is selected
    ' in the design|code tabcontrol.
    if pDoc->IsDesigner then 
-      dim as long idx = TabCtrl_GetCurSel(pDoc->hDesignTabCtrl)
-      bDesignView = iif(idx = 0, true, false)
+      bDesignView = iif(pDoc->DesignTabsCurSel = 0, true, false)
    else
       ' Must be a code window
       bDesignView = false
    END IF
 
    function = bDesignView
-END FUNCTION
-
+end function
 
 ' ========================================================================================
 ' Reset any SnapLines data in order to ready it for future control movements.
 ' ========================================================================================
-private Function ResetSnapLines( byval pDoc as clsDocument ptr ) as Long
+function ResetSnapLines( byval pDoc as clsDocument ptr ) as Long
    if pDoc->bSnapLines = false then exit function
    
    dim pt as POINT
@@ -63,12 +61,13 @@ end function
 ' Calculate any SnapLines and show them on screen.
 ' Returns True if SnapLines have been set and calling program should perform the snap.
 ' ========================================================================================
-private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
-                                   byval pCtrlActive as clsControl ptr, _
-                                   byval ptCursor as POINT, _
-                                   byref xDelta as long, _
-                                   byref yDelta as long _
-                                   ) As long
+Function PerformSnapLines( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrlActive as clsControl ptr, _
+            byval ptCursor as POINT, _
+            byref xDelta as long, _
+            byref yDelta as long _
+            ) As long
                                
    if pDoc->bSnapLines = false then exit function
    
@@ -247,7 +246,6 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                     nShowWindow )
       if bDone then exit for
    next              
-      
    
    function = 0
 end function
@@ -256,10 +254,11 @@ end function
 ' ========================================================================================
 ' Create and display popup control menu.
 ' ========================================================================================
-private Function DisplayControlPopupMenu( byval hwnd as hwnd, _
-                                          byval xpos as long, _
-                                          byval ypos as long _
-                                          ) As Long
+function DisplayControlPopupMenu( _
+            byval hwnd as hwnd, _
+            byval xpos as long, _
+            byval ypos as long _
+            ) As Long
    static as HMENU hPopupMenu
    
    If hPopupMenu Then DestroyMenu(hPopupMenu)
@@ -279,10 +278,11 @@ end function
 ' ========================================================================================
 ' Create and display popup form menu.
 ' ========================================================================================
-private Function DisplayFormPopupMenu( byval hwnd as hwnd, _
-                                       byval xpos as long, _
-                                       byval ypos as long _
-                                       ) As Long
+Function DisplayFormPopupMenu( _
+            byval hwnd as hwnd, _
+            byval xpos as long, _
+            byval ypos as long _
+            ) As Long
    static as HMENU hPopupMenu
    
    If hPopupMenu Then DestroyMenu(hPopupMenu)
@@ -302,7 +302,7 @@ end function
 ' ========================================================================================
 ' Change the mouse cursor depending on selected Toolbox control.
 ' ========================================================================================
-private Function SetMouseCursor() As Long
+function SetMouseCursor() As Long
    Dim As HWnd hList1 = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX)
    dim as long nCurSel = ListBox_GetCurSel(hList1)
    
@@ -322,11 +322,12 @@ End Function
 ' ========================================================================================
 ' Change the mouse cursor if over a valid grab handle
 ' ========================================================================================
-private function SetGrabHandleMouseCursor( byval pDoc as clsDocument ptr, _
-                                           byval x as long, _
-                                           byval y as long, _
-                                           byref pCtrlAction as clsControl Ptr _
-                                           ) as LRESULT
+function SetGrabHandleMouseCursor( _
+            byval pDoc as clsDocument ptr, _
+            byval x as long, _
+            byval y as long, _
+            byref pCtrlAction as clsControl Ptr _
+            ) as LRESULT
    
    dim pCtrl as clsControl ptr
    dim rcCtrl as RECT
@@ -381,7 +382,7 @@ end function
 ' ========================================================================================
 ' Calculate the size of form/controls grab handle rectangles 
 ' ========================================================================================
-private function CalculateGrabHandles( byval pDoc as clsDocument ptr) as long
+function CalculateGrabHandles( byval pDoc as clsDocument ptr) as long
    if pDoc = 0 THEN exit function
       
    dim pCtrl as clsControl ptr 
@@ -442,10 +443,12 @@ end function
 ' ========================================================================================
 ' Draw the actual grab handles (this is called from WM_PAINT)
 ' ========================================================================================
-public function DrawGrabHandles( byval hDC as HDC, _
-                                 byval pDoc as clsDocument ptr, _ 
-                                 byval bFormOnly as Boolean _
-                                 ) as long
+function DrawGrabHandles( _
+            byval hDC as HDC, _
+            byval pDoc as clsDocument ptr, _ 
+            byval bFormOnly as Boolean _
+            ) as long
+
    if pDoc = 0 THEN exit function
       
    dim pCtrl as clsControl ptr 
@@ -522,10 +525,10 @@ end function
 ' ========================================================================================
 ' Handle WM_LBUTTONDBLCLK  messages for the Form (displays the code editor)
 ' ========================================================================================
-private function HandleDesignerLButtonDoubleClick( ByVal HWnd As HWnd ) as LRESULT
+function HandleDesignerLButtonDoubleClick( ByVal HWnd As HWnd ) as LRESULT
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    if pDoc then
-      TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, 1)
+      pDoc->DesignTabsCurSel = 1
       frmMain_PositionWindows
       PostMessage(HWND_FRMMAIN, MSG_USER_GENERATECODE, 0, 0)
    END IF
@@ -536,7 +539,7 @@ end function
 ' ========================================================================================
 ' Handle WM_LBUTTONDOWN messages for the Form and Frame windows
 ' ========================================================================================
-public function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
+function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
 
    dim as POINT pt
    dim as RECT rc
@@ -626,7 +629,7 @@ end function
 ' ========================================================================================
 ' Handle WM_LBUTTONUP messages for the Form and Frame windows
 ' ========================================================================================
-public function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
+function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
 
    ClipCursor(0)
    ReleaseCapture
@@ -703,7 +706,7 @@ end function
 ' ========================================================================================
 ' Handle WM_RBUTTONDOWN messages for the Form and Frame windows
 ' ========================================================================================
-public function HandleDesignerRButtonDown( ByVal HWnd As HWnd ) as LRESULT
+function HandleDesignerRButtonDown( ByVal HWnd As HWnd ) as LRESULT
 
    dim as POINT pt
    
@@ -737,7 +740,7 @@ end function
 ' ========================================================================================
 ' Handle MOUSEMOVE messages for the Form and Frame windows
 ' ========================================================================================
-public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
+function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
 
    dim as POINT pt
    dim as long xDelta, yDelta
@@ -902,7 +905,7 @@ END FUNCTION
 ' ========================================================================================
 ' Process WM_PAINT message for Visual Designer Form
 ' ========================================================================================
-private Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
+Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
    If pWindow = 0 Then Exit Function
@@ -922,9 +925,7 @@ private Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
    end if   
 
    RestoreDC hDC, -1 
-   
    DeleteObject(hPen)
-   
    EndPaint hWnd, @ps
    
    ' Repaint any Frame controls because they disappear when the form's background is painted.
@@ -946,7 +947,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for Visual Designer Form
 ' ========================================================================================
-private Function DesignerForm_OnDestroy( byval HWnd As HWnd ) As LRESULT
+function DesignerForm_OnDestroy( byval HWnd As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
    if pWindow then Delete pWindow
    Function = 0
@@ -956,10 +957,11 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for Visual Designer Form
 ' ========================================================================================
-private Function DesignerForm_OnNotify( ByVal HWnd As HWnd, _
-                                        ByVal id As Long, _
-                                        ByVal pNMHDR As NMHDR Ptr _
-                                        ) As LRESULT
+function DesignerForm_OnNotify( _
+            ByVal HWnd As HWnd, _
+            ByVal id As Long, _
+            ByVal pNMHDR As NMHDR Ptr _
+            ) As LRESULT
 
    Select Case pNMHDR->code 
       Case NM_CLICK
@@ -981,11 +983,12 @@ end function
 ' ========================================================================================
 ' Process WM_COMMAND message for Visual Designer Form
 ' ========================================================================================
-private Function DesignerForm_OnCommand( ByVal HWnd As HWnd, _
-                                         ByVal id As Long, _
-                                         ByVal hwndCtl As HWnd, _
-                                         ByVal codeNotify As UINT _
-                                         ) As LRESULT
+function DesignerForm_OnCommand( _
+            ByVal HWnd As HWnd, _
+            ByVal id As Long, _
+            ByVal hwndCtl As HWnd, _
+            ByVal codeNotify As UINT _
+            ) As LRESULT
    Select Case id
       Case IDC_LBLFAKEMAINMENU
          If codeNotify = BN_CLICKED Then
@@ -1000,11 +1003,12 @@ end function
 ' ========================================================================================
 ' Visual Designer Form Window procedure 
 ' ========================================================================================
-public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
-                                       ByVal uMsg   As UINT, _
-                                       ByVal wParam As WPARAM, _
-                                       ByVal lParam As LPARAM _
-                                       ) As LRESULT
+function DesignerForm_WndProc( _
+            ByVal HWnd   As HWnd, _
+            ByVal uMsg   As UINT, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_PAINT,   DesignerForm_OnPaint)
@@ -1264,13 +1268,14 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed controls.
 ' ========================================================================================
-public FUNCTION Control_SubclassProc( BYVAL hwnd   AS HWND, _                 ' Control window handle
-                                      BYVAL uMsg   AS UINT, _                 ' Type of message
-                                      BYVAL wParam AS WPARAM, _               ' First message parameter
-                                      BYVAL lParam AS LPARAM, _               ' Second message parameter
-                                      BYVAL uIdSubclass AS UINT_PTR, _        ' The subclass ID
-                                      BYVAL dwRefData AS DWORD_PTR _          ' Pointer to reference data
-                                      ) AS LRESULT
+function Control_SubclassProc( _
+            BYVAL hwnd   AS HWND, _                 ' Control window handle
+            BYVAL uMsg   AS UINT, _                 ' Type of message
+            BYVAL wParam AS WPARAM, _               ' First message parameter
+            BYVAL lParam AS LPARAM, _               ' Second message parameter
+            BYVAL uIdSubclass AS UINT_PTR, _        ' The subclass ID
+            BYVAL dwRefData AS DWORD_PTR _          ' Pointer to reference data
+            ) AS LRESULT
 
    dim pDoc as clsDocument ptr = cast(clsDocument ptr, dwRefData)
    

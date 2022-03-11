@@ -48,8 +48,9 @@ end function
 function isMouseOverWindow( byval hChild as HWND ) as boolean
    dim as POINT pt
    GetCursorPos( @pt )
-   dim as RECT rc = AfxGetWindowRect(hChild)
-   if PtInRect( @rc, pt ) then return true
+   'dim as RECT rc = AfxGetWindowRect(hChild)
+   'if PtInRect( @rc, pt ) then return true
+   if WindowFromPoint( pt ) = hChild then return true
 end function
 
 ' ========================================================================================
@@ -638,7 +639,7 @@ function OpenSelectedDocument( _
       ' Make sure that the code editor is selected for visual designer forms
       if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) then
          if nLineNumber <> -1 then
-            TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
+            pDoc->DesignTabsCurSel = 1  ' 1 = code tab, 0 = Designer
             frmMain_PositionWindows
          end if   
       end if

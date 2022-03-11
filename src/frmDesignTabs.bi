@@ -11,14 +11,13 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-
-type EDITOR_VSCROLL_TYPE
-   numLines as long 
-   linesPerPage as long
-   thumbHeight as long
-   thumbRatio as single
-   rc as RECT
+type DESIGNTABS_TYPE
+   wszText as CWSTR
+   rcTab as RECT          ' client coordinates 
+   rcText as RECT         ' client coordinates 
+   isHot as boolean
 end type
-dim shared gEditorVScroll(1) as EDITOR_VSCROLL_TYPE
+dim shared gDesignTabs(1) as DESIGNTABS_TYPE
 
-declare function frmEditorVScroll_calcVThumbRect( byval pDoc as clsDocument ptr ) as boolean
+declare function frmDesignTabs_PositionWindows() as LRESULT
+

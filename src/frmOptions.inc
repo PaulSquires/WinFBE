@@ -194,9 +194,16 @@ Function frmOptions_OnCommand( _
             ' Reposition main windows in case hide toolbar/statusbar selected
             frmMain_PositionWindows
             ' Apply the newly saved options to all open Scintilla windows
+            dim pFrame as CWindow ptr
             Dim pDoc As clsDocument Ptr = gApp.pDocList
             do until pDoc = 0
                pDoc->ApplyProperties
+               ' Ensure the grab handles of form and controls are redrawn or hidden
+               if IsWindow(pDoc->hWndFrame) then 
+                  pFrame = AfxCWindowPtr(pDoc->hWndFrame)
+                  pFrame->Brush = ghDesigner.hPanelBrush
+                  AfxRedrawWindow(pDoc->hWndFrame)
+               end if   
                pDoc = pDoc->pDocNext
             loop   
             SendMessage( HWnd, WM_CLOSE, 0, 0 )

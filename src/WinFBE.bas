@@ -104,6 +104,7 @@ dim shared gLasso   as clsLasso
 #include once "frmAbout.inc" 
 #include once "frmPopupMenu.inc"
 #include once "frmTopTabs.inc"
+#include once "frmDesignTabs.inc"
 #include once "frmMenuBar.inc"
 #include once "frmStatusBar.inc"
 #include once "frmImageManager.inc" 

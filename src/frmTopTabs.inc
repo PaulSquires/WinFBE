@@ -491,9 +491,7 @@ Function frmTopTabs_WndProc( _
       dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
       if pDoc then
          if pDoc->IsDesigner then
-            dim as long nCurSel = TabCtrl_GetCurSel(pDoc->hDesignTabCtrl)
-            nCurSel = iif(nCurSel = 0, 1, 0)
-            TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, nCurSel)
+            pDoc->DesignTabsCurSel = iif(pDoc->DesignTabsCurSel = 0, 1, 0)
             frmMain_PositionWindows
          END IF
       END IF
@@ -758,7 +756,7 @@ Function frmTopTabs_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    HWND_FRMMAIN_TOPTABS = pWindow->Create( hWndParent, "", @frmTopTabs_WndProc, _
         0, 0, 0, TOPTABS_HEIGHT, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
+        WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    ' Disable background erasing by only assigning the one style

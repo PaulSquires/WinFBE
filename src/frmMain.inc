@@ -826,22 +826,23 @@ function frmMain_PositionWindows() as LRESULT
       
       dim as long nDesignCodeTabHeight = 0
       if pDoc->IsDesigner then
-         nDesignCodeTabHeight = pWindow->ScaleY(24)
+         nDesignCodeTabHeight = pWindow->ScaleY(DESIGNTABS_HEIGHT)
       end if
       
       dim as long lStyle = SWP_SHOWWINDOW or SWP_NOZORDER or SWP_NOOWNERZORDER or _
                            SWP_NOACTIVATE or SWP_NOCOPYBITS
       
       if pDoc->IsDesigner then
-         SetWindowPos( pDoc->hDesignTabCtrl, 0, _
+         SetWindowPos( HWND_FRMMAIN_DESIGNTABS, 0, _
                        rcDoc.left, _
                        rcDoc.bottom - nDesignCodeTabHeight, _
                        rcDoc.right, _
                        rcDoc.bottom - nDesignCodeTabHeight, _
                        lStyle )
+         AfxRedrawWindow( HWND_FRMMAIN_DESIGNTABS )
          frmMain_HideScrollBars()
       else   
-         ShowWindow( pDoc->hDesignTabCtrl, SW_HIDE )
+         ShowWindow( HWND_FRMMAIN_DESIGNTABS, SW_HIDE )
       end if
       
       if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
@@ -1722,13 +1723,6 @@ function frmMain_WndProc( _
          ' which also calls frmMain_SelectComboFiles and frmMain_SelectComboFunctions.
          frmMain_SetFocusToCurrentCodeWindow
                
-      case MSG_USER_DESIGNTAB_CHANGING
-         frmMain_PositionWindows
-
-      case MSG_USER_DESIGNTAB_CHANGED
-         frmMain_PositionWindows
-         PostMessage( hwnd, MSG_USER_GENERATECODE, 0, 0 )
-
 
       case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document
@@ -1896,6 +1890,9 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
 
    ' Create the main application top tabs control
    frmTopTabs_Show( HWND_FRMMAIN )
+
+   ' Create the main application design tabs control
+   frmDesignTabs_Show( HWND_FRMMAIN )
 
    ' Create the main application statusbar
    frmStatusBar_Show( HWND_FRMMAIN )
