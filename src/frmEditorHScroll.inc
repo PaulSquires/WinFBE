@@ -17,57 +17,6 @@
 
 #include once "frmEditorHScroll.bi"
 
-' ========================================================================================
-' Calculate the RECT that holds the client coordinates of the scrollbar's horizontal thumb
-' Returns True if RECT is not empty
-' ========================================================================================
-function frmEditorHScroll_calcHThumbRect() as boolean
-'   dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMMAIN)
-'   if pWindow = 0 Then exit function
-
-'   numLines as long 
-'   linesPerPage as long
-'   thumbHeight as long
-'   rc as RECT
-'end type
-'dim shared gEditorVScroll(1) as EDITOR_VSCROLL_TYPE
-
-'   ' calculate the vertical scrollbars in client coordinates
-'   for i as long = lbound(
-'   SetRectEmpty( @gEditorVScroll(0).rc )
-'   SetRectEmpty( @gEditorVScroll(1).rc )
-  
-
-'   dim as Rect rc: GetClientRect( HWND_FRMMAIN_TOPTABS, @rc )
-   
-'   gTopTabsHScroll.rc = rc
-'   gTopTabsHScroll.rc.right = grcTopTabActionPanel.Left
-'   gTopTabsHScroll.rc.bottom = gTopTabsHScroll.rc.top + pWindow->ScaleY( TOPTABS_SCROLLBAR_HEIGHT )
-'   gTopTabsHScroll.rc = rc
-'   gTopTabsHScroll.rc.right = grcTopTabActionPanel.Left
-'   gTopTabsHScroll.rc.top = gTopTabsHScroll.rc.bottom - pWindow->ScaleY( TOPTABS_SCROLLBAR_HEIGHT )
-  
-'   dim as long nTopIndex = SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_GETTOPINDEX, 0, 0 ) 
-
-'   dim as Rect rc 
-'   with gExplorerVScroll
-'      GetClientRect( HWND_FRMEXPLORER_LISTBOX, @rc )
-'      .listBoxHeight = rc.bottom - rc.top
-'      .itemHeight = SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_GETITEMHEIGHT, 0, 0 )
-'      .numItems = ListBox_GetCount( HWND_FRMEXPLORER_LISTBOX ) 
-'      .itemsPerPage = .listBoxHeight / .itemHeight
-'      .thumbHeight = (.itemsPerPage / .numItems) * .listBoxHeight
-'      GetClientRect( HWND_FRMEXPLORER_VSCROLLBAR, @rc )
-'      .rc.Left = rc.Left
-'      .rc.top = rc.top + ((nTopIndex / .numItems) * .listBoxHeight)
-'      .rc.Right = rc.right
-'      .rc.bottom = .rc.top + .thumbHeight
-'      if .numItems < .itemsPerPage then return true
-'   end with
-
-   function = 0
-end function
-
     
 ' ========================================================================================
 ' frmEditorHScroll Window procedure
@@ -80,6 +29,8 @@ function frmEditorHScroll_WndProc( _
             ) as LRESULT
 
    static as POINT prev_pt   ' screen pt.y cursor position
+   static as long prev_xOffset
+   dim as long idxWindow = iif( HWnd = HWND_FRMEDITOR_HSCROLLBAR(0), 0, 1 )
 
    Select Case uMsg
       case WM_DESTROY
@@ -87,64 +38,86 @@ function frmEditorHScroll_WndProc( _
          if HWnd = HWND_FRMEDITOR_HSCROLLBAR(1) then HWND_FRMEDITOR_HSCROLLBAR(1) = 0
               
       case WM_LBUTTONDOWN
-'         dim as POINT pt: GetCursorPos( @pt )
-'         frmEditorHScroll_calcHThumbRect()   ' in client coordinates
-'         dim as RECT rc = gExplorerVScroll.rc ' covert copy to screen coordinates
-'         MapWindowPoints( HWND_FRMEXPLORER_VSCROLLBAR, HWND_DESKTOP, cast(POINT ptr, @rc), 2)
-'         if PtInRect( @rc, pt ) then
-'            prev_pt = pt
-'            gApp.bDragActive = true
-'            SetCapture( HWnd )
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc then
+            gApp.SuppressNotify = true   ' prevent SCN_UPDATEUI
+            dim as POINT pt: GetCursorPos( @pt )
+            dim as RECT rc = gEditorHScroll(idxWindow).rc ' covert copy to screen coordinates
+            MapWindowPoints( HWND_FRMEDITOR_HSCROLLBAR(idxWindow), HWND_DESKTOP, cast(POINT ptr, @rc), 2)
+            if PtInRect( @rc, pt ) then
+               prev_pt = pt
+               gApp.bDragActive = true
+               SetCapture( HWnd )
+            else
+'         nPageCols = 100    ' pixels
+'         ' The client area was clicked. Determine if left or right of the thumb.
+'         xOffset = SendMessageW( hEdit, SCI_GETXOFFSET, 0, 0) 
+'         If pt.x < gScroll.rcThumb.left Then
+'            xOffset = Max(xOffset - nPageCols, 0)
+'            SendMessageW( hEdit, SCI_SETXOFFSET, xOffset, 0) 
+'         ElseIf pt.x > gScroll.rcThumb.right Then
+'            SendMessageW( hEdit, SCI_SETXOFFSET, xOffset + nPageCols, 0) 
 '         else
-'            ' we have clicked on a PageUp or PageDn
-'            dim as long nTopIndex = SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_GETTOPINDEX, 0, 0 ) 
-'            if pt.y < rc.top then
-'               nTopIndex = max( nTopIndex - gExplorerVScroll.itemsPerPage, 0 )
-'               SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_SETTOPINDEX, nTopIndex, 0 ) 
-'               frmEditorHScroll_calcHThumbRect()   ' in client coordinates
-'               frmEditorHScroll_UpdateUI()
-'               AfxRedrawWindow( HWND_FRMEXPLORER_LISTBOX )
-'            elseif pt.y > rc.bottom then
-'               dim as long nMaxTopIndex = gExplorerVScroll.numItems - gExplorerVScroll.itemsPerPage
-'               nTopIndex = min( nTopIndex + gExplorerVScroll.itemsPerPage, nMaxTopIndex )
-'               SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_SETTOPINDEX, nTopIndex, 0 ) 
-'               frmEditorHScroll_calcHThumbRect()   ' in client coordinates
-'               frmEditorHScroll_UpdateUI()
-'               AfxRedrawWindow( HWND_FRMEXPLORER_LISTBOX )
-'            end if
-'         end if
+'            print "other"
+'         End If
+               ' we have clicked on a PageUp or PageDn
+'               dim as long nTopIndex = SendMessage( pDoc->hWindow(idxWindow), SCI_GETFIRSTVISIBLELINE, 0, 0 ) 
+'               if pt.y < rc.top then
+'                  nTopIndex = max( nTopIndex - gEditorVScroll(idxWindow).linesPerPage, 0 )
+'                  SendMessage( pDoc->hWindow(idxWindow), SCI_SETFIRSTVISIBLELINE, nTopIndex, 0 ) 
+'                  frmEditorVScroll_calcVThumbRect(pDoc)   ' in client coordinates
+'                  AfxRedrawWindow( HWND_FRMEDITOR_VSCROLLBAR(idxWindow) )
+'               elseif pt.y > rc.bottom then
+'                  dim as long nMaxTopIndex = gEditorVScroll(idxWindow).numLines - gEditorVScroll(idxWindow).linesPerPage
+'                  nTopIndex = min( nTopIndex + gEditorVScroll(idxWindow).linesPerPage, nMaxTopIndex )
+'                  SendMessage( pDoc->hWindow(idxWindow), SCI_SETFIRSTVISIBLELINE, nTopIndex, 0 ) 
+'                  frmEditorVScroll_calcVThumbRect(pDoc)   ' in client coordinates
+'                  AfxRedrawWindow( HWND_FRMEDITOR_VSCROLLBAR(idxWindow) )
+'               end if
+            end if
+         end if
          
       case WM_MOUSEMOVE
-'         if gApp.bDragActive then
-'            dim as POINT pt: GetCursorPos( @pt )
-'            if pt.y <> prev_pt.y then 
-'               dim as long delta = pt.y - prev_pt.y 
+         if gApp.bDragActive then
+            dim as POINT pt: GetCursorPos( @pt )
+            if pt.x <> prev_pt.x then 
+               dim as long delta = pt.x - prev_pt.x 
+
+
 '               ' convert to client coordinates for ease of use
-'               dim as RECT rc: GetClientRect( HWND_FRMEXPLORER_VSCROLLBAR, @rc )
+'               dim as RECT rc: GetClientRect( HWND_FRMEDITOR_VSCROLLBAR(idxWindow), @rc )
+'               gEditorHScroll(idxWindow).rc.left = max(0, gEditorHScroll(idxWindow).rc.left + delta)
+'               gEditorHScroll(idxWindow).rc.right = min(rc.right, gEditorHScroll(idxWindow).rc.left + gEditorHScroll(idxWindow).thumbWidth)
 
-'               gExplorerVScroll.rc.top = max(0, gExplorerVScroll.rc.top + delta)
-'               gExplorerVScroll.rc.top = min(gExplorerVScroll.rc.top, rc.bottom-gExplorerVScroll.thumbHeight)
-'               gExplorerVScroll.rc.bottom = gExplorerVScroll.rc.top + gExplorerVScroll.thumbHeight
-
-'               prev_pt = pt
+               prev_pt = pt
                
-'               dim as long nPrevTopIndex = SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_GETTOPINDEX, 0, 0 ) 
-'               dim as long nLastIndex = (gExplorerVScroll.rc.bottom / rc.bottom) * gExplorerVScroll.numItems
-'               dim as long nTopIndex = nLastIndex - gExplorerVScroll.itemsPerPage
-'               if nTopIndex <> nPrevTopIndex then
-'                  SendMessage( HWND_FRMEXPLORER_LISTBOX, LB_SETTOPINDEX, nTopIndex, 0 ) 
-'                  AfxRedrawWindow( HWND_FRMEXPLORER_LISTBOX )
-'               end if   
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+               if pDoc then
+                  dim as RECT rc: GetClientRect( HWND_FRMEDITOR_HSCROLLBAR(idxWindow), @rc )
+                  dim as long xOffset = SciExec( pDoc->hWindow(idxWindow), SCI_GETXOFFSET, 0, 0 )
+                  gEditorHScroll(idxWindow).rc = rc
+                  gEditorHScroll(idxWindow).rc.left = xOffset
+                  gEditorHScroll(idxWindow).rc.right = xOffset + ((rc.right / gEditorHScroll(idxWindow).lineLength) * rc.right)
 
-'               frmEditorHScroll_UpdateUI()
-'            end if
-'        end if
+                  if gEditorHScroll(idxWindow).rc.right + delta < rc.right then
+                     xOffset = xOffset +  + delta
+                     xOffset = max( 0, xOffset )
+                     if xOffset <> prev_xOffset then
+                        SendMessage( pDoc->hWindow(idxWindow), SCI_SETXOFFSET, xOffset, 0) 
+                        prev_xOffset = xOffset
+                        AfxRedrawWindow( HWND_FRMEDITOR_HSCROLLBAR(idxWindow) )
+                     end if   
+                  end if
+               end if
+            end if
+        end if
          
       case WM_LBUTTONUP   
-'         gApp.bDragActive = false
-'         prev_pt.x = 0
-'         prev_pt.y = 0
-'         ReleaseCapture
+         gApp.SuppressNotify = false   ' allow SCN_UPDATEUI
+         gApp.bDragActive = false
+         prev_pt.x = 0
+         prev_pt.y = 0
+         ReleaseCapture
          
       case WM_ERASEBKGND
          return true
@@ -155,7 +128,17 @@ function frmEditorHScroll_WndProc( _
          hDC = BeginPaint( hWnd, @ps )
          SaveDC( hDC )
          FillRect( hDC, @ps.rcPaint, ghEditor.hBackBrushScrollBar )
-'         FillRect( hDC, @gEditorVScroll(idxWindow).rc, ghEditor.hBackBrushThumb )
+         
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc then
+            dim as RECT rc: GetClientRect( HWND_FRMEDITOR_HSCROLLBAR(idxWindow), @rc )
+            dim as long GetXOffset = SciExec( pDoc->hWindow(idxWindow), SCI_GETXOFFSET, 0, 0 )
+            gEditorHScroll(idxWindow).rc = rc
+            gEditorHScroll(idxWindow).rc.left = GetXOffset
+            gEditorHScroll(idxWindow).rc.right = GetXOffset + ((rc.right / gEditorHScroll(idxWindow).lineLength) * rc.right)
+            FillRect( hDC, @gEditorHScroll(idxWindow).rc, ghEditor.hBackBrushThumb )
+         end if
+         
          EndPaint( hWnd, @ps )
          RestoreDC( hDC, -1 )
 
@@ -197,6 +180,9 @@ function frmEditorHScroll_NeedScrollBar( _
             byval idxWindow as long _
             ) as long
 
+   dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMMAIN)
+   if pWindow = 0 Then exit function
+
    dim as RECT rc = AfxGetWindowRect( pDoc->hWindow(idxWindow) )
    MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 )
    
@@ -212,13 +198,15 @@ function frmEditorHScroll_NeedScrollBar( _
 
    dim as long GetXOffset, GetLineEndPosition, endPos
    dim as boolean needHSB = false
-   'dim as long x = ClientWidth
    for i as long = GetFirstVisibleLine to GetLastVisibleLine
-      ' GetXOffset adds left scroll spacing if we are already scrolled left some.
-      'GetXOffset = SciExec( pDoc->hWindow(idxWindow), SCI_GETXOFFSET, 0, 0 )
+      dim as long GetXOffset = SciExec( pDoc->hWindow(idxWindow), SCI_GETXOFFSET, 0, 0 )
       GetLineEndPosition = SciExec( pDoc->hWindow(idxWindow), SCI_GETLINEENDPOSITION, i, 0 )
       endPos = SciExec( pDoc->hWindow(idxWindow), SCI_POINTXFROMPOSITION, 0, GetLineEndPosition )
-      needHSB = endPos > ClientWidth
+      needHSB = (GetXOffset + endPos) > ClientWidth
+      dim as long lineLength = GetXOffset + endPos + pWindow->ScaleX(100)
+      if lineLength > gEditorHScroll(idxWindow).lineLength then
+         gEditorHScroll(idxWindow).lineLength = lineLength
+      end if
       if needHSB then exit for
    next
    function = iif( needHSB, SW_SHOWNA, SW_HIDE )

@@ -5,7 +5,6 @@ Editor:
 - All new Theme system. All colors (RGB) can be edited in external .theme files found in the \themes folder.
 - Added Windows API keywords and syntax highlighting.
 - New Bookmarks list that shows all bookmarks from all open (and closed) files. Easily navigate or clear bookmarks throughout all files.
-- New Functions List that displays in the left side Panel.
 - New option to save/restore "session". Allow reloading and showing of files active during most previous editor use. Will reload a project should a project had been active. Editor state (open windows, editing position, selected compiler, etc) is saved and restored. 
 - Added Environment option to automatically load the last used Session file when the editor starts. If the last Session saved was a Project, then the project will be loaded.
 - New keyboard binding mapping allowing the user to choose their own keyboard shortcuts for various editor functions. 
@@ -30,7 +29,7 @@ Editor:
 - Added keyboard shortcuts to move to next and move to previous compiler errors. This is a quick way to jump to and fix errors without having to use your mouse to double click the compiler error message in the Output window.
 - The Explorer window now allows for multiple nodes to be selected (via Ctrl or Shift) and to popup right-click menu to perform actions on the group of selected nodes (for example, to re-designate files to different FileTypes, etc).
 - Code Fold points are now saved between Project and/or Sessions in the same manner as Bookmarks are treated.
-- Disabled the functionality whereby if Find/Replace dialog is open and user switches to a different tab in the editor, then search highlights would automatically be applied to that new tab causing the current position in the tab to change.
+- Disabled the functionality whereby if Find/Replace dialog is open and user switches to a different tab in the editor, then search highlights would automatically reposition the caret to the first found find text in the newly selected tab.
 - Bookmark searches for Previous/Next Bookmark will now display in center of screen if Environment option "Position searches to middle of screen" is enabled. 
 - Find In Files corrected to properly process *.* files. In situations of *.* searches known binary formats are bypassed (eg. EXE, DLL, BMP, etc).
 - Corrected issues whereby Replace All could fail to replace matching entries near the end of the edit buffer.

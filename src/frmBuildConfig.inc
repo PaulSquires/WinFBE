@@ -24,7 +24,8 @@ Dim shared gBuildOptions(...) as CWSTR => _
       "Language compatibility QuickBasic (-lang qb)", _
       "Subsystem to console (-s console)", _
       "Subsystem to GUI (-s gui)", _
-      "Compiler assembler backend (-gen gas)", _
+      "Compiler 32-bit assembler backend (-gen gas)", _
+      "Compiler 64-bit assembler backend (-gen gas64)", _
       "Compiler GCC backend (-gen gcc)", _
       "Compiler LLVM backend (-gen llvm)", _
       "Create DLL and import library (-dll)", _

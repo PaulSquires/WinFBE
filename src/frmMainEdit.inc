@@ -39,6 +39,7 @@ function OnCommand_EditCut( _
             SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
          else
             SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
+            frmMain_PositionWindows()    ' ensure custom scrollbars display
          end if   
    end select
 
@@ -183,6 +184,7 @@ function OnCommand_EditPaste( _
             DisplayPropertyList(pDoc)
          else
             SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
+            frmMain_PositionWindows()    ' ensure custom scrollbars display
          end if   
    end select
    

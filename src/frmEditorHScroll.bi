@@ -13,12 +13,9 @@
 
 
 type EDITOR_HSCROLL_TYPE
-   listBoxHeight as long
-   numItems as long 
-   itemHeight as long
-   itemsPerPage as long
+   lineLength as long
    thumbWidth as long
    rc as RECT
 end type
-dim shared gEditorHScroll as EDITOR_HSCROLL_TYPE
+dim shared gEditorHScroll(1) as EDITOR_HSCROLL_TYPE
 

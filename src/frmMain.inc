@@ -439,6 +439,15 @@ function Scintilla_OnNotify( _
                if pDoc->lastCaretPos <> caretPos then
                   pDoc->lastCaretPos = caretPos
                   
+                  '// If the xOffset has changed then we need to update the horizontal scrollbar
+                  dim as long GetXOffset = SciExec( pDoc->hWndActiveScintilla, SCI_GETXOFFSET, 0, 0 )
+                  if pDoc->lastXOffsetPos <> GetXOffset then
+                     pDoc->lastXOffsetPos = GetXOffset
+                     AfxRedrawWindow( HWND_FRMEDITOR_HSCROLLBAR(0) )
+                     AfxRedrawWindow( HWND_FRMEDITOR_HSCROLLBAR(1) )
+                  end if
+               
+                  '// Update any occurrence highlights
                   if gConfig.OccurrenceHighlight then
                      static as string sCurWord, sPrevWord
                      sCurWord = pDoc->GetWord()
@@ -448,6 +457,7 @@ function Scintilla_OnNotify( _
                      end if
                   end if
                   
+                  '// Update any brace highlighting
                   if gConfig.BraceHighlight then
                      var bracePos1 = -1
                      var bracePos2 = -1
@@ -840,10 +850,16 @@ function frmMain_PositionWindows() as LRESULT
                        rcDoc.bottom - nDesignCodeTabHeight, _
                        lStyle )
          AfxRedrawWindow( HWND_FRMMAIN_DESIGNTABS )
-         frmMain_HideScrollBars()
       else   
          ShowWindow( HWND_FRMMAIN_DESIGNTABS, SW_HIDE )
       end if
+      
+      'if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc) = false) then
+      dim as long nShowVScrollBars = iif(pDoc->DesignTabsCurSel = 0, SW_HIDE, SW_SHOW)
+      ' Only hide vertical scrollbars because hiding the horizontal could
+      ' result in endless loop during mouseover test in modMsgPump.
+      ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(0), nShowVScrollBars )
+      ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(1), nShowVScrollBars )
       
       if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
          ' if the DesignView has been set to show the visual designer rather than the code
@@ -917,7 +933,7 @@ function frmMain_PositionWindows() as LRESULT
          ' Position the MAIN view horizontal scroll bar
          if IsWindowVisible(HWND_FRMEDITOR_HSCROLLBAR(0)) then
             SetWindowPos( HWND_FRMEDITOR_HSCROLLBAR(0), 0, _ 
-                          rcDoc.left, rcDoc.bottom - nTop - nDesignCodeTabHeight - iHScrollbarHeight, _
+                          rcDoc.left, rcDoc.bottom - nDesignCodeTabHeight - iHScrollbarHeight, _
                           rcDoc.right - rcDoc.left - iVScrollbarWidth, iHScrollbarHeight, _
                           SWP_NOZORDER )
          end if
@@ -942,7 +958,6 @@ function frmMain_PositionWindows() as LRESULT
          frmFindReplace_PositionWindows
          
       end if
-'      AfxRedrawWindow( HWND_FRMMAIN )
    end if
    
    ' Ensure that the correct notes are shown
@@ -1865,7 +1880,7 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
    'pWindow->DPI = 144   ' eg. 144 or any other value (96 is default)
    
    HWND_FRMMAIN = pWindow->Create( null, APPNAME, @frmMain_WndProc )
-
+   
    ' Load the currently selected theme (this needs a valid pWindow HWND_FRMMAIN to exists)
    LoadThemeFile()
    

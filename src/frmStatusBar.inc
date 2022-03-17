@@ -42,8 +42,12 @@ Function frmStatusBar_PositionWindows() As LRESULT
    nLeft = gSBPanels(i).rc.right + nSpacer
 
    '''' RIGHT ALIGNED STATUSBAR PANELS ''''
+   grcGripper = rc
+   grcGripper.top = (rc.bottom-rc.top) / 2
+   grcGripper.left = rc.right - (nSpacer * 4)
+   
    i = 6  ' CRLF
-   dim as long nRight = rc.right - (nSpacer * 4)
+   dim as long nRight = grcGripper.left
    gSBPanels(i).rc.Left   = nRight - _
       pWindow->ScaleX( getTextWidth( HWND_FRMMAIN_STATUSBAR, gSBPanels(i).wszText, ghStatusBar.hFontStatusBar, 4 ) )
    gSBPanels(i).rc.top    = rc.top
@@ -133,6 +137,8 @@ Function frmStatusBar_WndProc( _
 
    static as long prev_idxHot = -1
    static as long curr_idxHot = -1
+   static as boolean resizing
+   static as POINT prev_pt
    
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_SIZE, frmStatusBar_OnSize)
@@ -144,6 +150,17 @@ Function frmStatusBar_WndProc( _
    case WM_ERASEBKGND
       return true
 
+   case WM_LBUTTONDOWN
+      ' Are we over the resize gripper
+'      dim as POINT pt: GetCursorPos( @pt )
+'      MapWindowPoints( HWND_DESKTOP, HWnd, cast( POINT ptr, @pt ), 1 )
+'      if PtInRect( @grcGripper, pt ) then
+'         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENWSE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
+'         resizing = true
+'         prev_pt = pt
+         SetCapture( HWnd )
+'      end if
+      
    case WM_MOUSEMOVE
       Dim tme As TrackMouseEvent
       tme.cbSize = Sizeof(TrackMouseEvent)
@@ -153,42 +170,56 @@ Function frmStatusBar_WndProc( _
 
       dim as POINT pt: GetCursorPos( @pt )
       MapWindowPoints( HWND_DESKTOP, HWnd, cast( POINT ptr, @pt ), 1 )
-      curr_idxHot = -1
-      for i as long = lbound(gSBPanels) to ubound(gSBPanels)
-         if PtInRect( @gSBPanels(i).rc, pt ) then
-            ' Only make hot panels that have actual text
-            if len(gSBPanels(i).wszText) then
-               curr_idxHot = i
-               gSBPanels(i).isHot = true
-            end if   
-         else   
-            gSBPanels(i).isHot = false
+      
+      ' Are we over the resize gripper
+'      if PtInRect( @grcGripper, pt ) then
+'         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENWSE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
+'      else
+'         SetCursor( LoadCursor( null, IDC_ARROW ))
+'      end if
+      if resizing then
+'         dim as long xDelta = prev_pt.x - pt.x 
+'         dim as long yDelta = prev_pt.y - pt.y
+'         ' Resize the main form
+'         dim as RECT rcMain = AfxGetWindowRect( HWND_FRMMAIN )
+'         dim as long nWidth = rcMain.right - rcMain.left - xDelta
+'         dim as long nHeight = rcMain.bottom - rcMain.top - yDelta
+'         SetWindowPos( HWND_FRMMAIN, 0, 0, 0, nWidth, nHeight, SWP_NOMOVE or SWP_NOZORDER )
+      else
+         ' Are we over one of the status bar panels
+         curr_idxHot = -1
+         for i as long = lbound(gSBPanels) to ubound(gSBPanels)
+            if PtInRect( @gSBPanels(i).rc, pt ) then
+               ' Only make hot panels that have actual text
+               if len(gSBPanels(i).wszText) then
+                  curr_idxHot = i
+                  gSBPanels(i).isHot = true
+               end if   
+            else   
+               gSBPanels(i).isHot = false
+            end if
+         next
+         if curr_idxHot <> prev_idxHot then
+            AfxRedrawWindow( HWnd )
+            prev_idxHot = curr_idxHot 
          end if
-      next
-      if curr_idxHot <> prev_idxHot then
-         AfxRedrawWindow( HWnd )
-         prev_idxHot = curr_idxHot 
       end if
-      
-      
+            
    case WM_MOUSELEAVE
       for i as long = lbound(gSBPanels) to ubound(gSBPanels)
-            gSBPanels(i).isHot = false
+         gSBPanels(i).isHot = false
       next
       prev_idxHot = -1
       curr_idxHot = -1
       AfxRedrawWindow( HWnd )
 
-   case WM_MOUSEMOVE
-      Dim tme As TrackMouseEvent
-      tme.cbSize = Sizeof(TrackMouseEvent)
-      tme.dwFlags = TME_HOVER Or TME_LEAVE
-      tme.hwndTrack = HWnd
-      TrackMouseEvent(@tme) 
-
    case WM_LBUTTONUP
       dim as POINT pt: GetCursorPos( @pt )
       MapWindowPoints( HWND_DESKTOP, HWnd, cast( POINT ptr, @pt ), 1 )
+      SetCursor( LoadCursor( null, IDC_ARROW ))
+      ReleaseCapture
+      resizing = false
+      ' Are we over one of the status bar panels
       for i as long = lbound(gSBPanels) to ubound(gSBPanels)
          if PtInRect( @gSBPanels(i).rc, pt ) then
             PostMessage( HWND_FRMMAIN, WM_COMMAND, MAKEWPARAM(gSBPanels(i).nID, 0), 0 )

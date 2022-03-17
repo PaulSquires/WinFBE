@@ -288,7 +288,8 @@ TYPE STATUSBAR_PANEL_TYPE
    nID as long            ' id to invoke if clicked on
    isHot as boolean
 end type
-dim shared gSBPanels(6) as STATUSBAR_PANEL_TYPE   
+dim shared gSBPanels(6) as STATUSBAR_PANEL_TYPE 
+dim shared grcGripper as RECT  
 
 type TOPMENU_TYPE
    nParentID as long

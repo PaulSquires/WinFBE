@@ -23,15 +23,6 @@ type clsApp
       pfnCreateLexerfn           as CreateLexerFn
       IsWindowIncludes           as boolean           ' T/F that Windows includes have already been loaded
       SuppressNotify             as boolean           ' temporarily suppress Scintilla notifications
-      hRecentFilesRootNode       as HTREEITEM
-      hRecentProjectsRootNode    as HTREEITEM
-      hExplorerRootNode          as HTREEITEM
-      hExplorerFilesNode         as HTREEITEM
-      hExplorerNormalNode        as HTREEITEM
-      hExplorerMainNode          as HTREEITEM
-      hExplorerResourceNode      as HTREEITEM
-      hExplorerHeaderNode        as HTREEITEM
-      hExplorerModuleNode        as HTREEITEM
       bDragTabActive             as boolean           ' a tab in the top tabcontrol is being dragged
       bDragActive                as boolean           ' splitter drag is currently active 
       hWndPanel                  as HWND              ' the panel being split left/right or up/down

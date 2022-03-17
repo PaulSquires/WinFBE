@@ -16,6 +16,7 @@
 
 
 function handleMouseScrollBar( byval uMsg as MSG ) as boolean
+   if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then return false
    ' Determine if the mouse message should be intercepted by the 
    ' transparent WS_EX_LAYERED scrollbar
    select case uMsg.message 
@@ -39,8 +40,10 @@ end function
 
 
 function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
+   if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then return false
+
    ' Determine if the mouse has moved over (or away from) a window that should invoke
-   ' showing or hiding our custom Panel VScroll.
+   ' showing or hiding our custom Panel VScroll or Editor HScroll.
    if (uMsg.message = WM_MOUSEMOVE) orelse (uMsg.message = WM_NCMOUSEMOVE) then
       ' if mouse is currently in drag operation then simply exit
       if gApp.bDragActive then return false
@@ -63,6 +66,7 @@ function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
    dim as clsDocument ptr pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc then
       if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
+         ' visual designer design view is currently active
       else
          for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
             dim as boolean isVisible = IsWindowVisible( HWND_FRMEDITOR_HSCROLLBAR(i) )

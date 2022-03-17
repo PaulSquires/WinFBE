@@ -4,13 +4,22 @@ general.version: 1.0.0
 # all colors are specified using RGB syntax (red,green,blue)
 
 # simple macros that can be used instead of literal values
-%GRAY: 127,127,127
 %BLACK: 0,0,0
+%GRAY: 157,165,180
+%LIGHT_GRAY: 204,204,204
+%LIGHT_BLACK: 40,44,52
+%EVENING_BLACK: 33,37,43
+%LIGHT_WHITE: 215,218,224
 %WHITE: 255,255,255
+
+compile.iconsuccess.foreground: 138,209,138  # green
+compile.iconfail.foreground: 255,0,0         # red
+
+main.panel.background: %WHITE
 
 editor.window.background: %WHITE
 editor.caret.foreground: %BLACK
-editor.currentline.foreground: 255,255,0    # yellow
+editor.currentline.background: 255,255,0    # yellow
 editor.text.foreground: %BLACK
 editor.text.background: %WHITE
 editor.text.bold: false
@@ -36,10 +45,15 @@ editor.keyword.background: %WHITE
 editor.keyword.bold: false
 editor.keyword.italic: false
 editor.keyword.underline: false
-editor.foldmargin.foreground: 237,236,235       # pale gray
-editor.foldsymbol.foreground: %WHITE
-editor.foldsymbol.background: %BLACK
-editor.linenumbers.foreground: %GRAY            # gray
+editor.keyword2.foreground: 187,111,78      # Windows Api (dark orange)
+editor.keyword2.background: %WHITE
+editor.keyword2.bold: false
+editor.keyword2.italic: false
+editor.keyword2.underline: false
+editor.foldmargin.foreground: %WHITE
+editor.foldsymbol.foreground: %GRAY
+editor.foldsymbol.background: %WHITE
+editor.linenumbers.foreground: %GRAY
 editor.linenumbers.background: %WHITE
 editor.linenumbers.bold: false
 editor.linenumbers.italic: false
@@ -51,13 +65,13 @@ editor.operators.italic: false
 editor.operators.underline: false
 editor.indentguides.foreground: %WHITE
 editor.indentguides.background: %BLACK
-editor.preprocessor.foreground: 196,0,0         # red
+editor.preprocessor.foreground: 165,134,181    # light purple
 editor.preprocessor.background: %WHITE
 editor.preprocessor.bold: false
 editor.preprocessor.italic: false
 editor.preprocessor.underline: false
 editor.selection.foreground: %WHITE
-editor.selection.background: 038,079,120       # light blue
+editor.selection.background: 173,214,255       # light blue
 editor.strings.foreground: 173,0,173           # Purple (little darker than Magenta)
 editor.strings.background: %WHITE
 editor.strings.bold: false
@@ -66,3 +80,70 @@ editor.strings.underline: false
 editor.bracegood.foreground: 000,128,000       # green
 editor.bracebad.foreground: 196,000,000        # red
 editor.occurrence.foreground: 148,202,240      # powder blue
+editor.scrollbar.foreground: 236,236,236
+editor.scrollbar.background: %WHITE
+editor.divider.foreground: 64,67,73
+
+# panel holds Explorer, FunctionList, Bookmarks
+panel.panel.background: 243,243,243
+panel.text.foreground: 97,97,97
+panel.text.background: 243,243,243
+panel.texthot.foreground: 97,97,97
+panel.texthot.background: 232,232,232
+panel.scrollbar.foreground: %WHITE
+panel.scrollbar.background: %WHITE
+panel.button.foreground: 97,97,97
+panel.button.background: 236,236,236
+panel.buttonhot.foreground: 97,97,97
+panel.buttonhot.background: %WHITE
+
+toptabs.panel.background: 236,236,236
+toptabs.text.foreground: 106,106,106
+toptabs.text.background: 236,236,236
+toptabs.texthot.foreground: 51,51,51
+toptabs.texthot.background: %WHITE
+toptabs.divider.foreground: 243,243,243
+toptabs.closehot.background: 220,220,220
+
+menubar.panel.background: 221,221,221
+menubar.text.foreground: 51,51,51
+menubar.text.background: 221,221,221
+menubar.texthot.foreground: 51,51,51
+menubar.texthot.background: 198,198,198
+
+topmenu.panel.background: %WHITE
+topmenu.text.foreground: 97,97,97
+topmenu.text.background: %WHITE
+topmenu.texthot.foreground: %WHITE
+topmenu.texthot.background: 0,96,192
+topmenu.textdisabled.foreground: 192,192,192
+topmenu.textdisabled.background: %WHITE
+
+statusbar.panel.background: 0,122,204
+statusbar.text.foreground: %WHITE
+statusbar.text.background: 0,122,204
+statusbar.texthot.foreground: %WHITE
+statusbar.texthot.background: 31,138,210
+
+findreplace.panel.background: 243,243,243
+findreplace.text.foreground: 97,97,97
+findreplace.text.background: 243,243,243
+findreplace.texthot.foreground: 97,97,97
+findreplace.texthot.background: 56,59,65
+findreplace.leftedge.foreground: 200,200,200
+findreplace.iconhot.background: 225,225,225
+findreplace.iconselected.background: 204,233,252    # blue
+findreplace.textnotfound.foreground: 244,135,113    # salmon
+findreplace.textbox.foreground: 97,97,97
+findreplace.textbox.background: %WHITE
+findreplace.cuebanner.foreground: 118,118,118
+
+output.panel.background: %WHITE
+output.text.foreground: 106,106,106
+output.text.background: %WHITE
+output.texthot.foreground: 51,51,51
+output.texthot.background: %WHITE
+output.divider.foreground: 124,127,133
+output.closehot.background: 225,225,225
+
+designer.panel.background: %WHITE

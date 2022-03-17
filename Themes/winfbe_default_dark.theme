@@ -78,7 +78,10 @@ editor.strings.italic: false
 editor.strings.underline: false
 editor.bracegood.foreground: 000,128,000       # green
 editor.bracebad.foreground: 196,000,000        # red
-editor.occurrence.foreground: 53,59,69
+editor.occurrence.foreground: 53,70,107
+editor.scrollbar.foreground: 75,83,97
+editor.scrollbar.background: %LIGHT_BLACK
+editor.divider.foreground: 64,67,73
 
 # panel holds Explorer, FunctionList, Bookmarks
 panel.panel.background: %EVENING_BLACK
@@ -88,7 +91,6 @@ panel.texthot.foreground: %LIGHT_GRAY
 panel.texthot.background: 44,49,58
 panel.scrollbar.foreground: 53,59,69
 panel.scrollbar.background: %EVENING_BLACK
-panel.divider.foreground: 24,26,31
 panel.button.foreground: %LIGHT_WHITE
 panel.button.background: %LIGHT_BLACK
 panel.buttonhot.foreground: %LIGHT_WHITE
@@ -142,3 +144,5 @@ output.texthot.foreground: %LIGHT_WHITE
 output.texthot.background: %LIGHT_BLACK
 output.divider.foreground: 124,127,133
 output.closehot.background: 56,59,65
+
+designer.panel.background: %LIGHT_BLACK

@@ -39,15 +39,15 @@ function frmEditorVScroll_calcVThumbRect( byval pDoc as clsDocument ptr ) as boo
       SetRectEmpty( @gEditorVScroll(i).rc )
       with gEditorVScroll(i)
          .linesPerPage = pDoc->linesPerPage(i)
-         .numLines = pDoc->GetLineCount
+         .numLines = pDoc->GetLineCount + 1
          .thumbHeight = (.linesPerPage / .numLines) * clientHeight
          ' If the thumb height is less than the minimum default then adjust parameters so
          ' that the viewport can compensate for the adjustments.
          .thumbRatio = 1
-         if .thumbHeight < minThumbHeight then
-            .thumbRatio = 1 + (minThumbHeight-.thumbHeight) /.thumbHeight
-            .thumbHeight = minThumbHeight
-         end if
+         'if .thumbHeight < minThumbHeight then
+         '   .thumbRatio = 1 + (minThumbHeight-.thumbHeight) /.thumbHeight
+         '   .thumbHeight = minThumbHeight
+         'end if
          .rc.left = 0
          .rc.right = .rc.left + iScrollbarWidth
          .rc.top = ((firstVisibleLine / .numLines) * clientHeight)
@@ -125,8 +125,7 @@ function frmEditorVScroll_WndProc( _
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
                if pDoc then
                   dim as long nPrevTopLine = SendMessage( pDoc->hWindow(idxWindow), SCI_GETFIRSTVISIBLELINE, 0, 0 ) 
-                  dim as long nLastIndex = (gEditorVScroll(idxWindow).rc.bottom / rc.bottom) * gEditorVScroll(idxWindow).numLines
-                  dim as long nTopLine = nLastIndex - gEditorVScroll(idxWindow).linesPerPage
+                  dim as long nTopLine = (gEditorVScroll(idxWindow).rc.top / rc.bottom) * gEditorVScroll(idxWindow).numLines
                   if nTopLine <> nPrevTopLine then
                      SendMessage( pDoc->hWindow(idxWindow), SCI_SETFIRSTVISIBLELINE, nTopLine, 0 ) 
                   end if   

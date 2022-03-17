@@ -155,6 +155,7 @@ type clsDocument
       AutoCompletetype  as long        ' AUTOC_DIMAS, AUTOC_TYPE
       AutoCStartPos     as long
       lastCaretPos      as long        ' used for checking in SCN_UPDATEUI
+      lastXOffsetPos    as long        ' used for checking in SCN_UPDATEUI (horizontal offset)
       
       wszOnLoadBookmarks(any) as CWSTR  ' saved from project load for files that are not immediately shown in open tab      
       wszOnLoadFoldPoints as CWSTR      ' saved from project load for files that are not immediately shown in open tab      
