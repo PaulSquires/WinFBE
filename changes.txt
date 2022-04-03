@@ -1,4 +1,15 @@
-Version 3.0.0
+Version 3.0.0-BETA-2
+Editor:
+- Fixed visual error whereby statusbar area was covered whenever a visual designer form was active.
+- WinFBE64 is now compiled using the -gen gcc -O 2 flags.
+- Added right click popup menus for cut/copy/paste for textboxes that were changed to RichEdit (Find/Replace/CompilerLog/Notes).
+- Added popup tooltip for Function list that displays the function prototype. Easier now to differentiate between overloaded functions.
+- Fixed selecting function with multiple overloads would incorrectly always position the editor to the first instance of that function.
+- Added some bcrypt* Win32 api keywords to the default winapi_keywords.txt file.
+- Fixed issue whereby deleting a User Tool would result in a ghost entry in the User Tool top menu until the program was restarted.
+- Updated the SetCompilerSwitchesII user tool to the latest version.
+
+Version 3.0.0-BETA-1
 Editor:
 - Complete re-write of main editor UI to have a look and feel more in line with modern code editors.
 - Updated to Scintilla Version 5.1.5 (Dec 7, 2021). Also, switched to use Lexilla.dll with custom lexer called lexWinFBE that handles the FreeBasic lexing.
@@ -27,6 +38,7 @@ Editor:
 - Re-worked the Find/Replace popup dialog to be visually more appealing and to work better with keyboard. Added keyboard shortcuts for some find/replace actions (for example, Ctrl+Alt+Enter to Replace All).
 - Added keyboard shortcut "CTRL+~" (ctrl+tilde) to allow you to move keyboard focus back to the active editing window. This is useful, for example, for jumping between the editing window and the Find/Replace dialog.
 - Added keyboard shortcuts to move to next and move to previous compiler errors. This is a quick way to jump to and fix errors without having to use your mouse to double click the compiler error message in the Output window.
+- Added "Explorer Categories" that allow user defined custom nodes to display in the Explorer window (only when used with an active Project).
 - The Explorer window now allows for multiple nodes to be selected (via Ctrl or Shift) and to popup right-click menu to perform actions on the group of selected nodes (for example, to re-designate files to different FileTypes, etc).
 - Code Fold points are now saved between Project and/or Sessions in the same manner as Bookmarks are treated.
 - Disabled the functionality whereby if Find/Replace dialog is open and user switches to a different tab in the editor, then search highlights would automatically reposition the caret to the first found find text in the newly selected tab.
@@ -34,7 +46,8 @@ Editor:
 - Find In Files corrected to properly process *.* files. In situations of *.* searches known binary formats are bypassed (eg. EXE, DLL, BMP, etc).
 - Corrected issues whereby Replace All could fail to replace matching entries near the end of the edit buffer.
 - Implemented Preserve Case option for Find/Replace. Currently, only supports preserve Full Upper Case or Full Lower Case preserve case replace.
-
+- Added (-gen gas64) option for Build Configurations.
+- Fixed bug whereby FindReplace window would not close when all other underlying code windows have been closed.
 
 Visual Designer:
 - New control property hWindowToolTip which will retrieve the windows handle for any tooltip created for a control.

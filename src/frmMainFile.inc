@@ -548,10 +548,17 @@ end function
 ' ========================================================================================
 ' Load a previously saved session
 ' ========================================================================================
-public function OnCommand_FileLoadSession( byval HWnd As HWnd ) as LRESULT
+function OnCommand_FileLoadSession( byval HWnd As HWnd ) as LRESULT
    ' Display the Open File Dialog
    Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, IDM_LOADSESSION)
    If pwszName Then 
+      if gApp.IsProjectActive then 
+         if OnCommand_ProjectClose(hwnd) = false then exit function
+      else   
+         if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = false then exit function
+      end if
+      ' Clear any previous info from the Output windows
+      frmOutput_ResetAllControls()
       gConfig.LoadSessionFile(*pwszName) 
       CoTaskMemFree(pwszName)
    End If
@@ -562,7 +569,7 @@ end function
 ' ========================================================================================
 ' Save a session
 ' ========================================================================================
-public function OnCommand_FileSaveSession( byval HWnd As HWnd ) as LRESULT
+function OnCommand_FileSaveSession( byval HWnd As HWnd ) as LRESULT
    Dim wszFilename  As WString * MAX_PATH = ""
    Dim wszExtension As WString * MAX_PATH = "session"
    Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wszFilename, @wszExtension, IDM_SAVESESSION)

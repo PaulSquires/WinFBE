@@ -125,7 +125,6 @@ type clsConfig
       
    public:
       WinFBEversion         as CWSTR
-      SelectedTheme         as string                ' filename of selected theme
       Tools(any)            as TYPE_TOOLS
       ToolsTemp(any)        as TYPE_TOOLS  
       Builds(any)           as TYPE_BUILDS  

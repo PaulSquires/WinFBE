@@ -18,7 +18,7 @@
 ' ========================================================================================
 ' Format the codetip prior to showing it
 ' ========================================================================================
-private function FormatCodetip( byval strCodeTip as string ) as STRING
+function FormatCodetip( byval strCodeTip as string ) as STRING
    dim as long p
 
    ' remove multiple duplicate spaces 

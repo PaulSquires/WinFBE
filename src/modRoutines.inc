@@ -595,7 +595,7 @@ function OpenSelectedDocument( _
    
    ' If incoming FunctionName then search for filename and line number.
    dim pData as DB2_DATA ptr    
-   if len( wszFunctionName ) then
+   if len( wszFunctionName ) AndAlso nLineNumber = -1 then
       ' Search for function, sub, or property (get/set)
       pData = gdb2.dbFindFunction( wszFunctionName, wszFilename) 
       if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName, wszFilename) 
@@ -1478,6 +1478,9 @@ function DoCheckForUpdates( _
             byval hWndParent as hwnd, _
             byval bSilentCheck as Boolean = false _
             ) as long
+   
+   ' Check safeguard for when Beta versions are issued.
+   if PREVENT_UPDATE_CHECK then exit function
    
    ''  Contact the PlanetSquires server and download the text file containing
    ''  the latest WinFBE version number. If an update exists then ask the user

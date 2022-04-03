@@ -19,7 +19,7 @@
 ' ========================================================================================
 ' Update the UserTools items in the topmenu array
 ' ========================================================================================
-public Function updateUserToolsMenuItems() as long
+function updateUserToolsMenuItems() as long
    ' clear MRU items already existing in the gTopMenu array. We overwrite and extend
    ' the gTopMenu array rather than erase it because existing menus depend on the 
    ' array index that aready exist. The function also returns the width to use for
@@ -56,7 +56,7 @@ end function
 ' ========================================================================================
 ' Prepare and Execute a user tool
 ' ========================================================================================
-public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long            
+function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long            
             
    Dim ShExecInfo  As SHELLEXECUTEINFOW  
    Dim pDocMain    As clsDocument Ptr 
@@ -199,7 +199,7 @@ End Function
 ' ========================================================================================
 ' Create the keyboard shortcut text description.
 ' ========================================================================================
-public function createToolsMenuShortcut( byval nCtrlID as long ) as CWSTR
+function createToolsMenuShortcut( byval nCtrlID as long ) as CWSTR
    dim wszShortcut as CWSTR
       
    If gConfig.Tools(nCtrlID).IsCtrl Then wszShortcut = "Ctrl+"
@@ -216,7 +216,7 @@ end function
 ' Create an accelerator table based on selections for the user tools.
 ' Also adds the Tools to the top menu.
 ' ========================================================================================
-public Function frmUserTools_CreateAcceleratorTable() As Long
+function frmUserTools_CreateAcceleratorTable() As Long
 
    dim NumKeys  As Long
    dim nKey     As Long
@@ -307,7 +307,7 @@ End Function
 ' ========================================================================================
 ' Load all of the Tools descriptions into the listbox
 ' ========================================================================================
-private function frmUserTools_LoadListBox( byval hParent as hwnd ) as Long
+function frmUserTools_LoadListBox( byval hParent as hwnd ) as Long
    dim hList1 as hwnd = GetDlgItem(hParent, IDC_FRMUSERTOOLS_LSTTOOLS)
 
    ListBox_ResetContent(hList1)
@@ -322,9 +322,10 @@ end function
 ' ========================================================================================
 ' Swap two entries in the Tools Listbox
 ' ========================================================================================
-private function frmUserTools_SwapListBoxItems( byval Item1 as long, _
-                                                Byval Item2 as long _
-                                                ) as Long
+function frmUserTools_SwapListBoxItems( _
+   byval Item1 as long, _
+   byval Item2 as long _
+   ) as Long
    dim as hwnd hList1 = GetDlgItem( HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_LSTTOOLS)
    
    ' Swap the array values
@@ -340,7 +341,7 @@ end function
 ' ========================================================================================
 ' Set the UserTools textboxes and options depending on what listbox entry is selected
 ' ========================================================================================
-private function frmUserTools_SetTextboxes() as long
+function frmUserTools_SetTextboxes() as long
    dim as long nCurSel = ListBox_GetCurSel(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_LSTTOOLS))
    dim as Boolean fEnabled = iif( nCurSel < 0, false, true)
 
@@ -377,9 +378,10 @@ end function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmUserTools
 ' ========================================================================================
-private Function frmUserTools_OnCreate( ByVal HWnd As HWnd, _
-                                        ByVal lpCreateStructPtr As LPCREATESTRUCT _
-                                        ) As BOOLEAN
+function frmUserTools_OnCreate( _
+   byval HWnd As HWnd, _
+   byval lpCreateStructPtr As LPCREATESTRUCT _
+   ) as boolean
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -395,11 +397,12 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmUserTools
 ' ========================================================================================
-private Function frmUserTools_OnCommand( ByVal HWnd As HWnd, _
-                                         ByVal id As Long, _
-                                         ByVal hwndCtl As HWnd, _
-                                         ByVal codeNotify As UINT _
-                                         ) As LRESULT
+function frmUserTools_OnCommand( _
+   ByVal HWnd As HWnd, _
+   ByVal id As Long, _
+   ByVal hwndCtl As HWnd, _
+   ByVal codeNotify As UINT _
+   ) As LRESULT
 
    dim as hwnd hList1 = GetDlgItem( HWND, IDC_FRMUSERTOOLS_LSTTOOLS)
    dim as long nCurSel = ListBox_GetCurSel(hList1)
@@ -574,10 +577,11 @@ private Function frmUserTools_OnCommand( ByVal HWnd As HWnd, _
             redim gConfig.Tools(ubound(gConfig.ToolsTemp))
             for i as long = lbound(gConfig.ToolsTemp) to ubound(gConfig.ToolsTemp)
                gConfig.Tools(i) = gConfig.ToolsTemp(i)   
-            NEXT
+            next
             erase gConfig.ToolsTemp
             frmUserTools_CreateAcceleratorTable            
             gConfig.SaveConfigFile
+            updateUserToolsMenuItems()
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          end if

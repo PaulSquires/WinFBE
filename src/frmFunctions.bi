@@ -18,6 +18,7 @@
 
 type FUNCTION_NODE_TYPE
    wszFunctionName as CWSTR
+   wszPrototype as CWSTR      ' the sub/function parameters
    nLineNumber as long
 end type
 

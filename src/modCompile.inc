@@ -35,9 +35,10 @@ Dim Shared gCompile As COMPILE_TYPE
 ''
 ''  Set the statusbar text and icon for a good/bad compile
 ''
-private function SetCompileStatusBarMessage( byref wszText as wstring, _
-                                             byval hIconCompile as long _
-                                             ) as LRESULT
+function SetCompileStatusBarMessage( _
+            byref wszText as wstring, _
+            byval hIconCompile as long _
+            ) as LRESULT
    gApp.wszPanelText = wszText
    gApp.hIconPanel = hIconCompile
    frmMain_SetStatusbar
@@ -49,7 +50,7 @@ end function
 ''  Create Resource file (if necessary) for the compile and return
 ''  the full disk filename of the resource file.
 ''
-private function CreateTempResourceFile() as boolean
+function CreateTempResourceFile() as boolean
    dim as CWSTR wszResourceFile = gCompile.ResourceFile
    
    ' Collect all of the IMAGE_NAME used by controls/properties in the file/project
@@ -145,7 +146,7 @@ end function
 ''
 ''  Reset all Scintilla editing cursors
 ''
-public function ResetScintillaCursors() as Long
+function ResetScintillaCursors() as Long
    Dim As Long nCount = gTTabCtl.GetItemCount 
 
    For i as long = 0 To nCount - 1
@@ -168,10 +169,11 @@ end function
 
 ''
 ''
-private function RedirConsoleToFile( byref wszExe AS wstring, _
-                                     byref wszCmdLine AS wstring, _
-                                     byref sConsoleText AS string _
-                                     ) as long
+function RedirConsoleToFile( _
+            byref wszExe AS wstring, _
+            byref wszCmdLine AS wstring, _
+            byref sConsoleText AS string _
+            ) as long
 
    ' From the MinGW "Getting Started" guide:
    '    MinGW may have problems with paths containing spaces, and if not, usually 
@@ -267,9 +269,10 @@ END function
 
 ''
 ''
-public Function RunEXE( ByRef wszFileExe As CWSTR, _
-                        ByRef wszParam As CWSTR _
-                        ) As Long
+function RunEXE( _
+            ByRef wszFileExe As CWSTR, _
+            ByRef wszParam As CWSTR _
+            ) As Long
                          
    dim as CWSTR wszPath = AfxStrPathname("PATH", wszFileExe)
    dim as CWSTR wszBatchFile = AfxGetExePathName + AfxStrPathname("NAME", wszFileExe) + ".bat"
@@ -330,9 +333,10 @@ End Function
 ' Set the cursor to the error position based on the selected line in frmCompileResults
 ' or the TODO listview. 
 ' ========================================================================================
-public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
-                                          Byval wID as long _
-                                          ) As Long
+function SetDocumentErrorPosition( _
+            ByVal hLV As HWnd, _
+            Byval wID as long _
+            ) As Long
 
    Dim wszErrorLine As WString * MAX_PATH
    Dim wszErrorFile As WString * MAX_PATH
@@ -372,7 +376,7 @@ End Function
 
 ''
 ''
-private function SetLogFileTextbox() as long
+function SetLogFileTextbox() as long
    
    ' Construct the text that will be displayed:
    ' - FBC version, exe name, file size, compile time
@@ -398,12 +402,13 @@ end function
 
 ''
 ''
-private function ParseLogForError( byref wsLogSt as CWSTR, _
-                                   byval bAllowSuccessMessage as Boolean, _
-                                   Byval wID as long, _
-                                   byval fCompile64 as Boolean, _
-                                   byval fCompilingObjFiles as Boolean _
-                                   ) as Boolean
+function ParseLogForError( _
+            byref wsLogSt as CWSTR, _
+            byval bAllowSuccessMessage as Boolean, _
+            Byval wID as long, _
+            byval fCompile64 as Boolean, _
+            byval fCompilingObjFiles as Boolean _
+            ) as Boolean
    
    ' Returns TRUE if error has been detected. This signals to the calling code
    ' that we can break out of performing any further compiles (eg. modules).
@@ -741,7 +746,7 @@ end function
 ''
 '' Main module that handles the entire compile process
 ''
-public Function code_Compile( ByVal wID As Long ) As BOOLEAN
+function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Dim pDoc As clsDocument Ptr
    

@@ -18,7 +18,7 @@
 private function clearMRUFilesItems( byval nParentID as long ) as long
    ' clear out any existing items that match the nParentID so that they can be
    ' reused when the MRU popup menu is created and shown. This function is used
-   ' fr both Files and Projects MRU lists.
+   ' for Files and Projects and UserTools MRU lists.
    for i as long = lbound(gTopMenu) to ubound(gTopMenu)
       if gTopMenu(i).nParentID = nParentID then
          gTopMenu(i).nParentID = 0

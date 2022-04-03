@@ -334,7 +334,7 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
    wszCurPath = wszPath + "*"
 
    erase gThemeFilenames
-   
+
    idx = 0
    hSearch = FindFirstFile( wszCurPath, @WFD )
    IF hSearch <> INVALID_HANDLE_VALUE THEN

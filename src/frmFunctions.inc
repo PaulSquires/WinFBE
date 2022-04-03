@@ -40,6 +40,7 @@ end function
 ' ========================================================================================
 function getFunctionsLineNumber( byval wszCaption as CWSTR ) as long
    ' do not use Parse for this because line may contain embedded % in description
+   ' lineNum%functionName%prototype
    dim as long nLineNum 
    dim as long f1
    f1 = instr(wszCaption, "%")
@@ -52,13 +53,30 @@ end function
 ' ========================================================================================
 function getFunctionsFunctionName( byval wszCaption as CWSTR ) as CWSTR
    ' do not use Parse for this because line may contain embedded % in description
+   ' lineNum%functionName%prototype
    dim as CWSTR wszTemp
    dim as long f1
    f1 = instr(wszCaption, "%")
    if f1 then wszTemp = mid(wszCaption, f1 + 1)
+   f1 = instr(wszTemp, "%")
+   if f1 then wszTemp = left(wszTemp, f1 - 1)
    function = wszTemp
 end function
 
+' ========================================================================================
+' Get the Functions prototype from the Listbox line
+' ========================================================================================
+function getFunctionsPrototype( byval wszCaption as CWSTR ) as CWSTR
+   ' do not use Parse for this because line may contain embedded % in description
+   ' lineNum%functionName%prototype
+   dim as CWSTR wszTemp
+   dim as long f1
+   f1 = instr(wszCaption, "%")
+   if f1 then wszTemp = mid(wszCaption, f1 + 1)
+   f1 = instr(wszTemp, "%")
+   if f1 then wszTemp = mid(wszTemp, f1 + 1)
+   function = wszTemp
+end function
 
 ' ========================================================================================
 ' Expand/Collapse all Functions Nodes
@@ -403,6 +421,7 @@ function frmFunctionsListBox_SubclassProc ( _
          tme.cbSize = sizeof(TrackMouseEvent)
          tme.dwFlags = TME_HOVER or TME_LEAVE
          tme.hwndTrack = hWin
+         tme.dwHoverTime = 1
          TrackMouseEvent(@tme) 
          
          ' get the item rect that the mouse is over and only invalidate
@@ -430,15 +449,26 @@ function frmFunctionsListBox_SubclassProc ( _
          ' if the specified point is in the client area of the list box, or one if it is outside the 
          ' client area.
          if hiword(idx) <> 1 then
+            static wszPrevTooltip as CWSTR
             wszTooltip = ""
             dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
             if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
                dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
                if pDoc then wszTooltip = pDoc->DiskFilename
+            else
+               ' Get the function prototype and display it in popup multiline tooltip
+               wszTooltip = getFunctionsPrototype( wszCaption )
+               if len(wszTooltip) then
+                  SendMessage( hTooltip, TTM_SETMAXTIPWIDTH, 0, 300 )
+                  wszTooltip = FormatCodetip( wszTooltip )
+               end if   
             end if
             ' Display the tooltip
-            AfxSetTooltipText( hTooltip, hWin, wszTooltip )
-            AfxRedrawWindow( hWin )
+            if wszPrevTooltip <> wszTooltip then
+               AfxSetTooltipText( hTooltip, hWin, wszTooltip )
+               wszPrevTooltip = wszTooltip
+               AfxRedrawWindow( hWin )
+            end if   
          end if
          
       case WM_MOUSELEAVE
@@ -456,13 +486,7 @@ function frmFunctionsListBox_SubclassProc ( _
             dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
             dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
             if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
-'               ' Toggle the show/hide of bookmarks under this node
-'               if pDoc then pDoc->bFunctionsExpanded = not pDoc->bFunctionsExpanded
-'               if (pDoc->bFunctionsExpanded) orelse (pDoc->bHasFunctions = false) then
-                  OpenSelectedDocument( pDoc->DiskFilename, "", -1 )
-'               end if   
-'               ' allow listbox click event to fully process 
-'               PostMessage( hWin, MSG_USER_LOAD_FUNCTIONSFILES, 0, 0 )
+                OpenSelectedDocument( pDoc->DiskFilename, "", -1 )
             else
                ' Attempt to show the function name
                dim as long nLineNum = getFunctionsLinenumber( wszCaption )
@@ -618,7 +642,7 @@ function LoadFilesAndFunctions() as long
    ' true     ' expanded node
    ' false    ' collapsed node
    ' Function node line format. 
-   ' 231%FunctionName  ' function starts at line 231 of the file
+   ' 231%FunctionName%prototype  ' function starts at line 231 of the file
 
    ' **** FEB 8, 2022. Change approach to NOT allow the Functions list to be expanded
    ' or collapsed. This should lead to a better user experience because the now all
@@ -674,6 +698,7 @@ function LoadFilesAndFunctions() as long
                      ub = ubound(arrFuncs) + 1
                      redim preserve arrFuncs(ub)
                      arrFuncs(ub).wszFunctionName = wszNodeName
+                     arrFuncs(ub).wszPrototype = pData->CallTip
                      arrFuncs(ub).nLineNumber = pData->nLineNum
                   end if
             end select
@@ -683,7 +708,8 @@ function LoadFilesAndFunctions() as long
 
          for ii as long = lbound(arrFuncs) to ubound(arrFuncs)
             wszText = wstr(arrFuncs(ii).nLineNumber) & _
-                      "%" & ltrim(arrFuncs(ii).wszFunctionName)
+                      "%" & ltrim(arrFuncs(ii).wszFunctionName) & _
+                      "%" & trim(arrFuncs(ii).wszPrototype)
             idx = Listbox_AddString( hList, @wszText )
             ListBox_SetItemData( hList, idx, pDocs(i) )
             pDocs(i)->bHasFunctions = true
@@ -734,7 +760,7 @@ function LoadFunctionsOnly() as long
    dim as CWSTR wszNodeName
    dim as long ub, idx
     
-   ' 231%FunctionName  ' function starts at line 231 of the file
+   ' 231%FunctionName%prototype  ' function starts at line 231 of the file
 
    ' Get the functions (and sort them) 
    redim arrFuncs(any) as FUNCTION_NODE_TYPE
@@ -757,6 +783,7 @@ function LoadFunctionsOnly() as long
             ub = ubound(arrFuncs) + 1
             redim preserve arrFuncs(ub)
             arrFuncs(ub).wszFunctionName = wszNodeName
+            arrFuncs(ub).wszPrototype = pData->CallTip
             arrFuncs(ub).nLineNumber = pData->nLineNum
       end select
    loop      
@@ -765,7 +792,8 @@ function LoadFunctionsOnly() as long
 
    for ii as long = lbound(arrFuncs) to ubound(arrFuncs)
       wszText = wstr(arrFuncs(ii).nLineNumber) & _
-                "%" & ltrim(arrFuncs(ii).wszFunctionName)
+                "%" & ltrim(arrFuncs(ii).wszFunctionName) & _
+                "%" & trim(arrFuncs(ii).wszPrototype)
       idx = Listbox_AddString( hList, @wszText )
       ListBox_SetItemData( hList, idx, 0 )
    next 

@@ -760,9 +760,11 @@ function frmFindReplace_OnDestroy( byval HWnd as HWnd ) as LRESULT
    ' Remove any markers set in the document that highlights
    ' entire lines (used for Selected text searching).
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc then pDoc->RemoveMarkerHighlight
+   if pDoc then 
+      pDoc->RemoveMarkerHighlight
+      SetFocusScintilla
+   end if
       
-   SetFocusScintilla
    HWND_FRMFINDREPLACE = 0
 
    ' delete the pWindow because it gets recreated everytime frmFindReplace is invoked
@@ -994,6 +996,32 @@ Function frmFindReplace_RichEdit_SubclassProc ( _
             return result
          end if
      
+      case WM_CONTEXTMENU 
+         ' Create the right click popup menu
+         dim as CWSTR wszText = RichEdit_GetSelText( hWin )
+         Dim hPopUpMenu As HMENU = CreatePopupMenu()
+         if len(wszText) then 
+            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_CUT, wstr("Cut") )
+            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_COPY, wstr("Copy") )
+         end if
+         if RichEdit_CanPaste( hWin, 0 ) then
+            if len(wszText) then 
+               AppendMenu( hPopUpMenu, MF_SEPARATOR, 0, "" )
+            end if   
+            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_PASTE, wstr("Paste") )
+         end if   
+
+         dim as long nResult
+         nResult = TrackPopupMenu( hPopUpMenu, TPM_RETURNCMD or TPM_NONOTIFY, _
+                            loword(_lParam), hiword(_lParam), 0, HWND_FRMFINDREPLACE, 0 ) 
+         select case nResult
+            case IDM_CUT:   SendMessage( hWin, WM_CUT, 0, 0 )
+            case IDM_COPY:  SendMessage( hWin, WM_COPY, 0, 0 )
+            case IDM_PASTE: SendMessage( hWin, WM_PASTE, 0, 0 )
+         end select
+         DestroyMenu hPopUpMenu
+         return 0
+
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
          RemoveWindowSubclass( hWin, @frmFindReplace_RichEdit_SubclassProc, uIdSubclass )

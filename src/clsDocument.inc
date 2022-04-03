@@ -276,7 +276,6 @@ function clsDocument.CreateCodeWindow( _
 
       if AfxFileExists(wszFile) then     
          dim as string st, sText
-         dim as long f = Freefile
          dim as long idx
          
          if IsTemplate then
@@ -719,8 +718,6 @@ function clsDocument.SaveFile( _
    ' if this is a new Untitled document then set flag to display SaveAs dialog.
    if this.IsNewFlag then bSaveAs = true
       
-' TODO: How does autoSave respond to IsNew files Untitled
-
    ' Don't let AutoSave allow bSaveas
    if bAutoSaveOnly then bSaveAs = false
 
@@ -740,6 +737,7 @@ function clsDocument.SaveFile( _
       if pwszName then
          wszFilename = *pwszName
          CoTaskMemFree(pwszName)
+         this.bNeedsParsing = true
       else
          return false
       end if

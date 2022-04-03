@@ -29,6 +29,7 @@
 #include once "Afx\CWindow.inc"
 #include once "Afx\AfxFile.inc"
 #include once "Afx\AfxStr.inc"
+#include once "Afx\AfxRichEdit.inc"
 #include once "Afx\AfxTime.inc"
 #include once "Afx\AfxGdiplus.inc"
 #include once "Afx\AfxMenu.inc" 
@@ -44,7 +45,10 @@ using Afx
 
 #define APPNAME        wstr("WinFBE - FreeBASIC Editor")
 #define APPNAMESHORT   wstr("WinFBE")
-#define APPVERSION     wstr("3.0.0") 
+
+#define APPVERSION     wstr("3.0.0-BETA-2") 
+#define PREVENT_UPDATE_CHECK true     ' used for betas
+
 #define APPCOPYRIGHT   wstr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2022") 
 dim shared as CWSTR gwszDefaultToolchain = "FreeBASIC-1.09.0-winlibs-gcc-9.3.0"
 

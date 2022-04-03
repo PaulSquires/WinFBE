@@ -719,6 +719,9 @@ function frmMain_OnPaint( byval HWnd as HWnd ) as LRESULT
          if IsWindowVisible( pDoc->hWindow(1) ) then 
             GetWindowRect( pDoc->hWindow(1), @rc )
             rc.top = rc.bottom
+            if IsWindowVisible( HWND_FRMEDITOR_HSCROLLBAR(1) ) then
+               rc.top = rc.top + AfxGetWindowHeight( HWND_FRMEDITOR_HSCROLLBAR(1) )
+            end if   
             rc.bottom = rc.top + pWindow->ScaleY(SPLITSIZE)
             rc.right = rc.right + pWindow->ScaleX(SCROLLBAR_WIDTH_EDITOR)
             MapWindowPoints( HWND_DESKTOP, HWND_FRMMAIN, cast(POINT ptr, @rc), 2 )
@@ -752,7 +755,6 @@ end function
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
 function frmMain_PositionWindows() as LRESULT
-   
    dim as HWnd hEdit
    dim as long nHeightTabControl, nLeft, nTop
    dim as Rect rc
@@ -801,7 +803,11 @@ function frmMain_PositionWindows() as LRESULT
    if gTTabCtl.GetItemCount = 0 then
       ShowWindow( HWND_FRMMAIN_TOPTABS, SW_HIDE )
       nHeightTabControl = 0
-   Else
+      ' If Find/Replace is open then close it
+      if IsWindowVisible( HWND_FRMFINDREPLACE ) then
+         DestroyWindow( HWND_FRMFINDREPLACE )
+      end if   
+   else
       nHeightTabControl = AfxGetWindowHeight(HWND_FRMMAIN_TOPTABS)
       SetWindowPos( HWND_FRMMAIN_TOPTABS, 0, _
                     nLeft, nTop, _
@@ -847,14 +853,13 @@ function frmMain_PositionWindows() as LRESULT
                        rcDoc.left, _
                        rcDoc.bottom - nDesignCodeTabHeight, _
                        rcDoc.right, _
-                       rcDoc.bottom - nDesignCodeTabHeight, _
+                       nDesignCodeTabHeight, _
                        lStyle )
          AfxRedrawWindow( HWND_FRMMAIN_DESIGNTABS )
       else   
          ShowWindow( HWND_FRMMAIN_DESIGNTABS, SW_HIDE )
       end if
       
-      'if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc) = false) then
       dim as long nShowVScrollBars = iif(pDoc->DesignTabsCurSel = 0, SW_HIDE, SW_SHOW)
       ' Only hide vertical scrollbars because hiding the horizontal could
       ' result in endless loop during mouseover test in modMsgPump.
@@ -904,7 +909,7 @@ function frmMain_PositionWindows() as LRESULT
             ' Position the TOP view horizontal scroll bar
             if IsWindowVisible(HWND_FRMEDITOR_HSCROLLBAR(1)) then
                SetWindowPos( HWND_FRMEDITOR_HSCROLLBAR(1), 0, _ 
-                             rcDoc.left, pDoc->SplitY - rcDoc.top - iHScrollbarHeight, _
+                             rcDoc.left, pDoc->SplitY - iHScrollbarHeight, _
                              rcDoc.right - rcDoc.left - iVScrollbarWidth, iHScrollbarHeight, _
                              SWP_NOZORDER )
             end if

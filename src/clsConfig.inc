@@ -1485,7 +1485,6 @@ function clsConfig.LoadConfigFile() as long
          
          select case wKey
             case "WinFBEversion":          this.WinFBEversion         = wData
-            case "SelectedTheme":          this.SelectedTheme         = wData
             case "AskExit":                this.AskExit               = nData
             case "EnableProjectCache":     this.EnableProjectCache    = nData
             case "CheckForUpdates":        this.CheckForUpdates       = nData
@@ -1680,8 +1679,7 @@ function clsConfig.LoadConfigFile() as long
       this.FBWINCompiler32 = ""
       this.FBWINCompiler64 = ""
       this.EditorFontname = ""
-      this.SelectedTheme = ""
-      this.ThemeFilename = ""
+      this.ThemeFilename = "winfbe_default_dark.theme"
       this.EditorFontsize = 11
       this.FontExtraSpace = 10
       this.RightEdge = 0
@@ -1941,7 +1939,12 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
    
    frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
-
+   
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc then 
+      if pDoc->bEditorIsSplit then AfxRedrawWindow( HWND_FRMMAIN )
+   end if
+   
    function = true   ' successful open
 end function
 

@@ -746,6 +746,58 @@ end function
 
 
 ' ========================================================================================
+' frmOutput_RichEdit_SubclassProc Window procedure
+' ========================================================================================
+Function frmOutput_RichEdit_SubclassProc ( _
+      byval hWin   as HWnd, _                 ' // Control window handle
+      byval uMsg   as UINT, _                 ' // Type of message
+      byval _wParam as WPARAM, _               ' // First message parameter
+      byval _lParam as LPARAM, _               ' // Second message parameter
+      byval uIdSubclass as UINT_PTR, _        ' // The subclass ID
+      byval dwRefData as DWORD_PTR _          ' // Pointer to reference data
+      ) as LRESULT
+
+   dim pWindow as CWindow ptr = AfxCWindowPtr(hWin)
+
+   select case uMsg
+      
+      case WM_CONTEXTMENU 
+         ' Create the right click popup menu
+         dim as CWSTR wszText = RichEdit_GetSelText( hWin )
+         Dim hPopUpMenu As HMENU = CreatePopupMenu()
+         if len(wszText) then 
+            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_CUT, wstr("Cut") )
+            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_COPY, wstr("Copy") )
+         end if
+         if RichEdit_CanPaste( hWin, 0 ) then
+            if len(wszText) then 
+               AppendMenu( hPopUpMenu, MF_SEPARATOR, 0, "" )
+            end if   
+            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_PASTE, wstr("Paste") )
+         end if   
+
+         dim as long nResult
+         nResult = TrackPopupMenu( hPopUpMenu, TPM_RETURNCMD or TPM_NONOTIFY, _
+                            loword(_lParam), hiword(_lParam), 0, HWND_FRMOUTPUT, 0 ) 
+         select case nResult
+            case IDM_CUT:   SendMessage( hWin, WM_CUT, 0, 0 )
+            case IDM_COPY:  SendMessage( hWin, WM_COPY, 0, 0 )
+            case IDM_PASTE: SendMessage( hWin, WM_PASTE, 0, 0 )
+         end select
+         DestroyMenu hPopUpMenu
+         return 0
+
+      Case WM_DESTROY
+         ' REQUIRED: Remove control subclassing
+         RemoveWindowSubclass( hWin, @frmOutput_RichEdit_SubclassProc, uIdSubclass )
+   End Select
+    
+   ' For messages that we don't deal with
+   function = DefSubclassProc(hWin, uMsg, _wParam, _lParam)
+
+end function
+
+' ========================================================================================
 ' frmOutput Window procedure
 ' ========================================================================================
 Function frmOutput_WndProc( _
@@ -843,7 +895,8 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
                  0, 0, 0, 0, _
                  WS_CHILD or WS_TABSTOP or WS_VSCROLL or _
                  ES_MULTILINE or ES_LEFT or ES_AUTOVSCROLL, _
-                 WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR )
+                 WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR, _
+                 0, @frmOutput_RichEdit_SubclassProc, IDC_FRMOUTPUT_TXTLOGFILE, null )
       AfxSetWindowFont( hCtl, ghStatusBar.hFontStatusBar )
       SendMessage( hCtl, EM_SETEVENTMASK, 0, cast(LPARAM, ENM_SELCHANGE or ENM_CHANGE) )
 
@@ -851,7 +904,8 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
                  0, 0, 0, 0, _
                  WS_CHILD or WS_TABSTOP or WS_VSCROLL or _
                  ES_MULTILINE or ES_LEFT or ES_AUTOVSCROLL or ES_WANTRETURN, _
-                 WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR )
+                 WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR, _
+                 0, @frmOutput_RichEdit_SubclassProc, IDC_FRMOUTPUT_TXTNOTES, null )
       AfxSetWindowFont( hCtl, ghStatusBar.hFontStatusBar )
       SendMessage( hCtl, EM_SETEVENTMASK, 0, cast(LPARAM, ENM_SELCHANGE or ENM_CHANGE) )
       frmOutput_ShowNotes()   
