@@ -53,6 +53,7 @@ Function clsTopTabCtl.AddTab( ByVal pDoc As clsDocument Ptr ) As Long
    
    this.tabs(idx).pDoc = pDoc
    this.SetTabText(idx)
+
    Function = idx
 End Function
 
@@ -262,7 +263,7 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
 
    If idx = -1 Then idx = gTTabCtl.CurSel
    if this.IsSafeIndex(idx) = false then exit function
-   
+
    pDoc = this.tabs(idx).pDoc
    If pDoc Then 
       ' Set the text that displays on the tab

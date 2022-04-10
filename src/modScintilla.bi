@@ -241,6 +241,7 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define STYLE_CONTROLCHAR                               36
 #Define STYLE_INDENTGUIDE                               37
 #Define STYLE_CALLTIP                                   38
+#Define STYLE_FOLDDISPLAYTEXT                           39
 #Define STYLE_LASTPREDEFINED                            39
 #Define STYLE_MAX                                       255
 #Define SC_CHARSET_ANSI                                 0

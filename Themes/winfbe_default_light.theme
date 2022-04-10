@@ -35,11 +35,6 @@ editor.comments.background: %WHITE
 editor.comments.bold: false
 editor.comments.italic: false
 editor.comments.underline: false
-editor.identifiers.foreground: %BLACK
-editor.identifiers.background: %WHITE
-editor.identifiers.bold: false
-editor.identifiers.italic: false
-editor.identifiers.underline: false
 editor.keyword.foreground: 0,0,255          # blue
 editor.keyword.background: %WHITE
 editor.keyword.bold: false

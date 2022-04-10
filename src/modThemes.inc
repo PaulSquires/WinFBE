@@ -49,11 +49,6 @@ type EDITOR_HANDLES_TYPE
    CommentsBold as boolean
    CommentsItalic as boolean
    CommentsUnderline as boolean
-   ForeColorIdentifiers as COLORREF
-   BackColorIdentifiers as COLORREF
-   IdentifiersBold as boolean
-   IdentifiersItalic as boolean
-   IdentifiersUnderline as boolean
    ForeColorKeyword as COLORREF
    BackColorKeyword as COLORREF
    KeywordBold as boolean
@@ -262,6 +257,9 @@ function LoadThemeFile() as boolean
    dim pStream AS CTextStream   
    if pStream.Open(wszFilename) <> S_OK then return true   ' error
 
+   ' Ensure to delete any existing gTheme data
+   erase gTheme
+   
    dim param(100) as CWSTR
    dim param_value(100) as CWSTR
    dim as long nextParam = 0
@@ -305,7 +303,7 @@ function LoadThemeFile() as boolean
       dim keys(3) as string   ' always have maximum of 3 keys
       dim as long numKeys = AfxStrParseCount(keyValue, ".")  ' actual number of keys retrieved
       for i as long = 1 to numKeys
-         keys(i) = AfxstrParse(keyValue, i, ".")
+         keys(i) = AfxStrParse(keyValue, i, ".")
       next
       ' there will always be at least 2 elements to the key and
       ' we use that to lookup the theme type structure.
@@ -319,7 +317,7 @@ function LoadThemeFile() as boolean
       clr = BGR(r, g, b)
       
       ' determine if the key already exists and just needs
-      ' the proporties added to it, or if the structure needs
+      ' the properties added to it, or if the structure needs
       ' to be created.
       dim nFound as long = -1
       for i as long = lbound(gTheme) to ubound(gTheme)
@@ -333,6 +331,7 @@ function LoadThemeFile() as boolean
          nFound = ubound(gTheme) + 1
          redim preserve gTheme(nFound) as THEME_TYPE
       end if   
+
       gTheme(nFound).keyValue = keyValue
       gTheme(nFound).keyData = keyData
       select case keys(3)
@@ -346,7 +345,6 @@ function LoadThemeFile() as boolean
    
    pStream.Close
    
-
    ' Load the TYPE's for each of the forms that require theme data   
    DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
 
@@ -403,12 +401,6 @@ function LoadThemeFile() as boolean
    ghEditor.KeywordBold2 = pTheme->bold
    ghEditor.KeywordItalic2 = pTheme->italic
    ghEditor.KeywordUnderline2 = pTheme->underline
-   pTheme = getThemePtr("editor.identifiers")
-   ghEditor.BackColorIdentifiers = pTheme->background
-   ghEditor.ForeColorIdentifiers = pTheme->foreground
-   ghEditor.IdentifiersBold = pTheme->bold
-   ghEditor.IdentifiersItalic = pTheme->italic
-   ghEditor.IdentifiersUnderline = pTheme->underline
    pTheme = getThemePtr("editor.numbers")
    ghEditor.BackColorNumbers = pTheme->background
    ghEditor.ForeColorNumbers = pTheme->foreground

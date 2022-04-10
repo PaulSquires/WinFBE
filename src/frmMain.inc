@@ -1085,7 +1085,6 @@ function frmMain_OpenFileSafely( _
       end if
    end if      
    
-   
    if bShowInTab then
       ' if the document is already open and loaded then simply switch to
       ' that document in the top tabcontrol, otherwise load the Explorer 
@@ -1108,7 +1107,7 @@ function frmMain_OpenFileSafely( _
 
    frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
-   
+
    function = pDoc
 end Function
 
@@ -1990,8 +1989,10 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
          if (ghAccelUserTools = 0) orelse (TranslateAccelerator(pWindow->hWindow, ghAccelUserTools, @uMsg) = 0) then 
 
             ' Prevent any < asc(32) characters from making their way to Scintilla where they 
-            ' get shown as an embedded control graphic.
-            if (uMsg.message = WM_CHAR) and (uMsg.wParam < 32) then continue do
+            ' get shown as an embedded control graphic. Allow backspace.
+            if (uMsg.message = WM_CHAR) then
+               if (uMsg.wParam < 32) andalso (uMsg.wParam <> 8) then continue do
+            end if
 
             ' if topmenus or menubar are active then process all keyboard input for them rather than 
             ' passing it off to the system to process.

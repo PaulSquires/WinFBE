@@ -79,7 +79,7 @@ end function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function frmTopTabs_PositionWindows() As LRESULT
+function frmTopTabs_PositionWindows() As LRESULT
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMMAIN_TOPTABS)
    If pWindow = 0 Then Exit Function
@@ -170,7 +170,6 @@ Function frmTopTabs_PositionWindows() As LRESULT
 
    ' We now know the exact width and postions of all tabs so now we need to calculate
    ' and adjust the gTTabCtl.FirstDisplayTab based on where the gTTabCtl.CurSel is located.
-   
    if gTTabCtl.GetItemCount = 0 then
       ShowWindow( HWND_FRMMAIN_TOPTABS_SHADOW, SW_HIDE )
    else
@@ -180,11 +179,15 @@ Function frmTopTabs_PositionWindows() As LRESULT
       
       gTTabCtl.ClientRightEdge = gTTabCtl.rcActionPanel.left
       
+      if gTTabCtl.CurSel = -1 then
+         ' Put If check for CurSel being invalid otherwise other tab calculations
+         ' Scenarios will fail via GPF on invalid array access.
+         
       ' SCENARIO #1
       ' New gTTabCtl.CurSel is located before gTTabCtl.FirstDisplayTab so it is visually
       ' not on screen. We simply need to move the gTTabCtl.CurSel rect into the
       ' the first position (gTTabCtl.FirstDisplayTab) and adjust all rects accordingly.
-      if gTTabCtl.CurSel < gTTabCtl.FirstDisplayTab then
+      elseif gTTabCtl.CurSel < gTTabCtl.FirstDisplayTab then
          ' The amount of the adjustment is equal to the difference between the
          ' current first tab's left edge and the new cursel's left edge.
          nAdjAmount = gTTabCtl.tabs(gTTabCtl.FirstDisplayTab).rcTab.left - gTTabCtl.tabs(gTTabCtl.CurSel).rcTab.left

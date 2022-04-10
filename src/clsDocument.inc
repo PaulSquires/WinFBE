@@ -246,7 +246,7 @@ function clsDocument.CreateCodeWindow( _
          m_pSci(i) = cast(any ptr, SendMessage( this.hWindow(i), SCI_GETDIRECTPOINTER, 0, 0 )) 
       end if
    next
-   
+
    ' Disable scintilla vertical scroll bar (wParam = 1 to enable)
    SciMsg( m_pSci(0), SCI_SETVSCROLLBAR, 0, 0 )
    SciMsg( m_pSci(0), SCI_SETHSCROLLBAR, 0, 0 )
@@ -269,7 +269,7 @@ function clsDocument.CreateCodeWindow( _
       end if   
    end if
    this.ProjectFileType = FILETYPE_UNDEFINED
-   
+
    if len(wszFile) then   
       ' do not use Dir() > "" here b/c if incoming file originated from a Do/loop 
       ' of files using Dir() then there will be problems.
@@ -331,6 +331,7 @@ function clsDocument.CreateCodeWindow( _
             else
                print "Error opening: "; wszFile
             end if
+
             this.LoadingFromFile = false
             SciMsg( m_pSci(0), SCI_SETSAVEPOINT, 0, 0)
             SciMsg( m_pSci(0), SCI_EMPTYUNDOBUFFER, 0, 0)
@@ -1806,8 +1807,8 @@ function clsDocument.ApplyProperties() as long
       else
          SciMsg( m_pSci(i), SCI_SETINDENTATIONGUIDES, false, 0)
       end if
-      SciMsg( m_pSci(i), SCI_SETSELFORE, STYLE_INDENTGUIDE, ghEditor.ForeColorIndentguides )
-      SciMsg( m_pSci(i), SCI_SETSELBACK, STYLE_INDENTGUIDE, ghEditor.BackColorIndentguides )
+      SciMsg( m_pSci(i), SCI_STYLESETFORE, STYLE_INDENTGUIDE, ghEditor.ForeColorIndentguides )
+      SciMsg( m_pSci(i), SCI_STYLESETBACK, STYLE_INDENTGUIDE, ghEditor.BackColorIndentguides )
       
       ''
       ''  CARET
@@ -1888,6 +1889,13 @@ function clsDocument.ApplyProperties() as long
          end if
          
          if gConfig.SyntaxHighlighting then
+            ' Set the Default text colors
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_DEFAULT, ghEditor.ForeColorText)
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_DEFAULT, ghEditor.BackColorText)
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_DEFAULT, ghEditor.TextBold )
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_DEFAULT, ghEditor.TextItalic )
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_DEFAULT, ghEditor.TextUnderline )
+
             ' Set the Multiline Comments style
             SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_MULTILINECOMMENT, ghEditor.ForeColorComments )
             SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_MULTILINECOMMENT, ghEditor.BackColorComments )
@@ -1918,13 +1926,6 @@ function clsDocument.ApplyProperties() as long
             SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_KEYWORD2, ghEditor.KeywordItalic2 )
             SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_KEYWORD2, ghEditor.KeywordUnderline2 )
 
-            ' Set the Identifiers style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_IDENTIFIER, ghEditor.ForeColorIdentifiers )
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_IDENTIFIER, ghEditor.BackColorIdentifiers )
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_IDENTIFIER, ghEditor.IdentifiersBold )
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_IDENTIFIER, ghEditor.IdentifiersItalic )
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_IDENTIFIER, ghEditor.IdentifiersUnderline )
-
             ' Set the Numbers style
             SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_NUMBER, ghEditor.ForeColorNumbers )
             SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_NUMBER, ghEditor.BackColorNumbers )
@@ -1947,11 +1948,11 @@ function clsDocument.ApplyProperties() as long
             SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_PREPROCESSOR, ghEditor.PreprocessorUnderline)
 
             ' Set the strings style
-            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_string, ghEditor.ForeColorStrings )
-            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_string, ghEditor.BackColorStrings )
-            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_string, ghEditor.StringsBold)
-            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_string, ghEditor.StringsItalic)
-            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_string, ghEditor.StringsUnderline)
+            SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_STRING, ghEditor.ForeColorStrings )
+            SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_STRING, ghEditor.BackColorStrings )
+            SciMsg( m_pSci(i), SCI_STYLESETBOLD, SCE_B_STRING, ghEditor.StringsBold)
+            SciMsg( m_pSci(i), SCI_STYLESETITALIC, SCE_B_STRING, ghEditor.StringsItalic)
+            SciMsg( m_pSci(i), SCI_STYLESETUNDERLINE, SCE_B_STRING, ghEditor.StringsUnderline)
 
          end if
       end if

@@ -1553,13 +1553,12 @@ function clsConfig.LoadConfigFile() as long
    ' Set some defaults if the config file was missing.
    ' if no Tools exist then create some default ones...
    if (ubound(this.Tools) = -1) and (bNewConfigFile = true) then
-      dim wszTools(5) as CWSTR
+      dim wszTools(4) as CWSTR
       wszTools(0) = "ASCII Chart|-|.\Tools\asciichart32.exe|-||-|1|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
       wszTools(1) = "GUID Generator|-|.\Tools\GUIDgen32.exe|-||-|2|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
       wszTools(2) = "Registers|-|.\Tools\Registers.chm|-||-|3|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
       wszTools(3) = "Arch settings|-|.\Tools\ArchSettings.exe|-||-|4|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
       wszTools(4) = "Set compiler switches|-|.\Tools\SetCompilerSwitchesII.exe|-||-|5|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
-      wszTools(5) = "Set compiler paths|-|.\Tools\SetCompilerPathsII.exe|-||-|6|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
       for i = lbound(wszTools) to ubound(wszTools)
          if i > ubound(this.Tools) then
             redim preserve this.Tools(i)

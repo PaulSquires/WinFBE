@@ -34,11 +34,6 @@ editor.comments.background: %LIGHT_BLACK
 editor.comments.bold: false
 editor.comments.italic: false
 editor.comments.underline: false
-editor.identifiers.foreground: %LIGHT_GRAY
-editor.identifiers.background: %LIGHT_BLACK
-editor.identifiers.bold: false
-editor.identifiers.italic: false
-editor.identifiers.underline: false
 editor.keyword.foreground: 148,202,240         # FreeBasic (powder blue)
 editor.keyword.background: %LIGHT_BLACK
 editor.keyword.bold: false
