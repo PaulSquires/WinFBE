@@ -252,7 +252,7 @@ function clsDocument.CreateCodeWindow( _
    SciMsg( m_pSci(0), SCI_SETHSCROLLBAR, 0, 0 )
    SciMsg( m_pSci(1), SCI_SETVSCROLLBAR, 0, 0 )
    SciMsg( m_pSci(1), SCI_SETHSCROLLBAR, 0, 0 )
-
+   
    ' Get the document pointer from our main control and assign it to the other split windows
    dim as any ptr pDoc = cast(any ptr, SciMsg(m_pSci(0), SCI_GETDOCPOINTER, 0, 0))
    if pDoc then SciMsg( m_pSci(1), SCI_SETDOCPOINTER, 0, cast(LPARAM, pDoc)) 
@@ -892,19 +892,23 @@ function clsDocument.ChangeSelectionCase( byval fcase as long) as long
    ' Retrieve the text
    strText = this.GetTextRange(startSelPos, endSelPos)
    
-   ' Convert it to upper or lower case
+   ' Convert it to upper, lower case, or mixed case
    if fcase = 1 then
       strText = ucase(strText)
    elseif fcase = 2 then
       strText = LCase(strText)
    elseif fcase = 3 then
       ' Always uppercase the first character regardless
-      mid(strText,1,1) = ucase(left(strText,1))
-      Do
-          i = instr(i+1, strText, " ")
-          if i = 0 then Exit Do
-          mid(strText,i+1,1) = ucase(mid(strText,i+1,1))
-      loop
+      strText = LCase(strText)
+      mid(strText,1,1) = ucase(mid(strText,1,1))
+      dim as string prevChar
+      for i as long = 2 to len(strText)
+         prevChar = mid(strText,i-1,1)
+         select case prevChar
+            case chr(13), chr(10), " "
+               mid(strText,i,1) = ucase(mid(strText,i,1))
+         end select
+      next
    end if
    
    ' Replace the selected text

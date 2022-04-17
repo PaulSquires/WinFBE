@@ -129,7 +129,7 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
    frmKeyBoard_AddKeyBinding( "Edit", IDM_INSERTFILE, "IDM_INSERTFILE", "Insert file", "Ctrl+I", "" )
    frmKeyBoard_AddKeyBinding( "Edit", IDM_TOUPPERCASE, "IDM_TOUPPERCASE", "Change selection to uppercase", "Ctrl+Alt+U", "" )
    frmKeyBoard_AddKeyBinding( "Edit", IDM_TOLOWERCASE, "IDM_TOLOWERCASE", "Change selection to lowercase", "Ctrl+Alt+L", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOMIXEDCASE, "IDM_TOMIXEDCASE", "Change selection to mixedcase", "Ctrl+Alt+M", "" )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOMIXEDCASE, "IDM_TOMIXEDCASE", "Change selection to mixedcase", "Ctrl+Alt+X", "" )
    frmKeyBoard_AddKeyBinding( "Edit", IDM_NEWLINEBELOWCURRENT, "IDM_NEWLINEBELOWCURRENT", "Insert new line below current line", "Ctrl+Enter", "" ) 
    frmKeyBoard_AddKeyBinding( "Edit", IDM_SETFOCUSEDITOR, "IDM_SETFOCUSEDITOR", "Set keyboard focus to the editing window", "Ctrl+Tilde", "" ) ' VK_OEM_3
    
