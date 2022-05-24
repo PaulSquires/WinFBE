@@ -27,6 +27,7 @@
 #define IDC_FRMKEYBOARDEDIT_LABEL2      1105
 #define IDC_FRMKEYBOARDEDIT_LABEL3      1106
 #define IDC_FRMKEYBOARDEDIT_COMBOACCEL  1107
+#define IDC_FRMKEYBOARDEDIT_CHKDISABLED 1108
 
 TYPE KEYBINDINGS_TYPE
    idAction as long         ' IDM_* message
@@ -35,6 +36,7 @@ TYPE KEYBINDINGS_TYPE
    wszDescription as CWSTR
    wszDefaultKeys as CWSTR
    wszUserKeys as CWSTR
+   bDefaultDisabled as boolean = false
 end type
 dim shared gKeys(any) as KEYBINDINGS_TYPE
 dim shared gKeysEdit as KEYBINDINGS_TYPE
@@ -47,7 +49,8 @@ declare function frmKeyBoard_AddKeyBinding( _
             byval wszMsgString as CWSTR, _
             byval wszDescription as CWSTR, _
             byval wszDefaultKeys as CWSTR, _
-            byval wszUserKeys as CWSTR _
+            byval wszUserKeys as CWSTR, _
+            byval bDisabled as boolean _
             ) as long
 declare function frmKeyboard_CheckForKeyConflict ( byval wszKeys as CWSTR, byval nSkipIndex as long ) as long
 

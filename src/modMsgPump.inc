@@ -384,6 +384,7 @@ function handleKeysVisualDesigner( byval uMsg as MSG ) as boolean
                end if   
             end if
                         
+         case VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT
             if pDoc THEN
                if pDoc->IsDesigner THEN
                   select case GetFocus

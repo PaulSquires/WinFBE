@@ -130,7 +130,7 @@ end function
 ' ========================================================================================
 ' Create/Display the alpha blended shadow for the WS_EX_LAYERED window
 ' ========================================================================================
-private function paintLayeredWindow( byval HWnd as HWnd, byval clrRGBA as integer ) as long
+function paintLayeredWindow( byval HWnd as HWnd, byval clrRGBA as integer ) as long
    dim as RECT rcPos = AfxGetWindowRect(HWnd)
    
    dim as HDC hdcScreen = GetDC(0)
@@ -178,9 +178,10 @@ end function
 ' ========================================================================================
 ' Process WM_MEASUREITEM message for window/dialog: frmPopupMenu
 ' ========================================================================================
-private Function frmPopupMenu_OnMeasureItem( ByVal HWnd As HWnd, _
-                                             ByVal lpmis As MEASUREITEMSTRUCT Ptr _
-                                             ) As Long
+function frmPopupMenu_OnMeasureItem( _
+               ByVal HWnd As HWnd, _
+               ByVal lpmis As MEASUREITEMSTRUCT Ptr _
+               ) As Long
    ' Set the height of the menuitem list box items. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    lpmis->itemHeight = pWindow->ScaleY(MENUITEM_HEIGHT)
@@ -192,9 +193,10 @@ End Function
 ' ========================================================================================
 ' Process WM_DRAWITEM message for window/dialog: frmPopupMenu
 ' ========================================================================================
-private Function frmPopupMenu_OnDrawItem( ByVal HWnd As HWnd, _
-                                          ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
-                                          ) As Long
+function frmPopupMenu_OnDrawItem( _
+               ByVal HWnd As HWnd, _
+               ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
+               ) As Long
 
    DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
    If pWindow = 0 Then Exit Function
@@ -309,11 +311,12 @@ End Function
 ' ========================================================================================
 ' frmPopupMenuShadow Window procedure
 ' ========================================================================================
-private Function frmPopupMenuShadow_WndProc( ByVal HWnd   As HWnd, _
-                                             ByVal uMsg   As UINT, _
-                                             ByVal wParam As WPARAM, _
-                                             ByVal lParam As LPARAM _
-                                             ) As LRESULT
+function frmPopupMenuShadow_WndProc( _
+               ByVal HWnd   As HWnd, _
+               ByVal uMsg   As UINT, _
+               ByVal wParam As WPARAM, _
+               ByVal lParam As LPARAM _
+               ) As LRESULT
 
    ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
@@ -324,11 +327,12 @@ end function
 ' ========================================================================================
 ' frmPopupMenu Window procedure
 ' ========================================================================================
-private Function frmPopupMenu_WndProc( ByVal HWnd   As HWnd, _
-                                       ByVal uMsg   As UINT, _
-                                       ByVal wParam As WPARAM, _
-                                       ByVal lParam As LPARAM _
-                                       ) As LRESULT
+function frmPopupMenu_WndProc( _
+               ByVal HWnd   As HWnd, _
+               ByVal uMsg   As UINT, _
+               ByVal wParam As WPARAM, _
+               ByVal lParam As LPARAM _
+               ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_MEASUREITEM, frmPopupMenu_OnMeasureItem)
@@ -378,7 +382,7 @@ End Function
 ' ========================================================================================
 ' frmPopupMenu_SubclassProc 
 ' ========================================================================================
-Function frmPopupMenu_SubclassProc ( _
+function frmPopupMenu_SubclassProc ( _
                   ByVal hWin   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal _wParam As WPARAM, _               ' // First message parameter
@@ -473,10 +477,11 @@ End Function
 ' ========================================================================================
 ' frmPopupMenu_Show
 ' ========================================================================================
-public Function frmPopupMenu_Show( byval nPopupType as long, _   ' popup or subpopup
-                                   byval nItemID as long, _      ' parent listbox row 
-                                   byval hParent as HWND _       ' listbox or menubar button
-                                   ) As HWND
+function frmPopupMenu_Show( _
+               byval nPopupType as long, _   ' popup or subpopup
+               byval nItemID as long, _      ' parent listbox row 
+               byval hParent as HWND _       ' listbox or menubar button
+               ) As HWND
 
    dim pWindow as CWindow ptr 
    dim as long nMenuLeft, nMenuTop, nMenuWidth, nMenuHeight

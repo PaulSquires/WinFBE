@@ -94,6 +94,8 @@ Function frmKeyboardEdit_OnCommand( _
             ' Update the gKeysEdit entry with the new UserKeys value & Enabled value
             dim as CWSTR wszKeys = frmKeyboardEdit_GenerateKeyBinding()
             gKeysEdit.wszUserKeys = wszKeys
+            dim as HWND hCtrl = GetDlgItem( HWND_FRMKEYBOARDEDIT, IDC_FRMKEYBOARDEDIT_CHKDISABLED )
+            gKeysEdit.bDefaultDisabled = iif( Button_GetCheck(hCtrl) = BST_CHECKED, true, false )
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          end if
@@ -168,6 +170,11 @@ Function frmKeyboardEdit_Show( ByVal hWndParent As HWnd ) As LRESULT
    dim as long isAlt = BST_UNCHECKED
    dim as long isShift = BST_UNCHECKED
    dim as long isCtrl = BST_UNCHECKED
+   dim as long isDisabled = BST_UNCHECKED
+   
+   if gKeysEdit.bDefaultDisabled then
+      isDisabled = BST_CHECKED
+   end if   
    
    for ii as long = nCount to 1 step -1
       ' The accelerator key will always be the last parse regardless of 
@@ -194,7 +201,7 @@ Function frmKeyboardEdit_Show( ByVal hWndParent As HWnd ) As LRESULT
         @frmKeyboardEdit_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT )
-   pWindow->SetClientSize( 330, 200 )
+   pWindow->SetClientSize( 330, 220 )
    pWindow->Center( pWindow->hWindow, hWndParent )
 
    hCtrl = pWindow->AddControl("LABEL", , IDC_FRMKEYBOARDEDIT_LABEL1, "", 20, 10, 350, 20, _
@@ -211,40 +218,46 @@ Function frmKeyboardEdit_Show( ByVal hWndParent As HWnd ) As LRESULT
    AfxSetWindowText( hCtrl, "Default: " & wszText  )
    AfxSetWindowFont( hCtrl, ghStatusBar.hFontStatusBar, true )
 
-   hCtrl = pWindow->AddControl("LABEL", , IDC_FRMKEYBOARDEDIT_LABEL3, "", 20, 74, 350, 20, _
+   hCtrl = pWindow->AddControl("CHECKBOX", , IDC_FRMKEYBOARDEDIT_CHKDISABLED, "Disable Default", 20, 50, 150, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   AfxSetWindowFont( hCtrl, ghStatusBar.hFontStatusBar, true )
+   Button_SetCheck( hCtrl, isDisabled )
+
+   hCtrl = pWindow->AddControl("LABEL", , IDC_FRMKEYBOARDEDIT_LABEL3, "", 20, 94, 350, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    AfxSetWindowText( hCtrl, "User defined Keybinding" )
    AfxSetWindowFont( hCtrl, ghStatusBar.hFontStatusBar, true )
 
-   hCtrl = pWindow->AddControl("CHECKBOX", , IDC_FRMKEYBOARDEDIT_CHKCTRL, "Ctrl", 20, 94, 48, 20, _
+   hCtrl = pWindow->AddControl("CHECKBOX", , IDC_FRMKEYBOARDEDIT_CHKCTRL, "Ctrl", 20, 114, 48, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    AfxSetWindowFont( hCtrl, ghStatusBar.hFontStatusBar, true )
    Button_SetCheck( hCtrl, isCtrl )
    
-   hCtrl = pWindow->AddControl("CHECKBOX", , IDC_FRMKEYBOARDEDIT_CHKALT, "Alt", 75, 94, 42, 20, _
+   hCtrl = pWindow->AddControl("CHECKBOX", , IDC_FRMKEYBOARDEDIT_CHKALT, "Alt", 75, 114, 42, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    AfxSetWindowFont( hCtrl, ghStatusBar.hFontStatusBar, true )
    Button_SetCheck( hCtrl, isAlt )
    
-   hCtrl = pWindow->AddControl("CHECKBOX", , IDC_FRMKEYBOARDEDIT_CHKSHIFT, "Shift", 127, 94, 48, 20, _
+   hCtrl = pWindow->AddControl("CHECKBOX", , IDC_FRMKEYBOARDEDIT_CHKSHIFT, "Shift", 127, 114, 48, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    AfxSetWindowFont( hCtrl, ghStatusBar.hFontStatusBar, true )
    Button_SetCheck( hCtrl, isShift )
 
    dim as HWND hCombo 
-   hCombo = pWindow->AddControl("COMBOBOX", , IDC_FRMKEYBOARDEDIT_COMBOACCEL, "", 190, 94, 120, 200, _
+   hCombo = pWindow->AddControl("COMBOBOX", , IDC_FRMKEYBOARDEDIT_COMBOACCEL, "", 190, 114, 120, 200, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    AfxSetWindowFont( hCtrl, ghStatusBar.hFontStatusBar, true )
 
-   pWindow->AddControl("BUTTON", , IDOK, L(0,"OK"), 154, 150, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDOK, L(0,"OK"), 154, 170, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 236, 150, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 236, 170, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
                                      

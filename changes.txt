@@ -1,3 +1,17 @@
+Editor:
+- Added ability to disable the default keyboard shortcut for each keyboard shortcut. 
+- Fixed regression whereby arrow keys not functional when visual design form is active.
+- Fixed issue whereby edit window would lose focus if pasting text while the Find/Replace dialog is active.
+
+Version 3.0.0-BETA-3
+Editor:
+- Fixed regression whereby Backspace key was non-functional in editing textboxes in the Visual Designer Property List.
+- Fixed setting IndentGuides editor theme colors.
+- Fixed SetCompilerPathsII user tool being generated for new default winfbe configuration files.
+- Removed Identifiers theme colors from the *.theme files because they overrode editor.text values.
+- Fixed GPF due to invalid array access when positioning an editor tab in the top tab control.
+- Fixed "Convert to Mixed Case" keyboad shortcut from Ctrl+Alt+M to Ctrl+Alt+X.
+
 Version 3.0.0-BETA-2
 Editor:
 - Fixed visual error whereby statusbar area was covered whenever a visual designer form was active.
@@ -398,7 +412,7 @@ FYI - (The visual designer is still a work in progress)
 - Added: The -b compile flag when compiling Modules. This allows non *.bas files to be compiled. 
 - Added: Compile time messages (#print/#error) and "C" compile are now output to the Compiler Results listview.
 - Added: WinFBE source code is now included in the WinFBE Suite download.
-- Added: Several new color and text align options ofr ListBox.
+- Added: Several new color and text align options for ListBox.
 - Changed: Updated Italian language file thanks to Massimiliano.
 - Fixed: Regression that caused compiling of individual modules to object files in a project to fail.
 - Fixed: Compile errors now correctly display any hidden folded error line.

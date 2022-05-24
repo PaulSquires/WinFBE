@@ -23,8 +23,13 @@ function frmKeyboard_SaveKeyBindings( byval wszFilename as CWSTR ) as long
    if pStream.Create( wszFilename ) = S_OK then 
       dim as CWSTR wszLine
       for i as long = lbound(gKeys) to ubound(gKeys)
-         wszLine = gKeys(i).wszMsgString & ":" & _
-                   gKeys(i).wszUserKeys 
+         wszLine = gKeys(i).wszMsgString 
+         
+         if gKeys(i).bDefaultDisabled then
+            wszLine = wszLine & "(DISABLED)"
+         end if
+            
+         wszLine = wszLine & ":" & gKeys(i).wszUserKeys 
          pStream.WriteLine wszLine
       next
       pStream.Close
@@ -42,7 +47,8 @@ function frmKeyBoard_AddKeyBinding( _
             byval wszMsgString as CWSTR, _
             byval wszDescription as CWSTR, _
             byval wszDefaultKeys as CWSTR, _
-            byval wszUserKeys as CWSTR _
+            byval wszUserKeys as CWSTR, _
+            byval bDisabled as boolean _
             ) as long
             
    ' Search the array to see if the id exists. If it does then update
@@ -72,8 +78,10 @@ function frmKeyBoard_AddKeyBinding( _
          .wszDefaultKeys = wszDefaultKeys
       else
          ' Existing entry found which means we are reading the existing keybindings
-         ' file. Update the entry with any user defined keybinding.
+         ' file. Update the entry with any user defined keybinding or if the user has
+         ' disabled the Default keyboard shortcut.
          .wszUserKeys = wszUserKeys
+         .bDefaultDisabled = bDisabled
       end if
    end with
    
@@ -86,125 +94,125 @@ end function
 ' ========================================================================================
 function frmKeyboard_CreateDefaultKeyBindings() as long
    '' FILE MENU
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILENEW, "IDM_FILENEW", "New file", "Ctrl+N", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILEOPEN, "IDM_FILEOPEN", "Open one or more files", "Ctrl+O", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILEOPENTEMPLATES, "IDM_FILEOPENTEMPLATES", "Open templates", "Ctrl+T", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILECLOSE, "IDM_FILECLOSE", "Close file", "Ctrl+W", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILECLOSEALL, "IDM_FILECLOSEALL", "Close all files", "Ctrl+Shift+W", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVE, "IDM_FILESAVE", "Save file", "Ctrl+S", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVEAS, "IDM_FILESAVEAS", "Save file as a different name", "F12", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVEALL, "IDM_FILESAVEALL", "Save all files", "Ctrl+Shift+S", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_AUTOSAVE, "IDM_AUTOSAVE", "Toggle Auto Save", "", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_LOADSESSION, "IDM_LOADSESSION", "Load session", "", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_SAVESESSION, "IDM_SAVESESSION", "Save session", "", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_KEYBOARDSHORTCUTS, "IDM_KEYBOARDSHORTCUTS", "Keyboard shortcuts", "Ctrl+K", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_USERTOOLSDIALOG, "IDM_USERTOOLSDIALOG", "User tools", "Ctrl+F7", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_OPTIONSDIALOG, "IDM_OPTIONSDIALOG", "Environment options", "Shift+F7", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_BUILDCONFIG, "IDM_BUILDCONFIG", "Build configurations", "F7", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_USERSNIPPETS, "IDM_USERSNIPPETS", "User code snippets", "Ctrl+Shift+F7", "" )
-   frmKeyBoard_AddKeyBinding( "File", IDM_EXIT, "IDM_EXIT", "Exit application", "Alt+F4", "" )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILENEW, "IDM_FILENEW", "New file", "Ctrl+N", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILEOPEN, "IDM_FILEOPEN", "Open one or more files", "Ctrl+O", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILEOPENTEMPLATES, "IDM_FILEOPENTEMPLATES", "Open templates", "Ctrl+T", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILECLOSE, "IDM_FILECLOSE", "Close file", "Ctrl+W", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILECLOSEALL, "IDM_FILECLOSEALL", "Close all files", "Ctrl+Shift+W", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVE, "IDM_FILESAVE", "Save file", "Ctrl+S", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVEAS, "IDM_FILESAVEAS", "Save file as a different name", "F12", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVEALL, "IDM_FILESAVEALL", "Save all files", "Ctrl+Shift+S", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_AUTOSAVE, "IDM_AUTOSAVE", "Toggle Auto Save", "", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_LOADSESSION, "IDM_LOADSESSION", "Load session", "", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_SAVESESSION, "IDM_SAVESESSION", "Save session", "", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_KEYBOARDSHORTCUTS, "IDM_KEYBOARDSHORTCUTS", "Keyboard shortcuts", "Ctrl+K", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_USERTOOLSDIALOG, "IDM_USERTOOLSDIALOG", "User tools", "Ctrl+F7", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_OPTIONSDIALOG, "IDM_OPTIONSDIALOG", "Environment options", "Shift+F7", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_BUILDCONFIG, "IDM_BUILDCONFIG", "Build configurations", "F7", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_USERSNIPPETS, "IDM_USERSNIPPETS", "User code snippets", "Ctrl+Shift+F7", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_EXIT, "IDM_EXIT", "Exit application", "Alt+F4", "", false )
 
    '' EDIT MENU
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_UNDO, "IDM_UNDO", "Undo", "Ctrl+Z", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_REDO, "IDM_REDO", "Redo", "Ctrl+E", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_CUT, "IDM_CUT", "Cut selection to the clipboard", "Ctrl+X", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_COPY, "IDM_COPY", "Copy selection to the clipboard", "Ctrl+C", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_PASTE, "IDM_PASTE", "Paste clipboard contents", "Ctrl+V", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_DELETELINE, "IDM_DELETELINE", "Delete the current editor line", "Ctrl+Y", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_FIND, "IDM_FIND", "Find", "Ctrl+F", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_FINDINFILES, "IDM_FINDINFILES", "Find in files", "Ctrl+Shift+F", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_REPLACE, "IDM_REPLACE", "Replace", "Ctrl+H", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_DUPLICATELINE, "IDM_DUPLICATELINE", "Duplicate line", "Ctrl+D", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_MOVELINEUP, "IDM_MOVELINEUP", "Move line up", "Alt+Up", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_MOVELINEDOWN, "IDM_MOVELINEDOWN", "Move line down", "Alt+Down", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_COMMENTBLOCK, "IDM_COMMENTBLOCK", "Comment block", "Ctrl+/", "" )   'VK_OEM_2
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_UNCOMMENTBLOCK, "IDM_UNCOMMENTBLOCK", "UnComment block", "Ctrl+Shift+/", "" )  ' VK_OEM_2
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_SELECTLINE, "IDM_SELECTLINE", "Select line", "Ctrl+L", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_SELECTALL, "IDM_SELECTALL", "Select all", "Ctrl+A", "" )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_UNDO, "IDM_UNDO", "Undo", "Ctrl+Z", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_REDO, "IDM_REDO", "Redo", "Ctrl+E", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_CUT, "IDM_CUT", "Cut selection to the clipboard", "Ctrl+X", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_COPY, "IDM_COPY", "Copy selection to the clipboard", "Ctrl+C", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_PASTE, "IDM_PASTE", "Paste clipboard contents", "Ctrl+V", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_DELETELINE, "IDM_DELETELINE", "Delete the current editor line", "Ctrl+Y", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_FIND, "IDM_FIND", "Find", "Ctrl+F", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_FINDINFILES, "IDM_FINDINFILES", "Find in files", "Ctrl+Shift+F", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_REPLACE, "IDM_REPLACE", "Replace", "Ctrl+H", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_DUPLICATELINE, "IDM_DUPLICATELINE", "Duplicate line", "Ctrl+D", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_MOVELINEUP, "IDM_MOVELINEUP", "Move line up", "Alt+Up", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_MOVELINEDOWN, "IDM_MOVELINEDOWN", "Move line down", "Alt+Down", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_COMMENTBLOCK, "IDM_COMMENTBLOCK", "Comment block", "Ctrl+/", "", false )   'VK_OEM_2
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_UNCOMMENTBLOCK, "IDM_UNCOMMENTBLOCK", "UnComment block", "Ctrl+Shift+/", "", false )  ' VK_OEM_2
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_SELECTLINE, "IDM_SELECTLINE", "Select line", "Ctrl+L", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_SELECTALL, "IDM_SELECTALL", "Select all", "Ctrl+A", "", false )
    ' The following are non-visual (no topmenu item)
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_FINDNEXTACCEL, "IDM_FINDNEXTACCEL", "Find next", "F3", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_FINDPREVACCEL, "IDM_FINDPREVACCEL", "Find previous", "Shift+F3", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_INDENTBLOCK, "IDM_INDENTBLOCK", "Indent block", "TAB", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_UNINDENTBLOCK, "IDM_UNINDENTBLOCK", "UnIndent block", "Shift+TAB", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_INSERTFILE, "IDM_INSERTFILE", "Insert file", "Ctrl+I", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOUPPERCASE, "IDM_TOUPPERCASE", "Change selection to uppercase", "Ctrl+Alt+U", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOLOWERCASE, "IDM_TOLOWERCASE", "Change selection to lowercase", "Ctrl+Alt+L", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOMIXEDCASE, "IDM_TOMIXEDCASE", "Change selection to mixedcase", "Ctrl+Alt+X", "" )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_NEWLINEBELOWCURRENT, "IDM_NEWLINEBELOWCURRENT", "Insert new line below current line", "Ctrl+Enter", "" ) 
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_SETFOCUSEDITOR, "IDM_SETFOCUSEDITOR", "Set keyboard focus to the editing window", "Ctrl+Tilde", "" ) ' VK_OEM_3
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_FINDNEXTACCEL, "IDM_FINDNEXTACCEL", "Find next", "F3", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_FINDPREVACCEL, "IDM_FINDPREVACCEL", "Find previous", "Shift+F3", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_INDENTBLOCK, "IDM_INDENTBLOCK", "Indent block", "TAB", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_UNINDENTBLOCK, "IDM_UNINDENTBLOCK", "UnIndent block", "Shift+TAB", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_INSERTFILE, "IDM_INSERTFILE", "Insert file", "Ctrl+I", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOUPPERCASE, "IDM_TOUPPERCASE", "Change selection to uppercase", "Ctrl+Alt+U", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOLOWERCASE, "IDM_TOLOWERCASE", "Change selection to lowercase", "Ctrl+Alt+L", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_TOMIXEDCASE, "IDM_TOMIXEDCASE", "Change selection to mixedcase", "Ctrl+Alt+X", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_NEWLINEBELOWCURRENT, "IDM_NEWLINEBELOWCURRENT", "Insert new line below current line", "Ctrl+Enter", "", false ) 
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_SETFOCUSEDITOR, "IDM_SETFOCUSEDITOR", "Set keyboard focus to the editing window", "Ctrl+Tilde", "", false ) ' VK_OEM_3
    
    '' SEARCH MENU
-   frmKeyBoard_AddKeyBinding( "Search", IDM_DEFINITION, "IDM_DEFINITION", "Goto the sub/function definition", "F6", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_LASTPOSITION, "IDM_LASTPOSITION", "Goto previous file position", "Shift+F6", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTONEXTFUNCTION, "IDM_GOTONEXTFUNCTION", "Goto next sub/function", "Ctrl+PgDn", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOPREVFUNCTION, "IDM_GOTOPREVFUNCTION", "Goto previous sub/function", "Ctrl+PgUp", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOHEADERFILE, "IDM_GOTOHEADERFILE", "Goto header file", "Ctrl+Shift+H", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOSOURCEFILE, "IDM_GOTOSOURCEFILE", "Goto code file", "Ctrl+Shift+C", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOMAINFILE, "IDM_GOTOMAINFILE", "Goto main file", "Ctrl+Shift+M", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTORESOURCEFILE, "IDM_GOTORESOURCEFILE", "Goto resource file", "Ctrl+Shift+R", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKTOGGLE, "IDM_BOOKMARKTOGGLE", "Toggle bookmark", "Ctrl+F2", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKNEXT, "IDM_BOOKMARKNEXT", "Goto the next bookmark", "F2", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKPREV, "IDM_BOOKMARKPREV", "Goto the previous bookmark", "Shift+F2", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKCLEARALL, "IDM_BOOKMARKCLEARALL", "Clear bookmarks", "Ctrl+Shift+F2", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTO, "IDM_GOTO", "Goto line", "Ctrl+G", "" )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_DEFINITION, "IDM_DEFINITION", "Goto the sub/function definition", "F6", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_LASTPOSITION, "IDM_LASTPOSITION", "Goto previous file position", "Shift+F6", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTONEXTFUNCTION, "IDM_GOTONEXTFUNCTION", "Goto next sub/function", "Ctrl+PgDn", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOPREVFUNCTION, "IDM_GOTOPREVFUNCTION", "Goto previous sub/function", "Ctrl+PgUp", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOHEADERFILE, "IDM_GOTOHEADERFILE", "Goto header file", "Ctrl+Shift+H", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOSOURCEFILE, "IDM_GOTOSOURCEFILE", "Goto code file", "Ctrl+Shift+C", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOMAINFILE, "IDM_GOTOMAINFILE", "Goto main file", "Ctrl+Shift+M", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTORESOURCEFILE, "IDM_GOTORESOURCEFILE", "Goto resource file", "Ctrl+Shift+R", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKTOGGLE, "IDM_BOOKMARKTOGGLE", "Toggle bookmark", "Ctrl+F2", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKNEXT, "IDM_BOOKMARKNEXT", "Goto the next bookmark", "F2", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKPREV, "IDM_BOOKMARKPREV", "Goto the previous bookmark", "Shift+F2", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_BOOKMARKCLEARALL, "IDM_BOOKMARKCLEARALL", "Clear bookmarks", "Ctrl+Shift+F2", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTO, "IDM_GOTO", "Goto line", "Ctrl+G", "", false )
    ' The following are non-visual (no topmenu item)
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTONEXTTAB, "IDM_GOTONEXTTAB", "Goto next open editor tab", "Ctrl+Tab", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOPREVTAB, "IDM_GOTOPREVTAB", "Goto previous open editor tab", "Ctrl+Shift+Tab", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTONEXTCOMPILEERROR, "IDM_GOTONEXTCOMPILEERROR", "Goto next compile error", "Ctrl+\", "" )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOPREVCOMPILEERROR, "IDM_GOTOPREVCOMPILEERROR", "Goto previous compile error", "Ctrl+Shift+\", "" )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTONEXTTAB, "IDM_GOTONEXTTAB", "Goto next open editor tab", "Ctrl+Tab", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOPREVTAB, "IDM_GOTOPREVTAB", "Goto previous open editor tab", "Ctrl+Shift+Tab", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTONEXTCOMPILEERROR, "IDM_GOTONEXTCOMPILEERROR", "Goto next compile error", "Ctrl+\", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOPREVCOMPILEERROR, "IDM_GOTOPREVCOMPILEERROR", "Goto previous compile error", "Ctrl+Shift+\", "", false)
 
    '' VIEW MENU
-   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWEXPLORER, "IDM_VIEWEXPLORER", "View Explorer window", "F9", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWOUTPUT, "IDM_VIEWOUTPUT", "View Output window", "Ctrl+F9", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONLIST, "IDM_FUNCTIONLIST", "View Function List", "F4", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKSLIST, "IDM_BOOKMARKSLIST", "View Bookmarks List", "Shift+F4", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_ZOOMIN, "IDM_ZOOMIN", "Zoom in", "Ctrl+Plus", "" )     ' VK_OEM_PLUS
-   frmKeyBoard_AddKeyBinding( "View", IDM_ZOOMOUT, "IDM_ZOOMOUT", "Zoom out", "Ctrl+Minus", "" )   ' VK_OEM_MINUS
-   frmKeyBoard_AddKeyBinding( "View", IDM_FOLDTOGGLE, "IDM_FOLDTOGGLE", "Toggle current fold point", "F8", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_FOLDBELOW, "IDM_FOLDBELOW", "Fold current line and all below", "Ctrl+F8", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_FOLDALL, "IDM_FOLDALL", "Fold all lines", "Shift+F8", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_UNFOLDALL, "IDM_UNFOLDALL", "Unfold all lines", "Ctrl+Shift+F8", "" )
+   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWEXPLORER, "IDM_VIEWEXPLORER", "View Explorer window", "F9", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWOUTPUT, "IDM_VIEWOUTPUT", "View Output window", "Ctrl+F9", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONLIST, "IDM_FUNCTIONLIST", "View Function List", "F4", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKSLIST, "IDM_BOOKMARKSLIST", "View Bookmarks List", "Shift+F4", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_ZOOMIN, "IDM_ZOOMIN", "Zoom in", "Ctrl+Plus", "", false )     ' VK_OEM_PLUS
+   frmKeyBoard_AddKeyBinding( "View", IDM_ZOOMOUT, "IDM_ZOOMOUT", "Zoom out", "Ctrl+Minus", "", false )   ' VK_OEM_MINUS
+   frmKeyBoard_AddKeyBinding( "View", IDM_FOLDTOGGLE, "IDM_FOLDTOGGLE", "Toggle current fold point", "F8", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_FOLDBELOW, "IDM_FOLDBELOW", "Fold current line and all below", "Ctrl+F8", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_FOLDALL, "IDM_FOLDALL", "Fold all lines", "Shift+F8", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_UNFOLDALL, "IDM_UNFOLDALL", "Unfold all lines", "Ctrl+Shift+F8", "", false )
    ' The following are non-visual (no topmenu item)
-   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWNOTES, "IDM_VIEWNOTES", "Notes for this file or project", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWTODO, "IDM_VIEWTODO", "List of TODO's for this file or project", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_EXPLORER_EXPANDALL, "IDM_EXPLORER_EXPANDALL", "Expand all nodes in the Explorer window", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_EXPLORER_COLLAPSEALL, "IDM_EXPLORER_COLLAPSEALL", "Collapse all nodes in the Explorer window", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONS_EXPANDALL, "IDM_FUNCTIONS_EXPANDALL", "Expand all nodes in the Function List window", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONS_COLLAPSEALL, "IDM_FUNCTIONS_COLLAPSEALL", "Collapse all nodes in the Function List window", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_EXPANDALL, "IDM_BOOKMARKS_EXPANDALL", "Expand all nodes in the Bookmarks window", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_COLLAPSEALL, "IDM_BOOKMARKS_COLLAPSEALL", "Collapse all nodes in the Bookmarks window", "", "" )
-   frmKeyBoard_AddKeyBinding( "View", IDM_CLOSEPANEL, "IDM_CLOSEPANEL", "Close left side panel", "", "" )
+   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWNOTES, "IDM_VIEWNOTES", "Notes for this file or project", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_VIEWTODO, "IDM_VIEWTODO", "List of TODO's for this file or project", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_EXPLORER_EXPANDALL, "IDM_EXPLORER_EXPANDALL", "Expand all nodes in the Explorer window", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_EXPLORER_COLLAPSEALL, "IDM_EXPLORER_COLLAPSEALL", "Collapse all nodes in the Explorer window", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONS_EXPANDALL, "IDM_FUNCTIONS_EXPANDALL", "Expand all nodes in the Function List window", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONS_COLLAPSEALL, "IDM_FUNCTIONS_COLLAPSEALL", "Collapse all nodes in the Function List window", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_EXPANDALL, "IDM_BOOKMARKS_EXPANDALL", "Expand all nodes in the Bookmarks window", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKS_COLLAPSEALL, "IDM_BOOKMARKS_COLLAPSEALL", "Collapse all nodes in the Bookmarks window", "", "", false )
+   frmKeyBoard_AddKeyBinding( "View", IDM_CLOSEPANEL, "IDM_CLOSEPANEL", "Close left side panel", "", "", false )
 
    '' PROJECT MENU
-   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTNEW, "IDM_PROJECTNEW", "New project", "", "" )
-   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTSAVE, "IDM_PROJECTSAVE", "Save project", "", "" )
-   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTSAVEAS, "IDM_PROJECTSAVEAS", "Save project as a different name ", "", "" )
-   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTOPEN, "IDM_PROJECTOPEN", "Open project", "F11", "" )
-   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTFILESADD, "IDM_PROJECTFILESADD", "Add files to project", "Ctrl+F11", "" )
-   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTCLOSE, "IDM_PROJECTCLOSE", "Close project", "", "" )
-   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTOPTIONS, "IDM_PROJECTOPTIONS", "Project options", "", "" )
+   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTNEW, "IDM_PROJECTNEW", "New project", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTSAVE, "IDM_PROJECTSAVE", "Save project", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTSAVEAS, "IDM_PROJECTSAVEAS", "Save project as a different name ", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTOPEN, "IDM_PROJECTOPEN", "Open project", "F11", "", false )
+   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTFILESADD, "IDM_PROJECTFILESADD", "Add files to project", "Ctrl+F11", "", false )
+   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTCLOSE, "IDM_PROJECTCLOSE", "Close project", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Project", IDM_PROJECTOPTIONS, "IDM_PROJECTOPTIONS", "Project options", "", "", false )
 
    '' COMPILE MENU
-   frmKeyBoard_AddKeyBinding( "Compile", IDM_BUILDEXECUTE, "IDM_BUILDEXECUTE", "Build and Execute", "F5", "" )
-   frmKeyBoard_AddKeyBinding( "Compile", IDM_COMPILE, "IDM_COMPILE", "Compile the project or the current active file", "Ctrl+F5", "" )
-   frmKeyBoard_AddKeyBinding( "Compile", IDM_REBUILDALL, "IDM_REBUILDALL", "Rebuild all", "Ctrl+Alt+F5", "" )
-   frmKeyBoard_AddKeyBinding( "Compile", IDM_QUICKRUN, "IDM_QUICKRUN", "Quick Run current active file", "Ctrl+Shift+F5", "" )
-   frmKeyBoard_AddKeyBinding( "Compile", IDM_RUNEXE, "IDM_RUNEXE", "Run executable", "Shift+F5", "" )
-   frmKeyBoard_AddKeyBinding( "Compile", IDM_COMMANDLINE, "IDM_COMMANDLINE", "Command line", "", "" )
+   frmKeyBoard_AddKeyBinding( "Compile", IDM_BUILDEXECUTE, "IDM_BUILDEXECUTE", "Build and Execute", "F5", "", false )
+   frmKeyBoard_AddKeyBinding( "Compile", IDM_COMPILE, "IDM_COMPILE", "Compile the project or the current active file", "Ctrl+F5", "", false )
+   frmKeyBoard_AddKeyBinding( "Compile", IDM_REBUILDALL, "IDM_REBUILDALL", "Rebuild all", "Ctrl+Alt+F5", "", false )
+   frmKeyBoard_AddKeyBinding( "Compile", IDM_QUICKRUN, "IDM_QUICKRUN", "Quick Run current active file", "Ctrl+Shift+F5", "", false )
+   frmKeyBoard_AddKeyBinding( "Compile", IDM_RUNEXE, "IDM_RUNEXE", "Run executable", "Shift+F5", "", false )
+   frmKeyBoard_AddKeyBinding( "Compile", IDM_COMMANDLINE, "IDM_COMMANDLINE", "Command line", "", "", false )
    
    '' DESIGNER MENU
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_NEWFORM, "IDM_NEWFORM", "New form", "", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_TOGGLEVIEWCODE, "IDM_TOGGLEVIEWCODE", "Toggle view form/code", "Ctrl+M", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_VIEWTOOLBOX, "IDM_VIEWTOOLBOX", "View toolbox", "", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_MENUEDITOR, "IDM_MENUEDITOR", "Menu editor", "", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_TOOLBAREDITOR, "IDM_TOOLBAREDITOR", "Toolbar editor", "", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_STATUSBAREDITOR, "IDM_STATUSBAREDITOR", "Statusbar editor", "", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_IMAGEMANAGER, "IDM_IMAGEMANAGER", "Image manager", "", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_SNAPLINES, "IDM_SNAPLINES", "Enable snap lines", "", "" )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_LOCKCONTROLS, "IDM_LOCKCONTROLS", "Lock controls", "", "" )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_NEWFORM, "IDM_NEWFORM", "New form", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_TOGGLEVIEWCODE, "IDM_TOGGLEVIEWCODE", "Toggle view form/code", "Ctrl+M", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_VIEWTOOLBOX, "IDM_VIEWTOOLBOX", "View toolbox", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_MENUEDITOR, "IDM_MENUEDITOR", "Menu editor", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_TOOLBAREDITOR, "IDM_TOOLBAREDITOR", "Toolbar editor", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_STATUSBAREDITOR, "IDM_STATUSBAREDITOR", "Statusbar editor", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_IMAGEMANAGER, "IDM_IMAGEMANAGER", "Image manager", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_SNAPLINES, "IDM_SNAPLINES", "Enable snap lines", "", "", false )
+   frmKeyBoard_AddKeyBinding( "Designer", IDM_LOCKCONTROLS, "IDM_LOCKCONTROLS", "Lock controls", "", "", false )
    
    '' HELP MENU
-   frmKeyBoard_AddKeyBinding( "Help", IDM_HELP, "IDM_HELP", "FreeBasic Help (context sensitive help)", "F1", "" )
+   frmKeyBoard_AddKeyBinding( "Help", IDM_HELP, "IDM_HELP", "FreeBasic Help (context sensitive help)", "F1", "", false )
    
    ' Load the keybindings settings file. This will update the gKeys array with any
    ' user defined key mappings.
@@ -222,8 +230,19 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
          if instr( wst, ":" ) = 0 then continue do
          
          dim as CWSTR wszMsgString = AfxStrParse(wst, 1, ":")  
+         
+         ' The MsgString could have an embedded (DISABLED) flag indicating that the
+         ' default key combination should be disabled.
+         dim as boolean bDisabled = false
+         dim as long i
+         i = instr(wszMsgString, "(DISABLED)")
+         if i then
+            bDisabled = true
+            wszMsgString = left(wszMsgString, i-1 )
+         end if   
+         
          dim as CWSTR wszUserKeys = trim(AfxStrParse(wst, 2, ":"))
-         frmKeyBoard_AddKeyBinding( "", 0, wszMsgString, "", "", wszUserKeys )
+         frmKeyBoard_AddKeyBinding( "", 0, wszMsgString, "", "", wszUserKeys, bDisabled )
       Loop
       pStream.Close
    end if
@@ -348,7 +367,17 @@ Function frmKeyboard_BuildAcceleratorTable() As long
       dim as CWSTR wszKeys = gKeys(i).wszDefaultKeys
 
       ' wszUserKeys will override the wszDefaultKeys entry
-      if len(gKeys(i).wszUserKeys) then wszKeys = gKeys(i).wszUserKeys
+      if len(gKeys(i).wszUserKeys) then 
+         wszKeys = gKeys(i).wszUserKeys
+      else
+         ' Only create the default keyboard short if it has not been disabled
+         if gKeys(i).bDefaultDisabled then
+            wszKeys = ""
+         end if
+      end if
+      
+      ' No need to proceed further if no User defined shortcut and Default keys disabled
+      if len(wszKeys) = 0 then continue for
       
       ' convert the key combination into something that AddAcelerator can understand
       ' F5
@@ -585,6 +614,14 @@ Function frmKeyboard_WndProc( _
             gKeysEdit = gKeys(idx)
             frmKeyboardEdit_Show( Hwnd )
             gKeys(idx) = gKeysEdit
+
+            ' Update the Default keys column because it could have changed (DISABLED)
+            wszText = gKeysEdit.wszDefaultKeys
+            if gKeys(idx).bDefaultDisabled then
+               wszText = wszText & " (DISABLED)"
+            end if   
+            FF_ListView_SetItemText( HWND_FRMKEYBOARD_LISTVIEW, nCurSel, 4, wszText, MAX_PATH ) 
+            
             ' Update the UserKeys column because it could have changed
             wszText = gKeysEdit.wszUserKeys
             FF_ListView_SetItemText( HWND_FRMKEYBOARD_LISTVIEW, nCurSel, 5, wszText, MAX_PATH ) 
@@ -665,7 +702,11 @@ Function frmKeyboard_Show( ByVal hWndParent As HWnd ) As LRESULT
       FF_ListView_InsertItem( hLV, i, 1, "" ) 
       FF_ListView_InsertItem( hLV, i, 2, gKeys(i).wszCategory ) 
       FF_ListView_InsertItem( hLV, i, 3, gKeys(i).wszDescription ) 
-      FF_ListView_InsertItem( hLV, i, 4, gKeys(i).wszDefaultKeys ) 
+      dim as CWSTR wszTemp = gKeys(i).wszDefaultKeys
+      if gKeys(i).bDefaultDisabled then
+         wszTemp = wszTemp & " (DISABLED)"
+      end if
+      FF_ListView_InsertItem( hLV, i, 4, wszTemp ) 
       FF_ListView_InsertItem( hLV, i, 5, gKeys(i).wszUserKeys ) 
    next
 

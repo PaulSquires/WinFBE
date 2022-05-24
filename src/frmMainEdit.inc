@@ -185,6 +185,7 @@ function OnCommand_EditPaste( _
          else
             SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
             frmMain_PositionWindows()    ' ensure custom scrollbars display
+            SetFocus( hEdit )    ' ensure that the original edit window has not lost focus
          end if   
    end select
    

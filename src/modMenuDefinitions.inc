@@ -25,7 +25,9 @@ function getMenuAccelText( byval idMenu as long ) As CWSTR
          if len(gKeys(i).wszUserKeys) then
             wszAccel = gKeys(i).wszUserKeys
          else
-            wszAccel = gKeys(i).wszDefaultKeys
+            if gKeys(i).bDefaultDisabled = false then
+               wszAccel = gKeys(i).wszDefaultKeys
+            end if   
          end if
          exit for   
       end if
