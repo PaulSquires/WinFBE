@@ -259,7 +259,18 @@ function frmMain_DesignerTopMenuStates() as long
    If pDoc = 0 Then exit function
 
    ' Enable if Visual Designer is active
-   if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
+   if (pDoc->IsDesigner = true) then
+      EnableTopMenuItem( IDM_TOGGLEVIEWCODE, true )
+      EnableTopMenuItem( IDM_VIEWTOOLBOX, true )
+      EnableTopMenuItem( IDM_MENUEDITOR, true )
+      EnableTopMenuItem( IDM_TOGGLEVIEWCODE, true )
+      EnableTopMenuItem( IDM_TOOLBAREDITOR, true )
+      EnableTopMenuItem( IDM_STATUSBAREDITOR, true )
+      EnableTopMenuItem( IDM_IMAGEMANAGER, true )     
+   end if
+   
+   ' Enable if Visual Designer is active AND design window has selected controls
+   if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) then
       ' Enable Align, Horiz, Vert, and Same Size if more than 1 control is selected.
       if pDoc->Controls.SelectedControlsCount > 1 then
          for idMenu as long = IDM_ALIGN to IDM_SAMEBOTH
@@ -272,9 +283,10 @@ function frmMain_DesignerTopMenuStates() as long
             EnableTopMenuItem( idMenu, true )
          next
       end if
+      EnableTopMenuItem( IDM_SNAPLINES, true )     
+      EnableTopMenuItem( IDM_LOCKCONTROLS, true )     
       CheckMarkTopMenuItem( IDM_SNAPLINES, iif( pDoc->bSnapLines, true, false ) )
       CheckMarkTopMenuItem( IDM_LOCKCONTROLS, iif( pDoc->bLockControls, true, false ) )
-      EnableTopMenuItem( IDM_TOGGLEVIEWCODE, true )
    end if
    
    function = 0

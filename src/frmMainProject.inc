@@ -40,7 +40,7 @@ Function OnCommand_ProjectSave( _
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = 0
-End Function
+End Function 
 
 
 ' ========================================================================================

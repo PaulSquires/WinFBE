@@ -560,6 +560,8 @@ function Scintilla_OnNotify( _
             select case pNSC->margin 
                case 1   ' left margin (bookmarks)
                   pDoc->ToggleBookmark(nLine)
+                  LoadBookmarksFiles
+                  AfxRedrawWindow( HWND_FRMBOOKMARKS )
                case 2   ' fold margin
                   ' if is the head line...
                   if (nFoldLevel and SC_FOLDLEVELHEADERFLAG) <> 0 then

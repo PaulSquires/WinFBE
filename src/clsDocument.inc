@@ -70,7 +70,7 @@ end property
 
 property clsDocument.UserModified( byval nModified as boolean ) 
    m_UserModified = nModified
-   this.AutoSaveRequired = nModified
+   if nModified = true then this.AutoSaveRequired = true
 end property
 
 
@@ -719,7 +719,7 @@ function clsDocument.SaveFile( _
    ' if this is a new Untitled document then set flag to display SaveAs dialog.
    if this.IsNewFlag then bSaveAs = true
       
-   ' Don't let AutoSave allow bSaveas
+   ' Don't let AutoSave allow bSaveAs
    if bAutoSaveOnly then bSaveAs = false
 
    wszFilename = this.Diskfilename
@@ -773,7 +773,7 @@ function clsDocument.SaveFile( _
       if AfxFileExists(wszAutoSaveFilename) then AfxDeleteFile(wszAutoSaveFilename)
       wszSaveFilename = wszAutoSaveFilename
    else   
-      ' ensure any previously created AutoSave files are delete should the 
+      ' ensure any previously created AutoSave files are delete should 
       ' the user had chosen a new filename
       if AfxFileExists(wszFilename) then AfxDeleteFile(wszFilename)
       if AfxFileExists(wszAutoSaveFilename) then AfxDeleteFile(wszAutoSaveFilename)
@@ -831,7 +831,7 @@ function clsDocument.SaveFile( _
    this.DiskFilename = wszFilename
    this.AutoSaveFilename = OnCommand_FileAutoSaveGenerateFilename(wszFilename)
    this.DateFileTime = AfxGetFileLastWriteTime( wszFilename )
-   this.UserModified = false   ' this also resets the AutoSaveRequired flag
+   this.AutoSaveRequired = false
    
    ' if this was a new document then it needs to be saved to Recent File list.
    if this.IsNewFlag then 
@@ -843,6 +843,7 @@ function clsDocument.SaveFile( _
    
    ' Set the current state of the document to unmodified
    if bAutoSaveOnly = false then 
+      this.UserModified = false   
       SciMsg( pSci, SCI_SETSAVEPOINT, 0, 0)
    end if
    
@@ -1793,7 +1794,6 @@ function clsDocument.ApplyProperties() as long
       else
          SciMsg( m_pSci(i), SCI_SETUSETABS, Ctrue, 0 )
       end if
-
         
       ''
       ''  SELECTIONS FILL ENTIRE SCREEN SPACE
@@ -1823,14 +1823,11 @@ function clsDocument.ApplyProperties() as long
       ''  SHOW CARET LINE
       if gConfig.HighlightCurrentLine then
          SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLE, Ctrue, 0 )
+         SciMsg( m_pSci(i), SCI_SETCARETLINEBACK, ghEditor.BackColorCurrentline, 0 )
       else
          SciMsg( m_pSci(i), SCI_SETCARETLINEVISIBLE, false, 0 )
       end if
 
-      ''
-      ''  CARET LINE COLOR
-      SciMsg( m_pSci(i), SCI_SETCARETLINEBACK, ghEditor.BackColorCurrentline, 0 )
-      
       ''
       ''  SELECTION COLORS
       SciMsg( m_pSci(i), SCI_SETSELFORE, Ctrue, ghEditor.ForeColorSelection )

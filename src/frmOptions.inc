@@ -135,8 +135,7 @@ private function frmOptions_SaveEditorOptions() as long
    ' Output the config settings to disk file
    gConfig.SaveConfigFile
    
-   ' If Occurrences Highlighting is false then ensure that any highlights
-   ' on the screen will be removed.
+   ' If Occurrences Highlighting is false then ensure that any highlights on the screen will be removed.
    dim pDoc as clsDocument ptr
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc then

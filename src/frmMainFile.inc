@@ -152,62 +152,26 @@ end function
 ' ========================================================================================
 ' Save the incoming pDoc file to disk
 ' ========================================================================================
-Function OnCommand_FileSave( _
+function OnCommand_FileSave( _
             ByVal HWnd As HWnd, _
             byval pDoc as clsDocument ptr, _
-            ByVal bSaveAs As BOOLEAN _
+            ByVal bSaveAs As boolean, _
+            ByVal bSaveAll As boolean _
             ) As LRESULT
 
-   If pDoc = 0 Then Return 0
+   Dim as long i, iStart, iEnd
 
-   if pDoc->IsDesigner then
-      ' Parse the code to ensure up to date list of functions so that compiling will not
-      ' fail by generating a Declare without a body function.
-      ParseDocument(pDoc)
-      ' Regenerate code to ensure that any missing body functions are now present
-      pDoc->bRegenerateCode = true
-      SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-   end if
-          
-   ' Do the actual saving to disk
-   dim wszFilename as CWSTR = pDoc->DiskFilename
-   If pDoc->SaveFile(bSaveAs) Then
-      pDoc->ApplyProperties
-      ParseDocument( pDoc )
-      ' Apply document properties to this file because the file extension may have
-      ' changed. For example from Untitled to *.bas
-      if pDoc->DiskFilename <> wszFilename then
-         If gApp.IsProjectActive Then
-            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
-         end if
-      end if
-   EndIf   
+   if bSaveAll then
+      ' Save All
+      iStart = 0
+      iEnd = gTTabCtl.GetItemCount - 1
+   else
+      ' Save
+      iStart = gTTabCtl.GetTabIndexByDocumentPtr(pDoc)
+      iEnd = iStart
+   end if 
 
-   ' Ensure that the Tab displays the correct filename in case it was changed
-   gTTabCtl.SetTabText(-1)
-   LoadExplorerFiles()
-   LoadFunctionsFiles()
-
-   ' Highlight the selected tab file in the Explorer listbox
-   frmExplorer_SelectItemData( pDoc )
-   frmMain_SetFocusToCurrentCodeWindow
-
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Save all open files to disk
-' ========================================================================================
-Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
-
-   Dim As Long nCount = gTTabCtl.GetItemCount 
-   If nCount = 0 Then Exit Function
-                
-   Dim pDoc As clsDocument Ptr 
-   Dim i    As Long               
-
-   For i = 0 To nCount - 1
+   For i = iStart to iEnd
       ' Get the document pointer and then save file to disk
       if gTTabCtl.IsSafeIndex(i) then
          pDoc = gTTabCtl.tabs(i).pDoc
@@ -222,24 +186,42 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          pDoc->bRegenerateCode = true
          SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
       end if
+             
+      ' Do the actual saving to disk
+      dim wszFilename as CWSTR = pDoc->DiskFilename
+      If pDoc->SaveFile(bSaveAs) Then
+         pDoc->ApplyProperties
+         ParseDocument( pDoc )
+         ' Apply document properties to this file because the file extension may have
+         ' changed. For example from Untitled to *.bas
+         if pDoc->DiskFilename <> wszFilename then
+            If gApp.IsProjectActive Then
+               gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
+            end if
+         end if
+      end if
 
-      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         ' If this is a new Untitled document that is also dirty then we
-         ' need to set the focus to that tab because the SaveAs dialog will be shown.
-         If pDoc->IsNewFlag Then
-            gTTabCtl.SetFocusTab(i)
-         End If
-         dim wszFilename as CWSTR = pDoc->DiskFilename
-         if pDoc->SaveFile() = false then
-            ' Save file was cancelled
-         end if   
-         gTTabCtl.SetTabText(i)  ' make sure "*" updates
-         ' Parse the code for sub/function listing and create list
-         ParseDocument(pDoc)
-      End If   
-   Next
+      ' Ensure that the Tab displays the correct filename in case it was changed
+      gTTabCtl.SetTabText(-1)
+   next
+   
+   LoadExplorerFiles()
    LoadFunctionsFiles()
+
    frmMain_SetFocusToCurrentCodeWindow
+
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Save all open files to disk
+' ========================================================================================
+Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
+
+   If gTTabCtl.GetItemCount = 0 Then Exit Function
+                
+   function = OnCommand_FileSave( HWnd, 0, false, true )
 
    Function = 0
 End Function
@@ -304,9 +286,7 @@ Function OnCommand_FileClose( _
       If pDoc = 0 Then Return true
    
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         gTTabCtl.CurSel = i
          gTTabCtl.SetFocusTab(i)
-         wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
          r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
                            MB_YESNOCANCEL Or MB_ICONQUESTION)
          If r = IDCANCEL Then Exit Function

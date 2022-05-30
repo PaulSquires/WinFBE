@@ -69,8 +69,6 @@ Function frmMain_OnCommand( _
            IDM_PROJECTOPTIONS, IDM_COMMANDLINE, IDM_ABOUT
          killAllPopupMenus()
    end select
-
-
    
    Select Case id
        ' show any topmenu that were activated via keyboard Alt+ sequences     
@@ -135,8 +133,8 @@ Function frmMain_OnCommand( _
       Case IDM_FILENEW:            OnCommand_FileNew( HWnd )
       Case IDM_FILEOPEN:           OnCommand_FileOpen( HWnd, true )
       Case IDM_FILEOPENTEMPLATES:  OnCommand_FileTemplates( HWnd )
-      Case IDM_FILESAVE:           OnCommand_FileSave( HWnd, pDoc, False )
-      Case IDM_FILESAVEAS:         OnCommand_FileSave( HWnd, pDoc, True )
+      Case IDM_FILESAVE:           OnCommand_FileSave( HWnd, pDoc, false, false )
+      Case IDM_FILESAVEAS:         OnCommand_FileSave( HWnd, pDoc, true, false )
       Case IDM_FILECLOSE:          OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
       Case IDM_FILESAVEALL:        OnCommand_FileSaveAll( HWnd ) 
       case IDM_AUTOSAVE:           OnCommand_FileAutoSave( HWnd )
