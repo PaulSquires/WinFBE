@@ -32,13 +32,13 @@ Function frmStatusBar_PositionWindows() As LRESULT
    ' function to determine proper sizing and placement.
    
    '''' LEFT ALIGNED STATUSBAR PANELS ''''
-   i = 0  ' Build Configuration
+   i = 0  ' Ln 23, Col 20
    gSBPanels(i).rc.Left   = nLeft
    gSBPanels(i).rc.top    = rc.top
    gSBPanels(i).rc.right  = nLeft + _
       pWindow->ScaleX( getTextWidth( HWND_FRMMAIN_STATUSBAR, gSBPanels(i).wszText, ghStatusBar.hFontStatusBar, 4 ) )
    gSBPanels(i).rc.bottom = rc.bottom
-   gSBPanels(i).nID       = IDM_BUILDCONFIG
+   gSBPanels(i).nID       = IDM_GOTO
    nLeft = gSBPanels(i).rc.right + nSpacer
 
    '''' RIGHT ALIGNED STATUSBAR PANELS ''''
@@ -87,13 +87,13 @@ Function frmStatusBar_PositionWindows() As LRESULT
       SetRectEmpty( @gSBPanels(i).rc )
    end if
    
-   i -= 1  ' Ln 23, Col 20
+   i -= 1  ' Build Configuration
    gSBPanels(i).rc.Left   = nRight - _
       pWindow->ScaleX( getTextWidth( HWND_FRMMAIN_STATUSBAR, gSBPanels(i).wszText, ghStatusBar.hFontStatusBar, 4 ) )
    gSBPanels(i).rc.top    = rc.top
    gSBPanels(i).rc.right  = nRight
    gSBPanels(i).rc.bottom = rc.bottom
-   gSBPanels(i).nID       = IDM_GOTO
+   gSBPanels(i).nID       = IDM_BUILDCONFIG
    nRight = gSBPanels(i).rc.left - nSpacer
 
    '''' THE MESSAGES PANEL FILLS THE REMAINING AVAILABLE SPACE ''''

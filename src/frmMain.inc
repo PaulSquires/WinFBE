@@ -36,9 +36,9 @@ function frmMain_SetStatusbar() as long
    
    dim wszText as wstring * MAX_PATH
    
-   ' PANEL (0) Build Configuration
+   ' PANEL (0) Line/Col/Sel -or- VD coordinates
    ' PANEL (1) Compiling Results -or- Filename being parsed
-   ' PANEL (2) Line/Col/Sel -or- VD coordinates
+   ' PANEL (2) Build Configuration
    ' PANEL (3) Filetype (Normal/Main/Resource/Module)
    ' PANEL (4) Spacing
    ' PANEL (5) File Encoding (Ansi, UTF-8, etc)
@@ -48,11 +48,6 @@ function frmMain_SetStatusbar() as long
    for i as long = lbound(gSBPanels) to ubound(gSBPanels)
       gSBPanels(i).wszText = ""
    next
-
-   ' PANEL (0) Build Configuration
-   if gApp.GetDocumentCount then
-      gSBPanels(0).wszText = frmBuildConfig_GetSelectedBuildDescription()
-   end if
 
    ' PANEL (1) Compiling Results -or- Filename being parsed
    gSBPanels(1).wszText = gApp.wszPanelText
@@ -92,9 +87,14 @@ function frmMain_SetStatusbar() as long
          AfxRedrawWindow( iif( hEdit = pDoc->hWindow(0), HWND_FRMEDITOR_VSCROLLBAR(0), HWND_FRMEDITOR_VSCROLLBAR(1)) )
 
       end if
-      ' PANEL (2) Line/Col/Sel -or- VD coordinates
-      gSBPanels(2).wszText = wszText
-   
+      
+      ' PANEL (0) Line/Col/Sel -or- VD coordinates
+      gSBPanels(0).wszText = wszText
+
+      ' PANEL (2) Build Configuration
+      if gApp.GetDocumentCount then
+         gSBPanels(2).wszText = frmBuildConfig_GetSelectedBuildDescription()
+      end if
       
       ' PANEL (3) Filetype (Normal/Main/Resource/Module)
       wszText = ""
