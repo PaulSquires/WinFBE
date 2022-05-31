@@ -422,7 +422,7 @@ private Function frmImageManager_OnCommand( ByVal HWnd As HWnd, _
          if len(wszImageName) = 0 then exit function
          if id = IDM_DETACHIMAGE then wszImageName = ""
          
-         ' If the StatusBar Editor called this ImageManager then save the selected
+         ' If an editor called this ImageManager then save the selected
          ' image name into the pProp of the currently selected 
          if (GetParent( HWND_FRMIMAGES ) = HWND_FRMSTATUSBAREDITOR) or _
             (GetParent( HWND_FRMIMAGES ) = HWND_FRMTOOLBAREDITOR) or _
@@ -520,7 +520,6 @@ private Function frmImageManager_Listview_SubclassProc ( _
    ' Convert our ENTER key presses into LBUTTONDBLCLK to process them similarly
    If (uMsg = WM_KEYUP) And (Loword(wParam) = VK_RETURN) Then uMsg = WM_LBUTTONDBLCLK
 
-      
    Select Case uMsg
 
       Case WM_GETDLGCODE

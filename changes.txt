@@ -8,6 +8,7 @@ Editor:
 Visual Designer:
 - Several items in the Designer top menu were not being enabled/disabled correctly.
 - Possible that Form files would not have their dirty flag correctly maintained if AutoSave was active.
+- Adding an image to a TabControl tab header could cause a GPF resulting in WinFBE to crash.
 
 
 Version 3.0.0 (May 24, 2022)

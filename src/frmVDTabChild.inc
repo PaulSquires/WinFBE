@@ -175,8 +175,24 @@ private Function frmVDTabChild_OnCommand( ByVal HWnd As HWnd, _
             if nCurSel > -1 then
                dim pProp as clsProperty ptr = new clsProperty
                pProp->wszPropValue = gTabPages(nCurSel).wszImage
+               
+               ' Need to save the gTabPages array because the frmImageManager will
+               ' reset it during a pDoc Save.
+               dim temp(ubound(gTabPages)) as TabPage
+               for i as long = lbound(gTabPages) to ubound(gTabPages)
+                  temp(i) = gTabPages(i)
+               next
+               
                frmImageManager_Show( HWND, pProp )
+               
+               ' Need to reload the gTabPages array that would have been reset.
+               redim gTabPages(ubound(temp)) as TabPage
+               for i as long = lbound(temp) to ubound(temp)
+                  gTabPages(i) = temp(i)
+               next
+ 
                gTabPages(nCurSel).wszImage = pProp->wszPropValue
+
                delete pProp
                frmVDTabChild_SetTabChildTextboxes
             end if
@@ -490,7 +506,7 @@ public Function frmVDTabChild_Show( ByVal hWndParent As HWnd, _
    ' Process Windows messages(modal)
    Function = pWindow->DoEvents(SW_SHOW)
    
-   ' Delete the frmBuildConfig CWindow class manually allocated memory 
+   ' Delete the CWindow class manually allocated memory 
    Delete pWindow
 
    ' Reset the gTabPages global array
