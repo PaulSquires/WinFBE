@@ -4,6 +4,9 @@ Editor:
 - When closing all files sometimes not positioning editor to a dirty file that needed to be saved.
 - Enable/Disable "Highlight current line" editor option would not honor the theme color.
 - Toggling a Bookmark by clicking in the Bookmark margin would not visually update the Bookmarks list in the Explorer window.
+- Changed the statusbar positions for Line/Col and Build Configuration.
+- When a visual design Form is active, pressing TAB character would insert the TAB character into the underlying code editor.
+- Corrected "Append loop variable to For/Next statement" in cases where the variable did not immediately have a space character after it.
 
 Visual Designer:
 - Several items in the Designer top menu were not being enabled/disabled correctly.

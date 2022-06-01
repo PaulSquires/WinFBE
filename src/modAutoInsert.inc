@@ -300,7 +300,7 @@ public function AttemptAutoInsert() as Long
       if gConfig.ForNextVariable then
          ' Determine the loop variable and append it to the "next" statement
          strPrevLine = ltrim(AfxStrShrink(strPrevLineOrig))
-         wszLoopVar = " " & AfxStrParse(strPrevLine, 2, " ")
+         wszLoopVar = " " & AfxStrParseAny(strPrevLine, 2, " =")
       end if   
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_FOR, nLine) then
          strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "next" & wszLoopVar & vbcrlf

@@ -201,6 +201,8 @@ function OnCommand_EditIndentBlock( _
             ByVal hEdit as HWND _
             ) as LRESULT
 
+   if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then exit function
+   
    ' If a TAB was pressed then manually terminate any active autocomplete.
    if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
       SciExec(hEdit, SCI_AUTOCCOMPLETE, 0, 0) 
@@ -238,6 +240,8 @@ function OnCommand_EditUnIndentBlock( _
             ByVal hEdit as HWND _
             ) as LRESULT
 
+   if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then exit function
+   
    if GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
       if gFind.bExpanded then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
    elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then

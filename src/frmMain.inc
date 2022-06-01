@@ -1995,7 +1995,7 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
             if (uMsg.message = WM_CHAR) then
                if (uMsg.wParam < 32) andalso (uMsg.wParam <> 8) then continue do
             end if
-
+            
             ' if topmenus or menubar are active then process all keyboard input for them rather than 
             ' passing it off to the system to process.
             if handleKeysTopMenu(uMsg) then continue do
