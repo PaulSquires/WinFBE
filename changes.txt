@@ -1,4 +1,4 @@
-Version 3.0.1 (NOT RELEASED)
+Version 3.0.1 (June 6, 2021)
 Editor:
 - "Save All" was not correctly adding the saved file to the Explorer list.
 - When closing all files sometimes not positioning editor to a dirty file that needed to be saved.
