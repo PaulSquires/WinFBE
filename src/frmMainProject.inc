@@ -467,13 +467,16 @@ function OnCommand_ProjectRemove( _
    if gTTabCtl.SetTabIndexByDocumentPtr( pDoc ) <> -1 then
      if OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT ) = false then exit function
    end if  
+
    ' File close succeeded. Remove this document from the project collection and remove treeview node. 
    gdb2.dbDelete( pDoc->DiskFilename )
    gApp.RemoveDocument( pDoc )
+
    LoadExplorerFiles()
+
    if gTTabCtl.IsSafeIndex(gTTabCtl.CurSel) then
       frmExplorer_SelectItemData( gTTabCtl.tabs(gTTabCtl.CurSel).pDoc )
    end if
-         
+
    function = 0
 end function

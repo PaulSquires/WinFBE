@@ -42,10 +42,12 @@ end function
 ''
 ''
 function clsApp.RemoveDocument( byval pDoc as clsDocument ptr ) as long
-   
+   if pDoc = 0 then exit function
+      
    ' Remove from pDocList. Find the node that points to the incoming pDoc
    ' and then point that node to pDoc->pDocNext
    dim pDocSearch as clsDocument ptr = this.pDocList
+
    if pDocSearch = pDoc then
       this.pDocList = pDoc->pDocNext
    else
@@ -57,8 +59,9 @@ function clsApp.RemoveDocument( byval pDoc as clsDocument ptr ) as long
          pDocSearch = pDocSearch->pDocNext
       loop
    end if
+
    ' Release memory associated with this pDoc
-   delete pDoc
+   if pDoc then delete(pDoc)
 
    function = 0
 end function

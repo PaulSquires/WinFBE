@@ -1311,7 +1311,7 @@ function frmMain_OnActivateApp( _
                                           false, _    ' bIsInclude
                                           wszFilename, _ ' wszName
                                           0 )         ' pDocIn
-                  
+                 
                   pDocLoad->ProjectFileType = wszFileType
                end if                
             end if
