@@ -97,6 +97,7 @@ type clsDocument
       hWindow(1)        as HWnd   ' Scintilla split edit windows 
       
       ' Visual designer related
+      wszFormVersion    as CWSTR   
       MenuItems(any)    as clsMenuItem
       ToolBarItems(any) as clsToolBarItem
       wszToolBarSize    as CWSTR = wstr("SIZE_24")  ' SIZE_16, SIZE_24, SIZE_32, SIZE_48

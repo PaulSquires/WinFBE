@@ -18,6 +18,7 @@ type TABORDER_TYPE
    TabIndex   as Long        ' 999999 if TabStop=False or TabIndex property doesn't exist
 END TYPE
 
+declare function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
 declare function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long 
 declare function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 

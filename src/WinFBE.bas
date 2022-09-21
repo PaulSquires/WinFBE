@@ -20,6 +20,8 @@
 #define UNICODE
 #define _WIN32_WINNT &h0602  
 
+#include once "modJSON.inc"
+
 #include once "windows.bi"
 #include once "vbcompat.bi"
 #include once "win\shobjidl.bi"

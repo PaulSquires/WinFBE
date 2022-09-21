@@ -20,6 +20,19 @@
 #include once "frmMain.bi"
 
 ' ========================================================================================
+' Convert embedded single quote characters to double quote within a string
+' This is used mostly for creating JSON strings.
+' ========================================================================================
+function qstr( byval singleQuoteString as CWSTR ) as CWSTR
+   dim as long length = len(singleQuoteString)
+   if length = 0 then return singleQuoteString
+   for i as long = 0 to length - 1
+      if singleQuoteString[i] = 39 then singleQuoteString[i] = 34
+   next
+   return singleQuoteString
+end function
+
+' ========================================================================================
 ' Get the width of the text in unscaled pixels because we feed this value
 ' to the pWindow create control function that will then scale up the value.
 ' ========================================================================================

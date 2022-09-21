@@ -13,6 +13,7 @@
 
 #pragma once
 
+declare function qstr( byval singleQuoteString as CWSTR ) as CWSTR
 declare function isMouseOverRECT( byval hWin as HWND, byval rc as RECT ) as boolean
 declare function isMouseOverWindow( byval hChild as HWND ) as boolean
 declare function GetTextWidthPixels( byval hWin as HWND, byref wszText as WString ) as Long

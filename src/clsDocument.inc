@@ -317,7 +317,7 @@ function clsDocument.CreateCodeWindow( _
             this.LoadingFromFile = true
             dim sText as string  ' this will be an UTF-8 encoded string
             ' GetFileTostring has a call to pDoc->ParseFormMetaData which will create/recreate the designer form.
-            if GetFileTostring(wszFile, sText, @this) = false then
+            if GetFileToString(wszFile, sText, @this) = false then
                ' Take this opportunity to determine the text line endings
                if instr(sText, chr(13,10)) then
                   SciMsg( m_pSci(0), SCI_SETEOLMODE, SC_EOL_CRLF, 0)
@@ -351,6 +351,14 @@ function clsDocument.CreateCodeWindow( _
       ' select the Form as the default focus control
       this.Controls.SelectControl( this.hWndForm )
       this.Controls.SetActiveControl( this.hWndForm )
+
+      ' WinFBE Version 3.0.2+ requires that older version form file formats get upgraded
+      ' to the new json format and also separated out from the source code file. There
+      ' will now be two files: (1) *.frm for the json form definitions, and (2) *.inc/bas
+      ' for the actual form code.
+      if FormUpgrade302Format(@this) then 
+         'exit function
+      end if
 
       ' if the data that was read contained anything that caused the form to have
       ' to be code regenerated then we need to save the file back to disk with the
@@ -504,6 +512,7 @@ function clsDocument.ParseFormMetaData( _
             this.bRegenerateCode = true
             this.UserModified = true
          end if
+         this.wszFormVersion = wszPropValue
          
       elseif left(wst, 15) = "' LOCKCONTROLS=" then
          wszPropValue = mid(wst, 16)  ' default is false
