@@ -1190,6 +1190,9 @@ function frmMain_OnActivateApp( _
             byval fActivate as boolean, _
             byval dwThreadId as DWORD _
             ) as LRESULT
+
+   if gApp.PreventActivateApp then exit function
+
    dim pDoc as clsDocument ptr
    
    ' if the application is losing focus then validate any currently editing property

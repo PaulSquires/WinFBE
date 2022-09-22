@@ -36,6 +36,8 @@ public function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
       return false
    end if
    
+   gApp.PreventActivateApp = true
+   
    ' Commence conversion to the new json file format
    dim as CWSTR wszCodeFilename = pDoc->DiskFilename
 
@@ -215,8 +217,7 @@ public function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
 
    ' Convert UTF-16 to UTF-8 encoding
    wst = "{" & wst & "}"
-   pStream.WriteLine wst.utf8
-
+   pStream.WriteLine( UnicodeToUtf8(wst) )
    pStream.Close
    
    ' The new frm Form file has now been created so we can remove all code in the
@@ -237,14 +238,6 @@ public function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
    pDoc->IsDesigner = true
    if gApp.IsProjectActive then
       OnCommand_ProjectRemove( 0, pDoc )
-
-dim p as clsDocument ptr = gApp.pDocList
-do until p = 0
-   ? p->DiskFilename
-   p = p->pDocnext
-loop
-
-
    else
       if iTab > -1 then
          OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT, iTab )
@@ -278,6 +271,8 @@ loop
    LoadExplorerFiles()
    LoadFunctionsFiles()
                
+   gApp.PreventActivateApp = false
+
    return true  ' new format was created
 end function
 

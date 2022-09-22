@@ -444,98 +444,62 @@ end function
 ' ========================================================================================
 function clsDocument.LoadFormJSONdata( _
             byval hWndParent as HWnd, _
-            byref wszAllText as string, _    ' this will be UTF-8 text
+            byref JSONtext as string, _    ' this will be UTF-8 text
             byval bLoadOnly  as boolean = false _
             ) as long
             
    dim pCtrl as clsControl ptr
    dim pCtrlActive as clsControl ptr
    
-   dim as RECT rc, rcCtrl
-   dim as CWSTR wszControlType, wszPropName, wszPropValue, wszEventName
-   dim as CWSTR wst
-   dim as long nControlType, numLines, numOffsetLines
+   dim as string wst
    dim as boolean bIsValidControl = true
    
-this.wszFormVersion = "3.0.2"
-AFXMSG( "LOAD FORM JSON DATA" )
-
-'   ' The first line MUST contain the identifier that this is a form file.
-
-'   if left(wszAllText, 13) = "' WINFBE FORM" then
-'      this.IsDesigner = true
-'      ' Remove any previously created controls, etc otherwise reloading the form
-'      ' file will result in duplicates.
-'      if bLoadOnly = false then
-'         if this.hWndForm then DestroyWindow(this.hWndForm)
-'         if this.hWndFrame then DestroyWindow(this.hWndFrame)
-'         if this.hWndDesigner then DestroyWindow(this.hWndDesigner)
-'         this.CreateDesignerWindow(hWndParent)
-'      end if
-'      numOffsetLines = 1
-'   end if
+'   dim json as JsonItem = JsonItem(JSONtext)
    
+'   ' First, make sure that this is actually a Form file!
+'   if json["form"].value <> "true" then exit function
+   
+   this.IsDesigner = true
+   if this.wszFormVersion = "" then this.wszFormVersion = APPVERSION
 
-'   ' Iterate all of the lines related to the visual designer
-'   dim as long iLineStart = 1
-'   dim as long iLineEnd, nextMenuItem, nextToolBarItem, nextPanelItem, nextImageItem
+EXIT FUNCTION
 
-'   dim as boolean bReadingMenuItem, bReadingToolBarItem, bReadingPanelItem, bReadingImageItem
+   ' Remove any previously created controls, etc otherwise reloading the form
+   ' file will result in duplicates.
+   if bLoadOnly = false then
+      if this.hWndForm then DestroyWindow(this.hWndForm)
+      if this.hWndFrame then DestroyWindow(this.hWndFrame)
+      if this.hWndDesigner then DestroyWindow(this.hWndDesigner)
+      this.CreateDesignerWindow(hWndParent)
+   end if
 
-'   do until iLineStart >= len(wszAllText)
-      
-'      iLineend = instr(iLineStart, wszAllText, vbcrlf)
-'      if iLineend = 0 then iLineend = len(wszAllText)  ' cr/lf not found
-'      wst = mid(wszAllText, iLineStart, iLineend - iLineStart)   
-'      iLineStart = iLineStart + len(wst) + len(vbcrlf)
-      
-'      numOffsetLines = numOffsetLines + 1
-      
-'      if left(wst, 16) = "' WINFBE VERSION" then
-'         wszPropValue = trim(mid(wst, 17))
-'         if ConvertWinFBEversion(wszPropValue) < ConvertWinFBEversion(APPVERSION) then
-'            this.bRegenerateCode = true
-'            this.UserModified = true
-'         end if
-'         this.wszFormVersion = wszPropValue
+'   this.wszFormVersion = json["version"].value
+'   if this.wszFormVersion = "" then this.wszFormVersion = APPVERSION
          
-'      elseif left(wst, 15) = "' LOCKCONTROLS=" then
-'         wszPropValue = mid(wst, 16)  ' default is false
-'         if wszPropValue = "true" then this.bLockControls = true
+'   if json["lockcontrols"].value = "true" then this.bLockControls = true
+'   if json["snaplines"].value = "true" then this.bSnapLines = true
 
-'      elseif left(wst, 12) = "' SNAPLINES=" then
-'         wszPropValue = mid(wst, 13)  ' default is true
-'         if wszPropValue = "False" then this.bSnapLines = false
+'   ' Retrieve data related to MAINMENU
+'   dim as long numItems = json["mainmenu"]["items"].count
+'   this.GenerateMenu = iif(json["mainmenu"]["display"].value = "true", 1, 0)
+   
+'   if numItems then
+'      redim preserve this.MenuItems(numItems - 1)
+'      for i as long = 0 to numItems - 1
+'         this.MenuItems(i).wszName = json["mainmenu"]["items"][i]["name"].value
+'         this.MenuItems(i).wszCaption = json["mainmenu"]["items"][i]["caption"].value
+'         this.MenuItems(i).nIndent = val(json["mainmenu"]["items"][i]["indent"].value)
+'         this.MenuItems(i).chkAlt = val(json["mainmenu"]["items"][i]["alt"].value)
+'         this.MenuItems(i).chkShift = val(json["mainmenu"]["items"][i]["shift"].value)
+'         this.MenuItems(i).chkCtrl = val(json["mainmenu"]["items"][i]["ctrl"].value)
+'         this.MenuItems(i).wszShortcut = json["mainmenu"]["items"][i]["shortcut"].value
+'         this.MenuItems(i).chkChecked = val(json["mainmenu"]["items"][i]["checked"].value)
+'         this.MenuItems(i).chkGrayed = val(json["mainmenu"]["items"][i]["grayed"].value)
+'      next
+'   end if
 
-'      elseif left(wst, 17) = "' WINFBE FORM_END" then
-      
-'      elseif left(wst, 18) = "'   MENUITEM_START" then
-'         dim as long ub = ubound(this.MenuItems)
-'         redim preserve this.MenuItems(ub + 1)
-'         nextMenuItem = ub + 1
-'         bReadingMenuItem = true
-'      elseif left(wst, 21) = "'   MAINMENU_DISPLAY=" then
-'         this.GenerateMenu = val(mid(wst, 22))
-'      elseif left(wst, 11) = "'     NAME=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszName = mid(wst, 12)
-'      elseif left(wst, 14) = "'     CAPTION=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszCaption = mid(wst, 15)
-'      elseif left(wst, 13) = "'     INDENT=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).nIndent = val(mid(wst, 14))
-'      elseif left(wst, 10) = "'     ALT=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkAlt = val(mid(wst, 11))
-'      elseif left(wst, 12) = "'     SHIFT=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkShift = val(mid(wst, 13))
-'      elseif left(wst, 11) = "'     CTRL=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkCtrl = val(mid(wst, 12))
-'      elseif left(wst, 15) = "'     SHORTCUT=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszShortcut = mid(wst, 16)
-'      elseif left(wst, 14) = "'     CHECKED=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkChecked = val(mid(wst, 15))
-'      elseif left(wst, 13) = "'     GRAYED=" then
-'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkGrayed = val(mid(wst, 14))
-'      elseif left(wst, 16) = "'   MENUITEM_END" then
-'         bReadingMenuItem = false   
+
+
       
 '      elseif left(wst, 21) = "'   TOOLBARITEM_START" then
 '         dim as long ub = ubound(this.ToolBarItems)

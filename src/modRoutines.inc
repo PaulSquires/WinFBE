@@ -474,7 +474,7 @@ function GetFileToString( _
          wszText = pDoc->ParseFormMetaData(HWND_FRMMAIN, wszText)
          
          ' Convert to UTF8 so it can display in the editor
-         txtBuffer = wszText.utf8
+         txtBuffer = UnicodeToUtf8(wszText)
 
    end select
       

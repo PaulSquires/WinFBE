@@ -22,6 +22,7 @@ type clsApp
       isWineActive               as boolean
       pfnCreateLexerfn           as CreateLexerFn
       IsWindowIncludes           as boolean           ' T/F that Windows includes have already been loaded
+      PreventActivateApp         as boolean           ' temporarily suppress WM_ACTIVATEAPP (used in 3.02 form file upgrade)
       SuppressNotify             as boolean           ' temporarily suppress Scintilla notifications
       bDragTabActive             as boolean           ' a tab in the top tabcontrol is being dragged
       bDragActive                as boolean           ' splitter drag is currently active 
