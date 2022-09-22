@@ -352,14 +352,6 @@ function clsDocument.CreateCodeWindow( _
       this.Controls.SelectControl( this.hWndForm )
       this.Controls.SetActiveControl( this.hWndForm )
 
-      ' WinFBE Version 3.0.2+ requires that older version form file formats get upgraded
-      ' to the new json format and also separated out from the source code file. There
-      ' will now be two files: (1) *.frm for the json form definitions, and (2) *.inc/bas
-      ' for the actual form code.
-      if FormUpgrade302Format(@this) then 
-         'exit function
-      end if
-
       ' if the data that was read contained anything that caused the form to have
       ' to be code regenerated then we need to save the file back to disk with the
       ' new meta data and code generation.

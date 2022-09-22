@@ -19,6 +19,20 @@
 #include once "frmProjectOptions.bi"
 #include once "frmMain.bi"
 
+
+' ========================================================================================
+' Determine if filename is a *.FRM form file
+' ========================================================================================
+function IsFormFilename( byref wszName as wstring ) as boolean
+   dim as CWSTR ext = ucase(AfxStrPathName( "EXT", wszName ))
+   if ext = "FRM" then 
+      return true
+   else
+      return false   
+   end if
+end function
+
+
 ' ========================================================================================
 ' Convert embedded single quote characters to double quote within a string
 ' This is used mostly for creating JSON strings.
@@ -461,7 +475,6 @@ function GetFileToString( _
          if pDoc then wszText = pDoc->ParseFormMetaData(HWND_FRMMAIN, wszText)
 
          ' Convert to UTF8 so it can display in the editor
-         ' Need to pass a WSTRING pointer to the conversion function.
          txtBuffer = wszText.utf8
 
    END select

@@ -468,7 +468,7 @@ function OnCommand_ProjectRemove( _
      if OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT ) = false then exit function
    end if  
 
-   ' File close succeeded. Remove this document from the project collection and remove treeview node. 
+   ' File close succeeded. Remove this document from the project collection
    gdb2.dbDelete( pDoc->DiskFilename )
    gApp.RemoveDocument( pDoc )
 

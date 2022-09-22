@@ -76,12 +76,14 @@ Function OnCommand_FileOpen( _
             end if   
             if (pDoc = 0) orelse (pDocIn <> 0) then 
                pDoc = frmMain_OpenFileSafely(HWnd, _
-                                             False, _    ' bIsNewFile
-                                             False, _    ' bIsTemplate
-                                             false, _    ' bShowInTab
-                                             false, _    ' bIsInclude
+                                             False, _     ' bIsNewFile
+                                             False, _     ' bIsTemplate
+                                             false, _     ' bShowInTab
+                                             false, _     ' bIsInclude
                                              *pwszName, _ ' pwszName
-                                             pDocIn )     ' pDocIn
+                                             pDocIn, _    ' pDocIn
+                                             IsFormFilename(*pwszName) _
+                                             )     
             end if
 
             ' Give this document a default project type depending on its file extension

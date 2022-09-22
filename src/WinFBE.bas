@@ -105,6 +105,7 @@ dim shared gLasso   as clsLasso
 #include once "modGenerateCode.inc"
 #include once "modMenuDefinitions.inc"
 #include once "modMRU.inc"
+#include once "mod302Upgrade.inc"
 
 #include once "frmVDTabChild.inc"
 #include once "frmAbout.inc" 

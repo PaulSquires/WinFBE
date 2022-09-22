@@ -11,13 +11,11 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-#pragma once
 
-type TABORDER_TYPE
-   pCtrl as clsControl ptr
-   TabIndex   as Long        ' 999999 if TabStop=False or TabIndex property doesn't exist
-END TYPE
+' WinFBE Version 3.0.2+ requires that older version form file formats get upgraded
+' to the new json format and also separated out from the source code file. There
+' will now be two files: (1) *.frm for the json form definitions, and (2) *.inc/bas
+' for the actual form code.
 
-declare function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long 
-declare function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
+declare function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
 

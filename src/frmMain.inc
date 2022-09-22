@@ -23,6 +23,7 @@
 #include once "modAutoInsert.bi"
 #include once "modMenus.bi"
 #include once "modCompile.bi"
+#include once "mod302Upgrade.bi"
 
   
 ' ========================================================================================
@@ -1110,6 +1111,12 @@ function frmMain_OpenFileSafely( _
    frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
 
+   ' Post a custom message in order to check if this now opened file needs
+   ' to be upgraded to new 3.0.2 form format.
+   if pDoc->IsDesigner then
+      postmessage( HWND_FRMMAIN, MSG_USER_UPGRADE302FORM, 0, cast(LPARAM, pDoc) )
+   end if
+   
    function = pDoc
 end Function
 
@@ -1726,6 +1733,14 @@ function frmMain_WndProc( _
 
       ''  CUSTOM MESSAGES
 
+      case MSG_USER_UPGRADE302FORM
+         ' After a form file is loaded a PostMessage is made using this custom message
+         ' in order to initiate an upgrade check on that file.
+         if lParam then
+            dim pDoc as clsDocument ptr = cast(clsDocument ptr, lParam)
+            FormUpgrade302Format( pDoc )
+         end if   
+   
       case MSG_USER_TOPTABS_CHANGING
          ' Hide the current tab
          gTTabCtl.DisplayScintilla( gTTabCtl.CurSel, false )
