@@ -360,16 +360,6 @@ function SetDocumentErrorPosition( _
    
    pDoc = OpenSelectedDocument( wszErrorFile, "", nLineNum )
    
-   ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
-   ' initiate the toggle between the code editor and visual designer.
-   if pDoc then
-      if pDoc->IsDesigner then
-         ' Show the code editor.
-         pDoc->DesignTabsCurSel = 1  ' 1 = code tab
-         frmMain_PositionWindows
-      end if
-   END IF
-
    function = 0
 End Function
 
@@ -581,27 +571,6 @@ function ParseLogForError( _
                if ucase(AfxStrPathname( "NAMEX", wst1 )) = "WINFBE_VD_MAIN.BAS" then
                   wst1 = gCompile.pDocMain->DiskFilename
                   wst2 = str( val(wst2) - gCompile.pDocMainOffset)
-               
-               else
-               
-                  ' If this is a visual designer Form file then we need to modify the line
-                  ' number based on the error offset number.
-                  dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
-                  if pDoc then
-                     if pDoc->IsDesigner then
-                        if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
-                        if len(pDoc->wszFormCodegen) = 0 then 
-                           pDoc->bRegenerateCode = true
-                           GenerateFormCode(pDoc)   ' regenerate visual designer code
-                        end if   
-                        ' Offset is based on form metadata + code generation
-                        pDoc->ErrorOffset = 0
-                        pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
-                        pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
-                        wst2 = str( val(wst2) - pDoc->ErrorOffset)
-                     end if
-                  END IF
-               
                end if
               
                FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )

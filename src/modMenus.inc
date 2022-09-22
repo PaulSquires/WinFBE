@@ -94,7 +94,7 @@ function frmMain_EditTopMenuStates() as long
    If pDoc = 0 Then exit function
 
    ' Enable/Disable if Visual Designer is active
-   if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
+   if pDoc->IsDesigner then
       ' Only re-enable the cut/copy if an actual control is selected.
       if pDoc->Controls.SelectedControlsCount > 0 then
          EnableTopMenuItem( IDM_CUT, true )
@@ -259,18 +259,16 @@ function frmMain_DesignerTopMenuStates() as long
    If pDoc = 0 Then exit function
 
    ' Enable if Visual Designer is active
-   if (pDoc->IsDesigner = true) then
-      EnableTopMenuItem( IDM_TOGGLEVIEWCODE, true )
+   if pDoc->IsDesigner then
       EnableTopMenuItem( IDM_VIEWTOOLBOX, true )
       EnableTopMenuItem( IDM_MENUEDITOR, true )
-      EnableTopMenuItem( IDM_TOGGLEVIEWCODE, true )
       EnableTopMenuItem( IDM_TOOLBAREDITOR, true )
       EnableTopMenuItem( IDM_STATUSBAREDITOR, true )
       EnableTopMenuItem( IDM_IMAGEMANAGER, true )     
    end if
    
    ' Enable if Visual Designer is active AND design window has selected controls
-   if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) then
+   if pDoc->IsDesigner then
       ' Enable Align, Horiz, Vert, and Same Size if more than 1 control is selected.
       if pDoc->Controls.SelectedControlsCount > 1 then
          for idMenu as long = IDM_ALIGN to IDM_SAMEBOTH

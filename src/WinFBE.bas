@@ -48,7 +48,7 @@ using Afx
 #define APPNAME        wstr("WinFBE - FreeBASIC Editor")
 #define APPNAMESHORT   wstr("WinFBE")
 
-#define APPVERSION     wstr("3.0.1") 
+#define APPVERSION     wstr("3.0.2") 
 #define PREVENT_UPDATE_CHECK FALSE     ' used for betas
 
 #define APPCOPYRIGHT   wstr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2022") 
@@ -111,7 +111,6 @@ dim shared gLasso   as clsLasso
 #include once "frmAbout.inc" 
 #include once "frmPopupMenu.inc"
 #include once "frmTopTabs.inc"
-#include once "frmDesignTabs.inc"
 #include once "frmMenuBar.inc"
 #include once "frmStatusBar.inc"
 #include once "frmImageManager.inc" 

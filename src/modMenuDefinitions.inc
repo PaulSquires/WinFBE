@@ -151,7 +151,6 @@ Function getMenuText( byval idMenu as long ) As CWSTR
 
       case IDM_NEWFORM: wszText = L(310,"New Form")
       case IDM_VIEWTOOLBOX: wszText = L(311,"View Toolbox")
-      case IDM_TOGGLEVIEWCODE: wszText = L(382,"Toggle View Form/Code")
       case IDM_ALIGN: wszText = L(315,"Align")
       case IDM_ALIGNLEFTS: wszText = L(316,"Lefts")
       case IDM_ALIGNCENTERS: wszText = L(317,"Centers")
@@ -377,7 +376,6 @@ function buildTopMenuDefinitions() as long
    setTopMenuItem( IDC_MENUBAR_DESIGNER, IDM_NEWFORM, 0, false, false )
    setTopMenuItem( IDC_MENUBAR_DESIGNER, IDM_VIEWTOOLBOX, 0, false, false )
    setTopMenuItem( IDC_MENUBAR_DESIGNER, 0, 0, false, true )
-   setTopMenuItem( IDC_MENUBAR_DESIGNER, IDM_TOGGLEVIEWCODE, 0, false, false )
    setTopMenuItem( IDC_MENUBAR_DESIGNER, 0, 0, false, true )
    setTopMenuItem( IDC_MENUBAR_DESIGNER, IDM_ALIGN, IDM_ALIGNLEFTS, false, false )
    setTopMenuItem( IDM_ALIGN, IDM_ALIGNLEFTS, 0, false, false )

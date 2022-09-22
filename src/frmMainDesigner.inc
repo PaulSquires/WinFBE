@@ -108,23 +108,6 @@ Function OnCommand_DesignerLockControls( byval pDoc as clsDocument ptr ) As LRES
    function = 0
 end function
 
-' ========================================================================================
-' Visual Designer Toggle View Code
-' ========================================================================================
-Function OnCommand_DesignerToggleViewCode( byval pDoc as clsDocument ptr ) As LRESULT
-   if pDoc then 
-      if pDoc->DesignTabsCurSel = 0 then
-         ' Designer is active, switch to code
-         pDoc->DesignTabsCurSel = 1  ' 1 = code tab, 0 = Designer
-      else
-         ' Code is active, switch to designer
-         pDoc->DesignTabsCurSel = 0  ' 1 = code tab, 0 = Designer
-      end if
-      frmMain_PositionWindows
-   end if
-   function = 0
-end function            
-
 
 ' ========================================================================================
 ' Create a new visual designer window

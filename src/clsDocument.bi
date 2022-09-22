@@ -108,7 +108,6 @@ type clsDocument
       GenerateToolBar   as long = BST_CHECKED  ' Indicates to generate code for the menu
       GenerateStatusBar as long = BST_CHECKED  ' Indicates to generate code for the statusbar
       hWndDesigner      as HWnd            ' DesignMain window (switch to this window when in design mode (versus code mode)
-      DesignTabsCurSel  as long 
       hWndFrame         as hwnd            ' DesignFrame for visual designer windows
       hWndForm          as hwnd            ' DesignForm for visual designer windows
       hWndFakeMenu      as HWND            ' Fake top menu to display when using Menu Editor
@@ -116,7 +115,6 @@ type clsDocument
       hWndStatusBar     as HWND            ' StatusBar for the form using StatusBar Editor
       hWndRebar         as HWND            ' Rebar for the form using ToolBar Editor
       hWndToolBar       as HWND            ' ToolBar for the form using ToolBar Editor
-      ErrorOffset       as long            ' Number of lines to account for when error thrown for visual designer code files.
       GrabHit           as long            ' Which grab handle is currently active for sizing action
       ptPrev            as point           ' Used for sizing action
       bSizing           as boolean         ' Flag that sizing action is in progress
@@ -129,7 +127,6 @@ type clsDocument
       wszFormMetaData   as CWSTR           ' Form metadata that defines the form
       wszLastCallTip    as CWSTR           ' Last CallTip that was displayed before being cancelled by autocomplete popup.
       nLastCallTipLine  as long            ' The line on which the last calltip popup displayed
-      bDesignerViewLoad as boolean = true  ' Show designer/code when initially loaded from file and displayed in tab
       AppRunCount       as long = 0        ' Only one should exist in the whole project so track if one or more exists in the code.
                   
       ' SnapLines       
@@ -184,6 +181,7 @@ type clsDocument
       declare function FindReplace( byval strFindText as string, byval strReplaceText as string ) as long
       declare function InsertFile() as boolean
       declare function ParseFormMetaData( byval hWndParent as HWnd, byref sAllText as wstring, byval bLoadOnly as boolean = false ) as CWSTR
+      declare function LoadFormJSONdata( byval hWndParent as HWnd, byref wszAllText as string, byval bLoadOnly as boolean = false ) as long
       declare function SaveFile(byval bSaveAs as boolean = False, byval bAutoSaveOnly as boolean = false) as boolean
       declare function ApplyProperties() as long
       declare function GetTextRange( byval cpMin as long, byval cpMax as long) as string

@@ -315,8 +315,13 @@ function clsDocument.CreateCodeWindow( _
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
             this.DiskFilename = wszFile   ' assign before GetFileTostring because needed for RelativeFile calculation.
             this.LoadingFromFile = true
-            dim sText as string  ' this will be an UTF-8 encoded string
+            
             ' GetFileTostring has a call to pDoc->ParseFormMetaData which will create/recreate the designer form.
+            ' We continue to use this function in post version 3.02 form file format in order to ensure
+            ' that older form files can be imported. The downside is that allnew form files will continue
+            ' to have legacy scintilla code windows as part of the visual designer even though they are
+            ' never used or accessed.
+            dim sText as string  ' this will be an UTF-8 encoded string
             if GetFileToString(wszFile, sText, @this) = false then
                ' Take this opportunity to determine the text line endings
                if instr(sText, chr(13,10)) then
@@ -365,7 +370,7 @@ function clsDocument.CreateCodeWindow( _
    end if   
 
    ' Apply code editor properties to the edit window
-   this.ApplyProperties()
+   this.ApplyProperties
 
    function = this.hWindow(0)
 end function
@@ -435,6 +440,251 @@ end function
 
 
 ' ========================================================================================
+' Load the JSON data to populate the various Form's data structures.
+' ========================================================================================
+function clsDocument.LoadFormJSONdata( _
+            byval hWndParent as HWnd, _
+            byref wszAllText as string, _    ' this will be UTF-8 text
+            byval bLoadOnly  as boolean = false _
+            ) as long
+            
+   dim pCtrl as clsControl ptr
+   dim pCtrlActive as clsControl ptr
+   
+   dim as RECT rc, rcCtrl
+   dim as CWSTR wszControlType, wszPropName, wszPropValue, wszEventName
+   dim as CWSTR wst
+   dim as long nControlType, numLines, numOffsetLines
+   dim as boolean bIsValidControl = true
+   
+this.wszFormVersion = "3.0.2"
+AFXMSG( "LOAD FORM JSON DATA" )
+
+'   ' The first line MUST contain the identifier that this is a form file.
+
+'   if left(wszAllText, 13) = "' WINFBE FORM" then
+'      this.IsDesigner = true
+'      ' Remove any previously created controls, etc otherwise reloading the form
+'      ' file will result in duplicates.
+'      if bLoadOnly = false then
+'         if this.hWndForm then DestroyWindow(this.hWndForm)
+'         if this.hWndFrame then DestroyWindow(this.hWndFrame)
+'         if this.hWndDesigner then DestroyWindow(this.hWndDesigner)
+'         this.CreateDesignerWindow(hWndParent)
+'      end if
+'      numOffsetLines = 1
+'   end if
+   
+
+'   ' Iterate all of the lines related to the visual designer
+'   dim as long iLineStart = 1
+'   dim as long iLineEnd, nextMenuItem, nextToolBarItem, nextPanelItem, nextImageItem
+
+'   dim as boolean bReadingMenuItem, bReadingToolBarItem, bReadingPanelItem, bReadingImageItem
+
+'   do until iLineStart >= len(wszAllText)
+      
+'      iLineend = instr(iLineStart, wszAllText, vbcrlf)
+'      if iLineend = 0 then iLineend = len(wszAllText)  ' cr/lf not found
+'      wst = mid(wszAllText, iLineStart, iLineend - iLineStart)   
+'      iLineStart = iLineStart + len(wst) + len(vbcrlf)
+      
+'      numOffsetLines = numOffsetLines + 1
+      
+'      if left(wst, 16) = "' WINFBE VERSION" then
+'         wszPropValue = trim(mid(wst, 17))
+'         if ConvertWinFBEversion(wszPropValue) < ConvertWinFBEversion(APPVERSION) then
+'            this.bRegenerateCode = true
+'            this.UserModified = true
+'         end if
+'         this.wszFormVersion = wszPropValue
+         
+'      elseif left(wst, 15) = "' LOCKCONTROLS=" then
+'         wszPropValue = mid(wst, 16)  ' default is false
+'         if wszPropValue = "true" then this.bLockControls = true
+
+'      elseif left(wst, 12) = "' SNAPLINES=" then
+'         wszPropValue = mid(wst, 13)  ' default is true
+'         if wszPropValue = "False" then this.bSnapLines = false
+
+'      elseif left(wst, 17) = "' WINFBE FORM_END" then
+      
+'      elseif left(wst, 18) = "'   MENUITEM_START" then
+'         dim as long ub = ubound(this.MenuItems)
+'         redim preserve this.MenuItems(ub + 1)
+'         nextMenuItem = ub + 1
+'         bReadingMenuItem = true
+'      elseif left(wst, 21) = "'   MAINMENU_DISPLAY=" then
+'         this.GenerateMenu = val(mid(wst, 22))
+'      elseif left(wst, 11) = "'     NAME=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszName = mid(wst, 12)
+'      elseif left(wst, 14) = "'     CAPTION=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszCaption = mid(wst, 15)
+'      elseif left(wst, 13) = "'     INDENT=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).nIndent = val(mid(wst, 14))
+'      elseif left(wst, 10) = "'     ALT=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkAlt = val(mid(wst, 11))
+'      elseif left(wst, 12) = "'     SHIFT=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkShift = val(mid(wst, 13))
+'      elseif left(wst, 11) = "'     CTRL=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkCtrl = val(mid(wst, 12))
+'      elseif left(wst, 15) = "'     SHORTCUT=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).wszShortcut = mid(wst, 16)
+'      elseif left(wst, 14) = "'     CHECKED=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkChecked = val(mid(wst, 15))
+'      elseif left(wst, 13) = "'     GRAYED=" then
+'         if bReadingMenuItem then this.MenuItems(nextMenuItem).chkGrayed = val(mid(wst, 14))
+'      elseif left(wst, 16) = "'   MENUITEM_END" then
+'         bReadingMenuItem = false   
+      
+'      elseif left(wst, 21) = "'   TOOLBARITEM_START" then
+'         dim as long ub = ubound(this.ToolBarItems)
+'         redim preserve this.ToolBarItems(ub + 1)
+'         nextToolBarItem = ub + 1
+'         bReadingToolBarItem = true
+'      elseif left(wst, 20) = "'   TOOLBAR_DISPLAY=" then
+'         this.GenerateToolBar = val(mid(wst, 21))
+'      elseif left(wst, 17) = "'   TOOLBAR_SIZE=" then
+'         this.wszToolBarSize = mid(wst, 18)
+'      elseif left(wst, 17) = "'     BUTTONNAME=" then
+'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszName = mid(wst, 18)
+'      elseif left(wst, 17) = "'     BUTTONTYPE=" then
+'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszButtonType = mid(wst, 18)
+'      elseif left(wst, 20) = "'     BUTTONTOOLTIP=" then
+'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszTooltip = mid(wst, 21)
+'      elseif left(wst, 24) = "'     BUTTONNORMALIMAGE=" then
+'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropNormalImage.wszPropValue = mid(wst, 25)
+'      elseif left(wst, 21) = "'     BUTTONHOTIMAGE=" then
+'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropHotImage.wszPropValue = mid(wst, 22)
+'      elseif left(wst, 26) = "'     BUTTONDISABLEDIMAGE=" then
+'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropDisabledImage.wszPropValue = mid(wst, 27)
+'      elseif left(wst, 19) = "'   TOOLBARITEM_END" then
+'         bReadingToolBarItem = false   
+
+
+'      elseif left(wst, 19) = "'   PANELITEM_START" then
+'         dim as long ub = ubound(this.PanelItems)
+'         redim preserve this.PanelItems(ub + 1)
+'         nextPanelItem = ub + 1
+'         bReadingPanelItem = true
+'      elseif left(wst, 22) = "'   STATUSBAR_DISPLAY=" then
+'         this.GenerateStatusBar = val(mid(wst, 23))
+'      elseif left(wst, 16) = "'     PANELNAME=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszName = mid(wst, 17)
+'      elseif left(wst, 16) = "'     PANELTEXT=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszText = mid(wst, 17)
+'      elseif left(wst, 19) = "'     PANELTOOLTIP=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszTooltip = mid(wst, 20)
+'      elseif left(wst, 21) = "'     PANELALIGNMENT=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszAlignment = mid(wst, 22)
+'      ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+'      ' in WinFBE programs where Windows Themes are enabled.
+'      'elseif left(wst, 23) = "'     PANELBORDERSTYLE=" then
+'      '   if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBorderStyle = mid(wst, 24)
+'      elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszAutoSize = mid(wst, 21)
+'      elseif left(wst, 17) = "'     PANELWIDTH=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszWidth = mid(wst, 18)
+'      elseif left(wst, 20) = "'     PANELMINWIDTH=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszMinWidth = mid(wst, 21)
+'      elseif left(wst, 17) = "'     PANELIMAGE=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).pProp.wszPropValue = mid(wst, 18)
+'      elseif left(wst, 21) = "'     PANELBACKCOLOR=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBackColor = mid(wst, 22)
+'      elseif left(wst, 24) = "'     PANELBACKCOLORHOT=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBackColorHot = mid(wst, 25)
+'      elseif left(wst, 21) = "'     PANELFORECOLOR=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszForeColor = mid(wst, 22)
+'      elseif left(wst, 24) = "'     PANELFORECOLORHOT=" then
+'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszForeColorHot = mid(wst, 25)
+'      elseif left(wst, 17) = "'   PANELITEM_END" then
+'         bReadingPanelItem = false   
+      
+'      elseif left(wst, 15) = "'   IMAGE_START" then
+'         dim as long ub = ubound(this.AllImages)
+'         redim preserve this.AllImages(ub + 1)
+'         nextImageItem = ub + 1
+'         this.AllImages(nextImageItem).pDoc = @this
+'         bReadingImageItem = true
+'      elseif left(wst, 16) = "'     IMAGENAME=" then
+'         if bReadingImageItem then this.AllImages(nextImageItem).wszImageName = mid(wst, 17)
+'      elseif left(wst, 15) = "'     FILENAME=" then
+'         if bReadingImageItem then 
+'            ' if this is a relative filename then convert it back.
+'            dim as CWSTR wszImageFilename = ProcessFromCurdriveProject(mid(wst, 16))
+'            if AfxPathIsRelative(wszImageFilename) then 
+'               wszImageFilename = AfxPathCombine( AfxStrPathName("PATH", this.DiskFilename), wszImageFilename)
+'            end if
+'            this.AllImages(nextImageItem).wszFileName = wszImageFilename
+'         end if
+'      elseif left(wst, 19) = "'     RESOURCETYPE=" then
+'         if bReadingImageItem then this.AllImages(nextImageItem).wszFormat = mid(wst, 20)
+'      elseif left(wst, 13) = "'   IMAGE_END" then
+'         bReadingImageItem = false   
+
+'      elseif left(wst, 23) = "' WINFBE CONTROL_START " then
+'         ' The control type name is parse #4 (blank space)
+'         wszControlType = AfxStrParse(wst, 4, " ")
+'         nControlType = GetControlType(wszControlType)
+'         if nControlType = 0 then   
+'            ' no longer a valid toolbox control
+'            bIsValidControl = false
+'         else
+'            bIsValidControl = true
+'            if bLoadOnly = true then
+'               dim pCtrlTemp as clsControl ptr = new clsControl
+'               pCtrlTemp->ControlType = nControlType
+'               this.Controls.Add(pCtrlTemp)
+'            else
+'               pCtrl = CreateToolboxControl( @this, nControlType, rc )
+'               pCtrlActive = pCtrl
+'            end if   
+'         end if
+         
+'      elseif left(wst, 20) = "' WINFBE CONTROL_END" then
+'         if bIsValidControl then
+'            if bLoadOnly = false then
+'               pCtrl->SuspendLayout = true
+'               ApplyControlProperties( @this, pCtrl )
+'               pCtrl->SuspendLayout = false
+'            end if
+'         end if
+
+'      elseif left(wst, 16) = "'     PROP_NAME=" then
+'         if bIsValidControl then
+'            wszPropName = mid(wst, 17)
+'         end if
+         
+'      elseif left(wst, 17) = "'     PROP_VALUE=" then
+'         if bIsValidControl then
+'            wszPropValue = mid(wst, 18)   ' utf8 encoded 
+'            ' Only set the loading property if it exists in the current property
+'            ' listing. We do this otherwise older now unused properties will continue
+'            ' to get loaded when we no longer want them to.
+'            if IsPropertyExists(pCtrl, wszPropName) = false then
+'               ' Set the flag to regenerate code otherwise a compile time error
+'               ' will occur because the old property could exist in previously generated code.
+'               this.bRegenerateCode = true
+'            else   
+'               SetControlProperty(pCtrl, wszPropName, wszPropValue)
+'            end if
+'         end if
+         
+'      elseif left(wst, 17) = "'     EVENT_NAME=" then
+'         if bIsValidControl then
+'            wszEventName = mid(wst, 18)
+'            SetControlEvent(pCtrl, wszEventName, true)
+'         end if
+'      end if   
+
+'   loop
+
+   return 0
+   
+end function
+
+
+' ========================================================================================
 ' Parse all of the file's code to remove and process any visual designer specific code.
 ' Returns a string representing just the code only (visual designer metastatements removed).
 ' ========================================================================================
@@ -443,6 +693,9 @@ function clsDocument.ParseFormMetaData( _
             byref wszAllText as wstring, _
             byval bLoadOnly  as boolean = false _
             ) as CWSTR
+            
+   ' NOTE: THIS FUNCTION IS STILL REQUIRED IN ORDER TO LOAD PRE-VERSION 3.02 FORM FILE
+   ' THAT ARE THEN UPGRADED BY WINFBE AFTER THEY ARE LOADED. 
    
    ' NOTE: The incoming wszAllText string is UTF-16 encoded. The resulting string that
    ' is returned from this function is also UTF-16 encoded. All WinFBE form files
@@ -515,7 +768,6 @@ function clsDocument.ParseFormMetaData( _
          if wszPropValue = "False" then this.bSnapLines = false
 
       elseif left(wst, 17) = "' WINFBE FORM_END" then
-         this.ErrorOffset = numOffsetLines 
       
       elseif left(wst, 18) = "'   MENUITEM_START" then
          dim as long ub = ubound(this.MenuItems)
@@ -631,7 +883,6 @@ function clsDocument.ParseFormMetaData( _
          bReadingImageItem = false   
 
       elseif left(wst, 20) = "' WINFBE_CODEGEN_END" then
-         this.ErrorOffset = numOffsetLines 
          wszAllText = ltrim(AfxStrRemain( wszAllText, "' WINFBE_CODEGEN_END" ), vbcrlf)
          return wszAllText
          
@@ -747,19 +998,6 @@ function clsDocument.SaveFile( _
 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    
-   ' if this is a FORM document then we need to create the string of controls and properties that gets
-   ' saved at the start of the file before any of the code is displayed.
-   if this.IsDesigner then
-      ' We also need to find out how many vbcrlf's exist until the end of the WINFBE_CODEGEN_end tag
-      ' in order to properly calculate the file error offset.
-      this.bRegenerateCode = true
-      GenerateFormMetaData(@this)     ' recreate the metadata
-      GenerateFormCode(@this)         ' regenerate visual designer code
-      this.ErrorOffset = 0
-      this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormMetaData, vbcrlf) 
-      this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormCodegen, vbcrlf) 
-   end if
-
    ' if pSci does not exist then this file exists in the Explorer but has not yet been
    ' displayed in order to create a Scintilla window. Simply need to exit.
    if pSci = 0 then return true

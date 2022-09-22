@@ -259,7 +259,6 @@ Function frmMain_OnCommand( _
       case IDM_TOOLBAREDITOR:      OnCommand_DesignerToolBarEditor( HWnd, pDoc )       
       case IDM_STATUSBAREDITOR:    OnCommand_DesignerStatusBarEditor( HWnd, pDoc, codeNotify )                 
       case IDM_IMAGEMANAGER:       OnCommand_DesignerImageManager( HWnd, pDoc )                 
-      case IDM_TOGGLEVIEWCODE:     OnCommand_DesignerToggleViewCode( pDoc )                 
       case IDM_SNAPLINES:          OnCommand_DesignerSnapLines( pDoc )                 
       case IDM_LOCKCONTROLS:       OnCommand_DesignerLockControls( pDoc )
          

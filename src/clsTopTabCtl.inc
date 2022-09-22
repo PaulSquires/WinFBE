@@ -240,7 +240,7 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
       pDoc = pDoc->pDocNext
    loop
    
-   if (pDocShow->IsDesigner) andalso (IsDesignerView(pDocShow)) THEN
+   if pDocShow->IsDesigner then
       ShowWindow(pDocShow->hWndDesigner, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
       ShowWindow(HWND_FRMVDTOOLBOX, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
    else

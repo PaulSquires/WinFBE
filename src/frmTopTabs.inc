@@ -491,13 +491,6 @@ Function frmTopTabs_WndProc( _
       ' This will have already fired WM_LBUTTONUP
       ' If the tab holds a pDoc that is a visual designer form then we will toggle between
       ' code and design by toggling the designer tab control.
-      dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-      if pDoc then
-         if pDoc->IsDesigner then
-            pDoc->DesignTabsCurSel = iif(pDoc->DesignTabsCurSel = 0, 1, 0)
-            frmMain_PositionWindows
-         END IF
-      END IF
    
    case WM_LBUTTONUP
       if isPrevTabsHitTest( HWnd ) then

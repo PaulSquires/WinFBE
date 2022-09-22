@@ -92,7 +92,6 @@ declare function OnCommand_DesignerStatusBarEditor( ByVal HWnd As HWnd, byval pD
 declare function OnCommand_DesignerImageManager( ByVal HWnd As HWnd, byval pDoc as clsDocument ptr ) As LRESULT
 declare function OnCommand_DesignerSnapLines( byval pDoc as clsDocument ptr ) As LRESULT
 declare function OnCommand_DesignerLockControls( byval pDoc as clsDocument ptr ) As LRESULT
-declare function OnCommand_DesignerToggleViewCode( byval pDoc as clsDocument ptr ) As LRESULT
 
 declare Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                                     ByVal id As Long, _

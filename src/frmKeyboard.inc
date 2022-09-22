@@ -202,7 +202,6 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
    
    '' DESIGNER MENU
    frmKeyBoard_AddKeyBinding( "Designer", IDM_NEWFORM, "IDM_NEWFORM", "New form", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_TOGGLEVIEWCODE, "IDM_TOGGLEVIEWCODE", "Toggle view form/code", "Ctrl+M", "", false )
    frmKeyBoard_AddKeyBinding( "Designer", IDM_VIEWTOOLBOX, "IDM_VIEWTOOLBOX", "View toolbox", "", "", false )
    frmKeyBoard_AddKeyBinding( "Designer", IDM_MENUEDITOR, "IDM_MENUEDITOR", "Menu editor", "", "", false )
    frmKeyBoard_AddKeyBinding( "Designer", IDM_TOOLBAREDITOR, "IDM_TOOLBAREDITOR", "Toolbar editor", "", "", false )

@@ -30,13 +30,13 @@ public function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
    ' to the new json format and also separated out from the source code file. There
    ' will now be two files: (1) *.frm for the json form definitions, and (2) *.inc/bas
    ' for the actual form code.
-   if ConvertWinFBEversion(pDoc->wszFormVersion) >= ConvertWinFBEversion("3.0.2") then
+   if (ConvertWinFBEversion(pDoc->wszFormVersion) >= ConvertWinFBEversion("3.0.2")) orelse _
+      (ConvertWinFBEversion(pDoc->wszFormVersion) = 0) then  'b/c upgraded form files do not have version loaded yet
       ' We are already using new form file format so simply exit
       return false
    end if
    
    ' Commence conversion to the new json file format
-
    dim as CWSTR wszCodeFilename = pDoc->DiskFilename
 
    dim as CWSTR wszFormFilename = _
@@ -220,39 +220,63 @@ public function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
    pStream.Close
    
    ' The new frm Form file has now been created so we can remove all code in the
+   ' existing code file.
+   dim as long iTab = gTTabCtl.GetTabIndexFromFilename( wszCodeFilename )
+   dim as boolean bShowInTab = iif( iTab = -1, false, true )
+
+   ' We need to keep the Isdesigner to true because the close/remove routines
+   ' depend on this flag in order to destroy windows.
    pDoc->IsDesigner = false
    pDoc->wszFormMetaData = ""
    pDoc->wszFormCodeGen = ""
    pDoc->SaveFile
   
-   dim as long iTab = gTTabCtl.GetTabIndexFromFilename( pDoc->DiskFilename )
-   dim as boolean bShowInTab = iif( iTab = -1, false, true )
+   ' Close the current file in order to destroy and allow re-creation
+   ' We need to keep the Isdesigner to true because the close/remove routines
+   ' depend on this flag in order to destroy windows.
+   pDoc->IsDesigner = true
+   if gApp.IsProjectActive then
+      OnCommand_ProjectRemove( 0, pDoc )
 
-   ' Remove the current instance of the form/code
-   OnCommand_ProjectRemove( 0, pDoc )
+dim p as clsDocument ptr = gApp.pDocList
+do until p = 0
+   ? p->DiskFilename
+   p = p->pDocnext
+loop
 
-   ' Add the code file back into the Project/Explorer
+
+   else
+      if iTab > -1 then
+         OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT, iTab )
+      end if
+   end if
+   
+   ' Open the two new files
    pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                 false, _      ' bIsNewFile
-                                 false, _      ' bIsTemplate
+                                 False, _      ' bIsNewFile
+                                 False, _      ' bIsTemplate
                                  bShowInTab, _ ' bShowInTab
                                  false, _      ' bIsInclude
                                  wszCodeFilename, _ ' pwszName
                                  0, _          ' pDocIn
                                  false _       ' bIsDesigner
                                  )     
-
-
+   pDoc->ProjectFileType = FILETYPE_NORMAL 
+   
    ' Add the new frm Form file to the Project/Explorer
-'   pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-'                                 False, _     ' bIsNewFile
-'                                 False, _     ' bIsTemplate
-'                                 false, _     ' bShowInTab
-'                                 false, _     ' bIsInclude
-'                                 wszFormFilename, _ ' pwszName
-'                                 0, _         ' pDocIn
-'                                 true _       ' bIsDesigner
-'                                 )     
+   pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                                 False, _      ' bIsNewFile
+                                 False, _      ' bIsTemplate
+                                 bShowInTab, _ ' bShowInTab
+                                 false, _      ' bIsInclude
+                                 wszFormFilename, _ ' pwszName
+                                 0, _          ' pDocIn
+                                 true _        ' bIsDesigner
+                                 )     
+   pDoc->ProjectFileType = FILETYPE_NORMAL 
+
+   LoadExplorerFiles()
+   LoadFunctionsFiles()
                
    return true  ' new format was created
 end function

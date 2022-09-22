@@ -1755,7 +1755,6 @@ function clsConfig.SaveSessionFile( byref wszSessionFile as wstring ) as boolean
             pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
             pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
             pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
-            pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
             pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
             pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
             pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
@@ -1838,7 +1837,6 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
          case "FileType":            wszFileType = wData
          
          case "IsDesigner":          bIsDesigner = nData
-         case "IsDesignerView":      bDesignerView = nData
          case "TabIndex":            bLoadInTab  = nData
          case "Bookmarks":           sBookmarks  = str(wData)
          case "FoldPoints":          sFoldPoints = str(wData)
@@ -1863,10 +1861,8 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
                         wszFileType )
     
                iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
-               pDoc->DesignTabsCurSel = iif( bDesignerView, 0, 1 )
                
                ' Set the saved positions
-               pDoc->bDesignerViewLoad = bDesignerView
                pDoc->SplitY = nSplitPosition
                if pDoc->SplitY then pDoc->bEditorIsSplit = true
                SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
@@ -1990,7 +1986,6 @@ function clsConfig.ProjectSaveToFile() as boolean
          pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
          pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
          pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
-         pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
          pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
          pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
          pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
@@ -2027,7 +2022,6 @@ function clsConfig.ProjectSaveToFile() as boolean
                end if
                pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
                pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
-               pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
                pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
                pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
                pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
@@ -2160,7 +2154,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
             OnLoadBookmarks(ub) = wData
             
          case "IsDesigner":          bIsDesigner = nData
-         case "IsDesignerView":      bDesignerView = nData
          case "TabIndex":            bLoadInTab  = nData
          case "FoldPoints":          sFoldPoints = str(wData)
          case "FirstLine":           nFirstLine  = nData
@@ -2192,7 +2185,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
                   .wszBookmarks   = sBookmarks
                   .wszFoldPoints  = sFoldPoints
                   .IsDesigner     = bIsDesigner
-                  .IsDesignerView = bDesignerView
                   .nFirstLine     = nFirstLine
                   .nPosition      = nPosition
                   .nFirstLine1    = nFirstLine1
@@ -2231,7 +2223,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
       gApp.wszPanelText = docData(i).wszFilename
       frmMain_SetStatusbar
 
-      ' Re-load all files that were previously shoing in open tabs. Also, be sure
+      ' Re-load all files that were previously showing in open tabs. Also, be sure
       ' to load and visual designer forms as these can not be quick loaded from cache.
       if (docData(i).bLoadInTab) orelse (docData(i).IsDesigner) orelse _
 		   gApp.IsProjectCacheLoaded = false then
@@ -2249,13 +2241,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
  
          if docData(i).bLoadInTab then
             iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
-            if docData(i).IsDesignerView then
-               pDoc->DesignTabsCurSel = 0  ' 1 = code tab, 0 = Designer
-            else
-               pDoc->DesignTabsCurSel = 1  ' 1 = code tab, 0 = Designer
-            end if
             ' Set the saved positions
-            pDoc->bDesignerViewLoad = docData(i).IsDesignerView
             pDoc->SplitY = docData(i).nSplitPosition
             if pDoc->SplitY then pDoc->bEditorIsSplit = true
             SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine, 0) 

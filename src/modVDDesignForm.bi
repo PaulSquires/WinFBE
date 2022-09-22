@@ -34,7 +34,6 @@ enum SnapLinePosition
 end enum
 
 
-declare function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
 declare function DrawGrabHandles( byval hDC as HDC, byval pDoc as clsDocument ptr, byval bFormOnly as Boolean ) as long
 declare function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
 declare function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT

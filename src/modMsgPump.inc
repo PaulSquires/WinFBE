@@ -65,7 +65,7 @@ function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
    ' Should we show an Editor HScrollbar
    dim as clsDocument ptr pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc then
-      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
+      if pDoc->IsDesigner then
          ' visual designer design view is currently active
       else
          for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
@@ -349,14 +349,12 @@ function handleKeysVisualDesigner( byval uMsg as MSG ) as boolean
          ' We don't want keystrokes going into the scintilla control if the
          ' visual designer form is active.
          if pDoc->IsDesigner THEN
-            if IsDesignerView(pDoc) then
-               ' Don't allow keys to the scintilla control
-               if pDoc->IsValidScintillaID(GetDlgCtrlID(GetFocus)) then 
-                  if uMsg.wParam = VK_DELETE then
-                     frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
-                     return true
-                  end if   
-               end if
+            ' Don't allow keys to the scintilla control
+            if pDoc->IsValidScintillaID(GetDlgCtrlID(GetFocus)) then 
+               if uMsg.wParam = VK_DELETE then
+                  frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
+                  return true
+               end if   
             end if
          end if
       end if         
@@ -395,23 +393,21 @@ function handleKeysVisualDesigner( byval uMsg as MSG ) as boolean
                           HWND_PROPLIST_EDIT
                      case else
                         ' Allow arrows to move/resize selected controls
-                        if IsDesignerView(pDoc) then
-                           if pDoc->Controls.SelectedControlsCount > 0 then
-                              ' Move control(s)
-                              if (GetAsyncKeyState(VK_CONTROL) and &H8000) then
-                                 KeyboardMoveControls(pDoc, uMsg.wParam)
-                                 return true
-                              end if
-                              ' Resize control(s)   
-                              if (GetAsyncKeyState(VK_SHIFT) and &H8000) THEN
-                                 KeyboardResizeControls(pDoc, uMsg.wParam)
-                                 return true
-                              end if   
-                              ' Move active selected control focus within group of controls
-                              KeyboardCycleActiveControls(pDoc, uMsg.wParam)
+                        if pDoc->Controls.SelectedControlsCount > 0 then
+                           ' Move control(s)
+                           if (GetAsyncKeyState(VK_CONTROL) and &H8000) then
+                              KeyboardMoveControls(pDoc, uMsg.wParam)
+                              return true
+                           end if
+                           ' Resize control(s)   
+                           if (GetAsyncKeyState(VK_SHIFT) and &H8000) THEN
+                              KeyboardResizeControls(pDoc, uMsg.wParam)
                               return true
                            end if   
-                        end if
+                           ' Move active selected control focus within group of controls
+                           KeyboardCycleActiveControls(pDoc, uMsg.wParam)
+                           return true
+                        end if   
                   end select
                end if
             end if
