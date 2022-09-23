@@ -490,8 +490,35 @@ Function frmTopTabs_WndProc( _
    case WM_LBUTTONDBLCLK
       ' This will have already fired WM_LBUTTONUP
       ' If the tab holds a pDoc that is a visual designer form then we will toggle between
-      ' code and design by toggling the designer tab control.
-   
+      ' code and design by toggling to the asscoiated code file. If this is a code file
+      ' then search for the visual designer file.
+      dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+      if pDoc then
+         ' Search for the first code file that contains the same base filename as
+         ' the current active file.
+         dim as CWSTR wszLookfor = _
+            ucase(AfxStrPathName( "PATH", pDoc->DiskFilename )) & _
+            ucase(AfxStrPathName( "NAME", pDoc->DiskFilename ))
+            
+         dim pDocSearch as clsDocument ptr = gApp.pDocList
+         do until pDocSearch = 0
+            dim as CWSTR wszTryMatch = _
+               left(ucase(AfxStrPathName( "PATH", pDocSearch->DiskFilename )) & _
+               ucase(AfxStrPathName( "NAME", pDocsearch->DiskFilename )), len(wszLookfor))
+            if wszTryMatch = wszLookfor then
+               ' If the active document is a visual designer then only try to match
+               ' code files. Similarly, if this is a code file then only look at 
+               ' visual designer files for a match.
+               if pDoc->IsDesigner <> pDocSearch->IsDesigner then
+                  dim as long idx = gTTabCtl.GetTabIndexByDocumentPtr(pDocSearch)
+                  gTTabCtl.SetFocusTab(idx)
+                  exit do
+               end if
+            end if   
+            pDocSearch = pDocSearch->pDocNext
+         loop
+      end if
+      
    case WM_LBUTTONUP
       if isPrevTabsHitTest( HWnd ) then
          ' if the first displayed tab is not index 0 then there must be tabs before it

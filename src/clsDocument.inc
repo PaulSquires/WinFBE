@@ -451,18 +451,17 @@ function clsDocument.LoadFormJSONdata( _
    dim pCtrl as clsControl ptr
    dim pCtrlActive as clsControl ptr
    
-   dim as string wst
+   dim as RECT rc
+   dim as string wst, wszPropName, wszPropValue, wszEventName
    dim as boolean bIsValidControl = true
+   dim as long numItems
    
-'   dim json as JsonItem = JsonItem(JSONtext)
+   dim json as JsonItem = JsonItem(JSONtext)
    
-'   ' First, make sure that this is actually a Form file!
-'   if json["form"].value <> "true" then exit function
+   ' First, make sure that this is actually a Form file!
+   if json["form"].value <> "true" then exit function
    
    this.IsDesigner = true
-   if this.wszFormVersion = "" then this.wszFormVersion = APPVERSION
-
-EXIT FUNCTION
 
    ' Remove any previously created controls, etc otherwise reloading the form
    ' file will result in duplicates.
@@ -473,175 +472,145 @@ EXIT FUNCTION
       this.CreateDesignerWindow(hWndParent)
    end if
 
-'   this.wszFormVersion = json["version"].value
-'   if this.wszFormVersion = "" then this.wszFormVersion = APPVERSION
+   this.wszFormVersion = json["version"].value
+   if this.wszFormVersion = "" then this.wszFormVersion = APPVERSION
          
-'   if json["lockcontrols"].value = "true" then this.bLockControls = true
-'   if json["snaplines"].value = "true" then this.bSnapLines = true
+   if json["lockcontrols"].value = "true" then this.bLockControls = true
+   if json["snaplines"].value = "true" then this.bSnapLines = true
 
-'   ' Retrieve data related to MAINMENU
-'   dim as long numItems = json["mainmenu"]["items"].count
-'   this.GenerateMenu = iif(json["mainmenu"]["display"].value = "true", 1, 0)
+   ' Retrieve data related to IMAGES
+   numItems = json["images"].count
+   if numItems then
+      redim preserve this.AllImages(numItems - 1)
+      for i as long = 0 to numItems - 1
+         this.AllImages(i).pDoc = @this
+         this.AllImages(i).wszImageName = json["images"][i]["imagename"].value
+
+         wst = json["images"][i]["filename"].value
+         ' if this is a relative filename then convert it back.
+         dim as CWSTR wszImageFilename = ProcessFromCurdriveProject(wst)
+         if AfxPathIsRelative(wszImageFilename) then 
+            wszImageFilename = AfxPathCombine( AfxStrPathName("PATH", this.DiskFilename), wszImageFilename)
+         end if
+         this.AllImages(i).wszFileName = wszImageFilename
+         
+         this.AllImages(i).wszFormat = json["images"][i]["resourcetype"].value
+      next
+   end if   
+
+   ' Retrieve data related to MAINMENU
+   numItems = json["mainmenu"]["items"].count
+   this.GenerateMenu = iif(json["mainmenu"]["display"].value = "true", 1, 0)
    
-'   if numItems then
-'      redim preserve this.MenuItems(numItems - 1)
-'      for i as long = 0 to numItems - 1
-'         this.MenuItems(i).wszName = json["mainmenu"]["items"][i]["name"].value
-'         this.MenuItems(i).wszCaption = json["mainmenu"]["items"][i]["caption"].value
-'         this.MenuItems(i).nIndent = val(json["mainmenu"]["items"][i]["indent"].value)
-'         this.MenuItems(i).chkAlt = val(json["mainmenu"]["items"][i]["alt"].value)
-'         this.MenuItems(i).chkShift = val(json["mainmenu"]["items"][i]["shift"].value)
-'         this.MenuItems(i).chkCtrl = val(json["mainmenu"]["items"][i]["ctrl"].value)
-'         this.MenuItems(i).wszShortcut = json["mainmenu"]["items"][i]["shortcut"].value
-'         this.MenuItems(i).chkChecked = val(json["mainmenu"]["items"][i]["checked"].value)
-'         this.MenuItems(i).chkGrayed = val(json["mainmenu"]["items"][i]["grayed"].value)
-'      next
-'   end if
+   if numItems then
+      redim preserve this.MenuItems(numItems - 1)
+      for i as long = 0 to numItems - 1
+         this.MenuItems(i).wszName = json["mainmenu"]["items"][i]["name"].value
+         this.MenuItems(i).wszCaption = json["mainmenu"]["items"][i]["caption"].value
+         this.MenuItems(i).nIndent = val(json["mainmenu"]["items"][i]["indent"].value)
+         this.MenuItems(i).chkAlt = val(json["mainmenu"]["items"][i]["alt"].value)
+         this.MenuItems(i).chkShift = val(json["mainmenu"]["items"][i]["shift"].value)
+         this.MenuItems(i).chkCtrl = val(json["mainmenu"]["items"][i]["ctrl"].value)
+         this.MenuItems(i).wszShortcut = json["mainmenu"]["items"][i]["shortcut"].value
+         this.MenuItems(i).chkChecked = val(json["mainmenu"]["items"][i]["checked"].value)
+         this.MenuItems(i).chkGrayed = val(json["mainmenu"]["items"][i]["grayed"].value)
+      next
+   end if
 
+   ' Retrieve data related to TOOLBAR
+   numItems = json["toolbar"]["items"].count
+   this.GenerateToolbar = iif(json["toolbar"]["display"].value = "true", 1, 0)
+   this.wszToolBarSize = json["toolbar"]["size"].value
+   
+   if numItems then
+      redim preserve this.ToolBarItems(numItems - 1)
+      for i as long = 0 to numItems - 1
+         this.ToolBarItems(i).wszName = json["toolbar"]["items"][i]["name"].value
+         this.ToolBarItems(i).wszButtonType = json["toolbar"]["items"][i]["type"].value
+         this.ToolBarItems(i).wszTooltip = json["toolbar"]["items"][i]["tooltip"].value
+         this.ToolBarItems(i).pPropNormalImage.wszPropValue = json["toolbar"]["items"][i]["normalimage"].value
+         this.ToolBarItems(i).pPropHotImage.wszPropValue = json["toolbar"]["items"][i]["hotimage"].value
+         this.ToolBarItems(i).pPropDisabledImage.wszPropValue = json["toolbar"]["items"][i]["disabledimage"].value
+      next
+   end if
 
+   ' Retrieve data related to STATUSBAR
+   numItems = json["statusbar"]["items"].count
+   this.GenerateStatusBar = iif(json["statusbar"]["display"].value = "true", 1, 0)
+   
+   if numItems then
+      redim preserve this.PanelItems(numItems - 1)
+      for i as long = 0 to numItems - 1
+         this.PanelItems(i).wszName = json["statusbar"]["items"][i]["name"].value
+         this.PanelItems(i).wszText = json["statusbar"]["items"][i]["text"].value
+         this.PanelItems(i).wszTooltip = json["statusbar"]["items"][i]["tooltip"].value
+         this.PanelItems(i).wszAlignment = json["statusbar"]["items"][i]["alignment"].value
+         this.PanelItems(i).wszAutoSize = json["statusbar"]["items"][i]["autosize"].value
+         this.PanelItems(i).wszWidth = json["statusbar"]["items"][i]["width"].value
+         this.PanelItems(i).wszMinWidth = json["statusbar"]["items"][i]["minwidth"].value
+         this.PanelItems(i).pProp.wszPropValue = json["statusbar"]["items"][i]["image"].value
+         this.PanelItems(i).wszBackColor = json["statusbar"]["items"][i]["backcolor"].value
+         this.PanelItems(i).wszBackColorHot = json["statusbar"]["items"][i]["backcolorhot"].value
+         this.PanelItems(i).wszForeColor = json["statusbar"]["items"][i]["forecolor"].value
+         this.PanelItems(i).wszForeColorHot = json["statusbar"]["items"][i]["forecolorhot"].value
+         ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+         ' in WinFBE programs where Windows Themes are enabled.
+      next
+   end if
 
+   this.GenerateMenu = iif(json["controls"]["display"].value = "true", 1, 0)
+   dim as long numControls = json["controls"].count
+   
+   if numControls then
+      dim wszControlType as CWSTR
+      dim nControlType as long
       
-'      elseif left(wst, 21) = "'   TOOLBARITEM_START" then
-'         dim as long ub = ubound(this.ToolBarItems)
-'         redim preserve this.ToolBarItems(ub + 1)
-'         nextToolBarItem = ub + 1
-'         bReadingToolBarItem = true
-'      elseif left(wst, 20) = "'   TOOLBAR_DISPLAY=" then
-'         this.GenerateToolBar = val(mid(wst, 21))
-'      elseif left(wst, 17) = "'   TOOLBAR_SIZE=" then
-'         this.wszToolBarSize = mid(wst, 18)
-'      elseif left(wst, 17) = "'     BUTTONNAME=" then
-'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszName = mid(wst, 18)
-'      elseif left(wst, 17) = "'     BUTTONTYPE=" then
-'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszButtonType = mid(wst, 18)
-'      elseif left(wst, 20) = "'     BUTTONTOOLTIP=" then
-'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).wszTooltip = mid(wst, 21)
-'      elseif left(wst, 24) = "'     BUTTONNORMALIMAGE=" then
-'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropNormalImage.wszPropValue = mid(wst, 25)
-'      elseif left(wst, 21) = "'     BUTTONHOTIMAGE=" then
-'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropHotImage.wszPropValue = mid(wst, 22)
-'      elseif left(wst, 26) = "'     BUTTONDISABLEDIMAGE=" then
-'         if bReadingToolBarItem then this.ToolBarItems(nextToolBarItem).pPropDisabledImage.wszPropValue = mid(wst, 27)
-'      elseif left(wst, 19) = "'   TOOLBARITEM_END" then
-'         bReadingToolBarItem = false   
+      for i as long = 0 to numControls - 1
+         wszControlType = json["controls"][i]["type"].value
+         nControlType = GetControlType( wszControlType)
 
-
-'      elseif left(wst, 19) = "'   PANELITEM_START" then
-'         dim as long ub = ubound(this.PanelItems)
-'         redim preserve this.PanelItems(ub + 1)
-'         nextPanelItem = ub + 1
-'         bReadingPanelItem = true
-'      elseif left(wst, 22) = "'   STATUSBAR_DISPLAY=" then
-'         this.GenerateStatusBar = val(mid(wst, 23))
-'      elseif left(wst, 16) = "'     PANELNAME=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszName = mid(wst, 17)
-'      elseif left(wst, 16) = "'     PANELTEXT=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszText = mid(wst, 17)
-'      elseif left(wst, 19) = "'     PANELTOOLTIP=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszTooltip = mid(wst, 20)
-'      elseif left(wst, 21) = "'     PANELALIGNMENT=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszAlignment = mid(wst, 22)
-'      ' BorderStyle is deprecated as of v2.0.4 as it has no effect
-'      ' in WinFBE programs where Windows Themes are enabled.
-'      'elseif left(wst, 23) = "'     PANELBORDERSTYLE=" then
-'      '   if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBorderStyle = mid(wst, 24)
-'      elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszAutoSize = mid(wst, 21)
-'      elseif left(wst, 17) = "'     PANELWIDTH=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszWidth = mid(wst, 18)
-'      elseif left(wst, 20) = "'     PANELMINWIDTH=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszMinWidth = mid(wst, 21)
-'      elseif left(wst, 17) = "'     PANELIMAGE=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).pProp.wszPropValue = mid(wst, 18)
-'      elseif left(wst, 21) = "'     PANELBACKCOLOR=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBackColor = mid(wst, 22)
-'      elseif left(wst, 24) = "'     PANELBACKCOLORHOT=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszBackColorHot = mid(wst, 25)
-'      elseif left(wst, 21) = "'     PANELFORECOLOR=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszForeColor = mid(wst, 22)
-'      elseif left(wst, 24) = "'     PANELFORECOLORHOT=" then
-'         if bReadingPanelItem then this.PanelItems(nextPanelItem).wszForeColorHot = mid(wst, 25)
-'      elseif left(wst, 17) = "'   PANELITEM_END" then
-'         bReadingPanelItem = false   
-      
-'      elseif left(wst, 15) = "'   IMAGE_START" then
-'         dim as long ub = ubound(this.AllImages)
-'         redim preserve this.AllImages(ub + 1)
-'         nextImageItem = ub + 1
-'         this.AllImages(nextImageItem).pDoc = @this
-'         bReadingImageItem = true
-'      elseif left(wst, 16) = "'     IMAGENAME=" then
-'         if bReadingImageItem then this.AllImages(nextImageItem).wszImageName = mid(wst, 17)
-'      elseif left(wst, 15) = "'     FILENAME=" then
-'         if bReadingImageItem then 
-'            ' if this is a relative filename then convert it back.
-'            dim as CWSTR wszImageFilename = ProcessFromCurdriveProject(mid(wst, 16))
-'            if AfxPathIsRelative(wszImageFilename) then 
-'               wszImageFilename = AfxPathCombine( AfxStrPathName("PATH", this.DiskFilename), wszImageFilename)
-'            end if
-'            this.AllImages(nextImageItem).wszFileName = wszImageFilename
-'         end if
-'      elseif left(wst, 19) = "'     RESOURCETYPE=" then
-'         if bReadingImageItem then this.AllImages(nextImageItem).wszFormat = mid(wst, 20)
-'      elseif left(wst, 13) = "'   IMAGE_END" then
-'         bReadingImageItem = false   
-
-'      elseif left(wst, 23) = "' WINFBE CONTROL_START " then
-'         ' The control type name is parse #4 (blank space)
-'         wszControlType = AfxStrParse(wst, 4, " ")
-'         nControlType = GetControlType(wszControlType)
-'         if nControlType = 0 then   
-'            ' no longer a valid toolbox control
-'            bIsValidControl = false
-'         else
-'            bIsValidControl = true
-'            if bLoadOnly = true then
-'               dim pCtrlTemp as clsControl ptr = new clsControl
-'               pCtrlTemp->ControlType = nControlType
-'               this.Controls.Add(pCtrlTemp)
-'            else
-'               pCtrl = CreateToolboxControl( @this, nControlType, rc )
-'               pCtrlActive = pCtrl
-'            end if   
-'         end if
+         ' Control Start
+         if nControlType = 0 then   
+            ' no longer a valid toolbox control
+            continue for
+         else
+            if bLoadOnly = true then
+               dim pCtrlTemp as clsControl ptr = new clsControl
+               pCtrlTemp->ControlType = nControlType
+               this.Controls.Add(pCtrlTemp)
+            else
+               pCtrl = CreateToolboxControl( @this, nControlType, rc )
+               pCtrlActive = pCtrl
+            end if   
+         end if
          
-'      elseif left(wst, 20) = "' WINFBE CONTROL_END" then
-'         if bIsValidControl then
-'            if bLoadOnly = false then
-'               pCtrl->SuspendLayout = true
-'               ApplyControlProperties( @this, pCtrl )
-'               pCtrl->SuspendLayout = false
-'            end if
-'         end if
+         dim as long numProps = json["controls"][i]["properties"].count
+         for ii as long = 0 to numProps - 1
+            wszPropName = json["controls"][i]["properties"][ii]["name"].value
+            wszPropValue = json["controls"][i]["properties"][ii]["value"].value
+            ' Only set the loading property if it exists in the current property
+            ' listing. We do this otherwise older now unused properties will continue
+            ' to get loaded when we no longer want them to.
+            if IsPropertyExists( pCtrl, wszPropName ) then
+               SetControlProperty( pCtrl, wszPropName, wszPropValue ) 
+            end if
+         next
 
-'      elseif left(wst, 16) = "'     PROP_NAME=" then
-'         if bIsValidControl then
-'            wszPropName = mid(wst, 17)
-'         end if
-         
-'      elseif left(wst, 17) = "'     PROP_VALUE=" then
-'         if bIsValidControl then
-'            wszPropValue = mid(wst, 18)   ' utf8 encoded 
-'            ' Only set the loading property if it exists in the current property
-'            ' listing. We do this otherwise older now unused properties will continue
-'            ' to get loaded when we no longer want them to.
-'            if IsPropertyExists(pCtrl, wszPropName) = false then
-'               ' Set the flag to regenerate code otherwise a compile time error
-'               ' will occur because the old property could exist in previously generated code.
-'               this.bRegenerateCode = true
-'            else   
-'               SetControlProperty(pCtrl, wszPropName, wszPropValue)
-'            end if
-'         end if
-         
-'      elseif left(wst, 17) = "'     EVENT_NAME=" then
-'         if bIsValidControl then
-'            wszEventName = mid(wst, 18)
-'            SetControlEvent(pCtrl, wszEventName, true)
-'         end if
-'      end if   
+         dim as long numEvents = json["controls"][i]["events"].count
+         for ii as long = 0 to numEvents - 1
+            wszEventName = json["controls"][i]["properties"][ii].value
+            SetControlEvent( pCtrl, wszEventName, true )
+         next
 
-'   loop
+         ' Control End
+         if bLoadOnly = false then
+            pCtrl->SuspendLayout = true
+            ApplyControlProperties( @this, pCtrl )
+            pCtrl->SuspendLayout = false
+         end if
+      next
+
+   end if
 
    return 0
    
