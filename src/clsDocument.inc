@@ -983,14 +983,10 @@ function clsDocument.SaveFile( _
             st = chr(&HFF, &HFE)
             pStream.Write strptr(st), len(st)
             if sciCodePage = SC_CP_UTF8 then    
-               pStream.Write this.wszFormMetaData.m_pBuffer, this.wszFormMetaData.m_BufferLen
-               pStream.Write this.wszFormCodeGen.m_pBuffer, this.wszFormCodeGen.m_BufferLen
                ' convert utf8 to utf16
                wst.Utf8 = *psz  ' convert the utf *psz from Utf8
                pStream.Write wst.m_pBuffer, wst.m_BufferLen
             else
-               pStream.Write this.wszFormMetaData.m_pBuffer, this.wszFormMetaData.m_BufferLen
-               pStream.Write this.wszFormCodeGen.m_pBuffer, this.wszFormCodeGen.m_BufferLen
                ' need to convert ansi to unicode
                dim as CWSTR wst = Wstr(*psz)
                pStream.Write wst.m_pBuffer, wst.m_BufferLen

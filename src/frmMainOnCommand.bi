@@ -80,6 +80,7 @@ declare function OnCommand_ProjectRemove( byval id as long, byval pDoc as clsDoc
 declare function OnCommand_CompileCommon( byval id as long ) as LRESULT
 
 Declare Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
+declare Function OnCommand_DesignerToggleViewCode( byval pDoc as clsDocument ptr ) As LRESULT
 Declare Function OnCommand_DesignerAlign( byval HWND as HWND, byval id as long ) as LRESULT
 Declare Function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long ) as LRESULT
 declare function OnCommand_DesignerHorizSpacing( byval HWND as HWND, byval id as long ) as LRESULT

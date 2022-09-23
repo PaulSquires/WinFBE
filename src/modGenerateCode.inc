@@ -496,7 +496,6 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    dim as CWSTR wszText, wszFormName, wszCtrlName, wszPropName, wszPropValue, wszPropDefault
    dim as CWSTR wszFunction, wszAllEvents, wszPrototype, wszAllDeclares
    dim as CWSTR wszCombinedName, wszCodeGen, wszMenuSelect, wszToolBarSelect, wszStatusBarSelect
-   dim as CWSTR wszStartTag, wszEndTag
    dim as CWSTR DQ = chr(34)
    dim as long nStartTag, nEndTag, nPropType
    dim pData as DB2_DATA ptr
@@ -509,8 +508,6 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    pDoc->wszFormCodegen = ""
 
    wszFormName = GetFormName(pDoc)
-   wszStartTag = "' WINFBE_CODEGEN_START"
-   wszEndTag   = "' WINFBE_CODEGEN_END"
 
    ''
    ''  Generate the Declares for all of the Events for any MainMenu for the Form 
@@ -980,14 +977,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    wszText = wszText & _ 
    "dim shared " & wszFormName & " as " & wszFormName & "Type" & vbcrlf
    
-   ' We need to wrap the CodeGen in comment block. This is because the CodeGen is output
-   ' during the compile (without comment block) and then later #include'd at the end of
-   ' output compile code with comment block in order to prevent duplicate definition errors.
-   wszCodeGen = wszStartTag & vbcrlf & _
-                "#if 0" & vbcrlf & _
-                wszText & _
-                "#endif" & vbcrlf & _
-                wszEndTag & vbcrlf 
+   wszCodeGen = wszText & vbcrlf 
                      
    dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
    if pSci <> 0 then

@@ -180,15 +180,6 @@ function OnCommand_FileSave( _
          if pDoc = 0 then continue for
       end if   
 
-      if pDoc->IsDesigner then
-         ' Parse the code to ensure up to date list of functions so that compiling will not
-         ' fail by generating a Declare without a body function.
-         ParseDocument(pDoc)
-         ' Regenerate code to ensure that any missing body functions are now present
-         pDoc->bRegenerateCode = true
-         SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-      end if
-             
       ' Do the actual saving to disk
       dim wszFilename as CWSTR = pDoc->DiskFilename
       If pDoc->SaveFile(bSaveAs) Then

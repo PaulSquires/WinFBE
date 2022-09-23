@@ -261,6 +261,7 @@ function frmMain_DesignerTopMenuStates() as long
    ' Enable if Visual Designer is active
    if pDoc->IsDesigner then
       EnableTopMenuItem( IDM_VIEWTOOLBOX, true )
+      EnableTopMenuItem( IDM_TOGGLEVIEWCODE, true )
       EnableTopMenuItem( IDM_MENUEDITOR, true )
       EnableTopMenuItem( IDM_TOOLBAREDITOR, true )
       EnableTopMenuItem( IDM_STATUSBAREDITOR, true )

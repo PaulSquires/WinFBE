@@ -845,66 +845,24 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.MainFilename = GetTemporaryFilename(gCompile.MainFolder, "bas")
       gCompile.MainName     = AfxStrPathname("NAME", gCompile.MainFilename)
       
-      ' If this is a FORM document then we need to create the string of controls and properties that gets
-      ' saved at the start of the file before any of the code is displayed.
-      pDocMain->bRegenerateCode = true
-      GenerateFormMetaData(pDocMain)
-      GenerateFormCode(pDocMain)      ' Also, regenerate visual designer code
+      dim as CWSTR wszText = pDocMain->GetText()
 
-      ' Copy the contents of the active document to the temporary source file.
-      ' Save text buffer to disk by directly accessing buffer rather
-      ' saving it to an intermediary string variable first.
-      Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(pDocMain->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
-      dim as long sciCodePage = SciExec(pDocMain->hWindow(0), SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
-      
-      dim pStream as CFileStream
-      if pStream.Open(gCompile.MainFilename, STGM_CREATE or STGM_WRITE) = S_OK then
-         dim as string st
-         select CASE pDocMain->FileEncoding
-            case FILE_ENCODING_ANSI
-               if sciCodePage = 0 THEN    
-                  pStream.Write psz, len(*psz)     ' no conversion necessary
-               else
-                  ' need to convert
-                  st = Utf8ToAscii(*psz)
-                  pStream.Write strptr(st), len(st) 
-               end if    
+      ' Regenerate any visual designer code for Forms.
+      ' The codegen is stored in each pDoc's wszFormCodeGen
+      pDoc = gApp.pDocList
+      do until pDoc = 0
+         if pDoc->IsDesigner then 
+            GenerateFormCode(pDoc)
+            wszText = pDoc->wszFormCodeGen & vbcrlf & wszText
+         end if
+         pDoc = pDoc->pDocNext
+      loop
 
-            case FILE_ENCODING_UTF8_BOM
-               ' Output the BOM first
-               st = chr(&HEF, &HBB, &HBF)
-               pStream.Write strptr(st), len(st)
-               if sciCodePage = SC_CP_UTF8 THEN    
-                  ' no conversion necessary
-                  pStream.Write psz, len(*psz)     ' no conversion necessary
-               else
-                  ' need to convert
-                  st = AnsiToUtf8(*psz)
-                  pStream.Write strptr(st), len(st)
-               end if    
-
-            case FILE_ENCODING_UTF16_BOM
-               ' Output the BOM first
-               st = chr(&HFF, &HFE)
-               pStream.Write strptr(st), len(st)
-               if sciCodePage = SC_CP_UTF8 THEN    
-                  pStream.Write pDocMain->wszFormMetaData.m_pBuffer, pDocMain->wszFormMetaData.m_BufferLen
-                  pStream.Write pDocMain->wszFormCodeGen.m_pBuffer, pDocMain->wszFormCodeGen.m_BufferLen
-                  ' convert utf8 to utf16
-                  wst.Utf8 = *psz  ' convert the utf *psz from Utf8
-                  pStream.Write wst.m_pBuffer, wst.m_BufferLen
-               else
-                  pStream.Write pDocMain->wszFormMetaData.m_pBuffer, pDocMain->wszFormMetaData.m_BufferLen
-                  pStream.Write pDocMain->wszFormCodeGen.m_pBuffer, pDocMain->wszFormCodeGen.m_BufferLen
-                  ' need to convert ansi to unicode
-                  wst = *psz
-                  pStream.Write wst.m_pBuffer, wst.m_BufferLen
-               end if    
-               
-         END SELECT
-
-      end if
-      pStream.Close
+      dim pTextStream as CTextStream
+      if pTextStream.OpenUnicode(gCompile.MainFilename, IOMODE_FORWRITING, true) = S_OK then
+         pTextStream.Write( wszText )
+      end if    
+      pTextStream.Close
 
    else
       gCompile.MainFilename = pDocMain->DiskFilename
@@ -1000,11 +958,11 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
 
 
-   ' Regenerate any visual designer code for Forms. Doing a pDoc->Save will regenerate
-   ' the code for a document with pDoc->IsDesigner.
+   ' Regenerate any visual designer code for Forms.
+   ' The codegen is stored in each pDoc's wszFormCodeGen
    pDoc = gApp.pDocList
    do until pDoc = 0
-      if pDoc->IsDesigner then pDoc->SaveFile
+      if pDoc->IsDesigner then GenerateFormCode(pDoc)
       pDoc = pDoc->pDocNext
    loop
    
@@ -1146,7 +1104,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       "Using Afx" & vbcrlf 
 
    if bIsVisual then
-      dim wszVDMain as CWSTR = gCompile.MainFolder & "WinFBE_VD_MAIN.bas"
+      dim wszVDMain as CWSTR = gCompile.MainFolder & "WINFBE_VD_MAIN.bas"
       dim pStream as CTextStream
       if pStream.Create(wszVDMain, true, true) = S_OK then 
          ' Get all of the text from the MAIN pDoc file
@@ -1164,33 +1122,14 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
          ' code to the WinFBE_VD_MAIN.bas file and comment it out from the Main file.
          wszMainFileText = AfxStrReplace( wszMainFileText, wszUnicodeEquate, "'" & wszUnicodeEquate )
          wszMainFileText = AfxStrReplace( wszMainFileText, wszDefineWin32Equate, "'" & wszDefineWin32Equate )
-         ' Also in pre 2.0.9 versions, the user would have had to #Include the individual form files
-         ' into their main bas file. 2.0.9+ automatically outputs the code the codegen file so we
-         ' need to scan the main file and comment out any files that include a form file.
-         dim as CWSTR wszLookFor, wszAllTYPEs, wszAllEvents
+
+         dim as CWSTR wszAllTYPEs, wszAllEvents
          
+         ' Output all of the visual designer generated code for each Form in the project
          pDoc = iIf( gApp.IsProjectActive, gApp.pDocList, pDocMain )
          do until pDoc = 0
 				if pDoc->IsDesigner then 
-					' REM out any user entered #include file
-					wszLookFor = "#include once " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
-					wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
-					wszLookFor = "#include " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
-					wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
-					
-					' Get the code for the TYPE definitions and the EVENTS.
-					' Need to remove the #if 0 #endif from the FormCodeGen because we are now outputting
-					' the TYPE definitions. The #If 0 will remain in the physical code file so that when
-					' it is #included at the end of the main compile file then we won't get any duplicate
-					' definition errors.
-					dim as CWSTR wszTYPE = pDoc->wszFormCodeGen
-					wszTYPE = AfxStrReplaceI( wszTYPE, "#if 0", "" )
-					wszTYPE = AfxStrReplaceI( wszTYPE, "#endif", "" )
-					wszAllTYPEs = wszAllTYPEs & wszTYPE
-					if pDoc <> pDocMain then
-						wszAllEvents = wszAllEvents & _
-											"#include once " & chr(34) & pDoc->DiskFilename & chr(34) & vbcrlf
-					end if
+					wszAllTYPEs = wszAllTYPEs & pDoc->wszFormCodeGen
 				end if
             If gApp.IsProjectActive = false Then exit do
             pDoc = pDoc->pDocNext
