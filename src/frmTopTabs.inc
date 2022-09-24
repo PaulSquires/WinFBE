@@ -11,8 +11,6 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-#include once "frmMainOnCommand.bi"
-
 
 ' ========================================================================================
 ' Show or hide the drop down shadow that will display below the top tabs control. The
@@ -491,8 +489,15 @@ Function frmTopTabs_WndProc( _
 
    case WM_LBUTTONDBLCLK
       ' This will have already fired WM_LBUTTONUP
+      ' If the tab holds a pDoc that is a visual designer form then we will toggle between
+      ' code and design by toggling the designer tab control.
       dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-      if pDoc then OnCommand_DesignerToggleViewCode( pDoc )
+      if pDoc then
+         if pDoc->IsDesigner then
+            pDoc->DesignTabsCurSel = iif(pDoc->DesignTabsCurSel = 0, 1, 0)
+            frmMain_PositionWindows
+         END IF
+      END IF
       
    case WM_LBUTTONUP
       if isPrevTabsHitTest( HWnd ) then

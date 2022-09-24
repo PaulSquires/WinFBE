@@ -60,7 +60,7 @@ function frmMain_SetStatusbar() as long
    elseif pDoc <> 0 then
       dim as HWND hEdit = pDoc->hWndActiveScintilla
       wszText = ""
-      if pDoc->IsDesigner then 
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then 
          dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
          if pCtrl then
             wszText = "L:" & GetControlProperty(pCtrl, "LEFT") & ", T:" & GetControlProperty(pCtrl, "TOP") & "  ::  " & _
@@ -106,7 +106,7 @@ function frmMain_SetStatusbar() as long
          case FILETYPE_MAIN:      wszText = L(212,"Main")
          case FILETYPE_RESOURCE:  wszText = L(213,"Resource")
       end select 
-      if pDoc->IsDesigner andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then 
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then 
          wszText = "FORM"
       end if
       gSBPanels(3).wszText = wszText
@@ -843,22 +843,39 @@ function frmMain_PositionWindows() as LRESULT
       rcDoc.right = rc.Right
       rcDoc.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
       
+      dim as long nDesignCodeTabHeight = 0
+      if pDoc->IsDesigner then
+         nDesignCodeTabHeight = pWindow->ScaleY(DESIGNTABS_HEIGHT)
+      end if
+      
       dim as long lStyle = SWP_SHOWWINDOW or SWP_NOZORDER or SWP_NOOWNERZORDER or _
                            SWP_NOACTIVATE or SWP_NOCOPYBITS
       
-      dim as long nShowVScrollBars = SW_SHOW
+      if pDoc->IsDesigner then
+         SetWindowPos( HWND_FRMMAIN_DESIGNTABS, 0, _
+                       rcDoc.left, _
+                       rcDoc.bottom - nDesignCodeTabHeight, _
+                       rcDoc.right, _
+                       nDesignCodeTabHeight, _
+                       lStyle )
+         AfxRedrawWindow( HWND_FRMMAIN_DESIGNTABS )
+      else   
+         ShowWindow( HWND_FRMMAIN_DESIGNTABS, SW_HIDE )
+      end if
+      
+      dim as long nShowVScrollBars = iif(pDoc->DesignTabsCurSel = 0, SW_HIDE, SW_SHOW)
       ' Only hide vertical scrollbars because hiding the horizontal could
       ' result in endless loop during mouseover test in modMsgPump.
       ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(0), nShowVScrollBars )
       ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(1), nShowVScrollBars )
       
-      if pDoc->IsDesigner then
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then
          ' if the DesignView has been set to show the visual designer rather than the code
          ' window then ensure that DesignMain is shown.
          SetWindowPos( pDoc->hWndDesigner, 0, _
                        rcDoc.left, rcDoc.top, _
                        rcDoc.right - rcDoc.left, _
-                       rcDoc.bottom - rcDoc.top, _
+                       rcDoc.bottom - rcDoc.top - nDesignCodeTabHeight, _
                        lStyle )
 
          ' Display the ToolBox/PropertyList
@@ -918,13 +935,13 @@ function frmMain_PositionWindows() as LRESULT
          SetWindowPos( pDoc->hWindow(0), 0, _
                        rcDoc.left, nTop, _
                        rcDoc.right - rcDoc.left - iVScrollbarWidth, _
-                       rcDoc.bottom - nTop - iHScrollbarHeight, _
+                       rcDoc.bottom - nTop - nDesignCodeTabHeight - iHScrollbarHeight, _
                        lStyle )
 
          ' Position the MAIN view horizontal scroll bar
          if IsWindowVisible(HWND_FRMEDITOR_HSCROLLBAR(0)) then
             SetWindowPos( HWND_FRMEDITOR_HSCROLLBAR(0), 0, _ 
-                          rcDoc.left, rcDoc.bottom - iHScrollbarHeight, _
+                          rcDoc.left, rcDoc.bottom - nDesignCodeTabHeight - iHScrollbarHeight, _
                           rcDoc.right - rcDoc.left - iVScrollbarWidth, iHScrollbarHeight, _
                           SWP_NOZORDER )
          end if
@@ -935,7 +952,7 @@ function frmMain_PositionWindows() as LRESULT
             SetWindowPos( HWND_FRMEDITOR_VSCROLLBAR(0), 0, _ 
                           rcDoc.right - iVScrollbarWidth, nTop + SPLITSIZE, _
                           iVScrollbarWidth, _
-                          rcDoc.bottom - nTop, _ 
+                          rcDoc.bottom - nTop - nDesignCodeTabHeight, _ 
                           lStyle )
          else
             ShowWindow( HWND_FRMEDITOR_VSCROLLBAR(0), SW_HIDE )
@@ -955,8 +972,7 @@ function frmMain_PositionWindows() as LRESULT
    frmOutput_ShowNotes
    
    function = 0
-end Function
-
+end function
 
 
 ' ========================================================================================
@@ -1340,7 +1356,7 @@ function frmMain_OnContextMenu( _
    pt.x = xPos
    pt.y = yPos
    ScreenToClient hWndContext, @pt
-   if pDoc->IsDesigner then
+   if IsDesignerView(pDoc) then
       ' Right-click popup menu for visual design form is 
       ' handled in the HandleDesignerRButtonDown function.
    else
@@ -1737,14 +1753,13 @@ function frmMain_WndProc( _
          frmMain_PositionWindows
          dim pDoc as clsDocument ptr = gTTabCtl.tabs(gTTabCtl.CurSel).pDoc
          if pDoc then
-            if pDoc->IsDesigner then
+            if pDoc->IsDesigner andalso IsDesignerView(pDoc) then
                DisplayPropertyList( pDoc )
             end if   
          end if   
          ' Set the focus to the Scintilla window. This will call frmMain_SetStatusbar
          ' which also calls frmMain_SelectComboFiles and frmMain_SelectComboFunctions.
          frmMain_SetFocusToCurrentCodeWindow
-               
 
       case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document
@@ -1804,7 +1819,7 @@ function frmMain_WndProc( _
             pDoc = cast(clsDocument ptr, lParam)
          end if   
          if pDoc then
-            if pDoc->IsDesigner = false then  ' clicked on the code window
+            if IsDesignerView(pDoc) = false then  ' clicked on the code window
                dim as hwnd hEdit = pDoc->hWindow(0)
                dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
                dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
@@ -1912,6 +1927,9 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
 
    ' Create the main application top tabs control
    frmTopTabs_Show( HWND_FRMMAIN )
+
+   ' Create the main application design tabs control
+   frmDesignTabs_Show( HWND_FRMMAIN )
 
    ' Create the main application statusbar
    frmStatusBar_Show( HWND_FRMMAIN )

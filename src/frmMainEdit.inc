@@ -34,7 +34,7 @@ function OnCommand_EditCut( _
            HWND_PROPLIST_EDIT
          SendMessage( GetFocus, WM_CUT, 0, 0 )
       case else     
-         if pDoc->IsDesigner then
+         if IsDesignerView(pDoc) then
             SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_COPY, 0), 0)
             SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
          else
@@ -66,7 +66,7 @@ function OnCommand_EditCopy( _
            HWND_PROPLIST_EDIT
          SendMessage( GetFocus, WM_COPY, 0, 0 )
       case else     
-         if pDoc->IsDesigner then
+         if IsDesignerView(pDoc) then
             dim as long NumControls = pDoc->Controls.SelectedControlsCount
             if NumControls = 0 THEN exit function
             redim gCopyControls(NumControls-1) as clsControl
@@ -108,7 +108,7 @@ function OnCommand_EditPaste( _
            HWND_PROPLIST_EDIT
          SendMessage( GetFocus, WM_PASTE, 0, 0 )
       case else     
-         if pDoc->IsDesigner then
+         if IsDesignerView(pDoc) then
             dim pCtrl as clsControl ptr
             dim rc as RECT
             dim as long nLeft, nTop, nLeftActive = 99999, nTopActive = 99999
@@ -201,7 +201,7 @@ function OnCommand_EditIndentBlock( _
             ByVal hEdit as HWND _
             ) as LRESULT
 
-   if pDoc->IsDesigner then exit function
+   if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then exit function
    
    ' If a TAB was pressed then manually terminate any active autocomplete.
    if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
@@ -240,7 +240,7 @@ function OnCommand_EditUnIndentBlock( _
             ByVal hEdit as HWND _
             ) as LRESULT
 
-   if pDoc->IsDesigner then exit function
+   if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) then exit function
    
    if GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
       if gFind.bExpanded then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
@@ -282,7 +282,7 @@ function OnCommand_EditSelectAll( _
            HWND_PROPLIST_EDIT
          Edit_SetSel( GetFocus, 0, -1 )
       case else     
-         if pDoc->IsDesigner then
+         if IsDesignerView(pDoc) THEN
             pDoc->Controls.SelectAllControls
             ' Ensure the grab handles of form and controls are redrawn or hidden
             AfxRedrawWindow(pDoc->hWndFrame)

@@ -432,6 +432,7 @@ function GetFileToString( _
             ) as boolean
    
    if pDoc = 0 then return true
+   if AfxFileExists(wszFilename) = false then return true
    
    ' Load the entire file into a string
    DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
@@ -470,7 +471,9 @@ function GetFileToString( _
          MemCpy( CAST(any PTR, wszText.m_pBuffer), strptr(txtBuffer), len(txtBuffer))
 
          ' Need to parse wszText to remove/process any possible visual designer code. Only
-         ' the non-VD text is returned. We also skip over any codegen code.
+         ' the non-VD text is returned. We also skip over any codegen code. This is only
+         ' used in pre-version 3.02 files. New 3.02+ files will call LoadFormJSONdata during
+         ' the codewindow creation.
          wszText = pDoc->ParseFormMetaData(HWND_FRMMAIN, wszText)
          
          ' Convert to UTF8 so it can display in the editor
@@ -478,16 +481,6 @@ function GetFileToString( _
 
    end select
       
-   ' Do a check for IsDesigner. New post version 3.02+ files have new form JSON file
-   ' format and require a different parsing routine in order to load. They are also
-   ' stored in UTF-8 (no signature).
-   if pDoc->IsDesigner then
-      if (ConvertWinFBEversion(pDoc->wszFormVersion) >= ConvertWinFBEversion("3.0.2")) orelse _
-         (ConvertWinFBEversion(pDoc->wszFormVersion) = 0) then  'b/c upgraded form files do not have version loaded yet
-         pDoc->LoadFormJSONdata(HWND_FRMMAIN, txtBuffer)   ' this should now be UTF-8
-      end if
-   end if
-   
    function = false
 END FUNCTION
 
@@ -671,6 +664,14 @@ function OpenSelectedDocument( _
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
+      ' Make sure that the code editor is selected for visual designer forms
+      if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) then
+         if nLineNumber <> -1 then
+            pDoc->DesignTabsCurSel = 1  ' 1 = code tab, 0 = Designer
+            frmMain_PositionWindows
+         end if   
+      end if
+
       ' If this was a previously saved project/session file that may have had an active
       ' Scintilla at one point then bookmarks/foldpoints may have existed. Now that the
       ' document is finally being opened then we can try to restore those states.

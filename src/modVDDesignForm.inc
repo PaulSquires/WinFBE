@@ -18,6 +18,28 @@
 
 
 ' ========================================================================================
+' Determines if the current view should be Design or Code. This is done by checking
+' the current selection of the design/code tabcontrol.
+' ========================================================================================
+function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
+   if pDoc = 0 THEN exit function
+
+   dim as Boolean bDesignView
+
+   ' If this is a Visual Designer document then the display depends on what tab is selected
+   ' in the design|code tabcontrol.
+   if pDoc->IsDesigner then 
+      bDesignView = iif(pDoc->DesignTabsCurSel = 0, true, false)
+   else
+      ' Must be a code window
+      bDesignView = false
+   END IF
+
+   function = bDesignView
+end function
+
+
+' ========================================================================================
 ' Reset any SnapLines data in order to ready it for future control movements.
 ' ========================================================================================
 function ResetSnapLines( byval pDoc as clsDocument ptr ) as Long

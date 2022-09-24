@@ -314,13 +314,12 @@ function clsDocument.CreateCodeWindow( _
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
             this.DiskFilename = wszFile   ' assign before GetFileTostring because needed for RelativeFile calculation.
+            this.DesignerFilename = wszFile & ".design"
             this.LoadingFromFile = true
             
             ' GetFileTostring has a call to pDoc->ParseFormMetaData which will create/recreate the designer form.
             ' We continue to use this function in post version 3.02 form file format in order to ensure
-            ' that older form files can be imported. The downside is that allnew form files will continue
-            ' to have legacy scintilla code windows as part of the visual designer even though they are
-            ' never used or accessed.
+            ' that older form files can be imported. 
             dim sText as string  ' this will be an UTF-8 encoded string
             if GetFileToString(wszFile, sText, @this) = false then
                ' Take this opportunity to determine the text line endings
@@ -335,6 +334,21 @@ function clsDocument.CreateCodeWindow( _
                this.DateFileTime = AfxGetFileLastWriteTime( wszFile )
             else
                print "Error opening: "; wszFile
+            end if
+
+            ' Do a check for IsDesigner. New post version 3.02+ files have new form JSON file
+            ' format and require a different parsing routine in order to load. They are also
+            ' stored in UTF-8 (no signature).
+            if AfxFileExists(this.DesignerFilename) then 
+               this.IsDesigner = true
+               if (ConvertWinFBEversion(this.wszFormVersion) >= ConvertWinFBEversion("3.0.2")) orelse _
+                  (ConvertWinFBEversion(this.wszFormVersion) = 0) then  'b/c upgraded form files do not have version loaded yet
+                  sText = ""
+                  if GetFileToString(this.DesignerFilename, sText, @this) = false then
+                     this.CreateDesignerWindow(hWndParent)  ' Create the new visual designer window
+                     this.LoadFormJSONdata(HWND_FRMMAIN, sText)   ' this should now be UTF-8
+                  end if   
+               end if
             end if
 
             this.LoadingFromFile = false
@@ -883,6 +897,183 @@ end function
 
 ''
 ''
+function clsDocument.SaveDesignerFile() as boolean
+   if this.IsDesigner = false then return true
+   
+   dim pStream as CTextStream  
+   if pStream.Create(this.DesignerFilename, true, false) <> S_OK then return true   ' error
+
+   dim pCtrl as clsControl ptr
+   dim as CWSTR wst 
+   dim as CWSTR wcomma = ","
+   
+   wst = _
+   qstr("'form':true")        & wcomma & _
+   qstr("'version':'3.0.2'")  & wcomma & _
+   qstr("'lockcontrols':"     & iif(this.bLockControls, "true", "false")) & wcomma & _
+   qstr("'snaplines':"        & iif(this.bSnapLines, "true", "false")) 
+
+   ' Save Images(if applicable)
+   dim as long numImageItems = ubound(this.AllImages) - lbound(this.AllImages) + 1
+   if numImageItems > 0 then
+      wst = wst & wcomma & _
+      qstr("'images': [")
+      for ii as long = lbound(this.AllImages) to ubound(this.AllImages)
+         dim as CWSTR wszRelative
+         dim as CWSTR wszImageFilename = this.AllImages(ii).wszFilename
+         
+         ' Attempt to convert the image file name to relative path
+         if AfxFileExists( this.DiskFilename ) then
+            wszRelative = AfxPathRelativePathTo( this.DiskFilename, FILE_ATTRIBUTE_NORMAL, wszImageFilename, FILE_ATTRIBUTE_NORMAL)
+            if AfxPathIsRelative(wszRelative) then wszImageFilename = wszRelative
+         end if
+         
+         wst = wst & _
+         "{" & _
+         qstr("'imagename':'"        & this.AllImages(ii).wszImageName & "'") & wcomma & _ 
+         qstr("'filename':'"         & AfxStrReplace(ProcessToCurdriveProject(wszImageFilename), "\", "\\") & "'") & wcomma & _ 
+         qstr("'resourcetype':'"     & this.AllImages(ii).wszFormat & "'") & _ 
+         "},"
+      next
+      wst = rtrim(wst, ",") & "]"
+   end if
+
+   ' Save MainMenu (if applicable)
+   dim as long numMenuItems = ubound(this.MenuItems) - lbound(this.MenuItems) + 1
+   if numMenuItems > 0 then
+      wst = wst & wcomma & _
+      qstr("'mainmenu':{") & _
+      qstr("'display':" & iif(this.GenerateMenu, "true", "false")) & wcomma 
+
+      wst = wst & _
+      qstr("'items': [")
+      for ii as long = lbound(this.MenuItems) to ubound(this.MenuItems)
+         wst = wst & _
+         "{" & _
+         qstr("'name':'"     & this.MenuItems(ii).wszName & "'") & wcomma & _
+         qstr("'caption':'"  & this.MenuItems(ii).wszCaption & "'") & wcomma & _
+         qstr("'indent':"    & this.MenuItems(ii).nIndent) & wcomma & _
+         qstr("'alt':"       & this.MenuItems(ii).chkAlt) & wcomma & _
+         qstr("'shift':"     & this.MenuItems(ii).chkShift) & wcomma & _
+         qstr("'ctrl':"      & this.MenuItems(ii).chkCtrl) & wcomma & _
+         qstr("'shortcut':'" & this.MenuItems(ii).wszShortcut & "'") & wcomma & _
+         qstr("'checked':"   & this.MenuItems(ii).chkChecked) & wcomma & _
+         qstr("'grayed':"    & this.MenuItems(ii).chkGrayed) & _
+         "}," 
+      next
+      wst = rtrim(wst, ",") & "]}"
+   end if
+
+   ' Save ToolBar items (if applicable)
+   dim as long numToolBarItems = Ubound(this.ToolBarItems) - lbound(this.ToolBarItems) + 1
+   if numToolBarItems > 0 then
+      wst = wst & wcomma & _
+      qstr("'toolbar':{") & _
+      qstr("'display':" & iif(this.GenerateToolBar, "true", "false")) & wcomma & _
+      qstr("'size':'" & this.wszToolBarSize & "'") & wcomma 
+
+      wst = wst & _
+      qstr("'items': [")
+      for ii as long = lbound(this.ToolBarItems) to ubound(this.ToolBarItems)
+         wst = wst & _
+         "{" & _
+         qstr("'name':'"           & this.ToolBarItems(ii).wszName & "'") & wcomma & _
+         qstr("'type':'"           & this.ToolBarItems(ii).wszButtonType & "'") & wcomma & _
+         qstr("'tooltip':'"        & this.ToolBarItems(ii).wszTooltip & "'") & wcomma & _
+         qstr("'hotimage':'"       & this.ToolBarItems(ii).pPropHotImage.wszPropValue & "'") & wcomma & _
+         qstr("'normalimage':'"    & this.ToolBarItems(ii).pPropNormalImage.wszPropValue & "'") & wcomma & _
+         qstr("'disabledimage':'"  & this.ToolBarItems(ii).pPropDisabledImage.wszPropValue & "'") & _
+         "}," 
+      next
+      wst = rtrim(wst, ",") & "]}"
+   end if
+
+
+   ' Save StatusBar Panels (if applicable)
+   dim as long numPanelItems = Ubound(this.PanelItems) - lbound(this.PanelItems) + 1
+   if numPanelItems > 0 then
+      wst = wst & wcomma & _
+      qstr("'statusbar':{") & _
+      qstr("'display':" & iif(this.GenerateStatusBar, "true", "false")) & wcomma 
+
+      wst = wst & _
+      qstr("'items': [")
+      for ii as long = lbound(this.PanelItems) to ubound(this.PanelItems)
+         wst = wst & _
+         "{" & _
+         qstr("'name':'"           & this.PanelItems(ii).wszName & "'") & wcomma & _
+         qstr("'text':'"           & this.PanelItems(ii).wszText & "'") & wcomma & _
+         qstr("'tooltip':'"        & this.PanelItems(ii).wszTooltip & "'") & wcomma & _
+         qstr("'alignment':'"      & this.PanelItems(ii).wszAlignment & "'") & wcomma & _
+         qstr("'autosize':'"       & this.PanelItems(ii).wszAutoSize & "'") & wcomma & _
+         qstr("'width':"           & this.PanelItems(ii).wszWidth) & wcomma & _
+         qstr("'minwidth':"        & this.PanelItems(ii).wszMinWidth) & wcomma & _
+         qstr("'image':'"          & this.PanelItems(ii).pProp.wszPropValue & "'") & wcomma & _
+         qstr("'backcolor':'"      & this.PanelItems(ii).wszBackColor & "'") & wcomma & _
+         qstr("'backcolorhot':'"   & this.PanelItems(ii).wszBackColorHot & "'") & wcomma & _
+         qstr("'forecolor':'"      & this.PanelItems(ii).wszForeColor & "'") & wcomma & _
+         qstr("'forecolorhot':'"   & this.PanelItems(ii).wszForeColorHot & "'") & _
+         "}," 
+              ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+              ' in WinFBE programs where Windows Themes are enabled.
+              '"'     PANELBORDERSTYLE=" & this.PanelItems(ii).wszBorderStyle & vbcrlf & _
+      next
+      wst = rtrim(wst, ",") & "]}"
+   end if
+   
+   
+   ' Iterate all of the controls on the form
+   if this.Controls.Count then
+      wst = wst & wcomma & _
+      qstr("'controls':[") 
+            
+      for i as long = this.Controls.ItemFirst to this.Controls.ItemLast
+         pCtrl = this.Controls.ItemAt(i)
+         if pCtrl then
+
+            wst = wst & _
+            "{" & _
+            qstr("'type':'" & GetToolBoxName(pCtrl->ControlType) & "'") & wcomma & _
+            qstr("'properties': [") 
+
+            for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
+               wst = wst & "{" & _
+               qstr("'name':'" & pCtrl->Properties(ii).wszPropName & "'") & wcomma & _
+               qstr("'value':'" & pCtrl->Properties(ii).wszPropValue & "'") & _
+               "},"
+            next
+            
+            wst = rtrim(wst, ",") & "]," & _
+            qstr("'events': [") 
+
+            for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
+               ' Only need to output the names of the Events that have been ticked as being in use.
+               if pCtrl->Events(ii).bIsSelected then
+                  wst = wst & _
+                  qstr("'" & pCtrl->Events(ii).wszEventName & "'") & wcomma 
+               end if   
+            next
+            wst = rtrim(wst, ",") & "]"
+      
+         end if
+         
+         wst = wst & "},"
+      next
+
+      wst = rtrim(wst, ",") & "]"
+   end if
+
+   ' Convert UTF-16 to UTF-8 encoding
+   wst = "{" & wst & "}"
+   pStream.WriteLine( UnicodeToUtf8(wst) )
+   pStream.Close
+
+   function = false
+end function
+
+
+''
+''
 function clsDocument.SaveFile( _
             byval bSaveAs as boolean = false, _
             byval bAutoSaveOnly as boolean = false _
@@ -997,6 +1188,7 @@ function clsDocument.SaveFile( _
    pStream.Close
 
    this.DiskFilename = wszFilename
+   this.DesignerFilename = wszFilename & ".design"
    this.AutoSaveFilename = OnCommand_FileAutoSaveGenerateFilename(wszFilename)
    this.DateFileTime = AfxGetFileLastWriteTime( wszFilename )
    this.AutoSaveRequired = false

@@ -108,6 +108,7 @@ type clsDocument
       GenerateToolBar   as long = BST_CHECKED  ' Indicates to generate code for the menu
       GenerateStatusBar as long = BST_CHECKED  ' Indicates to generate code for the statusbar
       hWndDesigner      as HWnd            ' DesignMain window (switch to this window when in design mode (versus code mode)
+      DesignTabsCurSel  as long 
       hWndFrame         as hwnd            ' DesignFrame for visual designer windows
       hWndForm          as hwnd            ' DesignForm for visual designer windows
       hWndFakeMenu      as HWND            ' Fake top menu to display when using Menu Editor
@@ -139,6 +140,7 @@ type clsDocument
       ' Code document related
       ProjectFiletype   as CWSTR = FILETYPE_UNDEFINED
       DiskFilename      as wstring * MAX_PATH
+      DesignerFilename  as wstring * MAX_PATH
       AutoSaveFilename  as wstring * MAX_PATH    '#filename#
       AutoSaveRequired  as boolean
       DateFileTime      as FILETIME  
@@ -182,6 +184,7 @@ type clsDocument
       declare function InsertFile() as boolean
       declare function ParseFormMetaData( byval hWndParent as HWnd, byref sAllText as wstring, byval bLoadOnly as boolean = false ) as CWSTR
       declare function LoadFormJSONdata( byval hWndParent as HWnd, byref wszAllText as string, byval bLoadOnly as boolean = false ) as long
+      declare function SaveDesignerFile() as boolean
       declare function SaveFile(byval bSaveAs as boolean = False, byval bAutoSaveOnly as boolean = false) as boolean
       declare function ApplyProperties() as long
       declare function GetTextRange( byval cpMin as long, byval cpMax as long) as string

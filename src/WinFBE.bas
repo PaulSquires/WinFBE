@@ -127,6 +127,7 @@ dim shared gLasso   as clsLasso
 #include once "frmSnippets.inc"
 #include once "frmCategories.inc" 
 #include once "frmBuildConfig.inc" 
+#include once "frmDesignTabs.inc"
 #include once "frmOutput.inc" 
 #include once "frmOptionsGeneral.inc"
 #include once "frmOptionsEditor.inc"
