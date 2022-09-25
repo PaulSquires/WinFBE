@@ -836,13 +836,15 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' If this is a QuickRun then we need to copy the current source code to a temporary bas file
    ' and compile that bas file instead. The resulting bas file will be deleted after the compiling
    ' has completed and exe will be deleted when the exe is terminated. 
+   dim as CWSTR wszTempMainFilename
    if wID = IDM_QUICKRUN THEN
       if pDocMain->IsNewFlag then 
          gCompile.MainFolder = AfxGetExePathName
       else
          gCompile.MainFolder = AfxStrPathname("PATH", pDocMain->DiskFilename)
       end if
-      gCompile.MainFilename = GetTemporaryFilename(gCompile.MainFolder, "bas")
+      wszTempMainFilename = GetTemporaryFilename(gCompile.MainFolder, "bas")
+      gCompile.MainFilename = wszTempMainFilename
       gCompile.MainName     = AfxStrPathname("NAME", gCompile.MainFilename)
       
       dim as CWSTR wszText = pDocMain->GetText()
@@ -1103,8 +1105,9 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       "#Include once " & chr(34) & "WinFormsX\WinFormsX.bi" & chr(34) & vbcrlf & _
       "Using Afx" & vbcrlf 
 
+   dim wszVDMain as CWSTR 
    if bIsVisual then
-      dim wszVDMain as CWSTR = gCompile.MainFolder & "WINFBE_VD_MAIN.bas"
+      wszVDMain = gCompile.MainFolder & "WINFBE_VD_MAIN.bas"
       dim pStream as CTextStream
       if pStream.Create(wszVDMain, true, true) = S_OK then 
          ' Get all of the text from the MAIN pDoc file
@@ -1130,6 +1133,10 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
          do until pDoc = 0
 				if pDoc->IsDesigner then 
 					wszAllTYPEs = wszAllTYPEs & pDoc->wszFormCodeGen
+					if pDoc <> pDocMain then
+						wszAllEvents = wszAllEvents & _
+											"#include once " & chr(34) & pDoc->DiskFilename & chr(34) & vbcrlf
+					end if
 				end if
             If gApp.IsProjectActive = false Then exit do
             pDoc = pDoc->pDocNext
@@ -1250,8 +1257,10 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
 
 
    ' If this was a QuickRun then delete the temporary code file that was created.
+   ' Both the temporary disk file and (if applicable) the VD MAIN CODEGEN file.
    if wID = IDM_QUICKRUN THEN 
       AfxDeleteFile( gCompile.MainFilename )
+      AfxDeleteFile( wszTempMainFilename )
    end if    
    
    ' Add any temp resource file to the list of temp files to later be deleted.
@@ -1286,6 +1295,10 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    end if
    
    gApp.IsCompiling = false
+
+'   if AfxFileExists( wszVDMain ) then
+'      AfxDeleteFile( wszVDMain )
+'   end if
 
    Function = True   ' successful
 End Function

@@ -40,18 +40,10 @@ public function FormUpgrade302Format( byval pDoc as clsDocument ptr ) as boolean
    
    ' Commence conversion to the new json file format
    dim as CWSTR wszCodeFilename = pDoc->DiskFilename
-
    dim as CWSTR wszFormFilename = wszCodeFilename & ".design"
    
-   if AfxFileExists(wszFormFilename) then
-      AfxMsg( "Failed to upgrade form file to new format." & vbCrLf & _
-              "REASON: File already exists. Please remove or rename the following file:" & vbCrLf & vbCrLf &_
-              wszFormFilename ) 
-      return false        
-   end if
-   
    pDoc->DesignerFilename = wszFormFilename
-   if pDoc->SaveDesignerFile() = false then return false
+   if pDoc->SaveFormJSONdata() = false then return false
    
    ' The new design Form file has now been created so we can remove all code in the
    ' existing code file.

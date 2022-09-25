@@ -96,6 +96,9 @@ end function
 ' ========================================================================================
 public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long 
 
+   ' *** This is legacy pre-version 3.02 code that is still required in order to 
+   ' load older form files that have not yet been upgraded.
+   
    if pDoc = 0 then exit function
 
    dim pCtrl as clsControl ptr

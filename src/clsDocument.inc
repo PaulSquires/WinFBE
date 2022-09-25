@@ -112,7 +112,7 @@ end property
 ''  Returns true/False indicating that a valid top mainmenu exists for this form.
 function clsDocument.MainMenuExists() as boolean
    dim as long numItems = (ubound(this.MenuItems) - lbound(this.MenuItems)) + 1
-   if (this.GenerateMenu = BST_CHECKED) andalso (numItems > 0) then
+   if (this.GenerateMenu = BST_CHECKED or this.GenerateMenu = true) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -123,7 +123,7 @@ end function
 ''  Returns true/False indicating that a valid top toolbar exists for this form.
 function clsDocument.ToolBarExists() as boolean
    dim as long numItems = (ubound(this.ToolBarItems) - lbound(this.ToolBarItems)) + 1
-   if (this.GenerateToolBar = BST_CHECKED) andalso (numItems > 0) then
+   if (this.GenerateToolBar = BST_CHECKED or this.GenerateToolBar = true) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -134,7 +134,7 @@ end function
 ''  Returns true/False indicating that a valid top statusbar exists for this form.
 function clsDocument.StatusBarExists() as boolean
    dim as long numItems = (ubound(this.PanelItems) - lbound(this.PanelItems)) + 1
-   if (this.GenerateStatusBar = BST_CHECKED) andalso (numItems > 0) then
+   if (this.GenerateStatusBar = BST_CHECKED or this.GenerateStatusBar = true) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -514,7 +514,7 @@ function clsDocument.LoadFormJSONdata( _
 
    ' Retrieve data related to MAINMENU
    numItems = json["mainmenu"]["items"].count
-   this.GenerateMenu = iif(json["mainmenu"]["display"].value = "true", 1, 0)
+   this.GenerateMenu = iif(json["mainmenu"]["display"].value = "true", true, false)
    
    if numItems then
       redim preserve this.MenuItems(numItems - 1)
@@ -533,7 +533,7 @@ function clsDocument.LoadFormJSONdata( _
 
    ' Retrieve data related to TOOLBAR
    numItems = json["toolbar"]["items"].count
-   this.GenerateToolbar = iif(json["toolbar"]["display"].value = "true", 1, 0)
+   this.GenerateToolbar = iif(json["toolbar"]["display"].value = "true", true, false)
    this.wszToolBarSize = json["toolbar"]["size"].value
    
    if numItems then
@@ -550,7 +550,7 @@ function clsDocument.LoadFormJSONdata( _
 
    ' Retrieve data related to STATUSBAR
    numItems = json["statusbar"]["items"].count
-   this.GenerateStatusBar = iif(json["statusbar"]["display"].value = "true", 1, 0)
+   this.GenerateStatusBar = iif(json["statusbar"]["display"].value = "true", true, false)
    
    if numItems then
       redim preserve this.PanelItems(numItems - 1)
@@ -572,9 +572,8 @@ function clsDocument.LoadFormJSONdata( _
       next
    end if
 
-   this.GenerateMenu = iif(json["controls"]["display"].value = "true", 1, 0)
+
    dim as long numControls = json["controls"].count
-   
    if numControls then
       dim wszControlType as CWSTR
       dim nControlType as long
@@ -897,7 +896,7 @@ end function
 
 ''
 ''
-function clsDocument.SaveDesignerFile() as boolean
+function clsDocument.SaveFormJSONdata() as boolean
    if this.IsDesigner = false then return true
    
    dim pStream as CTextStream  
@@ -1192,6 +1191,8 @@ function clsDocument.SaveFile( _
    this.AutoSaveFilename = OnCommand_FileAutoSaveGenerateFilename(wszFilename)
    this.DateFileTime = AfxGetFileLastWriteTime( wszFilename )
    this.AutoSaveRequired = false
+   
+   if this.IsDesigner then this.SaveFormJSONdata()
    
    ' if this was a new document then it needs to be saved to Recent File list.
    if this.IsNewFlag then 

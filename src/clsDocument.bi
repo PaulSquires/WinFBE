@@ -184,7 +184,7 @@ type clsDocument
       declare function InsertFile() as boolean
       declare function ParseFormMetaData( byval hWndParent as HWnd, byref sAllText as wstring, byval bLoadOnly as boolean = false ) as CWSTR
       declare function LoadFormJSONdata( byval hWndParent as HWnd, byref wszAllText as string, byval bLoadOnly as boolean = false ) as long
-      declare function SaveDesignerFile() as boolean
+      declare function SaveFormJSONdata() as boolean
       declare function SaveFile(byval bSaveAs as boolean = False, byval bAutoSaveOnly as boolean = false) as boolean
       declare function ApplyProperties() as long
       declare function GetTextRange( byval cpMin as long, byval cpMax as long) as string
