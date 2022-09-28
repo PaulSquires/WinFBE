@@ -156,7 +156,12 @@ function clsDocument.CreateDesignerWindow( byval hWndParent as HWnd ) as hwnd
    '      out the DesignFrame whenever the tabcontrol switches between design/code view.
    '
    this.IsDesigner = true
-   this.FileEncoding = FILE_ENCODING_UTF16_BOM
+   
+   ' In version 3.02+ form file encoding does not have to be unicode because the form meta
+   ' data is saved to a seaprate .design file (UTF-8 encoded no sigature). Therefore, unless
+   ' the user specifically changes the code file encoding then we will default to ANSI.
+   ' this.FileEncoding = FILE_ENCODING_UTF16_BOM
+   this.FileEncoding = FILE_ENCODING_ANSI
    
    dim rc as RECT
    

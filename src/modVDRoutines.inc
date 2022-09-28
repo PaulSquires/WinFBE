@@ -39,6 +39,55 @@ end function
 
 
 ' ========================================================================================
+' Check for a minimum default size when creating. Check needed because a user could
+' select a control in the Toolbox and simply click on the Form rather than drawing
+' the control on the form.
+' ========================================================================================
+function CheckMinimumControlSize( byval nControlType as long, byval rcIn as RECT ) as RECT
+   dim as RECT rc = rcIn
+   dim as long nWidth = rc.right - rc.left
+   dim as long nHeight = rc.bottom - rc.top
+   
+   if (nWidth < 5) orelse (nHeight < 5) then
+      'AFXMSG( "Control too small" )
+   end if
+
+   select case nControlType 
+      case CTRL_LABEL:             nWidth = 97:  nHeight = 41  
+      case CTRL_BUTTON:            nWidth = 188: nHeight = 58  
+      case CTRL_TEXTBOX:           nWidth = 250: nHeight = 47  
+      case CTRL_CHECKBOX:          nWidth = 197: nHeight = 45  
+      case CTRL_OPTION:            nWidth = 228: nHeight = 45  
+      case CTRL_FRAME:             nWidth = 500: nHeight = 250  
+      case CTRL_PICTUREBOX:        nWidth = 250: nHeight = 125  
+      case CTRL_COMBOBOX:          nWidth = 302: nHeight = 49  
+      case CTRL_LISTBOX:           nWidth = 300: nHeight = 209  
+      case CTRL_RICHEDIT:          nWidth = 250: nHeight = 240  
+      case CTRL_MASKEDEDIT:        nWidth = 250: nHeight = 47  
+      case CTRL_PROGRESSBAR:       nWidth = 250: nHeight = 58  
+      case CTRL_LISTVIEW:          nWidth = 302: nHeight = 242  
+      case CTRL_TREEVIEW:          nWidth = 302: nHeight = 242  
+      case CTRL_MONTHCALENDAR:     nWidth = 489: nHeight = 399  
+      case CTRL_DATETIMEPICKER:    nWidth = 500: nHeight = 47  
+      case CTRL_TABCONTROL:        nWidth = 500: nHeight = 58  
+      case CTRL_UPDOWN:            nWidth = 44:  nHeight = 47  
+      case CTRL_TIMER:             nWidth = 32:  nHeight = 32  
+      case CTRL_HSCROLL:           nWidth = 200: nHeight = 108  
+      case CTRL_VSCROLL:           nWidth = 108: nHeight = 500   
+      case CTRL_SLIDER:            nWidth = 260: nHeight = 114   
+      case CTRL_WEBBROWSER:
+      case CTRL_CUSTOM:
+      case CTRL_OCX:
+   end select
+   
+   rc.right = rc.left + AfxUnScaleX(nWidth)
+   rc.bottom = rc.top + AfxUnScaleY(nHeight)
+   
+   return rc
+end function
+
+
+' ========================================================================================
 ' Retrieve the control type that is currently actively selected in the Toolbox
 ' ========================================================================================
 public function GetActiveToolboxControlType() as Long

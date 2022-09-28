@@ -670,9 +670,14 @@ function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
          ' Create the selected Toolbox control.
          ' Need to modify rcLasso dimensions in case of HighDPI
          Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
-         SetRect(@rcCtrl, pWindow->UnScaleX(rcLasso.Left), pWindow->UnScaleY(rcLasso.Top), _
-                         pWindow->UnScaleX(rcLasso.Right), pWindow->UnScaleY(rcLasso.Bottom))
-         pCtrl = CreateToolboxControl( pDoc, GetActiveToolboxControlType, rcCtrl )
+         SetRect( @rcCtrl, pWindow->UnScaleX(rcLasso.Left), pWindow->UnScaleY(rcLasso.Top), _
+                         pWindow->UnScaleX(rcLasso.Right), pWindow->UnScaleY(rcLasso.Bottom) )
+         ' Check for a minimum default size when creating. Check needed because a user could
+         ' select a control in the Toolbox and simply click on the Form rather than drawing
+         ' the control on the form.
+         dim as long nControlType = GetActiveToolboxControlType()
+         rcCtrl = CheckMinimumControlSize( nControlType, rcCtrl )
+         pCtrl = CreateToolboxControl( pDoc, nControlType, rcCtrl )
          pDoc->UserModified = true
          pDoc->bRegenerateCode = true
          pDoc->Controls.SelectControl(pCtrl->hWindow)

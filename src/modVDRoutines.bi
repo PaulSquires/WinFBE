@@ -14,6 +14,7 @@
 #pragma once
 
 declare Function GetImagesTypePtr( byref wszImageName as wstring ) As IMAGES_TYPE ptr
+declare function CheckMinimumControlSize( byval nCtrlType as long, byval rc as RECT ) as RECT
 declare function GetActiveToolboxControlType() as Long
 declare function GetActivePropertyPtr() as clsProperty ptr
 declare function GetActiveEventPtr() as clsEvent ptr
