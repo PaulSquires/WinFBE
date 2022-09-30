@@ -158,7 +158,7 @@ function clsDocument.CreateDesignerWindow( byval hWndParent as HWnd ) as hwnd
    this.IsDesigner = true
    
    ' In version 3.02+ form file encoding does not have to be unicode because the form meta
-   ' data is saved to a seaprate .design file (UTF-8 encoded no sigature). Therefore, unless
+   ' data is saved to a separate .design file (UTF-8 encoded no sigature). Therefore, unless
    ' the user specifically changes the code file encoding then we will default to ANSI.
    ' this.FileEncoding = FILE_ENCODING_UTF16_BOM
    this.FileEncoding = FILE_ENCODING_ANSI
@@ -616,7 +616,7 @@ function clsDocument.LoadFormJSONdata( _
 
          dim as long numEvents = json["controls"][i]["events"].count
          for ii as long = 0 to numEvents - 1
-            wszEventName = json["controls"][i]["properties"][ii].value
+            wszEventName = json["controls"][i]["events"][ii]["name"].value
             SetControlEvent( pCtrl, wszEventName, true )
          next
 
@@ -1053,8 +1053,9 @@ function clsDocument.SaveFormJSONdata() as boolean
             for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
                ' Only need to output the names of the Events that have been ticked as being in use.
                if pCtrl->Events(ii).bIsSelected then
-                  wst = wst & _
-                  qstr("'" & pCtrl->Events(ii).wszEventName & "'") & wcomma 
+                  wst = wst & "{" & _
+                  qstr("'name':'" & pCtrl->Events(ii).wszEventName & "'") & wcomma & _
+                  "},"
                end if   
             next
             wst = rtrim(wst, ",") & "]"

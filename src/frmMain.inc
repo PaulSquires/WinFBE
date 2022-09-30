@@ -1823,10 +1823,8 @@ function frmMain_WndProc( _
                dim as hwnd hEdit = pDoc->hWindow(0)
                dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
                dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
-               GenerateFormCode(pDoc)
                if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
                if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
-            else
                GenerateFormCode(pDoc)
             end if
          end if

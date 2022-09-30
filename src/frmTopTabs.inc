@@ -496,8 +496,9 @@ Function frmTopTabs_WndProc( _
          if pDoc->IsDesigner then
             pDoc->DesignTabsCurSel = iif(pDoc->DesignTabsCurSel = 0, 1, 0)
             frmMain_PositionWindows
-         END IF
-      END IF
+            PostMessage( HWND_FRMMAIN, MSG_USER_GENERATECODE, 0, 0 )
+         end if
+      end if
       
    case WM_LBUTTONUP
       if isPrevTabsHitTest( HWnd ) then

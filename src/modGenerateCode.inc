@@ -73,7 +73,7 @@ end function
 ' ========================================================================================
 ' Retrieve the Form name for this document.
 ' ========================================================================================
-private function GetFormName( byval pDoc as clsDocument ptr ) as CWSTR
+public function GetFormName( byval pDoc as clsDocument ptr ) as CWSTR
    if pDoc = 0 then exit function
    
    dim pCtrl as clsControl ptr

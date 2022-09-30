@@ -133,7 +133,7 @@ Function frmDesignTabs_WndProc( _
          if (curr_idxHot = 0) orelse (curr_idxHot = 1) then
             pDoc->DesignTabsCurSel = curr_idxHot
             frmMain_PositionWindows()
-            PostMessage( hwnd, MSG_USER_GENERATECODE, 0, 0 )
+            PostMessage( HWND_FRMMAIN, MSG_USER_GENERATECODE, 0, 0 )
          end if   
       end if
       

@@ -12,6 +12,7 @@
 '    GNU General Public License for more details.
 
 #include once "modVDToolbox.bi"
+#include once "modGenerateCode.bi"
 #include once "frmImageManager.bi"
 #include once "frmVDTabChild.bi"
 #include once "clsApp.bi"
@@ -703,7 +704,7 @@ function frmVDToolbox_OnCommand( _
             ) As LRESULT
 
    select case id
-      CASE IDC_FRMVDTOOLBOX_COMBOCONTROLS
+      case IDC_FRMVDTOOLBOX_COMBOCONTROLS
          if codeNotify = CBN_SELCHANGE then
             dim as long nCurSel = Combobox_GetCurSel(hwndCtl)
             if nCurSel = -1 then exit function
@@ -726,16 +727,39 @@ function frmVDToolbox_OnCommand( _
             HidePropertyListControls
             ShowPropertyListControl
             DisplayPropertyDetails
-         END IF
+         end if
 
       case IDC_FRMVDTOOLBOX_LSTEVENTS
          if codeNotify = LBN_SELCHANGE then
             DisplayEventDetails
-         END IF
+         end if
+         if codeNotify = LBN_DBLCLK then
+            ' If doubleclicking an Event then we select that event and automatically
+            ' switch to the code editor and insert that Event code if needed.
+            dim as long nCurSel = ListBox_GetCurSel(hwndCtl)
+            if nCurSel = -1 then exit function
+            dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+            dim pCtrl as clsControl ptr 
+            if pDoc then
+               pCtrl = pDoc->Controls.GetActiveControl
+               if pCtrl then
+                  pCtrl->Events(nCurSel).bIsSelected = true
+                  pDoc->UserModified = true
+                  pDoc->bRegenerateCode = true
+                  GenerateFormCode(pDoc)
+                  ' position code to the new Event 
+                  dim as CWSTR wszFunctionName = GetControlProperty(pCtrl, "NAME") & "_" & pCtrl->Events(nCurSel).wszEventName
+                  if pCtrl->ControlType <> CTRL_FORM then               
+                     wszFunctionName = GetFormName(pDoc) & "_" & wszFunctionName 
+                  end if
+                  OpenSelectedDocument( pDoc->DiskFilename, wszFunctionName, -1 )
+               end if   
+            end if   
+         end if
 
-   END SELECT
+   end select
 
-   Function = 0
+   function = 0
 End Function
 
 ' ========================================================================================
@@ -1335,7 +1359,7 @@ function frmVDToolbox_ListBox_SubclassProc ( _
                      pDoc->UserModified = true
                      pDoc->bRegenerateCode = true
                      frmMain_SetStatusbar
-                  END IF
+                  end if
                end if
             end if   
          end if

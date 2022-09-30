@@ -20,4 +20,5 @@ END TYPE
 
 declare function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long 
 declare function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
+declare function GetFormName( byval pDoc as clsDocument ptr ) as CWSTR
 

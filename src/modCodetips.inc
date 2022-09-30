@@ -471,12 +471,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
          If pDoc->UserModified Then
-				if pDoc->IsDesigner then
-					pDoc->bRegenerateCode = true
-					GenerateFormCode(pDoc)
-				else
-					ParseDocument(pDoc)
-				end if
+            ParseDocument(pDoc)
 			End If   
       end if
    END IF

@@ -524,9 +524,15 @@ end function
 
 
 ' ========================================================================================
-' Handle WM_LBUTTONDBLCLK  messages for the Form (displays the code editor)
+' Handle WM_LBUTTONDBLCLK messages for the Form (displays the code editor)
 ' ========================================================================================
 function HandleDesignerLButtonDoubleClick( ByVal HWnd As HWnd ) as LRESULT
+   ' When a Control is double clicked, it would have already set the default Event
+   ' in the PropertyList. Therefore, all we need to do is call the doubleclick 
+   ' handler for the Event listbox. This will create (if necessary) the Event 
+   ' handler code and then position the code editor to that Event.
+   dim as HWND hEvents = GetDlgItem( HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS )
+   SendMessage( HWND_FRMVDTOOLBOX, WM_COMMAND, MAKELONG(IDC_FRMVDTOOLBOX_LSTEVENTS, LBN_DBLCLK), cast(LPARAM,hEvents) )
    function = 0
 end function
 
@@ -1286,10 +1292,11 @@ function Control_SubclassProc( _
          FUNCTION = DLGC_WANTALLKEYS
          EXIT FUNCTION
 
-      case WM_RBUTTONDOWN: HandleDesignerRButtonDown(pDoc->hWndForm): return CTRUE
-      case WM_LBUTTONDOWN: HandleDesignerLButtonDown(pDoc->hWndForm): return CTRUE
-      case WM_LBUTTONUP:   HandleDesignerLButtonUp(pDoc->hWndForm): return CTRUE
-      case WM_MOUSEMOVE:   HandleDesignerMouseMove(pDoc->hWndForm)
+      case WM_RBUTTONDOWN:   HandleDesignerRButtonDown(pDoc->hWndForm): return CTRUE
+      case WM_LBUTTONDOWN:   HandleDesignerLButtonDown(pDoc->hWndForm): return CTRUE
+      case WM_LBUTTONDBLCLK: HandleDesignerLButtonDoubleClick(pDoc->hWndForm): return CTRUE
+      case WM_LBUTTONUP:     HandleDesignerLButtonUp(pDoc->hWndForm): return CTRUE
+      case WM_MOUSEMOVE:     HandleDesignerMouseMove(pDoc->hWndForm)
 
       Case WM_MOUSEACTIVATE
          ' Defeat this message so that mouse clicks do not activate the control. However, we
