@@ -128,6 +128,8 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Gets or sets a value indicating whether grid lines appear between the rows and columns containing the items and subitems in the control."   
       case "GROUPNAME"
          wszPropDescribe = "Controls with the same GroupName form part of the same OptionButton group."
+      case "HEADERTHEMED"
+         wszPropDescribe = "Gets or sets whether to apply Windows Theme style to the ListView header."
       case "HEADERSTYLE"
          wszPropDescribe = "Gets or sets the column header style."
       case "HEADERHEIGHT"

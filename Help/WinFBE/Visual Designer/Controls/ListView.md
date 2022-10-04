@@ -16,6 +16,7 @@
 | Font | Gets or sets the font for the control. Refer to the Font object.|
 | FullRowSelect | Gets or sets a value indicating whether clicking an item selects all its subitems. |
 | GridLines | Gets or sets a value indicating whether grid lines appear between the rows and columns containing the items and subitems in the control. |
+| HeaderThemed | Gets or sets whether to apply Windows Theme style to the ListView header. |
 | HeaderStyle | Gets or sets the column header style. |
 | HeaderHeight | Gets or sets the column header height |
 | HeaderBackColor | The backgroundground color of the ListView column display text. |
