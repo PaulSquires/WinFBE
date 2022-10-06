@@ -9,6 +9,8 @@ Visual Designer:
 - When double-clicking a control in design view, automatically switch to the code view for the default event handler for that control (e.g.: the _Click handler if it's a button).
 - Listview was not clearing columns/rows when a form is reused (e.g. via popup form). 
 - Added Listview property (HeaderThemed) to enable/disable theme drawing for the header portion of the Listview.
+- The ability to set the default control font name and size for all new controls created for a project, rather than always defaulting to Segoe UI 9pt.
+- Added Button control property (AllowFocusRect) to enable/disable drawing the rectangle around the button when it has focus. Only valid if Theme property 
 
 Version 3.0.1 (June 6, 2021)
 Editor:

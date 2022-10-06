@@ -4,7 +4,8 @@
 
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
-| AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
+| AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
+| AllowFocusRect | Enables or disables drawing the focus rectangle for a Button control. ThemeSupport property must be set to False. |
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
 | BackColorDown | Gets or sets the background color of the control when pressed. Refer to the **Colors** object. ThemeSupport property must be set to False.|
 | BackColorHot | Gets or sets the background hot color of the control when the mouse is over the button. Refer to the **Colors** object. ThemeSupport property must be set to False.|
@@ -34,6 +35,7 @@
 | TextBackColor |Gets or sets the background color of the control. ThemeSupport property must be set to False.|
 | TextBackColorDown | Gets or sets the background color of the control when the button is pressed. ThemeSupport property must be set to False.|
 | TextForeColor | Gets or sets the foreground color of the control. ThemeSupport property must be set to False.|
+| TextForeColorHot | Gets or sets the foreground hot color of the control when the mouse is over the button. Refer to the **Colors** object. ThemeSupport property must be set to False.|
 | TextForeColorDown | Gets or sets the foreground color of the control when the button is pressed. ThemeSupport property must be set to False.|
 | TextMargin | Gets or sets a value indicating the margin in pixels to the text of a button control.|
 | ThemeSupport | Gets or sets a value (true/false) indicating whether Windows Theme will be applied to the control.|
