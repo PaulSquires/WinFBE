@@ -52,6 +52,7 @@ type clsApp
       ProjectOther64             as CWSTR             ' compile flags 64 bit compiler
       ProjectNotes               as CWSTR             ' Save/Load from project file
       ProjectCommandLine         as CWSTR
+      ProjectDefaultFont         as CWSTR = "Segoe UI,9,400,0,0,0,1"
       ProjectManifest            as long              ' T/F create a generic resource and manifest file
 
       ' Global string to track the last accessed property/event in the PropertyList. This allows the

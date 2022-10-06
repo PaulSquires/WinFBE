@@ -1959,10 +1959,11 @@ function clsConfig.ProjectSaveToFile() as boolean
    if pStream.Create(gApp.ProjectFilename, true, true) <> S_OK then return false
    
    pStream.WriteLine "' WINFBE PROJECT FILE"
-   pStream.WriteLine "ProjectBuild=" &       gApp.ProjectBuild
-   pStream.WriteLine "ProjectOther32=" &     gApp.ProjectOther32
-   pStream.WriteLine "ProjectOther64=" &     gApp.ProjectOther64
+   pStream.WriteLine "ProjectBuild="       & gApp.ProjectBuild
+   pStream.WriteLine "ProjectOther32="     & gApp.ProjectOther32
+   pStream.WriteLine "ProjectOther64="     & gApp.ProjectOther64
    pStream.WriteLine "ProjectCommandLine=" & gApp.ProjectCommandLine
+   pStream.WriteLine "ProjectDefaultFont=" & gApp.ProjectDefaultFont
 
    ' Save all of the loaded tabs first
    pStream.WriteLine "ActiveTab=" & gTTabCtl.CurSel
@@ -2142,6 +2143,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          case "ProjectOther32":      gApp.ProjectOther32     = wData
          case "ProjectOther64":      gApp.ProjectOther64     = wData
          case "ProjectCommandLine":  gApp.ProjectCommandLine = wData
+         case "ProjectDefaultFont":  gApp.ProjectDefaultFont = wData
          case "ActiveTab":           nActiveTab = nData
          
          case "File":                wszFilename = wData

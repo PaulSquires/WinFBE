@@ -97,11 +97,13 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
           
       case CTRL_BUTTON
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "AllowFocusRect", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "TextForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "TextForeColorHot", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextBackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextForeColorDown", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextBackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)

@@ -31,6 +31,7 @@ Function OnCommand_ProjectSave( _
             byval HWnd As HWnd, _
             ByVal bSaveAs As BOOLEAN = False _
             ) As LRESULT
+            
    ' Save all dirty files
    OnCommand_FileSaveAll( HWnd )
    
@@ -78,6 +79,7 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.ProjectNotes         = ""
    gApp.ProjectCommandLine   = ""
    gApp.wszLastOpenFolder    = ""
+   gApp.ProjectDefaultFont   = "Segoe UI,9,400,0,0,0,1"
    
    gApp.wszPanelText = ""
    gApp.hIconPanel = 0

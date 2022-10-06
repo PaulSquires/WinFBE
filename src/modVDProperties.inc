@@ -56,6 +56,8 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Indicates whether the control can accept data that the user drags onto it."
       case "ALLOWFOCUS"   
          wszPropDescribe = "Indicates whether the control can receive keyboard focus."
+      case "ALLOWFOCUSRECT"   
+         wszPropDescribe = "Enables or disables drawing the focus rectangle for a Button control. ThemeSupport property must be set to False."
       case "AUTORESET"   
          wszPropDescribe = "Gets or sets a value indicating whether the Timer should raise the Elapsed event only once (false) or repeatedly (true)."
       case "BACKCOLOR"   
@@ -520,12 +522,19 @@ end function
 private function CreateDefaultFontPropValue() as CWSTR
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd_FRMMAIN)
-   if pWindow = 0 THEN exit function
+   if pWindow = 0 THEN return ""
    
+   if gApp.IsProjectActive then
+      if len(gApp.ProjectDefaultFont) then
+         return gApp.ProjectDefaultFont
+      end if
+   end if
+   
+   ' Otherwise, no active project or a ProjectDefaultFont is not available
    dim lf as LOGFONT
    GetObject(pWindow->Font, sizeof(lf), @lf)
    
-   function = SetPropValueFromLogFont(lf)
+   return SetPropValueFromLogFont(lf)
 end function
 
 

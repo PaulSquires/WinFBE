@@ -15,15 +15,50 @@
 #include once "frmBuildConfig.bi"
 
 
+' ========================================================================================
+' Display the abbreviated Font name and point size in the Label
+' ========================================================================================
+function SetDefaultFontLabel( byval hParent as HWND ) as long
+   dim as CWSTR wszPropValue = gApp.ProjectDefaultFont
+   dim as CWSTR wszFont = AfxStrParse(wszPropValue, 1, ",") & ", " & _ 
+                          AfxStrParse(wszPropValue, 2, ",") & "pt"
+   AfxSetWindowText( GetDlgItem(hParent, IDC_FRMPROJECTOPTIONS_LBLDEFAULTFONT), wszFont )
+   function = 0
+end function
+
+' ========================================================================================
+' Show the popup font selection dialog for the Project Default Control Font
+' ========================================================================================
+function ChooseProjectDefaultFont( byval hParent as HWND ) as long
+   
+   dim cf as CHOOSEFONT 
+   dim lf as LOGFONT
+   cf.lStructSize = sizeof(cf)
+   cf.hwndOwner = hParent
+   cf.lpLogFont = @lf
+   cf.Flags = CF_SCREENFONTS or CF_EFFECTS or CF_INITTOLOGFONTSTRUCT
+
+   lf = SetLogFontFromPropValue(gApp.ProjectDefaultFont)
+
+   EnableWindow(hParent, false)
+   if ChooseFont(@cf) then
+      gApp.ProjectDefaultFont = SetPropValueFromLogFont(*cf.lpLogFont) 
+      SetDefaultFontLabel( hParent )
+   END IF
+   EnableWindow(hParent, true)
+   SetActiveWindow(hParent)
+
+   function = 0
+end function
 
 ' ========================================================================================
 ' Create a generic resource file and manifest for the Project
 ' ========================================================================================
-private function frmProjectOptions_CreateResourceManifest() as Long
+function frmProjectOptions_CreateResourceManifest() as Long
 
-   dim as CWSTR wszProjectPath = AfxStrPathname("PATH", gApp.ProjectFilename)
-   dim as CWSTR wszManifest    = wszProjectPath + "manifest.xml"
-   dim as CWSTR wszResource    = wszProjectPath + "resource.rc"
+   dim as CWSTR wszProjectPath      = AfxStrPathname("PATH", gApp.ProjectFilename)
+   dim as CWSTR wszManifest         = wszProjectPath + "manifest.xml"
+   dim as CWSTR wszResource         = wszProjectPath + "resource.rc"
    dim as CWSTR wszManifestTemplate = AfxGetExePathName + "Settings\WinFBE_manifest.xml"
    dim as CWSTR wszResourceTemplate = AfxGetExePathName + "Settings\WinFBE_resource.rc" 
    
@@ -78,7 +113,7 @@ end function
 ' ========================================================================================
 ' Save all options for the Project
 ' ========================================================================================
-private Function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN    
+function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN    
    
    Dim wText As WString * MAX_PATH  
    
@@ -141,11 +176,13 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmProjectOptions
 ' ========================================================================================
-private Function frmProjectOptions_OnCommand( ByVal HWnd As HWnd, _
-                                              ByVal id As Long, _
-                                              ByVal hwndCtl As HWnd, _
-                                              ByVal codeNotify As UINT _
-                                              ) As LRESULT
+function frmProjectOptions_OnCommand( _
+         ByVal HWnd As HWnd, _
+         ByVal id As Long, _
+         ByVal hwndCtl As HWnd, _
+         ByVal codeNotify As UINT _
+         ) As LRESULT
+
    Select Case id
       Case IDC_FRMPROJECTOPTIONS_CMDSELECT
          If codeNotify = BN_CLICKED Then
@@ -159,6 +196,12 @@ private Function frmProjectOptions_OnCommand( ByVal HWnd As HWnd, _
             Exit Function
          End If
          
+      Case IDC_FRMPROJECTOPTIONS_CMDDEFAULTFONT
+         If codeNotify = BN_CLICKED Then
+            ChooseProjectDefaultFont( HWnd )
+            Exit Function
+         End If
+
       Case IDOK
          If codeNotify = BN_CLICKED Then
             If frmProjectOptions_SaveProjectOptions(HWnd) Then
@@ -183,9 +226,10 @@ End Function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmProjectOptions
 ' ========================================================================================
-private Function frmProjectOptions_OnCreate( ByVal HWnd As HWnd, _
-                                             ByVal lpCreateStructPtr As LPCREATESTRUCT _
-                                             ) As BOOLEAN
+function frmProjectOptions_OnCreate( _
+         ByVal HWnd As HWnd, _
+         ByVal lpCreateStructPtr As LPCREATESTRUCT _
+         ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -201,18 +245,18 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmProjectOptions
 ' ========================================================================================
-private Function frmProjectOptions_OnClose( byval HWnd As HWnd ) As LRESULT
+function frmProjectOptions_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
    Function = 0
-End Function
+end function
 
 
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmProjectOptions
 ' ========================================================================================
-private Function frmProjectOptions_OnDestroy( byval HWnd As HWnd ) As LRESULT
+function frmProjectOptions_OnDestroy( byval HWnd As HWnd ) As LRESULT
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -221,11 +265,13 @@ End Function
 ' ========================================================================================
 ' frmProjectOptions Window procedure
 ' ========================================================================================
-private Function frmProjectOptions_WndProc( ByVal HWnd   As HWnd, _
-                                            ByVal uMsg   As UINT, _
-                                            ByVal wParam As WPARAM, _
-                                            ByVal lParam As LPARAM _
-                                            ) As LRESULT
+function frmProjectOptions_WndProc( _
+         ByVal HWnd   As HWnd, _
+         ByVal uMsg   As UINT, _
+         ByVal wParam As WPARAM, _
+         ByVal lParam As LPARAM _
+         ) As LRESULT
+
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmProjectOptions_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmProjectOptions_OnClose)
@@ -241,9 +287,10 @@ End Function
 ' ========================================================================================
 ' frmProjectOptions_Show
 ' ========================================================================================
-public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
-                                        byval IsNewProject as boolean _
-                                        ) As LRESULT
+function frmProjectOptions_Show( _
+         ByVal hWndParent As HWnd, _
+         byval IsNewProject as boolean _
+         ) As LRESULT
 
    Dim wszTitle As WString * MAX_PATH
    dim as long nLeft, nTop, nWidth, nHeight, nMidPoint
@@ -256,7 +303,7 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->Create( hWndParent, "", @frmProjectOptions_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT)
-   pWindow->SetClientSize(600, 320)
+   pWindow->SetClientSize(600, 342)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
    dim as RECT rcClient
@@ -275,7 +322,7 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    nTop    = iIf(IsNewProject, 75, 95) 
-   nWidth  = iIf(IsNewProject, 260, 555)
+   nWidth  = iIf(IsNewProject, 280, 555)
    nHeight = iIf(IsNewProject, 40, 20)
    pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL5, L(283,"Specify compiler options in addition to the selected build configuration") & ":", 26, nTop, nWidth, nHeight, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
@@ -284,7 +331,7 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL2, L(241,"Other Options (32-bit compiler)"), 26, 121, nWidth, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   nWidth = iIf(IsNewProject, 260, 555) 
+   nWidth = iIf(IsNewProject, 280, 555) 
    Dim As HWnd hProjectOther32 = _
    pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS32, "", 26, 141, nWidth, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
@@ -293,25 +340,40 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL4, L(242,"Other Options (64-bit compiler)"), 26, 170, nWidth, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   nWidth = iIf(IsNewProject, 260, 555) 
+   nWidth = iIf(IsNewProject, 280, 555) 
    Dim As HWnd hProjectOther64 = _
    pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS64, "", 26, 190, nWidth, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   nWidth = iIf(IsNewProject, 260, 555) 
+   nWidth = iIf(IsNewProject, 280, 555) 
    dim as hwnd hManifest = _
    pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKMANIFEST, L(308,"Create resource file and manifest"), 26, 222, nWidth, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
+   nWidth = iIf(IsNewProject, 280, 555) 
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL8, L(448,"Default Control Font") & ":", 26, 254, 130, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   dim as hwnd hLblDefaultFont = _
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LBLDEFAULTFONT, "", 160, 254, 120, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   SetDefaultFontLabel( hForm )
+   dim as hwnd hCmdDefaultFont = _
+   pWindow->AddControl("BUTTON", , IDC_FRMPROJECTOPTIONS_CMDDEFAULTFONT, wszMoreActions, 282, 254, 24, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
    If IsNewProject Then
-      pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL6, "", nMidPoint, 75, 3, 175, _
+      nMidPoint = nMidPoint + 40
+      pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL6, "", nMidPoint, 75, 2, 200, _
            WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_SUNKEN, _
            WS_EX_LEFT Or WS_EX_LTRREADING)
       nLeft  = nMidPoint + 20     
       nTop   = 75
-      nWidth = 270
+      nWidth = 250
       pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL7, L(176,"Templates") & ":", nLeft, nTop, nWidth, 20, _
            WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
            WS_EX_LEFT Or WS_EX_LTRREADING)
@@ -347,13 +409,13 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    end if
    
    
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL3, "", 10, 260, 572, 2, _
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL3, "", 10, 282, 572, 2, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 423, 275, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 423, 297, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 508, 275, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 508, 297, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
