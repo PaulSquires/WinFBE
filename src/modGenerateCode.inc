@@ -864,6 +864,8 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                      elseif left(wszPropValue, 7) = "CUSTOM|" then
                         wszPropValue = mid(**wszPropValue, 8) & "  ' custom color"
                      end if   
+                  case PropertyType.AnchorPicker
+                     wszPropValue = chr(34) & wszPropValue & chr(34)
                   case PropertyType.FontPicker
                      wszPropValue = "New wfxFont(" & SetFontClassFromPropValue(wszPropValue) & ")"
                END SELECT

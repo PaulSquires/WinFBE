@@ -80,6 +80,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       case CTRL_LABEL
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
@@ -98,6 +99,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       case CTRL_BUTTON
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AllowFocusRect", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Control", PropertyType.ColorPicker)
@@ -135,6 +137,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "AcceptsReturn", iif(pCtrl->ControlType=CTRL_TEXTBOX,"False","True"), PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AcceptsTab", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
          if pCtrl->ControlType = CTRL_TEXTBOX then
@@ -166,6 +169,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_MASKEDEDIT
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "DefaultCharacter", "_", PropertyType.EditEnter)
@@ -188,6 +192,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_CHECKBOX
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "CheckState", "CheckBoxState.Unchecked", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
@@ -206,6 +211,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_LISTBOX
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorSelected", "SYSTEM|Highlight", PropertyType.ColorPicker)
@@ -235,6 +241,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_COMBOBOX
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "DropDownStyle", "ComboBoxStyle.DropDownList", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
@@ -251,6 +258,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_OPTION
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "Checked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
@@ -271,6 +279,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       case CTRL_FRAME
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
@@ -284,6 +293,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       case CTRL_PICTUREBOX
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
@@ -302,6 +312,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_PROGRESSBAR
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "Maximum", "100", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "Minimum", "0", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "StepValue", "1", PropertyType.EditEnter)
@@ -318,6 +329,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_LISTVIEW
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "CheckBoxes", "False", PropertyType.TrueFalse)
@@ -345,6 +357,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       
       case CTRL_TREEVIEW
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "CheckBoxes", "False", PropertyType.TrueFalse)
@@ -371,6 +384,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          
       case CTRL_MONTHCALENDAR
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
@@ -390,6 +404,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_DATETIMEPICKER
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "CalendarRightAlign", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
@@ -410,6 +425,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "(Custom)", "", PropertyType.CustomDialog)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AllowFocus", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "ResizeTabPages", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ButtonStyle", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
@@ -434,6 +450,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
 
       case CTRL_UPDOWN
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)

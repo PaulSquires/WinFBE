@@ -58,6 +58,8 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Indicates whether the control can receive keyboard focus."
       case "ALLOWFOCUSRECT"   
          wszPropDescribe = "Enables or disables drawing the focus rectangle for a Button control. ThemeSupport property must be set to False."
+      case "ANCHOR"
+         wszPropDescribe = "Specifies how a control anchors to the edges of its Form."
       case "AUTORESET"   
          wszPropDescribe = "Gets or sets a value indicating whether the Timer should raise the Elapsed event only once (false) or repeatedly (true)."
       case "BACKCOLOR"   

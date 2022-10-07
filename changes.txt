@@ -10,7 +10,9 @@ Visual Designer:
 - Listview was not clearing columns/rows when a form is reused (e.g. via popup form). 
 - Added Listview property (HeaderThemed) to enable/disable theme drawing for the header portion of the Listview.
 - The ability to set the default control font name and size for all new controls created for a project, rather than always defaulting to Segoe UI 9pt.
-- Added Button control property (AllowFocusRect) to enable/disable drawing the rectangle around the button when it has focus. Only valid if Theme property 
+- Added Button control property (AllowFocusRect) to enable/disable drawing the rectangle around the button when it has focus. Only valid if Theme property is False. 
+- Added Button control property (TextForeColorHot) to set text color when mouse hovers over the button. Only valid if Theme property is False. 
+- Added Control property (Anchor) which allows you to specify layout resize/movement at design time (uses the WinFBX CLayout class behind the scenes).
 
 Version 3.0.1 (June 6, 2021)
 Editor:

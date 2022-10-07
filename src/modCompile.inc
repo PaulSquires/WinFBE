@@ -1052,6 +1052,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    wszVDEquates = wszUnicodeEquate & _
                   wszDefineWin32Equate & _
                   "#Include Once " & chr(34) & "windows.bi" & chr(34) & vbcrlf & _
+                  "#Include Once " & chr(34) & "Afx\CLayout.inc" & chr(34) & vbcrlf & _
                   "#Include Once " & chr(34) & "Afx\CWindow.inc" & chr(34) & vbcrlf
       
    pDoc = iIf( gApp.IsProjectActive, gApp.pDocList, pDocMain )

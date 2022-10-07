@@ -23,6 +23,7 @@ enum PropertyType
    FontPicker
    ImagePicker
    CustomDialog
+   AnchorPicker
 end enum
    
 type clsEvent

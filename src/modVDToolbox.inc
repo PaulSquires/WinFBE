@@ -671,7 +671,7 @@ function ShowPropertyListControl() as Long
          SetWindowPos(HWND_PROPLIST_COMBO, HWND_TOP, rc.left, rc.top, _
                              rc.right-rc.left, rc.bottom-rc.top, SWP_SHOWWINDOW)
 
-      CASE PropertyType.ColorPicker
+      CASE PropertyType.ColorPicker, PropertyType.AnchorPicker
          rc.left = rc.right - (rc.bottom-rc.top)
          SetWindowPos(HWND_PROPLIST_COMBO, HWND_TOP, rc.left, rc.top, _
                              rc.right-rc.left, rc.bottom-rc.top, SWP_SHOWWINDOW)
@@ -683,10 +683,18 @@ function ShowPropertyListControl() as Long
          MapWindowPoints(0, hList, cast(POINT ptr, @pt), 1)                    
          If PtInRect(@rcLine, pt) then 
             MapWindowPoints(hList, 0, cast(POINT ptr, @rc), 2)
-            frmVDColors_Show(hList, pCtrl->Properties(nItemData).wszPropValue)  ' initialize the color popup if not already done so
-            dim as long nWidth = AfxGetWindowWidth(HWND_FRMVDCOLORS)
-            SetWindowPos(HWND_FRMVDCOLORS, HWND_TOP, rc.right - nWidth, rc.bottom, 0, 0, SWP_NOSIZE or SWP_SHOWWINDOW)
+            dim as HWND hForm
+            if pCtrl->Properties(nItemData).PropType = PropertyType.ColorPicker then
+               frmVDColors_Show(hList, pCtrl->Properties(nItemData).wszPropValue)  ' initialize the color popup if not already done so
+               hForm = HWND_FRMVDCOLORS
+            elseif pCtrl->Properties(nItemData).PropType = PropertyType.AnchorPicker then
+               frmVDAnchors_Show(hList, pCtrl->Properties(nItemData).wszPropValue)  ' initialize the Anchors popup if not already done so
+               hForm = HWND_FRMVDANCHORS
+            end if   
+            dim as long nWidth = AfxGetWindowWidth(hForm)
+            SetWindowPos(hForm, HWND_TOP, rc.right - nWidth, rc.bottom, 0, 0, SWP_NOSIZE or SWP_SHOWWINDOW)
          end if
+
    END SELECT
 
    function = 0
@@ -1076,7 +1084,7 @@ function frmVDToolbox_OnDrawItem( _
                   ' Some properties that are blank will show "(none)"
                   if len(wszPropValue) = 0 then
                      select case ucase(wszPropName)
-                        CASE "ACCEPTBUTTON", "BACKGROUNDIMAGE", "CANCELBUTTON", "ICON", "IMAGE"
+                        CASE "ACCEPTBUTTON", "BACKGROUNDIMAGE", "CANCELBUTTON", "ICON", "IMAGE", "ANCHOR"
                            wszPropValue = "(none)"
                      END SELECT
                   end if   
@@ -1282,6 +1290,15 @@ function frmVDToolbox_ListBox_SubclassProc ( _
                      frmVDColors_Show(hList, pProp->wszPropValue)  ' initialize the color popup if not already done so
                      dim as long nWidth = AfxGetWindowWidth(HWND_FRMVDCOLORS)
                      SetWindowPos(HWND_FRMVDCOLORS, HWND_TOP, rcLine.right - nWidth, rcLine.bottom, 0, 0, SWP_NOSIZE or SWP_SHOWWINDOW)
+                  elseif pProp->PropType = PropertyType.AnchorPicker then
+                     dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
+                     dim as long nCurSel = ListBox_GetCurSel(hList)
+                     dim as RECT rcLine
+                     ListBox_GetItemRect(hList, nCurSel, @rcLine)
+                     MapWindowPoints(hList, 0, cast(POINT ptr, @rcLine), 2)
+                     frmVDAnchors_Show(hList, pProp->wszPropValue)  ' initialize the Anchor popup if not already done so
+                     dim as long nWidth = AfxGetWindowWidth(HWND_FRMVDANCHORS)
+                     SetWindowPos(HWND_FRMVDANCHORS, HWND_TOP, rcLine.right - nWidth, rcLine.bottom, 0, 0, SWP_NOSIZE or SWP_SHOWWINDOW)
                   else   
                      ' Show the ListBox portion of our "combo" control
                      ShowWindow(HWND_PROPLIST_COMBOLIST, SW_SHOW)

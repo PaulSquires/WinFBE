@@ -94,6 +94,7 @@ dim shared gLasso   as clsLasso
 #include once "modVDProperties.inc"
 #include once "modVDApplyProperties.inc"
 #include once "modVDColors.inc"
+#include once "modVDAnchors.inc"
 #include once "modVDControls.inc"
 #include once "modVDDesignForm.inc"
 #include once "modVDDesignMain.inc"
