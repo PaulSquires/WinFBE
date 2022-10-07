@@ -1,6 +1,7 @@
 Version 3.0.2
 Editor:
 - Fixed bug where WinFBE 64-bit only would GPF if currently loaded file is edited by an external editor causing WinFBE to reload the file.
+- Fixed bug where focus would be lost from the Find textbox as the user typed a search word and a corresponding match was found.
 
 Visual Designer:
 - MAJOR FILE FORMAT CHANGE: Form data separated from code file and is now saved to external file with *.design file extension.

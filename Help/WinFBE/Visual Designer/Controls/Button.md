@@ -6,6 +6,7 @@
 | ------------------------------- | ------------------------------ |
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
 | AllowFocusRect | Enables or disables drawing the focus rectangle for a Button control. ThemeSupport property must be set to False. |
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
 | BackColorDown | Gets or sets the background color of the control when pressed. Refer to the **Colors** object. ThemeSupport property must be set to False.|
 | BackColorHot | Gets or sets the background hot color of the control when the mouse is over the button. Refer to the **Colors** object. ThemeSupport property must be set to False.|

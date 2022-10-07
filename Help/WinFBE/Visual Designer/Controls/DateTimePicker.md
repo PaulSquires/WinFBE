@@ -5,6 +5,7 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | CalendarRightAlign | Indicates whether the drop-down calendar will be right aligned with the control instead of left aligned which is the default.|
 | DateFormat | Gets or sets the format of the date and time displayed in the control. Refer to the DateTimePickerFormat enum.|
 | CtrlId | Gets or sets a value indicating the control ID of the control.|

@@ -4,7 +4,8 @@
 
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
-| AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
+| AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it. | 
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
 | CtrlType | Gets or sets the control type value. Always **ControlType.UpDown** and used when adding control to the application’s form collection.|
 | Delta | Gets the value of the most recent click. Delta is a positive value if the up arrow was clicked; it is a negative value if the down arrow was clicked. This property is usually checked from within the Click event.|

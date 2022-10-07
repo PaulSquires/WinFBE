@@ -449,6 +449,7 @@ function frmFindReplace_OnCommand( _
          if (codeNotify = EN_CHANGE) then
             gFind.txtFind = AfxGetWindowText(hwndCtl)
             frmFindReplace_HighlightSearches( true )
+            SetFocus( hwndCtl )   ' in case search stole focus from textbox
             AfxRedrawWindow( hWnd )
          elseif (codeNotify = EN_SETFOCUS) then
             AfxRedrawWindow( hWnd )

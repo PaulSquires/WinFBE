@@ -5,6 +5,7 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum.|
 | CheckBoxes | Gets or sets a value indicating whether a check box appears next to each item in the control. |
 | Column |Gets or sets properties of a Column [wfxListViewColumn](#wfxListViewColumn) object |

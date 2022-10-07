@@ -7,6 +7,7 @@
 | AcceptsReturn | Gets or sets a value (true/false) indicating whether the multiline textbox will accept the Enter character as input.|
 | AcceptsTab | Gets or sets a value (true/false) indicating whether the multiline textbox will accept the Tab character as input.|
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
 | BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum.|
 | CharacterCasing |  Gets or sets a value indicating the case of the text. Refer to the [CharacterCasing](#CharacterCasing) enum.|

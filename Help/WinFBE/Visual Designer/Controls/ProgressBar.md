@@ -5,6 +5,7 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
 | CtrlType | Gets or sets the control type value. Always **ControlType.ProgressBar** and used when adding the control to the form's control collection. |
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|

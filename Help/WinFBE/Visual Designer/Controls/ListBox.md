@@ -5,6 +5,7 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | AllowSelection | Gets a value (true/false) indicating whether the control will allow items to be selected.|
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
 | BackColorHot | Gets or sets the background color of the item in the control that the mouse is over. Refer to the **Colors** object. |

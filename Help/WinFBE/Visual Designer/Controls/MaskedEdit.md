@@ -5,6 +5,7 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
 | BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum.|
 | CtrlId | Gets or sets a value indicating the control ID of the control.|

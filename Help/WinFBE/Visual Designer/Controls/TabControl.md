@@ -6,6 +6,7 @@
 | ------------------------------- | ------------------------------ |
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
 | AllowFocus | Gets or sets a value (true/false) indicating whether the control can receive keyboard focus.|
+| Anchor | Specifies how a control anchors to the edges of its Form. |
 | BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum.|
 | ButtonStyle | Gets or sets a value (true/false) indicating Tabs appear as buttons and no border is drawn around the display area of the Tab Control.|
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
