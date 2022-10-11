@@ -1518,7 +1518,7 @@ function frmMain_OnMouseMove( _
          end if   
       else   
          if PtInRect(@pDoc->rcSplitButton, pt) then 
-            SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
+            SetCursor( ghCursorSizeNS )
          end if   
       end if
    end if
@@ -1550,7 +1550,7 @@ function frmMain_OnLButtonDown( _
          pDoc->bSizing = true
          pDoc->SplitY = pDoc->rcSplitButton.top  
          pDoc->ptPrev.y = pt.y
-         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
+         SetCursor( ghCursorSizeNS )
          SetCapture( HWND_FRMMAIN )
       end if
    end if
@@ -1916,6 +1916,10 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
    dim cx as long =  16 * (pWindow->DPI \ 96)
    ghIconTick   = LoadImage( pWindow->InstanceHandle, "IMAGE_TICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
    ghIconNoTick = LoadImage( pWindow->InstanceHandle, "IMAGE_NOTICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
+
+   ' Load the North/Southand East/West cursor images
+   ghCursorSizeNS = LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
+   ghCursorSizeWE = LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZEWE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
 
    ' Build the keyboard accelerators
    frmKeyboard_BuildAcceleratorTable

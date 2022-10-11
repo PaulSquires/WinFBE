@@ -186,6 +186,8 @@ dim shared as hwnd HWND_FRMEDITOR_VSCROLLBAR(1)
 
 dim shared as HICON ghIconTick, ghIconNoTick
 dim shared as long ghIconGood, ghIconBad
+dim shared as HCURSOR ghCursorSizeNS
+dim shared as HCURSOR ghCursorSizeWE
 
 ' Create a dynamic array that will hold all localization words/phrases while
 ' a language is being edited in frmOptionsLocal. Also create a global array

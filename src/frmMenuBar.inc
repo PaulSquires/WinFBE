@@ -99,13 +99,17 @@ function frmMenuBar_WndProc( _
 
          GetClientRect( lpdis->hwndItem, @rc )
          
+         dim as HFONT oldFont
+         dim as HBITMAP oldBmp
+
          SaveDC(lpdis->hDC)
 
          memDC = CreateCompatibleDC( lpdis->hDC )
          hbit  = CreateCompatibleBitmap( lpdis->hDC, rc.right, rc.bottom )
-         If hbit Then hbit = SelectObject( memDC, hbit )
-
-         SelectObject( memDC, ghMenuBar.hFontMenuBar )
+         
+         SaveDC(memDC)
+         oldBmp = SelectObject( memDC, hbit )
+         oldFont = SelectObject( memDC, ghMenuBar.hFontMenuBar )
          
          dim as boolean IsHot = false
          if lpdis->hwndItem = ghWndActiveMenuBarButton then IsHot = true
@@ -126,12 +130,16 @@ function frmMenuBar_WndProc( _
          
          dim as CWSTR wszCaption = AfxGetWindowText( lpdis->hwndItem )
          DrawText( memDC, wszCaption.sptr, -1, Cast(lpRect, @rcText), wsStyle )
-
+         SelectObject( memDC, oldFont )
+         
          BitBlt lpdis->hDC, 0, 0, rc.right, rc.bottom, memDC, 0, 0, SRCCOPY 
 
+         SelectObject( memDC, oldBmp )
+
          ' Cleanup
-         If hbit  Then DeleteObject SelectObject(memDC, hbit)
-         If memDC Then DeleteDC memDC
+         RestoreDC(memDC, -1)
+         if hbit then DeleteObject(hbit)
+         If memDC Then DeleteDC(memDC)
          RestoreDC(lpdis->hDC, -1)
          return true
       end if   

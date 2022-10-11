@@ -394,9 +394,11 @@ Function frmOutput_Listview_SubclassProc ( _
                         'Header_GetItemText is currently bugged. Report submitted to Jose to correct.
                         'Header_GetItemText( ptnmhdr->hwndFrom, ptnmcd->dwItemSpec, @wszText, MAX_PATH )
                         ListView_GetHeaderText( HWnd, ptnmcd->dwItemSpec, @wszText, MAX_PATH )
-                        SelectObject( ptnmcd->hdc, ghStatusBar.hFontStatusBar )
+                        dim as HFONT oldFont
+                        oldFont = SelectObject( ptnmcd->hdc, ghStatusBar.hFontStatusBar )
                         dim as long wsStyle = DT_NOPREFIX or DT_LEFT Or DT_VCENTER or DT_SINGLELINE
                         DrawText( ptnmcd->hdc, wszText, -1, Cast(lpRect, @ptnmcd->rc), wsStyle )
+                        SelectObject( ptnmcd->hdc, oldFont )
                         return CDRF_SKIPDEFAULT
                   end select
                       
@@ -452,7 +454,7 @@ Function frmOutput_OnMouseMove( _
    GetCursorPos(@pt)
    If PtInRect( @rc, pt ) Then
       if WindowFromPoint(pt) = HWND_FRMOUTPUT then
-         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         SetCursor( ghCursorSizeNS )
       end if
    End If
    
@@ -515,7 +517,7 @@ Function frmOutput_OnLButtonDown( _
    GetCursorPos(@pt)
    If PtInRect( @rc, pt ) Then
       if WindowFromPoint(pt) = HWND_FRMOUTPUT then
-         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         SetCursor( ghCursorSizeNS )
          gApp.bDragActive = True 
          gApp.hWndPanel   = HWND_FRMOUTPUT
          SetCapture( HWND_FRMOUTPUT )
@@ -660,10 +662,16 @@ function frmOutputTabs_SubclassProc ( _
 
          Dim memDC as HDC      ' Double buffering
          Dim hbit As HBITMAP   ' Double buffering
-
+         dim oldFont as HFONT
+         dim oldPen as HPEN
+         dim oldBrush as HBRUSH
+         dim oldBmp as HBITMAP
+         
          memDC = CreateCompatibleDC( hDC )
          hbit  = CreateCompatibleBitmap( hDC, nWidth, nHeight )
-         If hbit Then hbit = SelectObject( memDC, hbit )
+         
+         SaveDC(memDC)
+         oldBmp = SelectObject( memDC, hbit )
 
          FillRect( memDC, @ps.rcPaint, ghOutput.hPanelBrush )
  
@@ -679,25 +687,31 @@ function frmOutputTabs_SubclassProc ( _
                FillRect( memDC, @rc, ghOutput.hBackBrush )
             end if
             dim as long wsStyle = DT_NOPREFIX or DT_CENTER Or DT_VCENTER or DT_SINGLELINE
-            SelectObject( memDC, ghStatusBar.hFontStatusBar )
+            oldFont = SelectObject( memDC, ghStatusBar.hFontStatusBar )
             DrawText( memDC, gOutputTabs(i).wszText.sptr, -1, Cast(lpRect, @rc), wsStyle )
+            SelectObject( memDC, oldFont )
          next
 
          dim as HPEN hPenNull = CreatePen( PS_NULL, 1, 0 )  ' null/invisible pen
          dim as long wsStyle = DT_NOPREFIX or DT_CENTER Or DT_TOP 
          rc = gOutputCloseRect
-         SelectObject( memDC, ghMenuBar.hFontSymbolSmall )
+         oldFont = SelectObject( memDC, ghMenuBar.hFontSymbolSmall )
          SetTextColor( memDC, ghOutput.ForeColorHot )
          DrawText( memDC, wszClose, -1, Cast(lpRect, @rc), wsStyle )
+         SelectObject( memDC, oldFont )
+         
          if isMouseOverRECT( hWin, rc ) then
             ' if we are hovered over the "X" close icon rect then highlight it
-            SelectPen( memDC, hPenNull )
-            SelectObject( memDC, ghOutput.hCloseBrushHot )
+            oldPen = SelectPen( memDC, hPenNull )
+            oldBrush = SelectObject( memDC, ghOutput.hCloseBrushHot )
             RoundRect( memDC, rc.left, rc.top, rc.right, rc.bottom, 20, 20 )
             SetBkColor( memDC, ghOutput.CloseBackColorHot )
             SetTextColor( memDC, ghOutput.ForeColorHot )
-            SelectObject( memDC, ghMenuBar.hFontSymbolSmall )
+            oldFont = SelectObject( memDC, ghMenuBar.hFontSymbolSmall )
             DrawText( memDC, wszClose, -1, Cast(lpRect, @rc), wsStyle )
+            SelectObject( memDC, oldPen )
+            SelectObject( memDC, oldFont )
+            SelectObject( memDC, oldBrush )
          end if   
 
          ' Paint a simple line under the currently active tab
@@ -705,9 +719,10 @@ function frmOutputTabs_SubclassProc ( _
          if gOutputTabsCurSel <> -1 then
             rc = gOutputTabs(gOutputTabsCurSel).rcText
             SetBkColor( memDC, ghOutput.ForeColor )
-            SelectPen( memDC, hPenSolid )
+            oldPen = SelectPen( memDC, hPenSolid )
             MoveToEx( memDC, rc.left, rc.bottom - pWindow->ScaleY(4), Null )
             LineTo( memDC, rc.right, rc.bottom - pWindow->ScaleY(4) )
+            SelectObject( memDC, oldPen )
          end if
          
          ' Paint a simple line at the top of the window that will act as a 
@@ -715,18 +730,22 @@ function frmOutputTabs_SubclassProc ( _
          if hPenSolid then DeleteObject( hPenSolid )
          hPenSolid = CreatePen( PS_SOLID, pWindow->ScaleY(1), ghOutput.Divider )
          SetBkColor( memDC, ghOutput.BackColor )
-         SelectPen( memDC, hPenSolid )
+         oldPen = SelectPen( memDC, hPenSolid )
          MoveToEx( memDC, ps.rcPaint.left, ps.rcPaint.top, Null )
          LineTo( memDC, ps.rcPaint.right, ps.rcPaint.top )
+         SelectObject( memDC, oldPen )
          
          BitBlt( hDC, 0, 0, nWidth, nHeight, memDC, 0, 0, SRCCOPY )
 
+         SelectObject( memDC, oldBmp )
 
          ' Cleanup
+         RestoreDC( memDC, -1 )
+         DeleteObject( hbit )
+         if memDC then DeleteDC( memDC )
+         
          if hPenSolid then DeleteObject( hPenSolid )
          if hPenNull then DeleteObject( hPenNull )
-         if hbit  then DeleteObject( SelectObject(memDC, hbit) )
-         if memDC then DeleteDC( memDC )
          RestoreDC( hDC, -1 )
          
          EndPaint( hWin, @ps )

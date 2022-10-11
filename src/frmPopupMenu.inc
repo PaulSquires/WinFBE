@@ -215,19 +215,23 @@ function frmPopupMenu_OnDrawItem( _
 
       Dim memDC as HDC      ' Double buffering
       Dim hbit As HBITMAP   ' Double buffering
+      dim as HPEN oldPen
+      dim as HBRUSH oldBrush
+      dim as HFONT oldFont
+      dim as HFONT oldBmp
 
       memDC = CreateCompatibleDC( lpdis->hDC )
       hbit  = CreateCompatibleBitmap( lpdis->hDC, nWidth, nHeight )
-      If hbit Then hbit = SelectObject( memDC, hbit )
-
-      SelectObject( memDC, ghMenuBar.hFontMenuBar )
+      
+      SaveDC(memDC)
+      oldBmp = SelectObject( memDC, hbit )
          
       dim as CWSTR wszCaption 
       dim as long wsStyle 
 
       dim as HBRUSH hBrush
       dim as COLORREF foreclr, backclr
-         
+            
       dim as long idx = ListBox_GetItemData( lpdis->hwndItem, lpdis->ItemID )
       dim pMenu as TOPMENU_TYPE ptr = @gTopMenu(idx)
 
@@ -259,10 +263,11 @@ function frmPopupMenu_OnDrawItem( _
          rcText.left = rcText.left + pWindow->ScaleX(12) 
          rcText.right = rcText.right - pWindow->ScaleX(12) 
          dim as HPEN hPen = CreatePen( PS_SOLID, 1, ghPopup.ForeColorDisabled )
-         SelectObject( memDC, hPen )
+         oldPen = SelectObject( memDC, hPen )
          MoveToEx( memDC, rcText.Left, (rcText.bottom-rcText.top) / 2, null )   
          LineTo( memDC, rcText.Right, (rcText.bottom-rcText.top) / 2 )
-         DeleteObject hPen   
+         SelectObject( memDC, oldPen )
+         DeleteObject( hPen )   
       else
          dim as RECT rcBitmap = rcText
          ' Handle caption, keyboard accelerator or submenu marker
@@ -272,34 +277,43 @@ function frmPopupMenu_OnDrawItem( _
          if pMenu->isChecked then
             rcBitmap.Right = rcBitmap.Left + pWindow->ScaleX(30) 
             wsStyle = DT_NOPREFIX or DT_CENTER Or DT_VCENTER or DT_SINGLELINE
-            SelectObject( memDC, ghMenuBar.hFontSymbol )
+            oldFont = SelectObject( memDC, ghMenuBar.hFontSymbol )
             DrawText( memDC, wszCheckmark, -1, Cast(lpRect, @rcBitmap), wsStyle )
-            SelectObject( memDC, ghMenuBar.hFontMenuBar )
+            SelectObject( memDC, oldFont )
          end if
+         oldFont = SelectObject( memDC, ghMenuBar.hFontMenuBar )
          rcText.left = rcText.left + pWindow->ScaleX(30) 
          rcText.right = rcText.right - pWindow->ScaleX(30) 
+
          ' caption
          wsStyle = DT_NOPREFIX or DT_LEFT Or DT_VCENTER or DT_SINGLELINE
          DrawText( memDC, wszLeft.sptr, -1, Cast(lpRect, @rcText), wsStyle )
+
          ' keyboard accelerator 
          wsStyle = DT_NOPREFIX or DT_RIGHT Or DT_VCENTER or DT_SINGLELINE
          DrawText( memDC, wszRight.sptr, -1, Cast(lpRect, @rcText), wsStyle )
+         SelectObject( memDC, oldFont )
+
          ' submenu arrow
          if pMenu->nChildID then
             rcBitmap = rcText
             rcBitmap.Left = rcText.Right
             rcBitmap.Right = rcBitmap.Left + pWindow->ScaleX(20) 
-            SelectObject( memDC, ghMenuBar.hFontSymbol )
+            oldFont = SelectObject( memDC, ghMenuBar.hFontSymbol )
             wsStyle = DT_NOPREFIX or DT_RIGHT Or DT_TOP or DT_SINGLELINE
             DrawText( memDC, wszChevronRight, -1, Cast(lpRect, @rcBitmap), wsStyle )
+            SelectObject( memDC, oldFont )
          end if   
       end if
          
       BitBlt lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, _
              nWidth, nHeight, memDC, 0, 0, SRCCOPY 
 
+      SelectObject( memDC, oldBmp )
+      
       ' Cleanup
-      If hbit  Then DeleteObject SelectObject(memDC, hbit)
+      RestoreDC(memDC, -1)
+      If hbit  Then DeleteObject(hbit)
       If memDC Then DeleteDC memDC
       RestoreDC(lpdis->hDC, -1)
    end if   

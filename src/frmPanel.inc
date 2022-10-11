@@ -178,6 +178,9 @@ function frmPanel_OnPaint( byval HWnd as HWnd ) as LRESULT
 
    dim as PAINTSTRUCT ps
    dim as HDC hDc
+   dim as HPEN oldPen
+   dim as HFONT oldFont
+   dim as HBRUSH oldBrush
    
    hDC = BeginPaint(hWnd, @ps)
 
@@ -188,30 +191,38 @@ function frmPanel_OnPaint( byval HWnd as HWnd ) as LRESULT
    ' Draw the panel Label
    SetTextColor( hDC, ghPanel.forecolor )
    SetBkColor( hDC, ghPanel.backcolor )
-   SelectObject( hDC, ghStatusBar.hFontStatusBar )
+   oldFont = SelectObject( hDC, ghStatusBar.hFontStatusBar )
+
    dim as long wsStyle = DT_NOPREFIX or DT_LEFT or DT_VCENTER or DT_SINGLELINE  
    DrawText( hDC, gPanel.wszLabel.sptr, -1, cast(lpRect, @gPanel.rcLabel), wsStyle )
+   SelectObject( hDC, oldFont )
    
    ' Draw the "..." menu item
-   dim as HPEN hPenNull = CreatePen( PS_NULL, 1, 0 )  ' null/invisible pen
-   SelectObject( hDC, ghPanel.hPanelBrush )
-   SetBkColor( hDC, ghPanel.BackColor )
    SetTextColor( hDC, ghPanel.ForeColorHot )
    if isPanelActionButtonHitTest( HWnd ) then
+      oldBrush = SelectObject( hDC, ghPanel.hBackBrushHot )
       SetBkColor( hDC, ghPanel.BackColorHot )
-      SelectObject( hDC, ghPanel.hBackBrushHot )
+   else
+      oldBrush = SelectObject( hDC, ghPanel.hPanelBrush )
+      SetBkColor( hDC, ghPanel.BackColor )
    end if
    dim as RECT rc = gPanel.rcActionMenu
-   SelectPen( hDC, hPenNull )
+
+   dim as HPEN hPenNull = CreatePen( PS_NULL, 1, 0 )  ' null/invisible pen
+   oldPen = SelectObject( hDC, hPenNull )
    RoundRect( hDC, rc.left, rc.top, rc.right, rc.bottom, 20, 20 )
+   DeleteObject SelectObject( hDC, oldPen )
+   
    wsStyle = DT_NOPREFIX or DT_CENTER Or DT_VCENTER
-   SelectObject( hDC, ghMenuBar.hFontSymbolLargeBold )
+   oldFont = SelectObject( hDC, ghMenuBar.hFontSymbolLargeBold )
    DrawText( hDC, wszMoreActions, -1, Cast(lpRect, @rc), wsStyle )
+   SelectObject( hDC, oldFont )
+   SelectObject( hDC, oldBrush )
 
    ' Draw the bottom two Panel buttons
    dim as long penWidth = pWindow->ScaleX(1)
    dim as HPEN hPenSolid = CreatePen( PS_SOLID, penWidth, ghTopTabs.Divider )
-   SelectObject( hDC, hPenSolid)
+   oldPen = SelectObject( hDC, hPenSolid)
 
    dim as HBRUSH hBrush
    dim as COLORREF foreclr, backclr
@@ -225,20 +236,22 @@ function frmPanel_OnPaint( byval HWnd as HWnd ) as LRESULT
       backclr = iif( isHot, ghPanel.BackColorButtonHot, ghPanel.BackColorButton)
       foreclr = iif( isHot, ghPanel.ForeColorButtonHot, ghPanel.ForeColorButton)
       
-      SelectObject( hDC, hBrush )
+      oldBrush = SelectObject( hDC, hBrush )
       SetBkColor( hDC, backclr )
       SetTextColor( hDC, foreclr )
 
       SelectPen( hDC, hPenSolid )
       Rectangle( hDC, rc.left, rc.top, rc.right, rc.bottom )
       wsStyle = DT_NOPREFIX or DT_CENTER Or DT_VCENTER or DT_SINGLELINE
-      SelectObject( hDC, ghStatusBar.hFontStatusBar )
+      oldFont = SelectObject( hDC, ghStatusBar.hFontStatusBar )
       DrawText( hDC, gPanelButton(i).wszCaption.sptr, -1, Cast(lpRect, @rc), wsStyle )
+
+      SelectObject( hDC, oldFont )
+      SelectObject( hDC, oldBrush )
    next   
 
+   DeleteObject SelectObject( hDC, oldPen )
    RestoreDC( hDC, -1 )
-   DeletePen( hPenNull )
-   DeletePen( hPenSolid )
 
    EndPaint( hWnd, @ps )
 
@@ -305,8 +318,7 @@ function frmPanel_WndProc( _
       GetCursorPos(@pt)
       if PtInRect( @rc, pt ) then
          if WindowFromPoint(pt) = HWND_FRMPANEL then
-            SetCursor LoadImage( null, MAKEINTRESOURCEW(OCR_SIZEWE), _
-                                   IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
+            SetCursor( ghCursorSizeWE )
          end if
       end if
 
@@ -341,8 +353,7 @@ function frmPanel_WndProc( _
       GetCursorPos(@pt)
       if PtInRect( @rc, pt ) then
          if WindowFromPoint(pt) = HWND_FRMPANEL then
-            SetCursor LoadImage( null, MAKEINTRESOURCEW(OCR_SIZEWE), _
-                                   IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE or LR_SHARED )
+            SetCursor( ghCursorSizeWE )
             gApp.bDragActive = true 
             gApp.hWndPanel   = HWND_FRMPANEL
             SetCapture( HWND_FRMPANEL )

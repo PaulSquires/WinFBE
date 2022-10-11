@@ -245,7 +245,9 @@ Function frmStatusBar_WndProc( _
 
       memDC = CreateCompatibleDC( hDC )
       hbit  = CreateCompatibleBitmap( hDC, nWidth, nHeight )
-      If hbit Then hbit = SelectObject( memDC, hbit )
+      
+      SaveDC(memDC)
+      SelectObject( memDC, hbit )
 
       if ghStatusBar.hFontStatusBar then SelectObject(memDC, ghStatusBar.hFontStatusBar)
 
@@ -281,8 +283,9 @@ Function frmStatusBar_WndProc( _
       BitBlt hDC, 0, 0, nWidth, nHeight, memDC, 0, 0, SRCCOPY 
 
       ' Cleanup
-      If hbit  Then DeleteObject SelectObject(memDC, hbit)
-      If memDC Then DeleteDC memDC
+      RestoreDC(memDC, -1)
+      If hbit  Then DeleteObject(hbit)
+      If memDC Then DeleteDC(memDC)
       RestoreDC(hDC, -1)
 
       EndPaint hWnd, @ps
