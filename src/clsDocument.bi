@@ -34,7 +34,6 @@
 #include once "clsPanelItem.bi"
 #include once "clsControl.bi"      ' Includes properties and events types
 #include once "clsCollection.bi"
-#include once "clsParser.bi"
 
 ' Structure that holds all of the user embedded compiler directives
 ' in the source code. Currently, only the main source file is searched
@@ -55,6 +54,14 @@ type IMAGES_TYPE
    pDoc         as clsDocument_ ptr   ' backpointer to pDoc in case search on wszImageName performed.
 end type
 
+' Enum used to distinguish bewteen a sub/function and Property Get/Set
+enum ClassProperty
+   None   = 0   ' sub/function
+   Getter = 1
+   Setter = 2
+   ctor   = 3   ' constructor
+   dtor   = 4   ' destructor
+end enum
 
 ' type that holds data for all project files as it they are loaded from
 ' the project file.
@@ -156,10 +163,10 @@ type clsDocument
       AutoCStartPos     as long
       lastCaretPos      as long        ' used for checking in SCN_UPDATEUI
       lastXOffsetPos    as long        ' used for checking in SCN_UPDATEUI (horizontal offset)
-      
-      wszOnLoadBookmarks(any) as CWSTR  ' saved from project load for files that are not immediately shown in open tab      
-      wszOnLoadFoldPoints as CWSTR      ' saved from project load for files that are not immediately shown in open tab      
-      
+            
+      wszOnLoadBookmarks(any) as CWSTR  
+      wszOnLoadFoldPoints as CWSTR      
+
       ' Following used for split edit views
       rcSplitButton     as RECT        ' Split gripper vertical for Scintilla window
       SplitY            as long        ' Y coordinate of vertical splitter
@@ -173,6 +180,7 @@ type clsDocument
       declare property UserModified() as boolean
       declare property UserModified( byval nModified as boolean )
       
+      declare function ParseDocument() as boolean
       declare function MainMenuExists() as boolean
       declare function ToolBarExists() as boolean
       declare function StatusBarExists() as boolean

@@ -35,7 +35,6 @@ type clsApp
       NewProjectTemplatetype     as long              ' IDC of the new project type to create.
       IsNewProjectFlag           as boolean
       IsProjectLoading           as boolean           ' Project loading. Disable some screen updating.
-      IsProjectCacheLoaded       as boolean           ' The project codetip cache was successfully load. Bypass ParseDocument on load.
       IsFileLoading              as boolean           ' File loading. Disable some screen updating.
       IsCompiling                as boolean           ' File/Project currently being compiled (spinning mouse cursor).
       IsShutDown                 as boolean           ' App is currently closing

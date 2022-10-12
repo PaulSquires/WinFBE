@@ -119,8 +119,6 @@ type clsConfig
       _WinAPICodetipsFilename    as CWSTR 
       _WinFormsXCodetipsFilename as CWSTR 
       _WinFBXCodetipsFilename    as CWSTR
-      _CodetipCacheDatabase      as CWSTR 
-      _CodetipCacheMetaData      as CWSTR
       _DateFileTime              as FILETIME
       
    public:
@@ -198,7 +196,6 @@ type clsConfig
       DisableCompileBeep    as long = false
       MRU(9)                as CWSTR
       MRUProject(9)         as CWSTR
-      bWriteCodetipCache    as boolean
       
       declare constructor()
       declare function SetCategoryDefaults() as long
@@ -215,16 +212,12 @@ type clsConfig
       declare function LoadSessionFile( byref wszSessionFile as wstring ) as boolean    
       declare function ProjectSaveToFile() as boolean    
       declare function ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean    
-      declare function ProjectGetCacheFilename() as CWSTR
-      declare function ProjectSaveCache() as long
-      declare function ProjectLoadCache() as long
       declare function LoadCodetipsFB() as boolean
       declare function LoadCodetipsWinAPI() as boolean
       declare function LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       declare function LoadCodetipsWinFormsX() as boolean
       declare function LoadCodetipsWinFBX() as boolean
       declare function LoadCodetipsGeneric( byval wszFilename as CWSTR, byval nFiletype as long) as boolean
-      declare function LoadCodetipsCache() as long
-      declare function SaveCodetipsCache() as long
+      declare function LoadCodetips() as long
       declare function ReloadConfigFileTest() as boolean    
 end type

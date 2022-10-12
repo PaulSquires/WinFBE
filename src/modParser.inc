@@ -12,267 +12,719 @@
 '    GNU General Public License for more details.
 
 
-''  PARSER MODULE (used in conjunction with clsParser.inc)
-
 #include once "modParser.bi"
 
 
-' ========================================================================================
-' Change everything between quotes to # symbols
-' ========================================================================================
-public function MaskStringCharacters( byval st as string) as string
-   ' Iterate the line and change everything between quotes to # symbols. This
-   ' ensures that we correctly deal with strings that have embedded single 
-   ' quote characters.
-   dim as long i 
-   dim as Boolean bInString = false
-   for i = 0 to len(st) - 1
-      if st[i] = 34 THEN bInString = not(bInString)
-      if bInString THEN  
-         if st[i] <> 34 THEN st[i] = 35   ' # symbol
-      END IF
-   NEXT
-   function = st
+'':::::
+function ctxParser.ParseTODO( byval action as PARSEACTION ) as boolean
+
+   this.objectStartLine = this.lineNum
+   this.objectEndLine = this.lineNum
+
+   ' Get the remainder of the line after the TODO: statement
+   if this.GetLine() = true then 
+      gdb2.dbAdd( @this, DB2_TODO )
+   end if
+      
+   return true
 end function
 
 
-' ========================================================================================
-' Removes a single line comment.
-' ========================================================================================
-public function RemoveComments( byval st as string) as string
-   function = AfxStrExtract( 1, st, "'")
-end function  
+'':::::
+function ctxParser.ParseDIM( _
+         byval action as PARSEACTION, _
+         byval originFrom as DIMSCOPE _
+         ) as boolean
 
+   ' DIMSCOPE tells us from where this function is being called. The origin is important
+   ' because when saving the DIM data to the database we need to the parent scope of
+   ' the DIM statement.
+   
+   dim as string text
+   dim as boolean parenActive 
+   dim as integer numStatements = 0   ' the number of "as" clauses
 
-' ========================================================================================
-' Parse the incoming pDoc clsDocument.
-' ========================================================================================
-public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
-
-   If pDoc = 0 Then exit function
-   if pDoc->bNeedsParsing = false then exit function
-   if gApp.IsProjectCacheLoaded = true then 
-      pDoc->bNeedsParsing = false
-      exit function
+   ' Get the tokens for this DIM statement up until the EOL
+   do until this.GetToken() = false
+      if this.EOL then exit do
+      select case this.ltoken 
+         case "shared"
+            ' change the scope of this variable to global and do not add it to the statement  
+            originFrom = DIMSCOPE.SCOPEGLOBAL
+         case "ptr", "pointer", "byref", "any", "preserve"
+            ' simply skip these tokens
+         case "("
+            parenActive = true   
+         case ")"
+            parenActive = false
+         case "="
+            ' We have hit an initializer. No need to continue to parse.
+            this.ReadToEOL()
+            continue do   
+         case "as"
+            if parenActive = false then
+               text = text & this.ltoken & " " 
+               numStatements += 1
+            end if   
+         case else
+            if parenActive = false then
+               if this.token = "," then
+                  text = rtrim(text) & ","
+               else
+                  text = text & this.token & " "
+               end if   
+            end if   
+      end select
+   loop
+   
+   ' remove any trailing spaces
+   text = rtrim(text)
+   
+   ' If we are parsing a DIM from global space then reset any sub/function data.
+   if originFrom = DIMSCOPE.SCOPEGLOBAL then
+      this.ResetFunctionValues()
    end if
 
-   dim as long nLineCount, nLineNum, nPos, nStartParseLine, numBufferArrayLines
-   Dim As String st, st_ucase, sLine, sTempFileBuffer
+   ' Dim Shared name1 As DataType, name2 As DataType
+   ' There could be multiple DIMS on the same line. These would have more than one " as "
+   ' clause and the statements will be separated by a comma.
+   dim statements( 1 to numStatements ) as string
+   if numStatements = 1 then
+      statements(1) = text
+   else
+      for ii as long = 1 to numStatements
+         statements(ii) = AfxStrParse( text, ii, "," )
+      next
+   end if   
 
-   dim wszFilename as wstring * MAX_PATH
-   wszFilename = pDoc->DiskFilename 
-
-   ' The incoming document is already loaded into a clsDocument so we can simply 
-   ' use that pDoc to retrieve the lines. We can use that approach for the actual
-   ' editor lines but in order to parse any Form CodeGen lines then we need to 
-   ' load them into an array.
-   
-   ' Dynamic string array to hold all lines loaded from the file. It
-   ' is resized at reasonable capacity chunks in order to avoid
-   ' too many memory reallocations if constantly redim'd. 
-   ' These hold the ParsingCodeGen lines
-   redim sLineArray( any ) as string 
- 
-   ' Array to hold the lines read in from a document that exists in the project
-   ' but does not yet have the text loaded. Array access faster than Parse. 
-   redim sTempFileBufferArray( any ) as string 
-   
-   ' Create a parse TYPE that handles the state information throughout parsing this document.
-   dim parser as clsParser
-   
-   with parser
-      .action    = ACTION_NONE
-      .fileName  = wszFilename
-      .nFileType = DB2_FILETYPE_USERCODE
-      ' Flag whether we are parsing the codegen code. We do not want to save any
-      ' of the Form Types sub/function/ctor/dtor because those will then display
-      ' in the Explorer Treeview. The user would click on them expecting to be
-      ' able to then see them in the editor. We can't allow that.
-      .bParsingCodeGen = false
-   end with
-
-   ' Test to ensure that the document exists. If it does not then load the text now.
-   if pDoc->GetActiveScintillaPtr = 0 then
-      ' The document has not been loaded into a Scintilla window
-      GetFileToString( pDoc->DiskFilename, sTempFileBuffer, pDoc )
-      numBufferArrayLines = GetStringToArray( sTempFileBuffer, sTempFileBufferArray() )
-   end if
-   
-   do
-      if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then
-         gApp.wszPanelText = wszFilename
-         gApp.hIconPanel = 0
-         frmMain_SetStatusbar
-      END IF
-
-        
-      if parser.bParsingCodeGen then
-         ' We put the codegen code lines after the scintilla lines because this
-         ' ensures that if nStartParseLine is > 0 then the codegen code will get
-         ' reparsed when the main scintilla document is modified. Otherwise, 
-         ' we'd have to gdb2.dbDelete all entries in the database and have to
-         ' reparse the whole file when at times we only need to parse from the
-         ' line currently being modified onwards to the end of the file.
-         nLineCount = ubound( sLineArray )
-         nStartParseLine = lbound( sLineArray )
-      else
-         if pDoc->GetActiveScintillaPtr = 0 then
-            nLineCount = numBufferArrayLines 
-            nStartParseLine = 1
-         else
-            nLineCount = pDoc->GetLineCount - 1  
-            nStartParseLine = 0
-         end if
+   for ii as long = 1 to ubound(statements) 
+      text = statements(ii)
       
-         ' Before starting to parse this document we must remove any previously saved
-         ' data that exists in the gdb2 database for this file. This will also delete
-         ' any form codegen parsed structures because line numbers for those structures
-         ' are after the main scintilla code.
-         gdb2.dbDelete( wszFilename )
-         
-         ' Reset the count that tracks whether this file contains an Application.Run
-         ' statement (multiple lines in the same code file may contain this function call).
-         ' For visual designer projects, only one of these statements should exist in 
-         ' the entire project.
-         pDoc->AppRunCount = 0
+      ' Normalize the line to move "AS TYPE" to front of the list.
+      ' va1 as long
+      ' as long var1, var2, var3
+      ' var1 as long
+      ' p as long
+      dim as long i = instr(text, " as ")
+      if i > 1 then
+         text = mid(text, i + 1) & " " & left(text, i - 1)
       end if
       
-      ' Analyze all lines in the file
-      for nLineNum = nStartParseLine to nLineCount 
-         parser.st       = ""
-         parser.st_ucase = ""
-         sLine           = ""   ' reset our full line string
-         
-         ' IMPORTANT: Get the full line as it could be across multiple lines via the line continuation underscore.
-         do
-            if parser.bParsingCodeGen THEN
-               ' Parsing the codegen array
-               st = sLineArray( nLineNum )
-            else
-               ' Parsing the lines in the scintilla control or temporary buffer
-               if pDoc->GetActiveScintillaPtr = 0 then
-                  st = ltrim(sTempFileBufferArray(nLineNum))
-               else 
-                  st = pDoc->GetLine( nLineNum )
-               end if  
-            END IF
-            
-            parser.lineNum = nLineNum 
-                
-            ' Check for a TODO entry. Do not normalize line until after this check is done because
-            ' TODO's are found as part of a comment.
-            if parser.parseToDoItem(st) THEN continue for
-            
-            ' Mask out all characters inside of a string. This enables us to correctly
-            ' test for embedded comment characters and multiple line ":" separators.
-            st = trim(MaskStringCharacters(st))   ' important to remove all pre/post spaces
+      ' as long val
+      ' as long var1,var2,var3
+      ' The first space deliminated token should be "as" followed by the data type at
+      ' position two, followed by one or more list of variables.
+      dim as string dataType = AfxStrParse( text, 2, " " )
 
-            ' Check for multiline comments 
-            if parser.IsMultilineComment(st) THEN continue for
-                   
-            ' Remove any single line comments
-            st = trim(RemoveComments(st))
-            
-            if right(st, 2) = " _" THEN
-               sLine = sLine & left(st, len(st) - 1) & " "
-               nLineNum = nLineNum + 1
-            else
-               ' no line continuation character so we now have all the characters for the current line.   
-               sLine = sLine & st 
+      if this.IsStandardDataType( dataType ) = false then
+         dim as string varName, varNames 
+         i = InStrRev( text, " " )
+         if i then varNames = mid( text, i + 1 )
+         dim as long numItems = AfxStrParseCount( varNames, "," )
+         for i as long = 1 to numItems
+            varName = AfxStrParse( varNames, i, "," )
+            ' We have the full DIM statement so now commit it to the database
+'            ? "DIM: "; varName; " "; dataType;
+         next   
+      end if
+      
+   next
+   
+   return true
+end function
+
+
+'':::::
+function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
+
+   this.ResetFunctionValues()
+   this.objectStartLine = this.lineNum
+   this.objectEndLine = this.lineNum
+
+   ' Get next expected token (objectName)
+   if this.EOL then return false
+   if this.GetToken() then
+      this.objectName = this.token
+   end if
+
+   ' Finally, look for the END TYPE that will complete the parsing
+   do until this.GetToken() = false
+      ' tokens from the body of the TYPE should be processed here
+      
+      select case this.ltoken 
+         case "as"
+            this.ReadToSOL()
+            this.ParseDim( action, DIMSCOPE.SCOPETYPE )
+         case "'todo:"
+            this.ParseTODO( PARSINGACTION.PARSE_TODO )
+      end select
+      
+      if( this.ltoken = "end" ) then
+         if this.GetToken() then
+            if this.EOL then return false
+            if( this.ltoken = "type" ) then
+               this.objectEndLine = this.lineNum
                exit do
             end if
-         loop
-         
-         parser.lineNum = nLineNum 
-       
-         ' If the line contains ":" characters then the line needs to be broken up
-         ' into as many sublines to be processed. Don't use AfxStrParse because we
-         ' need to manually check whether the substring was actually created because
-         ' of a trailing ":". Using AfxStrParse and adding a trailing ":" will cause
-         ' parse problems.
-         for nPos = 1 to len(sLine)
-            ' Get the subline but ensure that we add back the ":" because it 
-            ' could be part of a Label or identifier like PRIVATE: or PUBLIC:
-            dim AS LONG i = instr(nPos, sLine, ":")
-            parser.st = trim(AfxStrExtract(nPos, sLine, ":"))
-            if i THEN parser.st = parser.st & ":"
-            nPos = iif(i, i + 1, len(sLine) + 1)
-               
-            ' Skip blank lines for speed
-            if len(parser.st) = 0 THEN continue for
-            parser.st_ucase = Ucase(parser.st)
+         end if      
+      end if
+   loop
+      
+'? "TYPE: "; this.objectName; " ("; this.objectStartLine; " "; this.objectEndLine; ")"
 
-            ' If normalized line is len = 0 then returns TRUE to continue to next line.
-            ' This removes double spaces and also stores the UCASE version of the line.
-            if parser.NormalizeLine() then continue for 
-            
-            ' Continue to parse a TYPE if applicable. If we found a declare line then
-            ' this function will return True. Declare names in Types are picked up 
-            ' elsewhere when the parser actually encounters the body code of the type/class.
-            if parser.parseTYPE() then continue for
+   return true
+end function
 
-            ' Continue to parse an ENUM if applicable
-            if parser.parseENUM() then continue for
 
-            ' Test the line to see if we have encountered any start or end points
-            ' for a parse. For example, starting to parse a TYPE or FUNCTION, or
-            ' ending an existing parse of a TYPE or FUNCTION. If we have completed/ended
-            ' a parse action then function returns TRUE and we can advance to the next line.
-            if parser.InspectLine() then continue for
-            
-            ' Parse the line for any DIM'd variables. This call parses for variables 
-            ' regardless whether they are global/local, inside a sub/function, or as
-            ' part of a TYPE structure. The current parser state will dictate how the
-            ' variable information is saved to the database.
-            if parser.parseVariableDefinitions() then continue for
-            
-            ' If the line starts with Application.Run then set the flag in the document. We
-            ' can only have one instance of Application.Run in visual designer projects
-            ' otherwise the resulting exe will start phantom processes.
-            if left(parser.st_ucase, 15) = "APPLICATION.RUN" then
-               pDoc->AppRunCount = pDoc->AppRunCount + 1
+'':::::
+function ctxParser.ResetFunctionValues() as boolean
+   this.objectName = ""
+   this.objectAlias = ""
+   this.objectParams = ""
+   this.objectReturnType = ""
+   this.objectStartLine = -1
+   this.objectEndLine = -1
+   this.varName = ""
+   this.varType = ""
+   return true
+end function   
+
+
+'':::::
+function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
+
+   dim as boolean readingAllParams = false
+   dim as boolean readingSingleParam = false
+      
+   this.ResetFunctionValues()
+
+   ' Get next expected token (objectName)
+   if this.EOL then return false
+   if this.GetToken() then
+      this.objectName = this.token
+   end if
+
+   this.objectStartLine = this.lineNum
+   this.objectEndLine = this.lineNum
+
+   ' Get next token (left parenthesis but is optional for sub/function)
+   do until this.GetToken() = false
+      if this.EOL then 
+         if action <> PARSINGACTION.PARSE_FUNCTION then
+            this.UnwindToken
+            exit do  ' only for Sub b/c for Function we haven't encountered AS RETURN_TYPE yet
+         end if   
+      end if
+
+      select case this.ltoken 
+         case "("
+            readingAllParams = true
+            readingSingleParam = true
+         case ")"
+            readingAllParams = false
+            readingSingleParam = false
+            exit do
+         case "="
+            ' if reading a parameter then need to bypass any initializer
+            if readingSingleParam then
+               ' Need to continue until we reach a comma that separates the parameters
+               ' or until we hit the closing parenthesis.
+               readingSingleParam = false
             end if
+         case else
+            ' Get the parameter tokens until we get (right parenthesis)
+            if readingAllParams andalso readingSingleParam then
+               this.objectParams = this.objectParams & iif(this.token = ",", ",", " " & this.token)
+               if this.token = "," then readingSingleParam = true
+            else
+               ' we are not reading params so maybe we have encountered the start of the RETURN_TYPE
+               select case this.ltoken 
+                  case "byref", "as"
+                     this.UnwindToken
+                     exit do
+               end select      
+            end if
+      end select
+   loop
+   
+   if action = PARSINGACTION.PARSE_FUNCTION then
+      ' Look for the Function RETURN_TYPE
+      do until this.GetToken() = false
+         if this.EOL then exit do
+         ' This should pickup any "byref" "as" RETURN_TYPE
+         this.objectReturnType = this.objectReturnType & this.token & " "
+      loop
+   end if
 
-         NEXT
-      next
+   ' Finally, look for the End Sub/Function that will complete the parsing
+   do until this.GetToken() = false
+      ' tokens from the body of the sub/function should be processed here
+      
+       select case this.ltoken 
+         case "dim", "static"
+            this.ParseDim( action, DIMSCOPE.SCOPEFUNCTION )
+         case "'todo:"
+            this.ParseTODO( PARSINGACTION.PARSE_TODO )
+      end select
 
-      ' Check to see if this is a visual design form. If it is, then we need
-      ' to parse the codegen string.
-      if parser.bParsingCodeGen = false then
-         parser.bParsingCodeGen = true
-         if pDoc->IsDesigner then
-            ' Load the codegen lines into the sLineArray
-            dim as CWSTR wst
-            dim as long iLineStart = 1
-            dim as long iLineEnd, nNextLine
+      if( this.ltoken = "end" ) then
+         if this.GetToken() then
+            if this.EOL then return false
+            if( this.ltoken = "sub" ) orelse _
+               (this.ltoken = "function") then 
+               this.objectEndLine = this.lineNum
+               exit do
+            end if
+         end if      
+      end if
+   loop
+      
+   gdb2.dbAdd( @this, DB2_FUNCTION )
+'? "FUNCTION: "; this.objectName; " "; this.objectParams; " "; this.objectReturnType; _
+'                    " ("; this.objectStartLine; " "; this.objectEndLine; ")"
 
-            ' Convert the CodeGen string into an array that can be parsed.
-            nNextLine = nLineCount
-            do until iLineStart >= len( pDoc->wszFormCodeGen )
-               iLineEnd = instr(iLineStart, pDoc->wszFormCodeGen, vbcrlf)
-               if iLineEnd = 0 then iLineEnd = len( pDoc->wszFormCodeGen )  ' cr/lf not found
-               wst = mid( pDoc->wszFormCodeGen.wstr, iLineStart, iLineEnd - iLineStart )
-               iLineStart = iLineStart + len(wst) + len(vbcrlf)
-               if nNextLine >= ubound(sLineArray) THEN
-                  redim preserve sLineArray( nLineCount to nLineCount + 5000 )
-               END IF
-               sLineArray(nNextLine) = wst   
-               nNextLine = nNextLine + 1
-            loop
-            continue do
+   return true
+end function
+
+
+'':::::
+function ctxParser.UnwindToken() as boolean
+   this.s -= len(this.token)
+   this.i = this.s
+   return true
+end function
+
+
+'':::::
+function ctxParser.IsStandardDataType( byref sVarType as string ) as boolean
+   ' Determine if the variable is one of the predefined standard data types
+   static as string sList
+   sList = " boolean byte double integer long longint short single" & _
+           " string ubyte uinteger ushort wstring zstring cwstr "
+   if instr(sList, " " & lcase(sVarType) & " " ) then return true
+   return false  
+end function
+
+
+'':::::
+function ctxParser.PeekChar _
+   ( _
+      byval x as integer = 0 _
+   ) as integer
+
+   if( this.i + x < this.n ) then
+      return cast( ubyte ptr, this.text )[this.i + x]
+   end if
+
+   return 0
+   
+end function 
+
+
+'':::::
+function ctxParser.ReadChar() as integer
+
+   if( this.i < this.n ) then
+      this.i += 1
+      return cast( ubyte ptr, this.text )[this.i - 1]
+   end if
+
+   return 0
+   
+end function 
+
+
+'':::::
+function ctxParser.ReadToEOL() as boolean
+
+   dim as integer c
+
+   c = this.PeekChar()
+   while( c )
+      c = this.PeekChar()
+      if( c = 10 or c = 13 ) then
+         exit while
+      elseif( c = asc("'") ) then
+         c = this.ReadChar()
+         if( this.incomment ) then
+            if( this.PeekChar() = asc("/") ) then
+               c = ReadChar()
+               this.incomment = false
+               exit while
+            end if
+         end if
+      else
+         c = this.ReadChar()
+      end if
+   wend
+
+   return true
+
+end function
+
+
+'':::::
+function ctxParser.ReadToSOL() as boolean
+   ' Rewind to start of line. Used when a token is found part way through a 
+   ' line but parsing it depends on tokens that would have occured earlier
+   ' in the line.
+   ' For example, a dim within a TYPE structure.
+   '      firstName as string
+   '
+   dim as integer curPos = this.s
+   for ii as integer = curPos to 0 step - 1
+      if( (this.text[ii] = 10) or (this.text[ii] = 13) ) then
+         exit for
+      end if
+      this.s = ii: this.i = ii
+   next
+   this.startofline = true
+   
+   return true
+
+end function
+
+
+'':::::
+function ctxParser.ReadQuoted _
+   ( _
+      byval escapedonce as boolean = FALSE _
+   ) as boolean
+
+   dim as integer c
+
+   c = this.PeekChar()
+   if( c <> 34 ) then
+      return false
+   end if
+   
+   '' Expects Opening Quote
+   c = ReadChar()
+
+   if( escapedonce or this.escaped ) then
+
+      while( this.i < this.n )
+         c = this.ReadChar()
+         if( c = asc("""") ) then
+            c = this.PeekChar()
+            if( c = asc("""") ) then
+               c = this.ReadChar()
+            else
+               exit while
+            end if
+         elseif( c = asc("\") ) then
+            c = this.PeekChar()
+            if( c = 10 or c = 13 ) then
+               exit while
+            else
+               c = this.ReadChar()
+            end if
+         end if
+      wend 
+
+   else
+      
+      while( this.i < this.n )
+         c = this.ReadChar()
+         if( c = asc("""") ) then
+            if( this.PeekChar() = asc("""") ) then
+               c = this.ReadChar()
+            else
+               exit while
+            end if
+         endif
+      wend
+
+   end if
+
+   return true
+
+end function
+
+
+'':::::
+function ctxParser.GetLine() as boolean
+   this.ReadToEOL()
+   this.fullLine = mid( *this.text, this.s + 1, this.i - this.s)
+   this.s = this.i
+   return true
+end function
+
+
+'':::::
+function ctxParser.GetToken() as boolean
+
+   while ( this.s < this.n )
+   
+   dim as integer c
+   this.EOL = false
+
+   '' newline ?
+   c = this.PeekChar()
+   if( c = 13 or c = 10 ) then
+      c = this.ReadChar()
+      if( c = 13 ) then
+         c = this.PeekChar()
+         if( c = 10 ) then
+            c = this.ReadChar()
          end if
       end if
-   
-      exit do
-   loop 
+      
+      this.EOL = true
 
-   ' Document has now been fully parsed
-   pDoc->bNeedsParsing = false
+      ' If line continuation was set then we can not set the
+      ' statement terminated marker yet.
+      if( this.ltoken = "_" ) then
+         this.EOL = false
+      end if
 
-   ' Update the TODO listview in the frmOutput form
-   frmOutput_UpdateToDoListview
+      this.lineNum += 1
+      this.startofline = true
+      this.inprepro = false
+      this.s = this.i
+      
+      if this.EOL then 
+         this.token = ""
+         this.ltoken = ""
+         return true
+      else   
+         continue while
+      end if   
+   end if
+
+   if( this.incomment ) then
+      this.ReadToEOL()
+      this.s = this.i
+      continue while
+   end if
+
+   '' tab | space ?
+   c = this.PeekChar()
+   if( c = 9 or c = 32 ) then
+      c = this.ReadChar()
+      while ( c )
+         c = this.PeekChar()
+         if( c = 9 or c = 32 )then
+            c = this.ReadChar()
+         else
+            this.startofline = false
+            exit while
+         end if
+      wend
+      this.s = this.i
+      continue while
+   end if
+
+   '' '
+   c = this.PeekChar()
+   if( c = asc("'") ) then
+      c = this.ReadChar()
+
+      ' We are in a Comment but we need to check if the comment starts
+      ' with a TODO: statement. If yes, then we need to return that token
+      c = this.PeekChar()
+      if( c = asc("t") or c = asc("T") ) then
+         c = this.ReadChar()
+         while( c )
+            c = this.PeekChar()
+            select case c
+               'case "O", "o", "D", "d", ":"
+               case 79, 111, 68, 100, 58
+                  c = this.ReadChar()
+               case else
+                  exit while
+            end select
+         wend
+         this.token = mid( *this.text, this.s + 1, this.i - this.s)
+         this.ltoken = lcase(this.token)
+         this.s = this.i
+         if this.ltoken = "'todo:" then
+            return true
+         end if
+      end if
+         
+      ' Reach this point then this is just a normal comment line 
+      ' to continue to the end of the line.
+      this.ReadToEOL()
+      this.s = this.i
+      continue while
+   end if
+
+   '' #
+   c = this.PeekChar()
+   if( c = asc("#") and this.startofline ) then
+      c = this.ReadChar()
+      while( c )
+         c = this.PeekChar()
+         if( ( c = asc("_") ) or _
+             ( c >= asc("A") and c <= asc("Z") ) or _
+             ( c >= asc("a") and c <= asc("z") ) _
+         ) then
+            c = this.ReadChar()
+         else
+            exit while
+         end if
+      wend 
+      this.inprepro = true
+      this.s = this.i
+      continue while
+   end if
+
+   '' /'
+   c = this.PeekChar()
+   if( c = asc("/") ) then
+      if( this.PeekChar(1) = asc("'") ) then
+         c = this.ReadChar()
+         c = this.ReadChar()
+         this.incomment = TRUE
+         this.ReadToEOL()
+         this.s = this.i
+         continue while
+      end if
+   end if
+
+   '' $"..." 
+   c = this.PeekChar()
+   if( c = asc("$") ) then
+      if( this.PeekChar(1) = asc("""") ) then
+         c = this.ReadChar() '' $
+         if( this.ReadQuoted(true) ) then
+            this.s = this.i
+            continue while
+         end if
+      end if
+   end if
+
+   '' "
+   c = this.PeekChar()
+   if( c = asc("""") ) then
+      if( this.ReadQuoted(false) ) then
+         this.s = this.i
+         continue while
+      end if
+   end if
+
+   '' Special characters that we want to process
+   c = this.PeekChar()
+   if( c = asc("(") or _
+       c = asc(")") or _
+       c = asc("=") or _
+       c = asc(",") _
+      ) then
+
+      c = this.ReadChar()
+
+      this.token = chr(c)
+      this.ltoken = this.token
+      this.s = this.i
+
+      return true
+   end if
+
+   '' Name | keyword
+   c = this.PeekChar()
+   if( c = asc("_") or _
+      ( c >= asc("A") and c <= asc("Z") ) or _
+       ( c >= asc("a") and c <= asc("z") ) _
+      ) then
+
+      c = this.ReadChar()
+      while( c )
+         c = this.PeekChar()
+         if( ( c = asc("_") ) or _
+             ( c >= asc("A") and c <= asc("Z") ) or _
+             ( c >= asc("a") and c <= asc("z") ) or _
+             ( c >= asc("0") and c <= asc("9") ) or _
+             ( c = asc(".") ) _
+            ) then
+
+            c = this.ReadChar()
+         else
+            '_ReadSuffix( ctx )
+            exit while
+         end if
+      wend
+
+      this.token = mid( *this.text, this.s + 1, this.i - this.s)
+      this.ltoken = lcase(this.token)
+
+      ' Bypass REM statements and Line Continuation underscore character
+      if (this.ltoken = "declare") orelse _
+         (this.ltoken = "rem") orelse _
+         (this.ltoken = "_") then
+         this.ReadToEOL()
+         this.s = this.i
+         continue while
+      end if
+
+      this.s = this.i
+
+      return true
+
+   end if
+
+   c = this.ReadChar()
+
+   this.s = this.i
+   wend
    
-   Function = 0
- 
-End Function
+   return false
+
+end function
+
+
+'':::::
+function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
+
+   if pDoc = 0 then return false
+   
+   this.pDoc = pDoc
+   this.text = Cast( ZString Ptr, SciExec(pDoc->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
+   if( this.text = 0 ) then return false
+
+   this.incomment = false
+   this.startofline = true
+   this.lineNum = 0
+   this.s = 0
+   this.i = 0
+   this.n = len(*this.text)
+
+   do until this.GetToken() = false 
+
+      select case this.ltoken
+         case "dim", "redim"
+            if this.ParseDIM( PARSINGACTION.PARSE_DIM, DIMSCOPE.SCOPEGLOBAL ) = false then
+               '? this.lineNum, "Error parsing DIM statement. Unexpected token: "; this.token
+            end if
+
+         case "sub"
+            if this.ParseSubFunction( PARSINGACTION.PARSE_SUB ) = false then
+               '? this.lineNum, "Error parsing SUB statement. Unexpected token: "; this.token
+            end if
+
+         case "function"
+            if this.ParseSubFunction( PARSINGACTION.PARSE_FUNCTION ) = false then
+               '? this.lineNum, "Error parsing FUNCTION statement. Unexpected token: "; this.token
+            end if
+
+         case "type"
+            if this.ParseTYPE( PARSINGACTION.PARSE_TYPE ) = false then
+               '? this.lineNum, "Error parsing TYPE statement. Unexpected token: "; this.token
+            end if
+
+         case "'todo:"
+            if this.ParseTODO( PARSINGACTION.PARSE_TODO ) = false then
+               '? this.lineNum, "Error parsing TODO statement. Unexpected token: "; this.token
+            end if
+
+      end select
+
+   loop
+
+   this.text = 0
+
+   return true
+
+end function
+
 

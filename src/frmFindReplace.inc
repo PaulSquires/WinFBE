@@ -352,7 +352,7 @@ function frmFindReplace_DoReplace( _
    ' Need to reparse because some of the function names may been replaced
    ' with new names.
    pDoc->bNeedsParsing = true
-   ParseDocument( pDoc )
+   pDoc->ParseDocument()
 
    function = 0
 end function

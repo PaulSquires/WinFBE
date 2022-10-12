@@ -1037,7 +1037,7 @@ function frmMain_OpenFileSafely( _
      
    dim as long iTab = -1
    dim pDoc as clsDocument ptr 
-   
+
    ' This function opens/creates various types of files depending on the situation. 
    ' - New documents
    ' - Open document from disk (after WinFBE has been loaded)
@@ -1055,30 +1055,18 @@ function frmMain_OpenFileSafely( _
          wszName = OnCommand_FileAutoSaveFileCheck( wszName )
          pDoc->CreateCodeWindow( HWnd, false, bIsTemplate, wszName )
          pDoc->bNeedsParsing = true
-         ParseDocument( pDoc )
+         pDoc->ParseDocument()
       end if
       pDoc->ProjectFileType = wszFileType
-      LoadExplorerFiles()
-      LoadFunctionsFiles()
-   end if
-
-   
-   ' if incoming pDocIn existed but did not have a valid Scintilla control then this
-   ' was a document created during a mass project load. In that situation, the creation
-   ' of the Scintilla control and loading of the actual code text is delayed until the
-   ' document actually has to be displayed.
-   if pDocIn then 
-      if pDocIn->hWndActiveScintilla = 0 then
-         ' Call CreateCodeWindow will reset the ProjectFileType so save it here.
-         dim as CWSTR wszFileType = pDocIn->ProjectFileType
-         pDocIn->CreateCodeWindow( HWnd, false, false, pDocIn->DiskFilename )
-         pDocIn->ProjectFileType = wszFileType
+      if gApp.IsProjectLoading = false then 
+         LoadExplorerFiles()
+         LoadFunctionsFiles()
       end if
-      pDoc = pDocIn     
+   else   
+      pDoc = pDocIn   
    end if
 
-
-   ' Set the default build configuration for this document. if no IsDefault option
+   ' Set the default build configuration for this document. If no IsDefault option
    ' has been checked then we simply use whatever the current selected build is.
    if pDoc->DocumentBuild = "" then 
       pDoc->DocumentBuild = frmBuildConfig_GetDefaultBuildGUID()
@@ -1088,15 +1076,17 @@ function frmMain_OpenFileSafely( _
    end if      
    
    if bShowInTab then
-      ' if the document is already open and loaded then simply switch to
-      ' that document in the top tabcontrol, otherwise load the Explorer 
-      ' files list, create a new tab, and switch to it.
-      iTab = gTTabCtl.GetTabIndexFromFilename( pDoc->DiskFilename )
-      if iTab = -1 then 
-         LoadExplorerFiles()
-         iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
-      end if   
-      gTTabCtl.SetFocusTab(iTab)
+      if gApp.IsProjectLoading = false then 
+         ' if the document is already open and loaded then simply switch to
+         ' that document in the top tabcontrol, otherwise load the Explorer 
+         ' files list, create a new tab, and switch to it.
+         iTab = gTTabCtl.GetTabIndexFromFilename( pDoc->DiskFilename )
+         if iTab = -1 then 
+            LoadExplorerFiles()
+            iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
+         end if   
+         gTTabCtl.SetFocusTab(iTab)
+      end if
    end if
 
    ' if a Menu, ToolBar or StatusBar exists on the Form then ensure that it
@@ -1107,15 +1097,17 @@ function frmMain_OpenFileSafely( _
       frmStatusBarEditor_CreateFakeStatusBar(pDoc)
    end if
 
-   frmMain_PositionWindows
-   frmMain_SetFocusToCurrentCodeWindow
-
+   if gApp.IsProjectLoading = false then 
+      frmMain_PositionWindows
+      frmMain_SetFocusToCurrentCodeWindow
+   end if
+   
    ' Post a custom message in order to check if this now opened file needs
    ' to be upgraded to new 3.0.2 form format.
    if pDoc->IsDesigner then
       postmessage( HWND_FRMMAIN, MSG_USER_UPGRADE302FORM, 0, cast(LPARAM, pDoc) )
    end if
-   
+
    function = pDoc
 end Function
 
@@ -1746,6 +1738,7 @@ function frmMain_WndProc( _
       case MSG_USER_TOPTABS_CHANGING
          ' Hide the current tab
          gTTabCtl.DisplayScintilla( gTTabCtl.CurSel, false )
+         exit function
          
       case MSG_USER_TOPTABS_CHANGED
          ' Show the new tab
@@ -1753,13 +1746,14 @@ function frmMain_WndProc( _
          frmMain_PositionWindows
          dim pDoc as clsDocument ptr = gTTabCtl.tabs(gTTabCtl.CurSel).pDoc
          if pDoc then
+            AfxRedrawWindow( pdoc->hWindow(0) )  ' makes the code window display quicker especially when loading Project.
             if pDoc->IsDesigner andalso IsDesignerView(pDoc) then
                DisplayPropertyList( pDoc )
             end if   
          end if   
-         ' Set the focus to the Scintilla window. This will call frmMain_SetStatusbar
-         ' which also calls frmMain_SelectComboFiles and frmMain_SelectComboFunctions.
-         frmMain_SetFocusToCurrentCodeWindow
+         ' Set the focus to the Scintilla window. This will call frmMain_SetStatusbar.
+         frmMain_SetFocusToCurrentCodeWindow()
+         exit function
 
       case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document

@@ -28,7 +28,7 @@ function frmFunctions_ReparseFiles() as Long
    do until pDoc = 0
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          pDoc->bNeedsParsing = true
-         ParseDocument(pDoc)
+         pDoc->ParseDocument()
       end if
       pDoc = pDoc->pDocNext
    loop   

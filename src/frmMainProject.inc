@@ -54,9 +54,6 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.SaveProject(false)
    if OnCommand_FileClose( HWnd, EFC_CLOSEALL ) = false then exit function
    
-   ' Save the project codetips to cache
-   gConfig.ProjectSaveCache
-   
    ' If the entire app is closing down then we do not have to process the
    ' remaining project cleanup commands. 
    if gApp.IsShutdown then return true

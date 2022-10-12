@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include once "clsParser.bi"
+#include once "modParser.bi"
 
 ''
 ''  Application in-memory database
@@ -24,7 +24,7 @@ const DB2_SUB              = 3    ' Standalone and type subs
 const DB2_PROPERTY         = 4    ' GetProp/SetProp/Constr/Destr of TYPEs
 const DB2_type             = 5
 const DB2_TODO             = 6
-const DB2_STANDARDDATAtype = 7    ' long, integer, string, etc...
+const DB2_STANDARDDATATYPE = 7    ' long, integer, string, etc...
 
 const DB2_FILETYPE_FB        = 100
 const DB2_FILETYPE_WINAPI    = 101
@@ -36,11 +36,12 @@ const DB2_FILETYPE_USERCODE  = 200
 ' and reloaded from disk (codetip cache database).
 type DB2_DATA
    deleted      as boolean = true      ' True/False
-   nFiletype    as long                ' See list of DB2_FILEtype above
+   pDoc         as clsDocument ptr     ' Code Document
+   nFiletype    as integer             ' See list of DB2_FILETYPE above
    fileName     as wstring * MAX_PATH  ' Filename of source file (needed for deleting).
-   id           as long                ' See DB_* above for what type of record this is.
-   nLineNum     as long                ' Location in the file where found
-   ElementName  as zstring * 75        ' Function name / Variable Name / type Name
+   id           as integer             ' See DB_* above for what type of record this is.
+   nLineNum     as integer             ' Location in the file where found
+   ElementName  as zstring * 75        ' Function name / Variable Name / TYPE Name
    ElementData  as zstring * MAX_PATH  ' Generic text data related to ElementName (todo text, etc)
    CallTip      as zstring * MAX_PATH  ' Function Calltip associated with ElementName variable
    Variabletype as zstring * 75        ' The type of variable this is. Could be a type name.
@@ -54,26 +55,27 @@ end type
 type clsDB2
    private:
       m_arrData(any) as DB2_DATA
-      m_index as long
+      m_index as integer
       
    public:  
-      declare function dbGetFreeSlot() as long
-      declare function dbAddDirect( byval pData as DB2_DATA ptr ) as long
-      declare function dbAdd( byval parser as clsParser ptr, byval id as long) as DB2_DATA ptr
-      declare function dbDelete( byref wszFilename as wstring ) as long
+      declare function dbGetFreeSlot() as integer
+      declare function dbAddDirect( byval pData as DB2_DATA ptr ) as integer
+      declare function dbAdd( byval parser as ctxParser ptr, byval id as integer) as DB2_DATA ptr
+      declare function dbDelete( byref wszFilename as wstring ) as integer
       declare function dbDeleteAll() as boolean
-      declare function dbDeleteByFileType( byval nFiletype as long ) as boolean
-      declare function dbRewind() as long
+      declare function dbDeleteByDocumentPtr( byval pDoc as clsDocument ptr ) as boolean
+      declare function dbDeleteByFileType( byval nFiletype as integer ) as boolean
+      declare function dbRewind() as integer
       declare function dbGetNext() as DB2_DATA ptr
-      declare function dbSeek( byval sLookFor as string, byval Action as long, byval sFilename as string = "" ) as DB2_DATA ptr
+      declare function dbSeek( byval sLookFor as string, byval Action as integer, byval sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindFunction( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindSub( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindProperty( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
       declare function dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
-      declare function dbWriteDB2( byref wszFilename as wstring ) as long
-      declare function dbReadDB2( byref wszFilename as wstring ) as long
-      declare function dbDebug() as long
+      declare function dbWriteDB2( byref wszFilename as wstring ) as integer
+      declare function dbReadDB2( byref wszFilename as wstring ) as integer
+      declare function dbDebug() as integer
       
       declare constructor
 end type

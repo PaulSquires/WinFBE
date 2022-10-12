@@ -533,7 +533,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          
          ' If the Event/function does not already exist in code then create it now.
          pDoc->bNeedsParsing = true
-         ParseDocument( pDoc )
+         pDoc->ParseDocument()
 
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
@@ -589,7 +589,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          
          ' If the Event/function does not already exist in code then create it now.
          pDoc->bNeedsParsing = true
-         ParseDocument( pDoc )
+         pDoc->ParseDocument()
          
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
@@ -640,7 +640,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          
          ' If the Event/function does not already exist in code then create it now.
          pDoc->bNeedsParsing = true
-         ParseDocument( pDoc )
+         pDoc->ParseDocument()
          
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
@@ -698,7 +698,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                
                ' If the Event/function does not already exist in code then create it now.
                pDoc->bNeedsParsing = true
-               ParseDocument( pDoc )
+               pDoc->ParseDocument()
                
                ' Only check if we are not loading the project because the event handling
                ' could already exist but just be in another source code file that has
@@ -1031,7 +1031,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    if len(wszAllEvents) then
       pDoc->AppendText( wszAllEvents )
       pDoc->bNeedsParsing = true
-      ParseDocument(pDoc)
+      pDoc->ParseDocument()
    END IF
   
    ' Save the generated codegen code because we will output it to a disk file

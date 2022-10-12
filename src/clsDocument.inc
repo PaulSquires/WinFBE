@@ -75,6 +75,27 @@ end property
 
 
 ' ========================================================================================
+' Parse the code for this document. Invokes the ctxParser which does all of
+' the actual parse work and database updating.
+' ========================================================================================
+function clsDocument.ParseDocument() as boolean
+   if this.bNeedsParsing = false then 
+      return false
+   end if
+   
+   ' Delete any existing data related to this pDoc
+   gdb2.dbDeleteByDocumentPtr(@this)
+   
+   dim parser as ctxParser
+   parser.nFileType = DB2_FILETYPE_USERCODE
+   parser.parse(@this)
+   frmOutput_UpdateToDoListview()
+
+   return true
+end function
+
+
+' ========================================================================================
 ' Determines if the IDC_SCINTILLA id being checked belongs to any of the 
 ' currently defined Scintilla windows (needed for splitter windows).
 ' ========================================================================================
@@ -2051,6 +2072,7 @@ function clsDocument.ApplyProperties() as long
    dim nFontcase   as long 
    dim rxRatio     as single = 1
    dim ryRatio     as single = 1
+
    
    if m_pSci(0) = 0 then exit function
 

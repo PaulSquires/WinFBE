@@ -184,7 +184,7 @@ function OnCommand_FileSave( _
       dim wszFilename as CWSTR = pDoc->DiskFilename
       If pDoc->SaveFile(bSaveAs) Then
          pDoc->ApplyProperties
-         ParseDocument( pDoc )
+         pDoc->ParseDocument()
          ' Apply document properties to this file because the file extension may have
          ' changed. For example from Untitled to *.bas
          if pDoc->DiskFilename <> wszFilename then

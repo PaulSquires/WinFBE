@@ -500,7 +500,7 @@ function InitiatePropertyValueChange() as Long
                            SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
                            SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
                         loop
-                        if bReparse then ParseDocument(pDocParse)
+                        if bReparse then pDocParse->ParseDocument()
                      end if
                      pDocParse = pDocParse->pDocNext
                   loop

@@ -78,7 +78,6 @@ dim shared gLasso   as clsLasso
 
 
 #include once "clsDB2.inc"
-#include once "clsParser.inc"
 #include once "clsConfig.inc"
 #include once "modThemes.inc"
 #include once "modRoutines.inc"
@@ -251,8 +250,8 @@ function WinMain( _
    ' Load the HTML help library for displaying FreeBASIC help *.chm file
    gpHelpLib = dylibload( "hhctrl.ocx" )
 
-   ' Load preparsed cached codetip files 
-   if gConfig.Codetips then gConfig.LoadCodetipsCache
+   ' Load codetip files 
+   if gConfig.Codetips then gConfig.LoadCodetips
 
    
    ' Load any user code snippets and initialize the ToolBox
@@ -262,9 +261,6 @@ function WinMain( _
 
    ' Show the main form
    function = frmMain_Show( 0 )
-
-   ' if the codetip cache needs to be saved then do that now
-   if gConfig.bWriteCodetipCache then gConfig.SaveCodetipsCache
 
 
    ' Free the Scintilla, CaptureConsole and HTML help libraries

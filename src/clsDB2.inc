@@ -43,13 +43,13 @@
 '         ' The incoming nDollars would be discarded by the parser
 '         ' MyTypeVar would be stored as:
 '         '    ElementName = MyType.CalculateAmount.myTypeVar   ElementValue = MYTYPE
-'         Dim n As long        ' This would be discarded by the parser
+'         Dim n As integer        ' This would be discarded by the parser
 '         Dim rc As RECT       ' ElementName = MyType.CalculateAmount.rc  ElementValue = RECT
 '      End Function
 '
 ' eg. (Standalone Function)
-'      Function MyFunction( ByVal p As MyType Ptr ) As long   ' ElementName = .MyFunction.p   ElementValue = MyType
-'         Dim n As long        ' This would be discarded by the parser
+'      Function MyFunction( ByVal p As MyType Ptr ) As integer   ' ElementName = .MyFunction.p   ElementValue = MyType
+'         Dim n As integer        ' This would be discarded by the parser
 '         Dim m As MyType      ' ElementName = .MyFunction.m   ElementValue = MyType
 '      End Function
 '
@@ -79,8 +79,7 @@
 
 
 #include once "clsDB2.bi"
-#include once "clsParser.bi"
-
+#include once "modParser.bi"
 
 
 ''
@@ -88,35 +87,35 @@
 constructor clsDB2
    redim m_arrData(500) as DB2_DATA
                    
-   ' Add the standard builtin data types
-   dim parser as clsParser
-   with parser
-     .lineNum    = -1
-     .Filename   = ""
-   end with
+'   ' Add the standard builtin data types
+'   dim parser as clsParser
+'   with parser
+'     .lineNum    = -1
+'     .Filename   = ""
+'   end with
 
-   dim as CWSTR wszMainStr = _
-   "boolean|byte|ubyte|short|ushort|integer|uinteger|long|ulong|longint|ulongint|single|" & _
-   "double|string|wstring|zstring|true|false|CWSTR"
+'   dim as CWSTR wszMainStr = _
+'   "boolean|byte|ubyte|short|ushort|integer|uinteger|long|ulong|longint|ulongint|single|" & _
+'   "double|string|wstring|zstring|true|false|CWSTR"
 
-   dim as long nCount = AfxStrParseCount(wszMainStr, "|")
+'   dim as integer nCount = AfxStrParseCount(wszMainStr, "|")
    
-   for i as long = 1 to nCount
-      parser.typeName = AfxStrParse(wszMainStr, i, "|")
-      this.dbAdd( @parser, DB2_STANDARDDATATYPE )  
-   next
-   this.dbRewind
+'   for i as integer = 1 to nCount
+'      parser.typeName = AfxStrParse(wszMainStr, i, "|")
+'      this.dbAdd( @parser, DB2_STANDARDDATATYPE )  
+'   next
+'   this.dbRewind
 end constructor    
 
 
 ''
 ''
-function clsDB2.dbGetFreeSlot() as long
+function clsDB2.dbGetFreeSlot() as integer
    
-   dim as long nSlot = -1
+   dim as integer nSlot = -1
    
    ' Find a slot to put the data in
-   for i as long = lbound(m_arrData) to ubound(m_arrData)
+   for i as integer = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).deleted then
          nSlot = i: exit for
       end if   
@@ -135,66 +134,68 @@ end function
 ''
 ''
 function clsDB2.dbAdd( _
-            byval parser as clsParser ptr, _
-            byval id as long _
+            byval parser as ctxParser ptr, _
+            byval id as integer _
             ) as DB2_DATA ptr
+   
+   if parser = 0 then exit function
    
    dim db as DB2_DATA
    
    with db
       .deleted      = false
       .id           = id                ' the type of database record that we are storing
-      .nLineNum     = parser->lineNum
-      .fileName     = parser->fileName
+      .pDoc         = parser->pDoc
+      if parser->pDoc then .fileName = parser->pDoc->DiskFilename
       .nFileType    = parser->nFileType
       
       select CASE id
-         case DB2_STANDARDDATATYPE
-            .ElementName  = parser->typeName
-            .VariableType = parser->typeName
-            if .ElementName = "" then exit function
+'         case DB2_STANDARDDATATYPE
+'            .ElementName  = parser->typeName
+'            .VariableType = parser->typeName
+'            if .ElementName = "" then exit function
             
-         case DB2_TYPE    ' this handles ENUM also
-            ' If the type has already been added skip adding it again. 
-            if this.dbFindTYPE( parser->typeName) then return 0
-            .nLineNum     = parser->funcLineNum
-            .ElementName  = parser->typeName
-            .VariableType = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
-            .IsEnum       = parser->IsEnum
-            .TypeExtends  = parser->TypeExtends
-            if .ElementName = "" then exit function
-         
+'         case DB2_TYPE    ' this handles ENUM also
+'            ' If the type has already been added skip adding it again. 
+'            if this.dbFindTYPE( parser->typeName) then return 0
+'            .nLineNum     = parser->funcLineNum
+'            .ElementName  = parser->typeName
+'            .VariableType = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
+'            .IsEnum       = parser->IsEnum
+'            .TypeExtends  = parser->TypeExtends
+'            if .ElementName = "" then exit function
+
          case DB2_TODO
             .ElementName  = ""
-            .ElementData  = parser->todoText
-            .nLineNum     = parser->lineNum + 1  ' display in listview
+            .ElementData  = parser->fullLine
+            .nLineNum     = parser->objectStartLine + 1  ' display in listview
          
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
-            .nLineNum     = parser->funcLineNum
-            .ElementName  = parser->funcName
-            .CallTip      = parser->funcParams   ' Calltip
-            .GetSet       = parser->GetSet
+            .nLineNum     = parser->objectStartLine
+            .ElementName  = parser->objectName
+            .CallTip      = parser->objectParams   ' Calltip
+ '           .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
-         
-         case DB2_VARIABLE
-            ' Variables are always in the format:
-            ' <OwnerName>.<FunctionName>.<VariableName>
-            if instr(parser->funcName, ".") = 0 then
-               .ElementName = parser->typeName & "." & parser->funcName & "." & parser->varName
-            Else
-               ' funcName is already mytype.MyFunctionName
-               .ElementName = parser->funcName & "." & parser->varName
-            end if
-            .CallTip      = parser->funcParams   ' Calltip
-            .VariableType = parser->varType
-            .IsPublic     = parser->bInTypePublic
-            if .ElementName = "" then exit function
+        
+'         case DB2_VARIABLE
+'            ' Variables are always in the format:
+'            ' <OwnerName>.<FunctionName>.<VariableName>
+'            if instr(parser->funcName, ".") = 0 then
+'               .ElementName = parser->typeName & "." & parser->funcName & "." & parser->varName
+'            Else
+'               ' funcName is already mytype.MyFunctionName
+'               .ElementName = parser->funcName & "." & parser->varName
+'            end if
+'            .CallTip      = parser->funcParams   ' Calltip
+'            .VariableType = parser->varType
+'            .IsPublic     = parser->bInTypePublic
+'            if .ElementName = "" then exit function
 
-      END SELECT
+      end select
 
    end with
 
-   dim as long nSlot = this.dbGetFreeSlot()
+   dim as integer nSlot = this.dbGetFreeSlot()
    m_arrData(nSlot) = db
 
    function = @m_arrData(nSlot)
@@ -203,11 +204,11 @@ end function
 
 ''
 ''
-function clsDB2.dbAddDirect( byval pData as DB2_DATA ptr ) as long
+function clsDB2.dbAddDirect( byval pData as DB2_DATA ptr ) as integer
    ' Thsi function is used when loading data directly from the external 
    ' cache file database. It loads the record directly into the memory array.
    if pData = 0 then exit function
-   dim as long nSlot = this.dbGetFreeSlot()
+   dim as integer nSlot = this.dbGetFreeSlot()
    m_arrData(nSlot) = *pData
    function = 0
 end function
@@ -215,10 +216,10 @@ end function
 
 ''
 ''
-function clsDB2.dbDelete( byref wszFilename as wstring ) as long
-   dim nCount as long 
+function clsDB2.dbDelete( byref wszFilename as wstring ) as integer
+   dim nCount as integer 
    dim as CWSTR wszFile = ucase(wszFilename)
-   for i as long = lbound(m_arrData) to ubound(m_arrData)
+   for i as integer = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).deleted = true then continue for
       if ucase(m_arrData(i).fileName) = wszFile then
          m_arrData(i).deleted = true
@@ -231,7 +232,7 @@ end function
 ''
 ''
 function clsDB2.dbDeleteAll() as boolean
-   for i as long = lbound(m_arrData) to ubound(m_arrData)
+   for i as integer = lbound(m_arrData) to ubound(m_arrData)
       m_arrData(i).deleted = true
       function = true
    next
@@ -239,9 +240,21 @@ end function
 
 ''
 ''
-function clsDB2.dbDeleteByFileType( byval nFileType as long ) as boolean
+function clsDB2.dbDeleteByDocumentPtr( byval pDoc as clsDocument ptr ) as boolean
+   ' Delete database entry based on incoming clsDocument pointer
+   for i as integer = lbound(m_arrData) to ubound(m_arrData)
+      if m_arrData(i).pDoc = pDoc then
+         m_arrData(i).deleted = true
+      end if
+      function = true
+   next
+end function
+
+''
+''
+function clsDB2.dbDeleteByFileType( byval nFileType as integer ) as boolean
    ' Delete database entry based on incoming DB2_FILETYPE_* value
-   for i as long = lbound(m_arrData) to ubound(m_arrData)
+   for i as integer = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).nFileType = nFileType then
          m_arrData(i).deleted = true
       end if
@@ -251,7 +264,7 @@ end function
 
 ''
 ''
-function clsDB2.dbRewind() as long
+function clsDB2.dbRewind() as integer
    ' Set index pointer to immediately before first array index 
    m_index = lbound(m_arrData) - 1
    function = 0
@@ -261,7 +274,7 @@ END FUNCTION
 ''
 function clsDB2.dbGetnext() as DB2_DATA ptr
    ' Set index pointer to next array index that is not deleted
-   dim as long ub = ubound(m_arrData)
+   dim as integer ub = ubound(m_arrData)
    do
       m_index = m_index + 1
       if m_index > ub then return 0
@@ -279,7 +292,7 @@ END FUNCTION
 ''
 function clsDB2.dbSeek( _
             byval sLookFor as string, _
-            byval Action as long, _
+            byval Action as integer, _
             byval sFilename as string = "" _
             ) as DB2_DATA ptr
 
@@ -288,7 +301,7 @@ function clsDB2.dbSeek( _
    dim pData as DB2_DATA ptr
             
    ' Determine if this is a get or set property
-   dim as long nGetSet, i
+   dim as integer nGetSet, i
 
    i = instr( sLookFor, " (get)" )
    if i then
@@ -382,17 +395,17 @@ end function
 
 ''
 ''
-function clsDB2.dbDebug() as long
+function clsDB2.dbDebug() as integer
    dim pStream as CTextStream
    pStream.Create("_debug.txt")
 
    dim as CWSTR wszTitle
-   dim as long dataType
+   dim as integer dataType
    
    dim pData as DB2_DATA ptr
    
    ' PRINT ALL TYPES
-   for i as long = 1 to 5
+   for i as integer = 1 to 5
       select case i
          case 1
             wszTitle = "CLASSES/TYPES"

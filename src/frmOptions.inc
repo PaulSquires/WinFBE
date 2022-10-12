@@ -41,7 +41,6 @@ private function frmOptions_SaveEditorOptions() as long
    gConfig.AskExit              = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT) )
    gConfig.RestoreSession       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKRESTORESESSION) )
    gConfig.CheckForUpdates      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKUPDATES) )
-   gConfig.EnableProjectCache   = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKPROJECTCACHE) )
 
 
    ' EDITOR OPTIONS   
