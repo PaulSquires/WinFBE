@@ -406,7 +406,7 @@ function clsDocument.CreateCodeWindow( _
 
       ' In any event, regenerate code for the visual designer 
       this.bRegenerateCode = true
-      GenerateFormCode( @this )
+      GenerateFormCode( @this, 9000 )
    end if   
 
    ' Apply code editor properties to the edit window

@@ -94,6 +94,8 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Indicates the state of the control."
       case "CHILDFORM"   
          wszPropDescribe = "Determines whether a form can act like a child panel control or child tab page. When set to True, ControlBox, MaximizeBox, MinimizeBox, and BorderStyle are ignored."
+      case "CHILDFORMPARENT"   
+         wszPropDescribe = "Gets or sets the parent form of a form with ChildForm property set to True."
       case "COLUMNWIDTH"   
          wszPropDescribe = "Indicates how wide each column should be in a multicolumn listbox."
       case "CONTROLBOX"   

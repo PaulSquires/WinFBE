@@ -851,11 +851,14 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
 
       ' Regenerate any visual designer code for Forms.
       ' The codegen is stored in each pDoc's wszFormCodeGen
+      dim as long initialCtrlID = 9000
       pDoc = gApp.pDocList
       do until pDoc = 0
          if pDoc->IsDesigner then 
-            GenerateFormCode(pDoc)
+            pDoc->bRegenerateCode = true
+            GenerateFormCode(pDoc, initialCtrlID)
             wszText = pDoc->wszFormCodeGen & vbcrlf & wszText
+            initialCtrlID = initialCtrlID + 1000
          end if
          pDoc = pDoc->pDocNext
       loop
@@ -962,9 +965,14 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Regenerate any visual designer code for Forms.
    ' The codegen is stored in each pDoc's wszFormCodeGen
+   dim as long initialCtrlID = 9000
    pDoc = gApp.pDocList
    do until pDoc = 0
-      if pDoc->IsDesigner then GenerateFormCode(pDoc)
+      if pDoc->IsDesigner then 
+         pDoc->bRegenerateCode = true
+         GenerateFormCode(pDoc, initialCtrlID)
+      end if
+      initialCtrlID  = initialCtrlID  + 1000
       pDoc = pDoc->pDocNext
    loop
    

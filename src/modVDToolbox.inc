@@ -89,6 +89,19 @@ function LoadPropertyComboListbox( _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Unchecked"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Indeterminate"))
 
+      case "CHILDFORMPARENT"
+         dim pDoc as clsDocument ptr = gApp.pDocList
+         dim pCtrl as clsControl ptr
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @"")
+         do until pDoc = 0
+            pCtrl = GetFormCtrlPtr(pDoc)
+            if pCtrl then
+               dim as CWSTR wszFormName = GetControlProperty(pCtrl, "NAME")
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, wszFormName.sptr)
+            end if
+            pDoc = pDoc->pDocNext
+         loop
+
       case "DATEFORMAT"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("DateTimePickerFormat.LongDate"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("DateTimePickerFormat.ShortDate"))
@@ -754,7 +767,7 @@ function frmVDToolbox_OnCommand( _
                   pCtrl->Events(nCurSel).bIsSelected = true
                   pDoc->UserModified = true
                   pDoc->bRegenerateCode = true
-                  GenerateFormCode(pDoc)
+                  GenerateFormCode(pDoc, 9000)
                   ' position code to the new Event 
                   dim as CWSTR wszFunctionName = GetControlProperty(pCtrl, "NAME") & "_" & pCtrl->Events(nCurSel).wszEventName
                   if pCtrl->ControlType <> CTRL_FORM then               

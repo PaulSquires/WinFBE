@@ -87,24 +87,22 @@
 constructor clsDB2
    redim m_arrData(500) as DB2_DATA
                    
-'   ' Add the standard builtin data types
-'   dim parser as clsParser
-'   with parser
-'     .lineNum    = -1
-'     .Filename   = ""
-'   end with
+   ' Add the standard builtin data types
+   dim parser as ctxParser
+   parser.objectStartLine = -1
+   parser.objectEndLine = -1
 
-'   dim as CWSTR wszMainStr = _
-'   "boolean|byte|ubyte|short|ushort|integer|uinteger|long|ulong|longint|ulongint|single|" & _
-'   "double|string|wstring|zstring|true|false|CWSTR"
+   dim as CWSTR wszMainStr = _
+   "boolean|byte|ubyte|short|ushort|integer|uinteger|long|ulong|longint|ulongint|single|" & _
+   "double|string|wstring|zstring|true|false|CWSTR"
 
-'   dim as integer nCount = AfxStrParseCount(wszMainStr, "|")
+   dim as integer nCount = AfxStrParseCount(wszMainStr, "|")
    
-'   for i as integer = 1 to nCount
-'      parser.typeName = AfxStrParse(wszMainStr, i, "|")
-'      this.dbAdd( @parser, DB2_STANDARDDATATYPE )  
-'   next
-'   this.dbRewind
+   for i as integer = 1 to nCount
+      parser.varName = AfxStrParse(wszMainStr, i, "|")
+      this.dbAdd( @parser, DB2_STANDARDDATATYPE )  
+   next
+   this.dbRewind
 end constructor    
 
 
@@ -150,10 +148,10 @@ function clsDB2.dbAdd( _
       .nFileType    = parser->nFileType
       
       select CASE id
-'         case DB2_STANDARDDATATYPE
-'            .ElementName  = parser->typeName
-'            .VariableType = parser->typeName
-'            if .ElementName = "" then exit function
+         case DB2_STANDARDDATATYPE
+            .ElementName  = parser->varName
+            .VariableType = parser->varType
+            if .ElementName = "" then exit function
             
 '         case DB2_TYPE    ' this handles ENUM also
 '            ' If the type has already been added skip adding it again. 
@@ -173,7 +171,7 @@ function clsDB2.dbAdd( _
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
             .nLineNum     = parser->objectStartLine
             .ElementName  = parser->objectName
-            .CallTip      = parser->objectParams   ' Calltip
+            .CallTip      = "(" & parser->objectParams & ") " & parser->objectReturnType   ' Calltip
  '           .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
         

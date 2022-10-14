@@ -21,11 +21,12 @@
 ' ========================================================================================
 ' Add a property to the incoming control and optionally a value
 ' ========================================================================================
-private function AddControlProperty( byval pCtrl as clsControl ptr, _
-                                     byref wszPropName as CWSTR, _
-                                     byref wszPropValue as CWSTR, _
-                                     byval nPropType as PropertyType _
-                                     ) as Long
+function AddControlProperty( _
+            byval pCtrl as clsControl ptr, _
+            byref wszPropName as CWSTR, _
+            byref wszPropValue as CWSTR, _
+            byval nPropType as PropertyType _
+            ) as Long
    dim as long ub = ubound(pCtrl->Properties) + 1
    redim preserve pCtrl->Properties(ub) as clsProperty
    pCtrl->Properties(ub).wszPropName  = wszPropName
@@ -39,7 +40,7 @@ end function
 ' ========================================================================================
 ' Attach default properties for the incoming control
 ' ========================================================================================
-private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
+function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
 
    ' Only add default properties if the no properties already exist for the control
    if ubound(pCtrl->Properties) - lbound(pCtrl->Properties) + 1 > 0 then exit function
@@ -54,7 +55,9 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
    ' Add control specific properties
    select CASE pCtrl->ControlType
       case CTRL_FORM
+         AddControlProperty(pCtrl, "Anchor", "", PropertyType.AnchorPicker)
          AddControlProperty(pCtrl, "ChildForm", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ChildFormParent", "", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "WindowState", "FormWindowState.Normal", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "StartPosition", "FormStartPosition.Manual", PropertyType.ComboPicker)

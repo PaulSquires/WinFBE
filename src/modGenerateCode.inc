@@ -490,7 +490,7 @@ end function
 ' ========================================================================================
 ' Generate (or regenerate) visual designer code.
 ' ========================================================================================
-public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
+function GenerateFormCode( byval pDoc as clsDocument ptr, byval initialCtrlID as long ) as long
    if pDoc = 0 then exit function
    if pDoc->IsDesigner = false then exit function
    if pDoc->bRegenerateCode = false then exit function
@@ -746,7 +746,8 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ''
    wszText = wszText & vbcrlf & _
    "function " & wszFormName & "Type.FormInitializeComponent( byval pForm as " & wszFormName & "Type ptr ) as LRESULT" & vbcrlf & _
-   sp(1) & "dim as long nClientOffset" & vbcrlf & vbcrlf 
+   sp(1) & "dim as long nClientOffset" & vbcrlf & _
+   sp(1) & "pForm->SetInitialCtrlID(" & str(initialCtrlID) & " )" & vbcrlf & vbcrlf
 
    ' If a menu exists for the Form then add the code generation
    if pDoc->MainMenuExists then
@@ -846,7 +847,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                   case "TEXT", "TAG", "PASSWORDCHAR", "GROUPNAME", _
                        "MASKSTRING", "INPUTSTRING", "DEFAULTCHARACTER", "VALIDCHARACTERS", _
                        "ICON", "IMAGE", "CUEBANNERTEXT", "SELECTEDDATE", "SELECTEDTIME", _
-                       "FORMATCUSTOM", "NAME", "TOOLTIP"            
+                       "FORMATCUSTOM", "NAME", "TOOLTIP", "CHILDFORMPARENT"            
                      ' Ensure that any embedded double quotes are escaped
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ
