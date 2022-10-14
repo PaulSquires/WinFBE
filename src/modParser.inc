@@ -11,7 +11,6 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-
 #include once "modParser.bi"
 
 
@@ -195,6 +194,7 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
 
    dim as boolean readingAllParams = false
    dim as boolean readingSingleParam = false
+   dim as boolean readingArrayParam = false
       
    this.ResetFunctionValues()
 
@@ -217,10 +217,22 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
       end if
 
       select case this.ltoken 
-         case "("
+         case "("    ' start of the list of parameters
+            if readingSingleParam then
+               ' This is start of an Array() parameter within the list so save it.
+               this.objectParams = this.objectParams & "("
+               readingArrayParam = true
+               continue do
+            end if
             readingAllParams = true
             readingSingleParam = true
-         case ")"
+         case ")"    ' end of the list of parameters
+            if readingArrayParam then
+               ' This is end of an Array() parameter within the list so save it.
+               this.objectParams = this.objectParams & ")"
+               readingArrayParam = false
+               continue do
+            end if
             readingAllParams = false
             readingSingleParam = false
             exit do
@@ -279,9 +291,10 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
       end if
    loop
       
+   ' Construct the CallTip that we store in objectParams that dbAdd 
+   ' will use when storing to the database.
+   this.objectParams = this.objectName & "(" & this.objectParams & ") " & this.objectReturnType  
    gdb2.dbAdd( @this, DB2_FUNCTION )
-'? "FUNCTION: "; this.objectName; " "; this.objectParams; " "; this.objectReturnType; _
-'                    " ("; this.objectStartLine; " "; this.objectEndLine; ")"
 
    return true
 end function

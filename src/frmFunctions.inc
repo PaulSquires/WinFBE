@@ -457,7 +457,7 @@ function frmFunctionsListBox_SubclassProc ( _
                if pDoc then wszTooltip = pDoc->DiskFilename
             else
                ' Get the function prototype and display it in popup multiline tooltip
-               wszTooltip = getFunctionsPrototype( wszCaption )
+               wszTooltip = getFunctionsPrototype(wszCaption)
                if len(wszTooltip) then
                   SendMessage( hTooltip, TTM_SETMAXTIPWIDTH, 0, 300 )
                   wszTooltip = FormatCodetip( wszTooltip )

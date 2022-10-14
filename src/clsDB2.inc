@@ -171,7 +171,7 @@ function clsDB2.dbAdd( _
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
             .nLineNum     = parser->objectStartLine
             .ElementName  = parser->objectName
-            .CallTip      = "(" & parser->objectParams & ") " & parser->objectReturnType   ' Calltip
+            .CallTip      = parser->objectParams    ' Calltip
  '           .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
         

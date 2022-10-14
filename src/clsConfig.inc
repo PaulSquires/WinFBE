@@ -765,25 +765,28 @@ end function
 function clsConfig.SaveConfigFile() as long
 
    ' Determine the current editor positioning 
-   dim WinPla as WINDOWPLACEMENT
-   WinPla.Length = sizeof(WinPla)
-   GetWindowPlacement( HWND_FRMMAIN, @WinPla )
-   With this
-      .StartupLeft   = WinPla.rcNormalPosition.Left 
-      .StartupTop    = WinPla.rcNormalPosition.Top
-      .StartupRight  = WinPla.rcNormalPosition.Right
-      .StartupBottom = WinPla.rcNormalPosition.Bottom
-      .StartupMaximized = iif( WinPla.showCmd = SW_MAXIMIZE, true, false )
-   end With
+   ' Do not save if editor is minimized
+   if isiconic( HWND_FRMMAIN ) = 0 then
+      dim WinPla as WINDOWPLACEMENT
+      WinPla.Length = sizeof(WinPla)
+      GetWindowPlacement( HWND_FRMMAIN, @WinPla )
+      With this
+         .StartupLeft   = WinPla.rcNormalPosition.Left 
+         .StartupTop    = WinPla.rcNormalPosition.Top
+         .StartupRight  = WinPla.rcNormalPosition.Right
+         .StartupBottom = WinPla.rcNormalPosition.Bottom
+         .StartupMaximized = iif( WinPla.showCmd = SW_MAXIMIZE, true, false )
+      end With
+      
+      dim as RECT rc
+      GetWindowRect( HWND_FRMMAIN, @rc )
+      if this.StartupLeft <> rc.Left then this.StartupLeft = rc.Left
+      if this.StartupTop <> rc.Top then this.StartupTop = rc.Top
+      if this.StartupRight <> rc.Right then this.StartupRight = rc.Right
+      if this.StartupBottom <> rc.Bottom then this.StartupBottom = rc.Bottom
+   end if
    
    this.CompilerBuild = frmBuildConfig_GetSelectedBuildGUID()
-   
-   dim as RECT rc
-   GetWindowRect( HWND_FRMMAIN, @rc )
-   if this.StartupLeft <> rc.Left then this.StartupLeft = rc.Left
-   if this.StartupTop <> rc.Top then this.StartupTop = rc.Top
-   if this.StartupRight <> rc.Right then this.StartupRight = rc.Right
-   if this.StartupBottom <> rc.Bottom then this.StartupBottom = rc.Bottom
 
    dim pStream as CTextStream   '(utf16)
    if pStream.Create(_ConfigFilename, true, true) <> S_OK then return true   ' error

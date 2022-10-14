@@ -2025,7 +2025,7 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
             if handleKeysFindReplace(uMsg) then continue do
             
             ' Check for any QuickRun exes that can be deleted.
-            gApp.CheckQuickRunExe
+            gApp.CheckQuickRunExe()
              
             ' Check if the WinFBE.ini file was changed by an external program.
             ' Reload the config file in case a user has automated a change to it since
