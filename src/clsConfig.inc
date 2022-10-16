@@ -109,8 +109,8 @@ function clsConfig.LoadCodetipsFB() as boolean
       
       i = instr(wst, "=")
       if i then
-         parser.objectName   = left(wst, i-1)
-         parser.objectParams = mid(wst, i+1)
+         parser.functionName   = left(wst, i-1)
+         parser.functionParams = mid(wst, i+1)
          gdb2.dbAdd( @parser, DB2_FUNCTION )
       end if   
    loop
@@ -162,26 +162,26 @@ function clsConfig.LoadCodetipsGeneric( _
       select case wsID
          case "S"    ' standard datatype
             i = instr(wst, "|")
-            parser.objectName = left(wst, i-1)
+            parser.functionName = left(wst, i-1)
             'parser.Description = mid(wst, i+1)
             gdb2.dbAdd( @parser, DB2_STANDARDDATATYPE )  
             
          case "F"    ' function
             i = instr(wst, "(")
-            parser.objectName   = trim(left(wst, i-1))
-            parser.objectParams = wst
+            parser.functionName   = trim(left(wst, i-1))
+            parser.functionParams = wst
             gdb2.dbAdd( @parser, DB2_FUNCTION )
 
          case "T"     ' type
             i = instr(wst, "|")
-            parser.objectName = left(wst, i-1)
-            parser.objectAlias = parser.objectName
+            parser.functionName = left(wst, i-1)
+            parser.functionAlias = parser.functionName
             wsParts = mid(wst, i + 1)
             gdb2.dbAdd( @parser, DB2_TYPE )
 
             ' Each element of the TYPE structure is added to the database. The
             ' element is in the format elementname,elementtype
-            parser.objectName = ""
+            parser.functionName = ""
             nCount = AfxStrParseCount(wsParts, "|")
             for i = 1 to nCount
                wsPart = AfxStrParse(wsParts, i, "|")
@@ -239,9 +239,9 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       
       if left(wst, 5) = "TYPE:" then
          bReadingType = true
-         parser.objectName = mid(wst, 6) 
-         parser.objectAlias = parser.objectName   
-         if parser.objectName = "BASE" then
+         parser.functionName = mid(wst, 6) 
+         parser.functionAlias = parser.functionName   
+         if parser.functionName = "BASE" then
             bIsBase = true
          else   
             bIsBase = false
@@ -257,9 +257,9 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       
       if bReadingType then
          ' Each element of the TYPE structure is added to the database. 
-         parser.objectName = ""
+         parser.functionName = ""
          parser.varType  = ""
-         parser.objectParams = ""
+         parser.functionParams = ""
          parser.varScope = SCOPEGLOBAL
          if bIsBase then
             dim as long ub = ubound(arrBase) + 1
@@ -270,7 +270,7 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
             for i as long = lbound(arrBase) to ubound(arrBase) 
                parser.varName    = trim(AfxStrParse(arrBase(i), 1, "|"))
                parser.varType    = trim(AfxStrParse(arrBase(i), 2, "|"))
-               parser.objectParams = trim(AfxStrParse(arrBase(i), 3, "|"))
+               parser.functionParams = trim(AfxStrParse(arrBase(i), 3, "|"))
                gdb2.dbAdd( @parser, DB2_VARIABLE )
             next 
          else
@@ -279,7 +279,7 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
             ' and also a CodeTip. for example, the Treeview Node property
             ' points to an wfxTreeNodeCollection TYPE but can also popup
             parser.varType = trim(AfxStrParse(wst, 2, "|"))
-            parser.objectParams = trim(AfxStrParse(wst, 3, "|"))
+            parser.functionParams = trim(AfxStrParse(wst, 3, "|"))
             gdb2.dbAdd( @parser, DB2_VARIABLE )
          end if
       end if
@@ -298,11 +298,11 @@ function clsConfig.LoadCodetipsWinFormsX() as boolean
    function = this.LoadCodetipsWinForms(_WinFormsXCodetipsFilename)
    dim parser as ctxParser
    parser.nFileType = DB2_FILETYPE_WINFORMSX
-   parser.objectName = "Application"
-   parser.objectAlias = "wfxApplication"
+   parser.functionName = "Application"
+   parser.functionAlias = "wfxApplication"
    gdb2.dbAdd( @parser, DB2_TYPE )
-   parser.objectName = "Colors"
-   parser.objectAlias = "wfxColors"
+   parser.functionName = "Colors"
+   parser.functionAlias = "wfxColors"
    gdb2.dbAdd( @parser, DB2_TYPE )
    function = 0
 end function

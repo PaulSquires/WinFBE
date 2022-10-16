@@ -16,68 +16,6 @@
 ''  Application in-memory database
 ''
 
-' VARIABLE NAMES
-' ==============
-' Every variable name is prefaced with its owner's name in order to differentiate
-' it from other variables (Global variables have no owner name). Usually owners are class/TYPEs.
-' The incoming parameter list for a Function is also processed as a variable.
-'
-' Therefore, the format is:  <OwnerName>.<FunctionName>.<VariableName>
-'
-' eg.  
-'      TYPE MyType
-'         PUBLIC:
-'            st As String               ' ElementName = MyType..st  ElementValue = String
-'            controls As clsCollection  ' ElementName = MyType..controls  ElementValue = clsCollection
-
-'            ' The Declares in a TYPE would not be parsed. They are picked up elsewhere
-'            ' in the source code when the Type body code is found.
-'            Declare Function CalculateAmount( ByVal nDollars As Single ) As Single
-'      END TYPE
-'
-' eg.
-'      DIM SHARED AS MyType g     '   ..g     ElementName = ..g   ElementValue = MyType
-'
-' eg. (Function as part of TYPE)
-'      Function MyType.CalculateAmount( ByVal nDollars As Single, myTypeVar as MYTYPE ) As Single  
-'         ' The incoming nDollars would be discarded by the parser
-'         ' MyTypeVar would be stored as:
-'         '    ElementName = MyType.CalculateAmount.myTypeVar   ElementValue = MYTYPE
-'         Dim n As integer        ' This would be discarded by the parser
-'         Dim rc As RECT       ' ElementName = MyType.CalculateAmount.rc  ElementValue = RECT
-'      End Function
-'
-' eg. (Standalone Function)
-'      Function MyFunction( ByVal p As MyType Ptr ) As integer   ' ElementName = .MyFunction.p   ElementValue = MyType
-'         Dim n As integer        ' This would be discarded by the parser
-'         Dim m As MyType      ' ElementName = .MyFunction.m   ElementValue = MyType
-'      End Function
-'
-'
-' FUNCTION NAMES
-' ==============
-'    ElementName = Function name  
-'                  (can also be fully qualified if from a TYPE.  eg. MyType.CalculateAmount )
-'    ElementValue = The Calltip
-'
-' TYPE STRUCTURES
-' ===============
-'    ElementName  = The name of the CLASS/TYPE.
-'    ElementValue = The true name of the CLASS/TYPE (b/c ElementName may be an ALIAS)
-'    TypeExtends  = The TYPE is extended from this TYPE
-'
-' ENUM STRUCTURES
-' ===============
-'    ElementName  = The name of the ENUM
-'    ElementValue = The name of the ENUM
-'
-' TODO LABELS
-' ===============
-'    ElementValue = The text of the TODO as found in code.
-'
-' 
-
-
 #include once "clsDB2.bi"
 #include once "modParser.bi"
 
@@ -100,6 +38,7 @@ constructor clsDB2
    
    for i as integer = 1 to nCount
       parser.varName = AfxStrParse(wszMainStr, i, "|")
+      parser.varType = parser.varName
       this.dbAdd( @parser, DB2_STANDARDDATATYPE )  
    next
    this.dbRewind
@@ -153,15 +92,15 @@ function clsDB2.dbAdd( _
             .VariableType = parser->varType
             if .ElementName = "" then exit function
             
-'         case DB2_TYPE    ' this handles ENUM also
-'            ' If the type has already been added skip adding it again. 
-'            if this.dbFindTYPE( parser->typeName) then return 0
-'            .nLineNum     = parser->funcLineNum
-'            .ElementName  = parser->typeName
-'            .VariableType = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
-'            .IsEnum       = parser->IsEnum
-'            .TypeExtends  = parser->TypeExtends
-'            if .ElementName = "" then exit function
+         case DB2_TYPE    ' this handles ENUM also
+            ' If the type has already been added skip adding it again. 
+            if this.dbFindTYPE( parser->typeName) then return 0
+            .nLineNum     = parser->objectStartLine
+            .ElementName  = parser->typeName
+            .VariableType = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
+            .IsEnum       = parser->isEnum
+            .TypeExtends  = parser->TypeExtends
+            if .ElementName = "" then exit function
 
          case DB2_TODO
             .ElementName  = ""
@@ -170,24 +109,17 @@ function clsDB2.dbAdd( _
          
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
             .nLineNum     = parser->objectStartLine
-            .ElementName  = parser->objectName
-            .CallTip      = parser->objectParams    ' Calltip
+            .ElementName  = parser->functionName
+            .CallTip      = parser->functionParams    ' Calltip
  '           .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
         
-'         case DB2_VARIABLE
-'            ' Variables are always in the format:
-'            ' <OwnerName>.<FunctionName>.<VariableName>
-'            if instr(parser->funcName, ".") = 0 then
-'               .ElementName = parser->typeName & "." & parser->funcName & "." & parser->varName
-'            Else
-'               ' funcName is already mytype.MyFunctionName
-'               .ElementName = parser->funcName & "." & parser->varName
-'            end if
-'            .CallTip      = parser->funcParams   ' Calltip
-'            .VariableType = parser->varType
-'            .IsPublic     = parser->bInTypePublic
-'            if .ElementName = "" then exit function
+         case DB2_VARIABLE
+            .ParentName     = parser->functionName
+            .ElementName    = parser->varName
+            .VariableType   = parser->varType
+            .VariableScope  = parser->varScope
+            if .ElementName = "" then exit function
 
       end select
 
@@ -289,6 +221,7 @@ END FUNCTION
 ''
 ''
 function clsDB2.dbSeek( _
+            byval sParentName as string, _
             byval sLookFor as string, _
             byval Action as integer, _
             byval sFilename as string = "" _
@@ -298,39 +231,45 @@ function clsDB2.dbSeek( _
    ' Find the array element that contains the function name beng searched for
    dim pData as DB2_DATA ptr
             
+   sParentName = ucase(sParentName)
+   
    ' Determine if this is a get or set property
    dim as integer nGetSet, i
 
-   i = instr( sLookFor, " (get)" )
-   if i then
-      nGetSet = ClassProperty.Getter
-   else
-      i = instr( sLookFor, " (set)" )
-      if i then
-         nGetSet = ClassProperty.Setter
-      else      
-         i = instr( sLookFor, " (ctor)" )
-         if i then
-            nGetSet = ClassProperty.ctor
-         else      
-            i = instr( sLookFor, " (dtor)" )
-            if i then
-               nGetSet = ClassProperty.dtor
-            end if
-         end if   
-      end if
-   end if
-   if i then sLookFor = left( sLookFor, i - 1 )
+'   i = instr( sLookFor, " (get)" )
+'   if i then
+'      nGetSet = ClassProperty.Getter
+'   else
+'      i = instr( sLookFor, " (set)" )
+'      if i then
+'         nGetSet = ClassProperty.Setter
+'      else      
+'         i = instr( sLookFor, " (ctor)" )
+'         if i then
+'            nGetSet = ClassProperty.ctor
+'         else      
+'            i = instr( sLookFor, " (dtor)" )
+'            if i then
+'               nGetSet = ClassProperty.dtor
+'            end if
+'         end if   
+'      end if
+'   end if
+'   if i then sLookFor = left( sLookFor, i - 1 )
       
    sLookFor = ucase(sLookFor)
    this.dbRewind()
    do 
       pData = this.dbGetnext()
       if pData = 0 then exit do
+      if pData->deleted = true then continue do
       if pData->id = Action then
          
+'         if ( sLookFor = ucase(pData->ElementName) ) andalso _
+'            ( sParentName = ucase(pData->ElementName) ) andalso _
+'            ( nGetSet = pData->GetSet ) then
          if ( sLookFor = ucase(pData->ElementName) ) andalso _
-            ( nGetSet = pData->GetSet )  then
+            ( sParentName = ucase(pData->ParentName) ) then
             
             if len(sFilename) then
                if ucase(pData->fileName) = ucase(sFilename) then 
@@ -352,28 +291,27 @@ end function
 ''
 ''
 function clsDB2.dbFindFunction( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek( sFunctionName, DB2_FUNCTION, sFilename ) 
+   return this.dbSeek( "", sFunctionName, DB2_FUNCTION, sFilename ) 
+end function
+
+''
+''
+function clsDB2.dbFindVariable( byref sParentName as string, byref sVariableName as string ) as DB2_DATA ptr
+   return this.dbSeek( sParentName, sVariableName, DB2_VARIABLE )      
 end function
 
 
 ''
 ''
 function clsDB2.dbFindSub( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek( sFunctionName, DB2_SUB, sFilename ) 
+   return this.dbSeek( "", sFunctionName, DB2_SUB, sFilename ) 
 end function
 
 
 ''
 ''
 function clsDB2.dbFindProperty( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek( sFunctionName, DB2_PROPERTY, sFilename ) 
-end function
-
-
-''
-''
-function clsDB2.dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
-   return this.dbSeek( sVariableName, DB2_VARIABLE )      
+   return this.dbSeek( "", sFunctionName, DB2_PROPERTY, sFilename ) 
 end function
 
 
@@ -381,11 +319,11 @@ end function
 ''
 function clsDB2.dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
    dim pData as DB2_DATA ptr       
-   pData = this.dbSeek(sTypeName, DB2_TYPE) 
+   pData = this.dbSeek("", sTypeName, DB2_TYPE) 
    if pData = 0 then return 0
    ' If this Type is an ALIAS for another Type then get that real type
    if ucase(pData->ElementName) <> ucase(pData->VariableType) then
-      return this.dbSeek(pData->VariableType, DB2_TYPE) 
+      return this.dbSeek("", pData->VariableType, DB2_TYPE) 
    end if   
    return pData
 end function
@@ -408,15 +346,18 @@ function clsDB2.dbDebug() as integer
          case 1
             wszTitle = "CLASSES/TYPES"
             dataType = DB2_TYPE
+continue for
          case 2
             wszTitle = "FUNCTIONS"
             dataType = DB2_FUNCTION
          case 3
             wszTitle = "SUBS"
             dataType = DB2_SUB
+continue for
          case 4
             wszTitle = "PROPERTY"
             dataType = DB2_PROPERTY
+continue for
          case 5
             wszTitle = "VARIABLES"
             dataType = DB2_VARIABLE
@@ -429,9 +370,6 @@ function clsDB2.dbDebug() as integer
          if pData = 0 then exit do
          if pData->id <> dataType then continue do
          'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
-         pStream.WriteLine "   " & wszTitle
-         pStream.WriteLine "   deleted: "           & pData->deleted
-         pStream.WriteLine "   fileName: "          & pData->fileName
          
          dim as CWSTR wszFileType
          select case pData->nFileType
@@ -441,13 +379,20 @@ function clsDB2.dbDebug() as integer
             case DB2_FILETYPE_WINFBX:    wszFileType = "DB2_FILETYPE_WINFBX"
             case DB2_FILETYPE_USERCODE:  wszFileType = "DB2_FILETYPE_USERCODE"
          end select
+
+if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
+         pStream.WriteLine "   " & wszTitle
+         pStream.WriteLine "   deleted: "           & pData->deleted
+         pStream.WriteLine "   fileName: "          & pData->fileName
+
          pStream.WriteLine "   nFileType: "         & wszFileType
+         pStream.WriteLine "   ParentName: "        & pData->ParentName
          pStream.WriteLine "   ElementName: "       & pData->ElementName
          pStream.WriteLine "   VariableType:"       & pData->VariableType
          pStream.WriteLine "   CallTip: "           & pData->CallTip
          pStream.WriteLine "   lineNum: "           & pData->nLineNum
-         pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
-         pStream.WriteLine "   IsPublic (TYPE elements): " & pData->IsPublic
+'         pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
+'         pStream.WriteLine "   Scope:             " & pData->varScope
          pStream.WriteLine ""
       loop
       pStream.WriteLine ""

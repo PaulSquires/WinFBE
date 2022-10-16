@@ -115,18 +115,72 @@ function ctxParser.ParseDIM( _
       ' position two, followed by one or more list of variables.
       dim as string dataType = AfxStrParse( text, 2, " " )
 
-      if this.IsStandardDataType( dataType ) = false then
+      dim as boolean bAddToDatabase = true
+      
+      ' TYPE variables are always added to the database regardless of whether they include
+      ' standard datatypes. This is essential in order to display all of the Type elements
+      ' in the autocomplete popup.
+      if originFrom <> DIMSCOPE.SCOPETYPE then
+         if this.IsStandardDataType( dataType ) then
+            bAddToDatabase = false
+         end if
+      end if
+      
+      if bAddToDatabase then
          dim as string varName, varNames 
          i = InStrRev( text, " " )
          if i then varNames = mid( text, i + 1 )
          dim as long numItems = AfxStrParseCount( varNames, "," )
          for i as long = 1 to numItems
-            varName = AfxStrParse( varNames, i, "," )
-            ' We have the full DIM statement so now commit it to the database
-'            ? "DIM: "; varName; " "; dataType;
+            this.varName = AfxStrParse( varNames, i, "," )
+            this.varType = dataType
+            this.varScope = originFrom
+            if originFrom = DIMSCOPE.SCOPETYPE then
+               this.functionName = this.typeName
+            end if   
+            gdb2.dbAdd( @this, DB2_VARIABLE )
          next   
       end if
       
+   next
+   
+   return true
+end function
+
+
+'':::::
+function ctxParser.ParseFunctionParams() as boolean
+
+   dim as string text = this.functionParams
+   dim as integer numStatements = 0   ' the number of "as" clauses
+
+   ' There could be multiple DIMS on the same line. These would have more than one " as "
+   ' clause and the statements will be separated by a comma.
+   dim as long numParts = AfxStrParseCount(this.functionParams, ",")
+   for ii as long = 1 to numParts
+      text = trim(AfxStrParse(this.functionParams, ii, ","))
+      text = AfxStrRemoveI(text, "ptr")    
+      text = AfxStrRemoveI(text, "pointer")    
+      text = AfxStrRemoveI(text, "byval")    
+      text = AfxStrRemoveI(text, "byref")    
+      text = AfxStrRemoveI(text, "ptr")    
+      
+      ' Isolate the variable name and variable type
+      dim as string varName, dataType
+      dim as long f = instr( ucase(text), " AS " )
+      if f then
+         varName = trim(left(text, f-1))
+         dataType = trim(mid(text, f+4))
+         if len(varName) andalso len(dataType) then
+            if this.IsStandardDataType( dataType ) = false then
+               this.varName = varName
+               this.varType = dataType
+               this.varScope = SCOPEFUNCTION
+               ' We have the full DIM statement so now commit it to the database
+               gdb2.dbAdd( @this, DB2_VARIABLE )
+            end if
+         end if   
+      end if
    next
    
    return true
@@ -140,10 +194,10 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
    this.objectStartLine = this.lineNum
    this.objectEndLine = this.lineNum
 
-   ' Get next expected token (objectName)
+   ' Get next expected token (functionName)
    if this.EOL then return false
    if this.GetToken() then
-      this.objectName = this.token
+      this.typeName = this.token
    end if
 
    ' Finally, look for the END TYPE that will complete the parsing
@@ -163,13 +217,15 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
             if this.EOL then return false
             if( this.ltoken = "type" ) then
                this.objectEndLine = this.lineNum
+               this.typeAlias = this.typeName
+               gdb2.dbAdd( @this, DB2_TYPE )
                exit do
             end if
          end if      
       end if
    loop
       
-'? "TYPE: "; this.objectName; " ("; this.objectStartLine; " "; this.objectEndLine; ")"
+'? "TYPE: "; this.functionName; " ("; this.objectStartLine; " "; this.objectEndLine; ")"
 
    return true
 end function
@@ -177,20 +233,21 @@ end function
 
 '':::::
 function ctxParser.ResetFunctionValues() as boolean
-   this.objectName = ""
-   this.objectAlias = ""
-   this.objectParams = ""
-   this.objectReturnType = ""
+   this.functionName = ""
+   this.functionAlias = ""
+   this.functionParams = ""
+   this.functionReturnType = ""
    this.objectStartLine = -1
    this.objectEndLine = -1
    this.varName = ""
    this.varType = ""
+   this.varScope = SCOPEGLOBAL
    return true
 end function   
 
 
 '':::::
-function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
+function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
 
    dim as boolean readingAllParams = false
    dim as boolean readingSingleParam = false
@@ -198,10 +255,10 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
       
    this.ResetFunctionValues()
 
-   ' Get next expected token (objectName)
+   ' Get next expected token (functionName)
    if this.EOL then return false
    if this.GetToken() then
-      this.objectName = this.token
+      this.functionName = this.token
    end if
 
    this.objectStartLine = this.lineNum
@@ -220,7 +277,7 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
          case "("    ' start of the list of parameters
             if readingSingleParam then
                ' This is start of an Array() parameter within the list so save it.
-               this.objectParams = this.objectParams & "("
+               this.functionParams = this.functionParams & "("
                readingArrayParam = true
                continue do
             end if
@@ -229,7 +286,7 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
          case ")"    ' end of the list of parameters
             if readingArrayParam then
                ' This is end of an Array() parameter within the list so save it.
-               this.objectParams = this.objectParams & ")"
+               this.functionParams = this.functionParams & ")"
                readingArrayParam = false
                continue do
             end if
@@ -246,7 +303,7 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
          case else
             ' Get the parameter tokens until we get (right parenthesis)
             if readingAllParams andalso readingSingleParam then
-               this.objectParams = this.objectParams & iif(this.token = ",", ",", " " & this.token)
+               this.functionParams = this.functionParams & iif(this.token = ",", ",", " " & this.token)
                if this.token = "," then readingSingleParam = true
             else
                ' we are not reading params so maybe we have encountered the start of the RETURN_TYPE
@@ -264,8 +321,15 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
       do until this.GetToken() = false
          if this.EOL then exit do
          ' This should pickup any "byref" "as" RETURN_TYPE
-         this.objectReturnType = this.objectReturnType & this.token & " "
+         this.functionReturnType = this.functionReturnType & this.token & " "
       loop
+   end if
+
+   ' Parse any function parameters to add to DIM variables. We use a separate
+   ' so that we don't interfere with the regular GetToken() parsing of the
+   ' main code.
+   if len(this.functionParams) then 
+      this.ParseFunctionParams()
    end if
 
    ' Finally, look for the End Sub/Function that will complete the parsing
@@ -291,9 +355,9 @@ function ctxParser.ParseSubFunction( byval action as PARSEACTION ) as boolean
       end if
    loop
       
-   ' Construct the CallTip that we store in objectParams that dbAdd 
+   ' Construct the CallTip that we store in functionParams that dbAdd 
    ' will use when storing to the database.
-   this.objectParams = this.objectName & "(" & this.objectParams & ") " & this.objectReturnType  
+   this.functionParams = this.functionName & "(" & this.functionParams & ") " & this.functionReturnType  
    gdb2.dbAdd( @this, DB2_FUNCTION )
 
    return true
@@ -711,12 +775,12 @@ function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
             end if
 
          case "sub"
-            if this.ParseSubFunction( PARSINGACTION.PARSE_SUB ) = false then
+            if this.ParseFunction( PARSINGACTION.PARSE_SUB ) = false then
                '? this.lineNum, "Error parsing SUB statement. Unexpected token: "; this.token
             end if
 
          case "function"
-            if this.ParseSubFunction( PARSINGACTION.PARSE_FUNCTION ) = false then
+            if this.ParseFunction( PARSINGACTION.PARSE_FUNCTION ) = false then
                '? this.lineNum, "Error parsing FUNCTION statement. Unexpected token: "; this.token
             end if
 

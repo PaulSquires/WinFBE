@@ -110,7 +110,7 @@ type clsDocument
       wszToolBarSize    as CWSTR = wstr("SIZE_24")  ' SIZE_16, SIZE_24, SIZE_32, SIZE_48
       PanelItems(any)   as clsPanelItem
       Controls          as clsCollection
-      AllImages(any)    as IMAGES_type     ' All Images belonging to the Form
+      AllImages(any)    as IMAGES_TYPE     ' All Images belonging to the Form
       GenerateMenu      as long = BST_CHECKED  ' Indicates to generate code for the menu
       GenerateToolBar   as long = BST_CHECKED  ' Indicates to generate code for the menu
       GenerateStatusBar as long = BST_CHECKED  ' Indicates to generate code for the statusbar

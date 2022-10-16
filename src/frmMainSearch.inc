@@ -101,7 +101,7 @@ function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRES
          if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
          if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
          ' Search for variable definitions
-         if pData = 0 then pData = gdb2.dbFindVariable( sFunctionName )
+         if pData = 0 then pData = gdb2.dbFindVariable( "", sFunctionName )
          ' Search for the TYPE definition
          if pData = 0 then pData = gdb2.dbFindType( sFunctionName )
       

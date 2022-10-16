@@ -46,12 +46,22 @@ type ctxParser
    as string           fullLine
    as integer          nFileType    ' one of the DB2_FILETYPE_* codes
    
-   as string           objectName 
-   as string           objectAlias 
-   as string           objectParams
-   as string           objectReturnType
    as integer          objectStartLine
    as integer          objectEndLine
+
+   ' FUNCTIONS
+   as string           functionName 
+   as string           functionAlias 
+   as string           functionParams
+   as string           functionReturnType
+   
+   ' TYPES
+   as string           typeName 
+   as string           typeAlias
+   as string           typeExtends
+   as boolean          isEnum
+   
+   ' VARIABLES
    as string           varName 
    as string           varType 
    as DIMSCOPE         varScope
@@ -66,7 +76,8 @@ type ctxParser
    declare function GetToken() as boolean
    declare function GetLine() as boolean
    declare function UnwindToken() as boolean
-   declare function ParseSubFunction( byval action as PARSEACTION ) as boolean
+   declare function ParseFunction( byval action as PARSEACTION ) as boolean
+   declare function ParseFunctionParams() as boolean
    declare function ParseDIM( byval action as PARSEACTION, byval originFrom as DIMscope ) as boolean
    declare function ParseTYPE( byval action as PARSEACTION ) as boolean
    declare function ParseTODO( byval action as PARSEACTION ) as boolean

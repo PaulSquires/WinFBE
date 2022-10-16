@@ -1,4 +1,4 @@
-Version 3.0.2 (beta 1)
+Version 3.0.2 (beta 2)
 Editor:
 - Fixed bug where WinFBE 64-bit only would GPF if currently loaded file is edited by an external editor causing WinFBE to reload the file.
 - Fixed bug where focus would be lost from the Find textbox as the user typed a search word and a corresponding match was found.
@@ -15,6 +15,8 @@ Visual Designer:
 - Added Button control property (AllowFocusRect) to enable/disable drawing the rectangle around the button when it has focus. Only valid if Theme property is False. 
 - Added Button control property (TextForeColorHot) to set text color when mouse hovers over the button. Only valid if Theme property is False. 
 - Added Control property (Anchor) which allows you to specify layout resize/movement at design time (uses the WinFBX CLayout class behind the scenes).
+- Added Anchor property for Forms.
+- Added ChildFormParent property for Forms.
 
 Version 3.0.1 (June 6, 2021)
 Editor:

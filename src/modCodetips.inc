@@ -189,78 +189,130 @@ function DereferenceLine( _
    ' eg.   MyFunctionName              ' standalone function
    pDoc->GetCurrentFunctionName( sCurrentFunction, nGetSet )
 
-   do until nCurElement > nTotalElements
-      sElement = AfxStrParse(sLine, nCurElement, ".")   ' p | MyFunction
+   dim as long numParts = AfxStrParseCount(sLine, ".")
+   dim parts(1 to numParts) as string
+   for i as long = 1 to numParts
+      parts(i) = AfxStrParse(sLine, i, ".")
+   next
 
-      ' SEARCH FOR MATCHING VARIABLE NAME
-      ' If the special keyword "THIS" is used then convert it to the function name
-      if nCurElement = 1 then
-         if ucase(sElement) = "THIS" then
-            sElement = AfxStrParse(sCurrentFunction, 1, ".")
-            bIsTHIS = true
-         else
-            bIsTHIS = false
-         END IF
-      END IF
-      sVarName = sVarName & sElement
-
-      '' ATTEMPT TO MATCH A FUNCTION NAME
-      ' eg.    MyFunction
-      ' eg.    mytype.MyFunction
-      pData = gdb2.dbFindFunction( sVarName )
-      if pData then return pData
-      pData = gdb2.dbFindSub( sVarName )
-      if pData then return pData
-      pData = gdb2.dbFindProperty( sVarName )
-      if pData then return pData
-                 
-      '' ATTEMPT TO MATCH LOCAL VARIABLE
-      ' <FunctionName>.<Element>
-      ' <TYPEname>.<FunctionName>.<Element>
-      sLocal = sCurrentFunction & "." & sVarName
-      if AfxStrTally(sLocal, ".") = 1 then sLocal = "." & sLocal
-
-      pData = gdb2.dbFindVariable(sLocal)
-      if pData = 0 THEN 
-         '' ATTEMPT TO MATCH ON A TYPE ELEMENT
-         if pLastData then
-            sTemp = pLastData->VariableType & ".." & sElement
-         else
-            sTemp = sVarName & "." & sElement
-         end if
-         pData = gdb2.dbFindVariable(sTemp)
-         
-         '' ATTEMPT TO MATCH GLOBAL VARIABLE   
-         if pData = 0 then
-            sGlobal = ".." & sElement     ' Global variable format ..<ElementName>
-            pData = gdb2.dbFindVariable(sGlobal)
-         end if
-      END IF              
-          
-      '' ATTEMPT TO MATCH ON A TYPE NAME
-      if pData then
-         ' If we are attempting to activate a CodeTip via "(" then the codetip
-         ' for a TYPE function element is stored in Element Value. Return the
-         ' pData now rather than continuing to then try to do a lookup for a
-         ' TYPE that will fail (because ElementValue is not a TYPE in this case,
-         ' but rather a codetip).
-         if nCurElement = nTotalElements then return pData
-         sTypeName = pData->VariableType   ' forward reference to the TYPE if applicable
-      else
-         sTypeName = sVarName   
-      END IF
-
-      pDataTYPE = gdb2.dbFindTYPE(sTypeName)
-      if pDataTYPE then pLastData = pDataTYPE
-
-      sVarName = sTypeName & "."
-      nCurElement = nCurElement + 1
-   loop
+   dim as string sParent = sCurrentFunction
+   dim as string sLookFor 
+   dim as long curPart = 1
    
-   if pLastData then pLastData->IsTHIS = bIsThis
-   return pLastData
+   do until curPart > numParts
+      sLookFor = parts(curPart)
+
+      if pLastData then
+         sParent = pLastData->VariableType
+      end if
+        
+      '' ATTEMPT TO MATCH LOCAL VARIABLE WITHIN CURRENT FUNCTION
+      pData = gdb2.dbFindVariable( sParent, sLookFor )
+      if pData then
+         pLastData = pData
+      else   
+         '' ATTEMPT TO MATCH GLOBAL VARIABLE   
+         pData = gdb2.dbFindVariable( "", sLookfor )
+         if pData then
+            pLastData = pData
+         end if
+      end if
       
-END FUNCTION
+      '' ATTEMPT TO MATCH FUNCTION NAME
+      if pData = 0 then
+         pData = gdb2.dbFindFunction( sLookfor )
+         if pData then
+            pLastData = pData
+            exit do
+         end if
+      end if
+
+      ' If we did not get anymore unresolved matches then return
+      ' the most recent match.
+      if pData = 0 then exit do
+
+      curPart += 1
+   loop
+
+'gdb2.dbDebug()
+
+return pLastData
+
+
+
+
+'   do until nCurElement > nTotalElements
+'      sElement = AfxStrParse(sLine, nCurElement, ".")   ' p | MyFunction
+
+'      ' SEARCH FOR MATCHING VARIABLE NAME
+'      ' If the special keyword "THIS" is used then convert it to the function name
+'      if nCurElement = 1 then
+'         if ucase(sElement) = "THIS" then
+'            sElement = AfxStrParse(sCurrentFunction, 1, ".")
+'            bIsTHIS = true
+'         else
+'            bIsTHIS = false
+'         END IF
+'      END IF
+'      sVarName = sVarName & sElement
+
+'      '' ATTEMPT TO MATCH A FUNCTION NAME
+'      ' eg.    MyFunction
+'      ' eg.    mytype.MyFunction
+'      pData = gdb2.dbFindFunction( sVarName )
+'      if pData then return pData
+'      pData = gdb2.dbFindSub( sVarName )
+'      if pData then return pData
+'      pData = gdb2.dbFindProperty( sVarName )
+'      if pData then return pData
+                 
+'      '' ATTEMPT TO MATCH LOCAL VARIABLE
+'      ' <FunctionName>.<Element>
+'      ' <TYPEname>.<FunctionName>.<Element>
+'      sLocal = sCurrentFunction & "." & sVarName
+'      if AfxStrTally(sLocal, ".") = 1 then sLocal = "." & sLocal
+
+'      pData = gdb2.dbFindVariable("", sLocal)
+'      if pData = 0 THEN 
+'         '' ATTEMPT TO MATCH ON A TYPE ELEMENT
+'         if pLastData then
+'            sTemp = pLastData->VariableType & ".." & sElement
+'         else
+'            sTemp = sVarName & "." & sElement
+'         end if
+'         pData = gdb2.dbFindVariable("", sTemp)
+         
+'         '' ATTEMPT TO MATCH GLOBAL VARIABLE   
+'         if pData = 0 then
+'            sGlobal = ".." & sElement     ' Global variable format ..<ElementName>
+'            pData = gdb2.dbFindVariable("", sGlobal)
+'         end if
+'      END IF              
+          
+'      '' ATTEMPT TO MATCH ON A TYPE NAME
+'      if pData then
+'         ' If we are attempting to activate a CodeTip via "(" then the codetip
+'         ' for a TYPE function element is stored in Element Value. Return the
+'         ' pData now rather than continuing to then try to do a lookup for a
+'         ' TYPE that will fail (because ElementValue is not a TYPE in this case,
+'         ' but rather a codetip).
+'         if nCurElement = nTotalElements then return pData
+'         sTypeName = pData->VariableType   ' forward reference to the TYPE if applicable
+'      else
+'         sTypeName = sVarName   
+'      END IF
+
+'      pDataTYPE = gdb2.dbFindTYPE(sTypeName)
+'      if pDataTYPE then pLastData = pDataTYPE
+
+'      sVarName = sTypeName & "."
+'      nCurElement = nCurElement + 1
+'   loop
+   
+'   if pLastData then pLastData->IsTHIS = bIsThis
+'   return pLastData
+      
+end function
 
    
 ' ========================================================================================
@@ -352,17 +404,13 @@ function ShowAutoCompletePopup( _
             ) as Long
    if len(sList) = 0 THEN exit function
    dim as string sFillups = "(=."
-                                  
-'   ' Register the PNG images       
-'   SciExec(hEdit, SCI_RGBAIMAGESETWIDTH, 16, 0)
-'   SciExec(hEdit, SCI_RGBAIMAGESETHEIGHT, 16, 0)
-                                          
-'   SciExec(hEdit, SCI_AUTOCSETFILLUPS, 0, strptr(sFillups))  ' characters that also select and close the popup
-'   SciExec(hEdit, SCI_AUTOCSETSEPARATOR, 124, 0)             ' Pipe symbol as separator
-'   SciExec(hEdit, SCI_AUTOCSETORDER, 1, 0)                   ' List must be sorted alphabetically
-'   SciExec(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
-'   SciExec(hEdit, SCI_AUTOCSETMAXHEIGHT, 9, 0)
-'   SciExec(hEdit, SCI_AUTOCSHOW, 0, strptr(sList))
+                                
+   SciExec(hEdit, SCI_AUTOCSETFILLUPS, 0, strptr(sFillups))  ' characters that also select and close the popup
+   SciExec(hEdit, SCI_AUTOCSETSEPARATOR, 124, 0)             ' Pipe symbol as separator
+   SciExec(hEdit, SCI_AUTOCSETORDER, 1, 0)                   ' List must be sorted alphabetically
+   SciExec(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
+   SciExec(hEdit, SCI_AUTOCSETMAXHEIGHT, 9, 0)
+   SciExec(hEdit, SCI_AUTOCSHOW, 0, strptr(sList))
                             
    function = 0
 end function
@@ -445,18 +493,18 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       sLine_ucase = ucase(sLine)
 
       if right(sLine_ucase, 4) = " AS " then 
-'         ' okay
-'         bTypesOnly = false
-'         bTypesNotPreloaded = false  ' all types
-'         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+         ' okay
+         bTypesOnly = false
+         bTypesNotPreloaded = false  ' all types
+         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
 
-'      elseif right(sLine_ucase, 1) = "." then 
-'         sDot = "."  ' okay
-'         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
+      elseif right(sLine_ucase, 1) = "." then 
+         sDot = "."  ' okay
+         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
 
-'      elseif right(sLine_ucase, 2) = "->" then
-'         sDot = "->"   
-'         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
+      elseif right(sLine_ucase, 2) = "->" then
+         sDot = "->"   
+         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
 
       elseif right(sLine_ucase, 1) = "(" then 
          ShowCodetip(pDoc)
@@ -466,202 +514,143 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          ShowCodetip(pDoc, true)
          exit function 
 
-'      elseif right(sLine_ucase, 5) = " NEW " then 
-'         ' okay
-'         bTypesOnly = false
-'         bTypesNotPreloaded = false  ' all types
-'         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+      elseif right(sLine_ucase, 5) = " NEW " then 
+         ' okay
+         bTypesOnly = false
+         bTypesNotPreloaded = false  ' all types
+         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
 
-'      elseif right(sLine_ucase, 12) = "CONSTRUCTOR " then 
-'         ' okay
-'         bTypesOnly = true
-'         bTypesNotPreloaded = true  ' only TYPES that are in our source.
-'         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+      elseif right(sLine_ucase, 12) = "CONSTRUCTOR " then 
+         ' okay
+         bTypesOnly = true
+         bTypesNotPreloaded = true  ' only TYPES that are in our source.
+         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
 
-'      elseif right(sLine_ucase, 11) = "DESTRUCTOR " then 
-'         ' okay
-'         bTypesOnly = true
-'         bTypesNotPreloaded = true
-'         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+      elseif right(sLine_ucase, 11) = "DESTRUCTOR " then 
+         ' okay
+         bTypesOnly = true
+         bTypesNotPreloaded = true
+         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
 
-'      elseif right(sLine_ucase, 9) = " EXTENDS " then 
-'         ' okay
-'         bTypesOnly = true
-'         bTypesNotPreloaded = false  ' all types
-'         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+      elseif right(sLine_ucase, 9) = " EXTENDS " then 
+         ' okay
+         bTypesOnly = true
+         bTypesNotPreloaded = false  ' all types
+         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       end if
 
-'      ' Check if it is a "FOR i AS LONG" type of statement
-'      if instr(sLine, "FOR ") then 
-'         SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
-'         exit function
-'      end if
+      ' Check if it is a "FOR i AS LONG" type of statement
+      if instr(sLine, "FOR ") then 
+         SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
+         exit function
+      end if
 
-'      if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
-'         ' If the file is dirty then reparse it before attempting the autocomplete
-'         If pDoc->UserModified Then
-'            ParseDocument(pDoc)
-'			End If   
-'      end if
+      if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
+         ' If the file is dirty then reparse it before attempting the autocomplete
+         If pDoc->UserModified Then
+            pDoc->ParseDocument()
+			End If   
+      end if
    end if
    
-'   sList = "|"
+   sList = "|"
          
-'   select case pDoc->AutoCompleteType
+   select case pDoc->AutoCompleteType
       
-'      case AUTOCOMPLETE_DIM_AS
-'         ' Create the space separated data type list
-'         ' Add all of the TYPE definitions that were found
-'         gdb2.dbRewind()
-'         do 
-'            pData = gdb2.dbGetNext()
-'            if pData = 0 THEN exit do
-            
-'            if bTypesOnly = false then
-'               if pData->id = DB2_STANDARDDATATYPE then
-'                  st = pData->VariableType
-'                  if nLenMatchWord then
-'                     if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
-'                        sList = sList & st & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
-'                     END IF
-'                  else
-'                     if len(st) then      
-'                        sList = sList & st & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
-'                     end if   
-'                  END IF
-'               END IF      
-'            end if
+      case AUTOCOMPLETE_DIM_AS
+         ' Create the space separated data type list
+         ' Add all of the TYPE definitions that were found
+         gdb2.dbRewind()
+         do 
+            pData = gdb2.dbGetNext()
+            if pData = 0 THEN exit do
+
+            if bTypesOnly = false then
+               if pData->id = DB2_STANDARDDATATYPE then
+                  st = pData->VariableType
+                  if nLenMatchWord then
+                     if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
+                        sList = sList & st & "|"
+                     end if
+                  else
+                     if len(st) then      
+                        sList = sList & st & "|"
+                     end if   
+                  end if
+               end if   
+            end if
     
-'            if pData->id = DB2_TYPE THEN
-'               if bTypesOnly then
-'                  if pData->IsEnum then continue do
-'                  if bTypesNotPreloaded then
-'                     ' Only look at TYPES that are loaded into the editor. These would
-'                     ' be entries that have a Filename attached to them. Preloaded TYPES
-'                     ' from WinAPI or Afx do not have Filenames.
-'                     if len(pData->fileName) = 0 then continue do
-'                  end if
-'               END IF
-'               st = rtrim(pData->VariableType)
-'               if nLenMatchWord then
-'                  if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
-'                     If ExistsInAutocompleteList(sList, st) = false THEN 
-'                        st = st & "?" & str(IMAGE_AUTOC_CLASS) 
-'                        sList = sList & st & "|" 
-'                     end if
-'                  end if
-'               elseif len(st) THEN 
-'                  If ExistsInAutocompleteList(sList, st) = false THEN 
-'                     st = st & "?" & str(IMAGE_AUTOC_CLASS) 
-'                     sList = sList & st & "|"
-'                  end if    
-'               END IF
-'            END IF
-'         loop
-
-
-'      case AUTOCOMPLETE_TYPE
-'         pData = DereferenceLine( pDoc, sDot, curPos - 1)
-'         if pData then 
-
-'            if (pData->id = DB2_VARIABLE) or (pData->id = DB2_TYPE) then
+            if pData->id = DB2_TYPE THEN
+               if bTypesOnly then
+                  if pData->IsEnum then continue do
+                  if bTypesNotPreloaded then
+                     ' Only look at TYPES that are loaded into the editor. These would
+                     ' be entries that have a Filename attached to them. Preloaded TYPES
+                     ' from WinAPI or Afx do not have Filenames.
+                     if len(pData->fileName) = 0 then continue do
+                  end if
+               end if
  
-'               bIsTHIS = pData->IsTHIS
-               
-'               ' Construct the popup list by retrieving all elements
-'               ' related to the TYPE name. 
-'               sLookFor = pData->VariableType
-   
-'               ' Lookup the TYPE because we need to ensure that we are using
-'               ' the true TYPE and not the ALIAS name. When the TYPE is found, the
-'               ' true TYPE can be found in pData->ElementValue.
-'               ' Also, this TYPE may be extended from another TYPE so we need to ensure
-'               ' that we gather the elements from all affected TYPEs.
-'               dim AllTypes(any) as string 
-               
-'               do
-'                  pData = gdb2.dbFindTYPE(sLookFor)
-'                  if pData = 0 then exit do
-'                  ub = ubound(AllTypes) + 1
-'                  redim preserve AllTypes(ub)
-'                  ' the true TYPE associated with the variable
-'                  AllTypes(ub) = ucase(pData->VariableType)
-'                  sLookFor = pData->TypeExtends
-'               loop 
-'               iNextType = lbound(AllTypes)
-               
-'               do until iNextType > ubound(AllTypes)
-'                  gdb2.dbRewind()
-'                  do 
-'                     pData = gdb2.dbGetNext()
-'                     if pData = 0 THEN exit do
-'                     sElement = pData->ElementName   
-'                     st = ucase(AfxStrParse(sElement, 1, "."))       ' MYTYPE
+               ' nLenMatchWord will allow partial matches to be added to the popup
+               ' based on what the user has currently typed.
+               st = rtrim(pData->VariableType)
+               if nLenMatchWord then
+                  if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
+                     if ExistsInAutocompleteList(sList, st) = false then
+                        sList = sList & st & "|" 
+                     end if
+                  end if
+               elseif len(st) then
+                  if ExistsInAutocompleteList(sList, st) = false then
+                     sList = sList & st & "|"
+                  end if    
+               end if
+            end if
+         loop
+
+
+      case AUTOCOMPLETE_TYPE
+         ' Attempt to popup a list of TYPE elements related the pData variableType (TYPE)
+         pData = DereferenceLine( pDoc, sDot, curPos - 1)
+         if pData = 0 then return false
+         sLookFor = pData->VariableType    ' This is the TYPE structure
+         if len(sLookFor) = 0 then return false
+
+         sLookFor = ucase(sLookFor)
+         gdb2.dbRewind()
+         do 
+            pData = gdb2.dbGetnext()
+            if pData = 0 then exit do
+            if pData->deleted = true then continue do
             
-'                     if AllTypes(iNextType) = st THEN   ' MYTYPE = MYTYPE
-'                        select case pData->id
-'                           case DB2_VARIABLE    ' 3 parse parts. mytype..sLine, mytype.MyFunction.rc
-'                              ' Only get the variable if Parse#2 is blank. This would indicate that
-'                              ' the variable is not part of a sub/function but rather belongs to
-'                              ' the TYPE structure itself.
-'                              st = AfxStrParse(sElement, 3, ".")   ' Get the "sLine"
-'                              if len(AfxStrParse(sElement, 2, ".")) = 0 then
-'                                 ' Only include PUBLIC elements of the TYPE unless the flag has
-'                                 ' been set that the THIS keyword was used.
-'                                 if bIsTHIS = false then
-'                                    if pData->IsPublic = false then continue do
-'                                 END IF
-'                                 if nLenMatchWord then
-'                                    if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
-'                                       If ExistsInAutocompleteList(sList, st) = false THEN 
-'                                          st = st & "?" & str(IMAGE_AUTOC_PROPERTY) 
-'                                          sList = sList & st & "|"
-'                                       end if
-'                                    end if
-'                                 else
-'                                    If ExistsInAutocompleteList(sList, st) = false THEN 
-'                                       st = st & "?" & str(IMAGE_AUTOC_PROPERTY) 
-'                                       sList = sList & st & "|"
-'                                    end if
-'                                 end if         
-'                              end if
-                           
-'                           case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY    ' 2 parse parts  mytype.MyFunction
-'                              st = AfxStrParse(sElement, 2, ".")   ' Get the MyFunction portion
+            if (pData->id = DB2_VARIABLE) andalso _
+               (ucase(pData->ParentName) = sLookFor) then
+               st = pData->ElementName
+               if nLenMatchWord then
+                  if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
+                     if ExistsInAutocompleteList(sList, st) = false then
+                        sList = sList & st & "|"
+                     end if
+                  end if
+               else
+                  If ExistsInAutocompleteList(sList, st) = false then
+                     sList = sList & st & "|"
+                  end if
+               end if         
+            end if   
+         loop 
 
-'                              if nLenMatchWord then
-'                                 if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
-'                                    If ExistsInAutocompleteList(sList, st) = false THEN 
-'                                       st = st & "?" & str(IMAGE_AUTOC_METHOD) 
-'                                       sList = sList & st & "|"
-'                                    end if
-'                                 end if
-'                              else
-'                                 If ExistsInAutocompleteList(sList, st) = false THEN 
-'                                    st = st & "?" & str(IMAGE_AUTOC_METHOD) 
-'                                    sList = sList & st & "|"
-'                                 end if
-'                              end if         
-'                        end select      
-'                     END IF
-'                  loop
-'                  iNextType = iNextType + 1
-'               loop
-'            END IF
-  
-'         END IF
-
-'   end select
+   end select
      
-'   sList = trim(sList, any "| ")
-'   if len(sList) THEN
-'      ' Save the code editor starting position 
-'      pDoc->AutoCStartPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
-'      ShowAutoCompletePopup(hEdit, sList)
-'      return true
-'   else
-'      SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
-'   end if 
+   sList = trim(sList, any "| ")
+   if len(sList) THEN
+      ' Save the code editor starting position 
+      pDoc->AutoCStartPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
+      ShowAutoCompletePopup(hEdit, sList)
+      return true
+   else
+      SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
+   end if 
 
    function = true
 END FUNCTION
