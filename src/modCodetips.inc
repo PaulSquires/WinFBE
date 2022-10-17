@@ -198,14 +198,14 @@ function DereferenceLine( _
    dim as string sParent = sCurrentFunction
    dim as string sLookFor 
    dim as long curPart = 1
-   
+
    do until curPart > numParts
       sLookFor = parts(curPart)
 
       if pLastData then
          sParent = pLastData->VariableType
       end if
-        
+
       '' ATTEMPT TO MATCH LOCAL VARIABLE WITHIN CURRENT FUNCTION
       pData = gdb2.dbFindVariable( sParent, sLookFor )
       if pData then
@@ -236,82 +236,8 @@ function DereferenceLine( _
 
 'gdb2.dbDebug()
 
-return pLastData
+   return pLastData
 
-
-
-
-'   do until nCurElement > nTotalElements
-'      sElement = AfxStrParse(sLine, nCurElement, ".")   ' p | MyFunction
-
-'      ' SEARCH FOR MATCHING VARIABLE NAME
-'      ' If the special keyword "THIS" is used then convert it to the function name
-'      if nCurElement = 1 then
-'         if ucase(sElement) = "THIS" then
-'            sElement = AfxStrParse(sCurrentFunction, 1, ".")
-'            bIsTHIS = true
-'         else
-'            bIsTHIS = false
-'         END IF
-'      END IF
-'      sVarName = sVarName & sElement
-
-'      '' ATTEMPT TO MATCH A FUNCTION NAME
-'      ' eg.    MyFunction
-'      ' eg.    mytype.MyFunction
-'      pData = gdb2.dbFindFunction( sVarName )
-'      if pData then return pData
-'      pData = gdb2.dbFindSub( sVarName )
-'      if pData then return pData
-'      pData = gdb2.dbFindProperty( sVarName )
-'      if pData then return pData
-                 
-'      '' ATTEMPT TO MATCH LOCAL VARIABLE
-'      ' <FunctionName>.<Element>
-'      ' <TYPEname>.<FunctionName>.<Element>
-'      sLocal = sCurrentFunction & "." & sVarName
-'      if AfxStrTally(sLocal, ".") = 1 then sLocal = "." & sLocal
-
-'      pData = gdb2.dbFindVariable("", sLocal)
-'      if pData = 0 THEN 
-'         '' ATTEMPT TO MATCH ON A TYPE ELEMENT
-'         if pLastData then
-'            sTemp = pLastData->VariableType & ".." & sElement
-'         else
-'            sTemp = sVarName & "." & sElement
-'         end if
-'         pData = gdb2.dbFindVariable("", sTemp)
-         
-'         '' ATTEMPT TO MATCH GLOBAL VARIABLE   
-'         if pData = 0 then
-'            sGlobal = ".." & sElement     ' Global variable format ..<ElementName>
-'            pData = gdb2.dbFindVariable("", sGlobal)
-'         end if
-'      END IF              
-          
-'      '' ATTEMPT TO MATCH ON A TYPE NAME
-'      if pData then
-'         ' If we are attempting to activate a CodeTip via "(" then the codetip
-'         ' for a TYPE function element is stored in Element Value. Return the
-'         ' pData now rather than continuing to then try to do a lookup for a
-'         ' TYPE that will fail (because ElementValue is not a TYPE in this case,
-'         ' but rather a codetip).
-'         if nCurElement = nTotalElements then return pData
-'         sTypeName = pData->VariableType   ' forward reference to the TYPE if applicable
-'      else
-'         sTypeName = sVarName   
-'      END IF
-
-'      pDataTYPE = gdb2.dbFindTYPE(sTypeName)
-'      if pDataTYPE then pLastData = pDataTYPE
-
-'      sVarName = sTypeName & "."
-'      nCurElement = nCurElement + 1
-'   loop
-   
-'   if pLastData then pLastData->IsTHIS = bIsThis
-'   return pLastData
-      
 end function
 
    
@@ -374,8 +300,6 @@ function ShowCodetip( _
             dim as string sFunctionName = pDoc->GetWord( curPos - 1)
             sFunctionName = left( sClassFunction, f ) & sFunctionName
             if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-            if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
-            if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
          end if   
       end if
       if pData then codeTip = pData->CallTip
@@ -617,6 +541,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          if len(sLookFor) = 0 then return false
 
          sLookFor = ucase(sLookFor)
+
          gdb2.dbRewind()
          do 
             pData = gdb2.dbGetnext()
@@ -626,6 +551,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
             if (pData->id = DB2_VARIABLE) andalso _
                (ucase(pData->ParentName) = sLookFor) then
                st = pData->ElementName
+
                if nLenMatchWord then
                   if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
                      if ExistsInAutocompleteList(sList, st) = false then

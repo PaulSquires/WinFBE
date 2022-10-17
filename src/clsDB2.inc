@@ -107,7 +107,7 @@ function clsDB2.dbAdd( _
             .ElementData  = parser->fullLine
             .nLineNum     = parser->objectStartLine + 1  ' display in listview
          
-         case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
+         case DB2_FUNCTION
             .nLineNum     = parser->objectStartLine
             .ElementName  = parser->functionName
             .CallTip      = parser->functionParams    ' Calltip
@@ -298,20 +298,6 @@ end function
 ''
 function clsDB2.dbFindVariable( byref sParentName as string, byref sVariableName as string ) as DB2_DATA ptr
    return this.dbSeek( sParentName, sVariableName, DB2_VARIABLE )      
-end function
-
-
-''
-''
-function clsDB2.dbFindSub( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek( "", sFunctionName, DB2_SUB, sFilename ) 
-end function
-
-
-''
-''
-function clsDB2.dbFindProperty( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek( "", sFunctionName, DB2_PROPERTY, sFilename ) 
 end function
 
 

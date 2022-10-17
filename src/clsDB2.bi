@@ -70,8 +70,6 @@ type clsDB2
       declare function dbGetNext() as DB2_DATA ptr
       declare function dbSeek( byval sParentName as string, byval sLookFor as string, byval Action as integer, byval sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindFunction( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
-      declare function dbFindSub( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
-      declare function dbFindProperty( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindVariable( byref sParentName as string, byref sVariableName as string ) as DB2_DATA ptr
       declare function dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
       declare function dbWriteDB2( byref wszFilename as wstring ) as integer

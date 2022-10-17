@@ -626,8 +626,6 @@ function OpenSelectedDocument( _
    if len( wszFunctionName ) AndAlso nLineNumber = -1 then
       ' Search for function, sub, or property (get/set)
       pData = gdb2.dbFindFunction( wszFunctionName, wszFilename) 
-      if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName, wszFilename) 
-      if pData = 0 then pData = gdb2.dbFindProperty( wszFunctionName, wszFilename) 
       if pData then
          wszFilename = pData->fileName
          nLineNumber = pData->nLineNum

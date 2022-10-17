@@ -17,6 +17,8 @@ Visual Designer:
 - Added Control property (Anchor) which allows you to specify layout resize/movement at design time (uses the WinFBX CLayout class behind the scenes).
 - Added Anchor property for Forms.
 - Added ChildFormParent property for Forms.
+- Added new (mostly complete) internal code parser that creates codetips and autocomplete popups.
+
 
 Version 3.0.1 (June 6, 2021)
 Editor:

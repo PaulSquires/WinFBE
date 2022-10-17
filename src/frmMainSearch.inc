@@ -98,8 +98,6 @@ function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRES
 
          ' Search the list of Function names
          if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-         if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
-         if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
          ' Search for variable definitions
          if pData = 0 then pData = gdb2.dbFindVariable( "", sFunctionName )
          ' Search for the TYPE definition
@@ -113,8 +111,6 @@ function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRES
          if f then
             sFunctionName = left( sClassFunction, f ) & sFunctionName
             if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-            if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
-            if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
          end if   
       
       end if

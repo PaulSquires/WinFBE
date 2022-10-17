@@ -174,8 +174,8 @@ function clsConfig.LoadCodetipsGeneric( _
 
          case "T"     ' type
             i = instr(wst, "|")
-            parser.functionName = left(wst, i-1)
-            parser.functionAlias = parser.functionName
+            parser.typeName = left(wst, i-1)
+            parser.typeAlias = parser.typeName
             wsParts = mid(wst, i + 1)
             gdb2.dbAdd( @parser, DB2_TYPE )
 
@@ -185,9 +185,10 @@ function clsConfig.LoadCodetipsGeneric( _
             nCount = AfxStrParseCount(wsParts, "|")
             for i = 1 to nCount
                wsPart = AfxStrParse(wsParts, i, "|")
+               parser.functionName = parser.typeName
                parser.varName = AfxStrParse(wsPart, 1, ",") 
                parser.varType = AfxStrParse(wsPart, 2, ",") 
-               parser.varScope = SCOPEGLOBAL
+               parser.varScope = DIMSCOPE.SCOPETYPE
                gdb2.dbAdd( @parser, DB2_VARIABLE )
             next
 
