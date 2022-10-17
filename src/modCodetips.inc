@@ -117,10 +117,7 @@ function DereferenceLine( _
    dim pDataTYPE as DB2_DATA ptr
    dim pLastData as DB2_DATA ptr
    
-   dim as long i, nTotalElements, nCurElement
-   dim as ClassProperty nGetSet
-   dim as string sElement, sVarName, sCurrentFunction, sTypeName, sLocal, sGlobal, sTemp
-   dim as Boolean bIsTHIS
+   dim as string sCurrentFunction, sTypeName
 
    dim as hwnd hEdit   = pDoc->hWndActiveScintilla
    dim as long curPos  = nPosition  
@@ -166,8 +163,8 @@ function DereferenceLine( _
    
    ' All of the array parenthesis should now be removed so now we can simply
    ' search for the start of the line.
-   i = InStrRev(sLine, any " (*[&@", -1)
-   if i THEN sLine = mid(sLine, i+1)
+   dim as long i = InStrRev(sLine, any " (*[&@", -1)
+   if i then sLine = mid(sLine, i+1)
    
    ' Need to check if this line is part of a WITH / END WITH block.
    if (len(sLine) = 0) or (left(sLine, 1) = ".") then
@@ -179,15 +176,13 @@ function DereferenceLine( _
    
    ' Convert all "->" pointer references to "." dots to make parsing easier
    sLine = AfxStrReplace(sLine, "->", ".")
-   nTotalElements = AfxStrParseCount(sLine, ".")
-   nCurElement = 1
    
    ' Determine what sub/function (if any) that we are in. This function will
    ' retrieve the current standalone function, or the fully qualified name of 
    ' a class/type function.
    ' eg.   clsType.MyFunctionName      ' inside a class/type function
    ' eg.   MyFunctionName              ' standalone function
-   pDoc->GetCurrentFunctionName( sCurrentFunction, nGetSet )
+   pDoc->GetCurrentFunctionName( sCurrentFunction, 0 )
 
    dim as long numParts = AfxStrParseCount(sLine, ".")
    dim parts(1 to numParts) as string
@@ -201,7 +196,7 @@ function DereferenceLine( _
 
    do until curPart > numParts
       sLookFor = parts(curPart)
-
+      
       if pLastData then
          sParent = pLastData->VariableType
       end if
@@ -217,24 +212,30 @@ function DereferenceLine( _
             pLastData = pData
          end if
       end if
-      
+
       '' ATTEMPT TO MATCH FUNCTION NAME
       if pData = 0 then
-         pData = gdb2.dbFindFunction( sLookfor )
+         if len(sParent) then
+            sLookFor = sParent & "." & sLookFor
+            pData = gdb2.dbFindFunctionTYPE( sParent, sLookfor )
+         else   
+            pData = gdb2.dbFindFunction( sLookfor )
+         end if
          if pData then
             pLastData = pData
             exit do
          end if
       end if
-
+      
       ' If we did not get anymore unresolved matches then return
       ' the most recent match.
       if pData = 0 then exit do
 
-      curPart += 1
+      curPart = curPart + 1
    loop
 
 'gdb2.dbDebug()
+'? " "
 
    return pLastData
 
@@ -289,19 +290,6 @@ function ShowCodetip( _
       pDoc->wszLastCallTip = ""
       pDoc->nLastCallTipLine = -1
       pData = DereferenceLine(pDoc, "(", curPos-1)
-      if pData = 0 then 
-         ' Maybe this is a class sub/function inside of a class method that is
-         ' not prefixed by the "this" keyword.
-         dim sClassFunction as String
-         pDoc->GetCurrentFunctionName( sClassFunction, 0 )
-         dim as long f = instr( sClassFunction, "." )
-         if f then
-            ' Get the word preceeding our "("
-            dim as string sFunctionName = pDoc->GetWord( curPos - 1)
-            sFunctionName = left( sClassFunction, f ) & sFunctionName
-            if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-         end if   
-      end if
       if pData then codeTip = pData->CallTip
    end if
 
@@ -548,10 +536,19 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
             if pData = 0 then exit do
             if pData->deleted = true then continue do
             
+            dim as boolean bAddToList = false
+            
             if (pData->id = DB2_VARIABLE) andalso _
                (ucase(pData->ParentName) = sLookFor) then
                st = pData->ElementName
-
+               bAddToList = true
+            elseif (pData->id = DB2_FUNCTION) andalso _
+               (ucase(pData->ParentName) = sLookFor) then   
+               st = AfxStrParse(pData->ElementName, 2, ".")
+               bAddToList = true
+            end if
+                     
+            if bAddToList then
                if nLenMatchWord then
                   if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
                      if ExistsInAutocompleteList(sList, st) = false then

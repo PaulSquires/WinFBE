@@ -66,7 +66,7 @@ type ctxParser
    as string           varType 
    as DIMSCOPE         varScope
    
-   declare function Parse( byval pDoc as clsDocument ptr ) as boolean
+   declare function Parse( byval pDoc as clsDocument ptr, byval isDesignerCode as boolean = false ) as boolean
    declare function ResetFunctionValues() as boolean
    declare function IsStandardDataType( byref sVarType as string ) as boolean
    declare function PeekChar( byval x as integer = 0 ) as integer

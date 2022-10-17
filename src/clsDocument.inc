@@ -83,6 +83,13 @@ function clsDocument.ParseDocument() as boolean
       return false
    end if
    
+   static as boolean bInParseDocument
+   
+   ' GenerateFormCode can create recursive parsing so we test to exit
+   ' the parsing if we already in this function.
+   if bInParseDocument then exit function
+   bInParseDocument = true
+   
    ' Delete any existing data related to this pDoc
    gdb2.dbDeleteByDocumentPtr(@this)
    
@@ -90,7 +97,21 @@ function clsDocument.ParseDocument() as boolean
    parser.nFileType = DB2_FILETYPE_USERCODE
    parser.parse(@this)
    frmOutput_UpdateToDoListview()
-
+   
+   ' If this document also has a visual designer then we need to generate
+   ' DB2 entries for all forms, controls, etc.
+   if (gApp.IsFileLoading = false) andalso (gApp.IsProjectLoading = false) then
+      if this.IsDesigner then
+         this.bRegenerateCode = true
+         GenerateFormCode( @this, 10000 )
+         dim parserVD as ctxParser
+         parserVD.nFileType = DB2_FILETYPE_USERCODE
+         parserVD.parse(@this, true)
+         this.bNeedsParsing = false   ' prevent recursion
+      end if   
+   end if
+      
+   bInParseDocument = false
    return true
 end function
 

@@ -106,10 +106,11 @@ function clsDB2.dbAdd( _
             .ElementName  = ""
             .ElementData  = parser->fullLine
             .nLineNum     = parser->objectStartLine + 1  ' display in listview
-         
+    
          case DB2_FUNCTION
             .nLineNum     = parser->objectStartLine
             .ElementName  = parser->functionName
+            .ParentName   = parser->typeName          
             .CallTip      = parser->functionParams    ' Calltip
  '           .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
@@ -130,18 +131,6 @@ function clsDB2.dbAdd( _
 
    function = @m_arrData(nSlot)
 end function                
-
-
-''
-''
-function clsDB2.dbAddDirect( byval pData as DB2_DATA ptr ) as integer
-   ' Thsi function is used when loading data directly from the external 
-   ' cache file database. It loads the record directly into the memory array.
-   if pData = 0 then exit function
-   dim as integer nSlot = this.dbGetFreeSlot()
-   m_arrData(nSlot) = *pData
-   function = 0
-end function
 
 
 ''
@@ -264,13 +253,13 @@ function clsDB2.dbSeek( _
       if pData = 0 then exit do
       if pData->deleted = true then continue do
       if pData->id = Action then
-         
+    
 '         if ( sLookFor = ucase(pData->ElementName) ) andalso _
 '            ( sParentName = ucase(pData->ElementName) ) andalso _
 '            ( nGetSet = pData->GetSet ) then
          if ( sLookFor = ucase(pData->ElementName) ) andalso _
             ( sParentName = ucase(pData->ParentName) ) then
-            
+          
             if len(sFilename) then
                if ucase(pData->fileName) = ucase(sFilename) then 
                   return pData
@@ -283,7 +272,7 @@ function clsDB2.dbSeek( _
       
       end if
    loop
-   
+
    function = 0
 end function
 
@@ -292,6 +281,12 @@ end function
 ''
 function clsDB2.dbFindFunction( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
    return this.dbSeek( "", sFunctionName, DB2_FUNCTION, sFilename ) 
+end function
+
+''
+''
+function clsDB2.dbFindFunctionTYPE( byref sTypeName as string, byref sFunctionName as string) as DB2_DATA ptr
+   return this.dbSeek( sTypeName, sFunctionName, DB2_FUNCTION ) 
 end function
 
 ''

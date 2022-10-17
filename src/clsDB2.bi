@@ -60,7 +60,6 @@ type clsDB2
       
    public:  
       declare function dbGetFreeSlot() as integer
-      declare function dbAddDirect( byval pData as DB2_DATA ptr ) as integer
       declare function dbAdd( byval parser as ctxParser ptr, byval id as integer) as DB2_DATA ptr
       declare function dbDelete( byref wszFilename as wstring ) as integer
       declare function dbDeleteAll() as boolean
@@ -70,6 +69,7 @@ type clsDB2
       declare function dbGetNext() as DB2_DATA ptr
       declare function dbSeek( byval sParentName as string, byval sLookFor as string, byval Action as integer, byval sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindFunction( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
+      declare function dbFindFunctionTYPE( byref sTypeName as string, byref sFunctionName as string ) as DB2_DATA ptr
       declare function dbFindVariable( byref sParentName as string, byref sVariableName as string ) as DB2_DATA ptr
       declare function dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
       declare function dbWriteDB2( byref wszFilename as wstring ) as integer

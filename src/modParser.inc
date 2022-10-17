@@ -175,7 +175,7 @@ function ctxParser.ParseFunctionParams() as boolean
             if this.IsStandardDataType( dataType ) = false then
                this.varName = varName
                this.varType = dataType
-               this.varScope = SCOPEFUNCTION
+               this.varScope = DIMSCOPE.SCOPEFUNCTION
                ' We have the full DIM statement so now commit it to the database
                gdb2.dbAdd( @this, DB2_VARIABLE )
             end if
@@ -196,6 +196,7 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
 
    ' Get next expected token (functionName)
    if this.EOL then return false
+   
    if this.GetToken() then
       this.typeName = this.token
    end if
@@ -224,8 +225,6 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
          end if      
       end if
    loop
-      
-'? "TYPE: "; this.functionName; " ("; this.objectStartLine; " "; this.objectEndLine; ")"
 
    return true
 end function
@@ -259,6 +258,22 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
    if this.EOL then return false
    if this.GetToken() then
       this.functionName = this.token
+      ' If there is an embedded "." then the function belongs to a TYPE/CLASS
+      dim as long i = instr(this.functionName, ".")
+      if i then 
+         this.typeName = left(this.functionName, i - 1)
+         ' Add a "THIS" variable
+         dim temp as ctxParser
+         temp.pDoc = this.pDoc
+         temp.functionName = this.functionName
+         temp.varName = "this"
+         temp.varType = this.typeName
+         temp.varScope = DIMSCOPE.SCOPEFUNCTION
+         temp.nFileType = this.nFileType
+         temp.objectStartLine = this.lineNum
+         temp.objectEndLine = this.lineNum
+         gdb2.dbAdd( @temp, DB2_VARIABLE )
+      end if   
    end if
 
    this.objectStartLine = this.lineNum
@@ -751,12 +766,18 @@ end function
 
 
 '':::::
-function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
+function ctxParser.Parse( byval pDoc as clsDocument ptr, byval isDesignerCode as boolean = false ) as boolean
 
    if pDoc = 0 then return false
    
    this.pDoc = pDoc
-   this.text = Cast( ZString Ptr, SciExec(pDoc->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
+   
+   if isDesignerCode then
+      dim as string sDesignerCode = UnicodeToUtf8( pDoc->wszFormCodeGen )
+      this.text = Cast( ZString Ptr, strptr(sDesignerCode) )
+   else   
+      this.text = Cast( ZString Ptr, SciExec(pDoc->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
+   end if
    if( this.text = 0 ) then return false
 
    this.incomment = false
@@ -805,3 +826,4 @@ function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
 end function
 
 
+   
