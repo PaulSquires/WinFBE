@@ -970,13 +970,17 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    do until pDoc = 0
       if pDoc->IsDesigner then 
          pDoc->bRegenerateCode = true
-         GenerateFormCode(pDoc, initialCtrlID)
+         GenerateFormCode( pDoc, initialCtrlID )
       end if
       initialCtrlID  = initialCtrlID  + 1000
       pDoc = pDoc->pDocNext
    loop
    
-   
+   ' Do another SaveAll because a call to GenerateFormCode may have created
+   ' Event code that previously did not exist.
+   OnCommand_FileSaveAll(HWND_FRMMAIN)
+
+
    ' Run any precompile tools
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
       if gConfig.Tools(y).Action = USERTOOL_ACTION_PRECOMPILE then

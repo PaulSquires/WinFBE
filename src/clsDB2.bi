@@ -20,11 +20,9 @@
 ''
 const DB2_VARIABLE         = 1
 const DB2_FUNCTION         = 2    ' Standalone and type functions
-const DB2_SUB              = 3    ' Standalone and type subs
-const DB2_PROPERTY         = 4    ' GetProp/SetProp/Constr/Destr of TYPEs
-const DB2_TYPE             = 5
-const DB2_TODO             = 6
-const DB2_STANDARDDATATYPE = 7    ' long, integer, string, etc...
+const DB2_TYPE             = 3
+const DB2_TODO             = 4
+const DB2_STANDARDDATATYPE = 5    ' long, integer, string, etc...
 
 const DB2_FILETYPE_FB        = 100
 const DB2_FILETYPE_WINAPI    = 101

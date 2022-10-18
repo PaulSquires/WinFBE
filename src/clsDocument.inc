@@ -100,16 +100,16 @@ function clsDocument.ParseDocument() as boolean
    
    ' If this document also has a visual designer then we need to generate
    ' DB2 entries for all forms, controls, etc.
-   if (gApp.IsFileLoading = false) andalso (gApp.IsProjectLoading = false) then
-      if this.IsDesigner then
-         this.bRegenerateCode = true
-         GenerateFormCode( @this, 10000 )
-         dim parserVD as ctxParser
-         parserVD.nFileType = DB2_FILETYPE_USERCODE
-         parserVD.parse(@this, true)
-         this.bNeedsParsing = false   ' prevent recursion
-      end if   
-   end if
+'   if (gApp.IsFileLoading = false) andalso (gApp.IsProjectLoading = false) then
+'      if this.IsDesigner then
+'         this.bRegenerateCode = true
+'         GenerateFormCode( @this, 10000 )
+'         dim parserVD as ctxParser
+'         parserVD.nFileType = DB2_FILETYPE_USERCODE
+'         parserVD.parse(@this, true)
+'         this.bNeedsParsing = false   ' prevent recursion
+'      end if   
+'   end if
       
    bInParseDocument = false
    return true

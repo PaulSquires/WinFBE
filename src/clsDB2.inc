@@ -322,24 +322,15 @@ function clsDB2.dbDebug() as integer
    dim pData as DB2_DATA ptr
    
    ' PRINT ALL TYPES
-   for i as integer = 1 to 5
+   for i as integer = 1 to 3
       select case i
          case 1
             wszTitle = "CLASSES/TYPES"
             dataType = DB2_TYPE
-continue for
          case 2
             wszTitle = "FUNCTIONS"
             dataType = DB2_FUNCTION
          case 3
-            wszTitle = "SUBS"
-            dataType = DB2_SUB
-continue for
-         case 4
-            wszTitle = "PROPERTY"
-            dataType = DB2_PROPERTY
-continue for
-         case 5
             wszTitle = "VARIABLES"
             dataType = DB2_VARIABLE
       end select
@@ -369,6 +360,7 @@ if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
          pStream.WriteLine "   nFileType: "         & wszFileType
          pStream.WriteLine "   ParentName: "        & pData->ParentName
          pStream.WriteLine "   ElementName: "       & pData->ElementName
+         pStream.WriteLine "   TypeExtends: "       & pData->TypeExtends
          pStream.WriteLine "   VariableType:"       & pData->VariableType
          pStream.WriteLine "   CallTip: "           & pData->CallTip
          pStream.WriteLine "   lineNum: "           & pData->nLineNum

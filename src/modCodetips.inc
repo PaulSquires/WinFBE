@@ -361,6 +361,9 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
              
+   ' Reparse this pDoc because the unsaved code needs to be parsed.
+   pDoc->ParseDocument()
+   
    ' Get the current entered word/characters to only match.
    ' Remove any trailing "." because we have modified valid scintilla to recognize
    ' the period as part of a valid word.
@@ -374,7 +377,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
          exit function
       end if   
-   END IF                 
+   end if
 
 
    ' Retrieve the position
@@ -530,39 +533,49 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
 
          sLookFor = ucase(sLookFor)
 
-         gdb2.dbRewind()
-         do 
-            pData = gdb2.dbGetnext()
-            if pData = 0 then exit do
-            if pData->deleted = true then continue do
-            
-            dim as boolean bAddToList = false
-            
-            if (pData->id = DB2_VARIABLE) andalso _
-               (ucase(pData->ParentName) = sLookFor) then
-               st = pData->ElementName
-               bAddToList = true
-            elseif (pData->id = DB2_FUNCTION) andalso _
-               (ucase(pData->ParentName) = sLookFor) then   
-               st = AfxStrParse(pData->ElementName, 2, ".")
-               bAddToList = true
-            end if
-                     
-            if bAddToList then
-               if nLenMatchWord then
-                  if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
-                     if ExistsInAutocompleteList(sList, st) = false then
+         do
+            gdb2.dbRewind()
+            do 
+               pData = gdb2.dbGetnext()
+               if pData = 0 then exit do
+               if pData->deleted = true then continue do
+               
+               dim as boolean bAddToList = false
+               
+               if (pData->id = DB2_VARIABLE) andalso _
+                  (ucase(pData->ParentName) = sLookFor) then
+                  st = pData->ElementName
+                  bAddToList = true
+               elseif (pData->id = DB2_FUNCTION) andalso _
+                  (ucase(pData->ParentName) = sLookFor) then   
+                  st = AfxStrParse(pData->ElementName, 2, ".")
+                  bAddToList = true
+               end if
+                        
+               if bAddToList then
+                  if nLenMatchWord then
+                     if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
+                        if ExistsInAutocompleteList(sList, st) = false then
+                           sList = sList & st & "|"
+                        end if
+                     end if
+                  else
+                     If ExistsInAutocompleteList(sList, st) = false then
                         sList = sList & st & "|"
                      end if
-                  end if
-               else
-                  If ExistsInAutocompleteList(sList, st) = false then
-                     sList = sList & st & "|"
-                  end if
-               end if         
-            end if   
-         loop 
-
+                  end if         
+               end if   
+            loop 
+            
+            dim pDataTYPE as DB2_DATA ptr
+            pDataTYPE = gdb2.dbFindTYPE( sLookFor )
+            if pDataTYPE then
+               sLookFor = ucase(pDataType->TypeExtends)
+            else
+               exit do   
+            end if
+            if len(sLookFor) = 0 then exit do
+         loop
    end select
      
    sList = trim(sList, any "| ")

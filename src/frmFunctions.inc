@@ -686,7 +686,7 @@ function LoadFilesAndFunctions() as long
             if pData->deleted then continue do
             if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
             select case pData->id 
-               case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
+               case DB2_FUNCTION
                   if wszFilename = ucase(pData->fileName) THEN
                      wszNodeName = pData->ElementName
                      select case pData->GetSet 
@@ -772,7 +772,7 @@ function LoadFunctionsOnly() as long
       if pData->deleted then continue do
       if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
       select case pData->id 
-         case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
+         case DB2_FUNCTION
             wszNodeName = pData->ElementName
             select case pData->GetSet 
                case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"

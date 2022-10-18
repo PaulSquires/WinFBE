@@ -194,6 +194,9 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
    this.objectStartLine = this.lineNum
    this.objectEndLine = this.lineNum
 
+   dim as boolean bReadingExtends = false
+   dim as string extendsTYPE 
+   
    ' Get next expected token (functionName)
    if this.EOL then return false
    
@@ -205,7 +208,14 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
    do until this.GetToken() = false
       ' tokens from the body of the TYPE should be processed here
       
+      if bReadingExtends then
+         extendsTYPE = this.token
+         bReadingExtends = false   
+      end if
+      
       select case this.ltoken 
+         case "extends"
+            bReadingExtends = true
          case "as"
             this.ReadToSOL()
             this.ParseDim( action, DIMSCOPE.SCOPETYPE )
@@ -219,6 +229,7 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
             if( this.ltoken = "type" ) then
                this.objectEndLine = this.lineNum
                this.typeAlias = this.typeName
+               this.typeExtends = extendsTYPE
                gdb2.dbAdd( @this, DB2_TYPE )
                exit do
             end if
