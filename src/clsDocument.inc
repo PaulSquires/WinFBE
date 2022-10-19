@@ -2578,24 +2578,14 @@ function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as 
    
    dim sText as string  ' this will be an UTF-8 encoded string
    
-   dim txtArray(any) as string ' temp string array if needed
-   
    dim as any ptr pSci = this.GetActiveScintillaPtr()
 
-   if pSci = 0 then
-      ' The document has not been loaded into a Scintilla window
-      GetFileTostring( this.DiskFilename, sText, @this)
-      nLines = GetstringToArray( sText, txtArray() )
-   else
-      nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
-   end if
+   if pSci = 0 then exit function
+
+   nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
 
    for i = 0 to nLines - 1
-      if pSci then
-         st = ltrim(this.GetLine(i))
-      else
-         st = ltrim(txtArray(i + 1))
-      end if
+      st = ltrim(this.GetLine(i))
          
       if left(st, 1) <> "'" then continue for
       st = ltrim(mid(st, 2))

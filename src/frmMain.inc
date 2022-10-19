@@ -1813,12 +1813,15 @@ function frmMain_WndProc( _
             pDoc = cast(clsDocument ptr, lParam)
          end if   
          if pDoc then
+            pDoc->bRegenerateCode = true
             if IsDesignerView(pDoc) = false then  ' clicked on the code window
                dim as hwnd hEdit = pDoc->hWindow(0)
                dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
                dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
+               GenerateFormCode(pDoc, 9000)
                if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
                if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
+            else
                GenerateFormCode(pDoc, 9000)
             end if
          end if
