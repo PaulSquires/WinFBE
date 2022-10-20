@@ -191,6 +191,7 @@ function DereferenceLine( _
    next
 
    dim as string sParent = sCurrentFunction
+   dim as string sSearch
    dim as string sLookFor 
    dim as long curPart = 1
 
@@ -216,10 +217,19 @@ function DereferenceLine( _
       '' ATTEMPT TO MATCH FUNCTION NAME
       if pData = 0 then
          if len(sParent) then
-            sLookFor = sParent & "." & sLookFor
-            pData = gdb2.dbFindFunctionTYPE( sParent, sLookfor )
+            sSearch = sParent & "." & sLookFor
+            pData = gdb2.dbFindFunctionTYPE( sParent, sSearch )
+            if pData = 0 then
+               ' Determine if there is a TYPE Extends that needs to be checked
+               pData = gdb2.dbFindTYPE( sParent )
+               if pData then
+                  sParent = pData->TypeExtends
+                  sSearch = sParent & "." & sLookFor
+                  pData = gdb2.dbFindFunctionTYPE( sParent, sSearch )
+               end if   
+            end if   
          else   
-            pData = gdb2.dbFindFunction( sLookfor )
+            pData = gdb2.dbFindFunction( sSearch )
          end if
          if pData then
             pLastData = pData
@@ -233,9 +243,6 @@ function DereferenceLine( _
 
       curPart = curPart + 1
    loop
-
-'gdb2.dbDebug()
-'? " "
 
    return pLastData
 
@@ -290,6 +297,16 @@ function ShowCodetip( _
       pDoc->wszLastCallTip = ""
       pDoc->nLastCallTipLine = -1
       pData = DereferenceLine(pDoc, "(", curPos-1)
+
+if pData then
+? "pData: "; pData
+? "ParentName: "; pData->ParentName
+? "ElementName: "; pData->ElementName
+? "TypeExtends: "; pData->TypeExtends
+? "VariableType: "; pData->VariableType
+? " "
+end if
+
       if pData then codeTip = pData->CallTip
    end if
 
