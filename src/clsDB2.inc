@@ -352,7 +352,6 @@ function clsDB2.dbDebug() as integer
             case DB2_FILETYPE_USERCODE:  wszFileType = "DB2_FILETYPE_USERCODE"
          end select
 
-if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
          pStream.WriteLine "   " & wszTitle
          pStream.WriteLine "   deleted: "           & pData->deleted
          pStream.WriteLine "   fileName: "          & pData->fileName

@@ -116,6 +116,7 @@ type clsDocument
       GenerateStatusBar as long = BST_CHECKED  ' Indicates to generate code for the statusbar
       hWndDesigner      as HWnd            ' DesignMain window (switch to this window when in design mode (versus code mode)
       DesignTabsCurSel  as long 
+      initialCtrlID     as long            ' The starting CtrlID to use for this form and all controls on it.
       hWndFrame         as hwnd            ' DesignFrame for visual designer windows
       hWndForm          as hwnd            ' DesignForm for visual designer windows
       hWndFakeMenu      as HWND            ' Fake top menu to display when using Menu Editor

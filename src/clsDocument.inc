@@ -103,7 +103,7 @@ function clsDocument.ParseDocument() as boolean
 '   if (gApp.IsFileLoading = false) andalso (gApp.IsProjectLoading = false) then
 '      if this.IsDesigner then
 '         this.bRegenerateCode = true
-'         GenerateFormCode( @this, 10000 )
+'         GenerateFormCode( @this )
 '         dim parserVD as ctxParser
 '         parserVD.nFileType = DB2_FILETYPE_USERCODE
 '         parserVD.parse(@this, true)
@@ -427,7 +427,7 @@ function clsDocument.CreateCodeWindow( _
 
       ' In any event, regenerate code for the visual designer 
       this.bRegenerateCode = true
-      GenerateFormCode( @this, 9000 )
+      GenerateFormCode( @this )
    end if   
 
    ' Apply code editor properties to the edit window

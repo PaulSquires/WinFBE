@@ -238,11 +238,15 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       wst = trim(wst)
       if len(wst) = 0 then continue do
       
+      parser.objectStartLine = 0
+      parser.objectEndLine = 0
+
       if left(wst, 5) = "TYPE:" then
          bReadingType = true
-         parser.functionName = mid(wst, 6) 
-         parser.functionAlias = parser.functionName   
-         if parser.functionName = "BASE" then
+         parser.typeName = mid(wst, 6) 
+         parser.typeAlias = parser.typeName   
+         parser.typeExtends = ""
+         if parser.typeName = "BASE" then
             bIsBase = true
          else   
             bIsBase = false
@@ -258,10 +262,11 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       
       if bReadingType then
          ' Each element of the TYPE structure is added to the database. 
-         parser.functionName = ""
+         parser.functionName = parser.typeName
+         parser.varName  = ""
          parser.varType  = ""
          parser.functionParams = ""
-         parser.varScope = SCOPEGLOBAL
+         parser.varScope = DIMSCOPE.SCOPEGLOBAL
          if bIsBase then
             dim as long ub = ubound(arrBase) + 1
             redim preserve arrBase(ub)
@@ -269,10 +274,17 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
          elseif wst = "+BASE" then
             ' add all of the BASE properties to this type
             for i as long = lbound(arrBase) to ubound(arrBase) 
-               parser.varName    = trim(AfxStrParse(arrBase(i), 1, "|"))
-               parser.varType    = trim(AfxStrParse(arrBase(i), 2, "|"))
-               parser.functionParams = trim(AfxStrParse(arrBase(i), 3, "|"))
-               gdb2.dbAdd( @parser, DB2_VARIABLE )
+               ' If functionParams exist then this is a function within a TYPE
+               dim as CWSTR functionParams = trim(AfxStrParse(arrBase(i), 3, "|"))
+               if len(functionParams) then
+                  parser.functionName = parser.typeName & "." & trim(AfxStrParse(arrBase(i), 1, "|"))
+                  parser.functionParams = functionParams
+                  gdb2.dbAdd( @parser, DB2_FUNCTION )
+               else
+                  parser.varName    = trim(AfxStrParse(arrBase(i), 1, "|"))
+                  parser.varType    = trim(AfxStrParse(arrBase(i), 2, "|"))
+                  gdb2.dbAdd( @parser, DB2_VARIABLE )
+               end if   
             next 
          else
             parser.varName = AfxStrParse(wst, 1, "|")   ' eg. ByIndex
@@ -287,6 +299,8 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
          
    loop
    pStream.Close
+
+'gdb2.dbDebug()
    
    return false  ' no error
 end function

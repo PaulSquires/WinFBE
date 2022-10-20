@@ -12,6 +12,51 @@
 '    GNU General Public License for more details.
 
 #include once "modParser.bi"
+#include once "modGenerateCode.bi"
+#include once "modVDProperties.bi"
+#include once "modVDRoutines.bi"
+
+'':::::
+function ctxParser.GenerateVisualDesignerVariables( byval pDoc as clsDocument ptr ) as boolean
+   
+   dim pData as DB2_DATA ptr
+   dim pCtrl as clsControl ptr
+
+   dim as CWSTR wszFormName = GetFormName(pDoc)
+   dim as CWSTR wszTypeName = wszFormName & "type"
+
+'type frmMainType extends wfxForm
+'   List1 As wfxListBox
+'end type
+   this.objectStartLine = 0
+   this.objectEndLine = 0
+   this.typeName = wszTypeName
+   this.typeAlias = wszTypeName
+   this.typeExtends = "wfxForm"
+   gdb2.dbAdd( @this, DB2_TYPE )
+
+'dim shared frmMain as frmMainType
+   this.varName = wszFormName
+   this.varType = wszTypeName
+   this.varScope = DIMSCOPE.SCOPEGLOBAL
+   this.functionName = ""
+   gdb2.dbAdd( @this, DB2_VARIABLE )
+
+'List1 As wfxListBox
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl then
+         if pCtrl->ControlType = CTRL_FORM then continue for
+         this.varName = GetControlProperty(pCtrl, "NAME")
+         this.varType = GetWinformsXClassName(pCtrl->ControlType) 
+         this.varScope = DIMSCOPE.SCOPETYPE
+         this.functionName = wszTypeName
+         gdb2.dbAdd( @this, DB2_VARIABLE )
+      end if
+   next   
+
+   return true
+end function
 
 
 '':::::
@@ -777,23 +822,22 @@ end function
 
 
 '':::::
-function ctxParser.Parse( byval pDoc as clsDocument ptr, byval isDesignerCode as boolean = false ) as boolean
+function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
 
    if pDoc = 0 then return false
    
    this.pDoc = pDoc
    
-   if isDesignerCode then
-      dim as string sDesignerCode = UnicodeToUtf8( pDoc->wszFormCodeGen )
-      this.text = Cast( ZString Ptr, strptr(sDesignerCode) )
-   else   
-      this.text = Cast( ZString Ptr, SciExec(pDoc->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
-   end if
+   this.text = Cast( ZString Ptr, SciExec(pDoc->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
    if( this.text = 0 ) then return false
 
    this.incomment = false
    this.startofline = true
    this.lineNum = 0
+   this.token = ""
+   this.ltoken = ""
+   this.fullline = ""
+   this.nfileType = DB2_FILETYPE_USERCODE
    this.s = 0
    this.i = 0
    this.n = len(*this.text)
@@ -831,6 +875,13 @@ function ctxParser.Parse( byval pDoc as clsDocument ptr, byval isDesignerCode as
    loop
 
    this.text = 0
+   
+   ' The main code source file has now been parsed. If this is a visual designer form then
+   ' we also need to add all of the Form and Control TYPE's and variables.
+   if pDoc->IsDesigner then
+      this.GenerateVisualDesignerVariables( pDoc )
+      'AFXMSG( "PARSE VISUAL DESIGN" )
+   end if
 
    return true
 

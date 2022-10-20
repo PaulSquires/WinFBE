@@ -851,17 +851,19 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
 
       ' Regenerate any visual designer code for Forms.
       ' The codegen is stored in each pDoc's wszFormCodeGen
-      dim as long initialCtrlID = 9000
+      dim as long initialCtrlID = 10000
+
       pDoc = gApp.pDocList
       do until pDoc = 0
          if pDoc->IsDesigner then 
+            pDoc->initialCtrlID = initialCtrlID
             pDoc->bRegenerateCode = true
-            GenerateFormCode(pDoc, initialCtrlID)
-            wszText = pDoc->wszFormCodeGen & vbcrlf & wszText
-            initialCtrlID = initialCtrlID + 1000
+            GenerateFormCode( pDoc )
+            initialCtrlID  = initialCtrlID  + 10000
          end if
          pDoc = pDoc->pDocNext
       loop
+      
 
       dim pTextStream as CTextStream
       if pTextStream.OpenUnicode(gCompile.MainFilename, IOMODE_FORWRITING, true) = S_OK then
@@ -965,14 +967,16 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Regenerate any visual designer code for Forms.
    ' The codegen is stored in each pDoc's wszFormCodeGen
-   dim as long initialCtrlID = 9000
+   dim as long initialCtrlID = 10000
+
    pDoc = gApp.pDocList
    do until pDoc = 0
       if pDoc->IsDesigner then 
+         pDoc->initialCtrlID = initialCtrlID
          pDoc->bRegenerateCode = true
-         GenerateFormCode( pDoc, initialCtrlID )
+         GenerateFormCode( pDoc )
+         initialCtrlID  = initialCtrlID  + 10000
       end if
-      initialCtrlID  = initialCtrlID  + 1000
       pDoc = pDoc->pDocNext
    loop
    

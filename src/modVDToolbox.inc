@@ -767,7 +767,7 @@ function frmVDToolbox_OnCommand( _
                   pCtrl->Events(nCurSel).bIsSelected = true
                   pDoc->UserModified = true
                   pDoc->bRegenerateCode = true
-                  GenerateFormCode(pDoc, 9000)
+                  GenerateFormCode(pDoc)
                   ' position code to the new Event 
                   dim as CWSTR wszFunctionName = GetControlProperty(pCtrl, "NAME") & "_" & pCtrl->Events(nCurSel).wszEventName
                   if pCtrl->ControlType <> CTRL_FORM then               

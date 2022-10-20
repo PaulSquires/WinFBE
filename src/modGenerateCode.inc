@@ -490,7 +490,7 @@ end function
 ' ========================================================================================
 ' Generate (or regenerate) visual designer code.
 ' ========================================================================================
-function GenerateFormCode( byval pDoc as clsDocument ptr, byval initialCtrlID as long ) as long
+function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    if pDoc = 0 then exit function
    if pDoc->IsDesigner = false then exit function
    if pDoc->bRegenerateCode = false then exit function
@@ -506,7 +506,10 @@ function GenerateFormCode( byval pDoc as clsDocument ptr, byval initialCtrlID as
    dim as string sp(5) 
    for i as long = 1 to ubound(sp)
       sp(i) = space(val(gConfig.TabSize) * i)
-   NEXT
+   next
+   
+   dim as long initialCtrlID = pDoc->initialCtrlID
+   if initialCtrlID = 0 then initialCtrlID = 10000
 
    pDoc->wszFormCodegen = ""
 
@@ -735,7 +738,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr, byval initialCtrlID as
             if pCtrl->ControlType = CTRL_FORM then continue for
             wszCtrlName = GetControlProperty(pCtrl, "NAME")
             wszText = wszText & sp(2) & wszCtrlName & " As " & GetWinformsXClassName(pCtrl->ControlType) & vbcrlf
-         END IF
+         end if
       next   
    wszText = wszText & _
    "end type" & vbcrlf & vbcrlf 
@@ -1038,11 +1041,6 @@ function GenerateFormCode( byval pDoc as clsDocument ptr, byval initialCtrlID as
    ' Save the generated codegen code because we will output it to a disk file
    pDoc->wszFormCodeGen = wszCodeGen
    pDoc->bRegenerateCode = false
-   ' IMPORTANT to set the document to need parsing because the code generation
-   ' has changed. When document is saved then the reparse flag must be TRUE
-   ' otherwise the second pass during the parse will not fire and get the
-   ' code generation variables included into the database.
-   pDoc->bNeedsParsing = true
    
    function = 0
 end function
