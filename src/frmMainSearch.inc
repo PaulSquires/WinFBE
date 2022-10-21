@@ -63,7 +63,7 @@ function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRES
    
    dim pData as DB2_DATA ptr
    dim as CWSTR wszFilename
-   dim as string sFunctionName, sTrigger
+   dim as string sTypeName, sFunctionName, sLookFor, sTrigger
    dim as long nLineNum = 0
    
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
@@ -88,30 +88,23 @@ function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRES
          if ( sTrigger = "." ) orelse ( sTrigger = "->" ) then
             ' In the DereferenceLine function any "->" are converted to "." for simplicity.
             pData = DereferenceLine( pDoc, sTrigger, wordStartPos - 1 )
-            if pData then 
-               sFunctionName = pData->VariableType & "." & sFunctionName
+            if pData then
+               sTypeName = pData->VariableType
+               sLookFor = sTypeName & "." & sFunctionName
                ' Set pData to null because it currently points at the TYPE definition and
                ' we the gdb2 searches below to actually find the sub/function.
                pData = 0
             end if
          end if   
 
+         ' Search the list of TYPE Function names
+         if pData = 0 then pData = gdb2.dbFindFunctionTYPE( sTypeName, sLookFor )
          ' Search the list of Function names
          if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
          ' Search for variable definitions
          if pData = 0 then pData = gdb2.dbFindVariable( "", sFunctionName )
          ' Search for the TYPE definition
-         if pData = 0 then pData = gdb2.dbFindType( sFunctionName )
-      
-         ' Maybe this is a class sub/function inside of a class method that is
-         ' not prefixed by the "this" keyword.
-         dim sClassFunction as String
-         pDoc->GetCurrentFunctionName( sClassFunction, 0 )
-         dim as long f = instr( sClassFunction, "." )
-         if f then
-            sFunctionName = left( sClassFunction, f ) & sFunctionName
-            if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-         end if   
+         if pData = 0 then pData = gdb2.dbFindType( sTypeName )
       
       end if
       
@@ -121,6 +114,7 @@ function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRES
       end if
       wszFilename = pData->filename
       nLineNum = pData->nLineNum
+   
    end if
    
    ' Save our current position in case user invokes "Last Position" option,   

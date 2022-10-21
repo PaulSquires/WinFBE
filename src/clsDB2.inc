@@ -116,6 +116,7 @@ function clsDB2.dbAdd( _
             if .ElementName = "" then exit function
         
          case DB2_VARIABLE
+            .nLineNum       = parser->objectStartLine
             .ParentName     = parser->functionName
             .ElementName    = parser->varName
             .VariableType   = parser->varType
@@ -221,32 +222,8 @@ function clsDB2.dbSeek( _
    dim pData as DB2_DATA ptr
             
    sParentName = ucase(sParentName)
-   
-   ' Determine if this is a get or set property
-   dim as integer nGetSet, i
-
-'   i = instr( sLookFor, " (get)" )
-'   if i then
-'      nGetSet = ClassProperty.Getter
-'   else
-'      i = instr( sLookFor, " (set)" )
-'      if i then
-'         nGetSet = ClassProperty.Setter
-'      else      
-'         i = instr( sLookFor, " (ctor)" )
-'         if i then
-'            nGetSet = ClassProperty.ctor
-'         else      
-'            i = instr( sLookFor, " (dtor)" )
-'            if i then
-'               nGetSet = ClassProperty.dtor
-'            end if
-'         end if   
-'      end if
-'   end if
-'   if i then sLookFor = left( sLookFor, i - 1 )
-      
    sLookFor = ucase(sLookFor)
+   
    this.dbRewind()
    do 
       pData = this.dbGetnext()
@@ -254,12 +231,9 @@ function clsDB2.dbSeek( _
       if pData->deleted = true then continue do
       if pData->id = Action then
     
-'         if ( sLookFor = ucase(pData->ElementName) ) andalso _
-'            ( sParentName = ucase(pData->ElementName) ) andalso _
-'            ( nGetSet = pData->GetSet ) then
          if ( sLookFor = ucase(pData->ElementName) ) andalso _
             ( sParentName = ucase(pData->ParentName) ) then
-          
+
             if len(sFilename) then
                if ucase(pData->fileName) = ucase(sFilename) then 
                   return pData
@@ -269,8 +243,8 @@ function clsDB2.dbSeek( _
             end if      
          
          end if
-      
       end if
+         
    loop
 
    function = 0

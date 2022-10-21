@@ -287,21 +287,23 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
                end if   
             next 
          else
-            parser.varName = AfxStrParse(wst, 1, "|")   ' eg. ByIndex
-            ' An element can have both a forward reference to another TYPE
-            ' and also a CodeTip. for example, the Treeview Node property
-            ' points to an wfxTreeNodeCollection TYPE but can also popup
-            parser.varType = trim(AfxStrParse(wst, 2, "|"))
-            parser.functionParams = trim(AfxStrParse(wst, 3, "|"))
-            gdb2.dbAdd( @parser, DB2_VARIABLE )
+            ' If functionParams exist then this is a function within a TYPE
+            dim as CWSTR functionParams = trim(AfxStrParse(wst, 3, "|"))
+            if len(functionParams) then
+               parser.functionName = parser.typeName & "." & trim(AfxStrParse(wst, 1, "|"))
+               parser.functionParams = functionParams
+               gdb2.dbAdd( @parser, DB2_FUNCTION )
+            else
+               parser.varName    = trim(AfxStrParse(wst, 1, "|"))
+               parser.varType    = trim(AfxStrParse(wst, 2, "|"))
+               gdb2.dbAdd( @parser, DB2_VARIABLE )
+            end if   
          end if
       end if
          
    loop
    pStream.Close
 
-'gdb2.dbDebug()
-   
    return false  ' no error
 end function
 

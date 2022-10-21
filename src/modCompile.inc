@@ -56,17 +56,23 @@ function CreateTempResourceFile() as boolean
    ' Collect all of the IMAGE_NAME used by controls/properties in the file/project
    ' and generate a string to output to the resource file.
    dim pDoc as clsDocument ptr
-   dim as CWSTR wszInternalText, wszExistingText
+   dim as CWSTR wszInternalText, wszExistingText, wszImage
    
    pDoc = gApp.pDocList
    do until pDoc = 0
       for i as long = lbound(pDoc->AllImages) to ubound(pDoc->AllImages)
          ' IMAGE_ARROWLEFT    RCDATA "IMAGES\\LEFTARROW.PNG"
-         wszInternalText = wszInternalText & _
-                   pDoc->AllImages(i).wszImageName & wspace(6) & _
-                   pDoc->AllImages(i).wszFormat    & wspace(2) & _
-                   wchr(34) & pDoc->AllImages(i).wszFileName & wchr(34) & _
-                   vbcrlf
+         wszImage = pDoc->AllImages(i).wszImageName & wspace(6) & _
+                    pDoc->AllImages(i).wszFormat    & wspace(2) & _
+                    wchr(34) & pDoc->AllImages(i).wszFileName & wchr(34) & _
+                    vbcrlf
+         
+         ' Only add this Image if code has not already been generated for it, otherwise
+         ' there will be a resource compile error.
+         if instr(wszInternalText, wszImage) = 0 then
+            wszInternalText = wszInternalText & wszImage
+         end if
+            
          ' Check to ensure that the path to the image is valid otherwise the
          ' resource compiler will fail.
          if AfxFileExists( pDoc->AllImages(i).wszFileName ) = false then

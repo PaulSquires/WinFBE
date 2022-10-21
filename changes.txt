@@ -18,6 +18,7 @@ Visual Designer:
 - Added Anchor property for Forms.
 - Added ChildFormParent property for Forms.
 - Added new (mostly complete) internal code parser that creates codetips and autocomplete popups.
+- Added check to prevent duplicate code output into the resource file for images with the same path and filename as this would cause a compile error.
 
 
 Version 3.0.1 (June 6, 2021)

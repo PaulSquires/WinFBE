@@ -297,16 +297,6 @@ function ShowCodetip( _
       pDoc->wszLastCallTip = ""
       pDoc->nLastCallTipLine = -1
       pData = DereferenceLine(pDoc, "(", curPos-1)
-
-if pData then
-? "pData: "; pData
-? "ParentName: "; pData->ParentName
-? "ElementName: "; pData->ElementName
-? "TypeExtends: "; pData->TypeExtends
-? "VariableType: "; pData->VariableType
-? " "
-end if
-
       if pData then codeTip = pData->CallTip
    end if
 
