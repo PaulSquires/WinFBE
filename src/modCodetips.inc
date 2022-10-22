@@ -368,9 +368,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
              
-   ' Reparse this pDoc because the unsaved code needs to be parsed.
-   pDoc->ParseDocument()
-   
    ' Get the current entered word/characters to only match.
    ' Remove any trailing "." because we have modified valid scintilla to recognize
    ' the period as part of a valid word.
@@ -466,10 +463,11 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
          exit function
       end if
-
+ 
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
-         If pDoc->UserModified Then
+         If cbool(SciExec(pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) = true orelse _
+            (pDoc->UserModified = true) then
             pDoc->ParseDocument()
 			End If   
       end if

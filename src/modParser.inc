@@ -233,6 +233,61 @@ end function
 
 
 '':::::
+function ctxParser.ParseENUM( byval action as PARSEACTION ) as boolean
+
+   ' We store ENUM data the same way as TYPE data
+   this.ResetFunctionValues()
+   this.objectStartLine = this.lineNum
+   this.objectEndLine = this.lineNum
+
+   ' Get next expected token (ENUM name)
+   if this.EOL then return false
+   
+   if this.GetToken() then
+      ' bypass any ENUM's that do not have names
+      if this.EOL then return false
+      this.typeName = this.token
+   end if
+
+   ' Finally, look for the END ENUM that will complete the parsing
+   do until this.GetToken() = false
+      ' tokens from the body of the ENUM should be processed here
+      
+      select case this.ltoken 
+         case "explicit", "="
+            this.ReadToEOL()
+         case "'todo:"
+            this.ParseTODO( PARSINGACTION.PARSE_TODO )
+         case "end", "enum"   
+         case else
+            if len(this.token) then
+               ' Everything else in this structure must be an actual ENUM 
+               this.varName = this.token
+               this.varType = "long"
+               this.varScope = DIMSCOPE.SCOPETYPE
+               this.functionName = this.typeName
+               gdb2.dbAdd( @this, DB2_VARIABLE )
+            end if   
+      end select
+      
+      if( this.ltoken = "end" ) then
+         if this.GetToken() then
+            if this.EOL then return false
+            if( this.ltoken = "enum" ) then
+               this.objectEndLine = this.lineNum
+               this.typeAlias = this.typeName
+               gdb2.dbAdd( @this, DB2_TYPE )
+               exit do
+            end if
+         end if      
+      end if
+   loop
+
+   return true
+end function
+
+
+'':::::
 function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
 
    this.ResetFunctionValues()
@@ -242,7 +297,7 @@ function ctxParser.ParseTYPE( byval action as PARSEACTION ) as boolean
    dim as boolean bReadingExtends = false
    dim as string extendsTYPE 
    
-   ' Get next expected token (functionName)
+   ' Get next expected token (typeName)
    if this.EOL then return false
    
    if this.GetToken() then
@@ -304,6 +359,8 @@ end function
 '':::::
 function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
 
+   ' This handles parsing FUNCTION, SUB, PROPERTY
+   
    dim as boolean readingAllParams = false
    dim as boolean readingSingleParam = false
    dim as boolean readingArrayParam = false
@@ -418,7 +475,8 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
          if this.GetToken() then
             if this.EOL then return false
             if( this.ltoken = "sub" ) orelse _
-               (this.ltoken = "function") then 
+               (this.ltoken = "function") orelse _
+               (this.ltoken = "property") then 
                this.objectEndLine = this.lineNum
                exit do
             end if
@@ -860,9 +918,19 @@ function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
                '? this.lineNum, "Error parsing FUNCTION statement. Unexpected token: "; this.token
             end if
 
+         case "property"
+            if this.ParseFunction( PARSINGACTION.PARSE_FUNCTION ) = false then
+               '? this.lineNum, "Error parsing PROPERTY statement. Unexpected token: "; this.token
+            end if
+
          case "type"
             if this.ParseTYPE( PARSINGACTION.PARSE_TYPE ) = false then
                '? this.lineNum, "Error parsing TYPE statement. Unexpected token: "; this.token
+            end if
+
+         case "enum"
+            if this.ParseENUM( PARSINGACTION.PARSE_ENUM ) = false then
+               '? this.lineNum, "Error parsing ENUM statement. Unexpected token: "; this.token
             end if
 
          case "'todo:"
@@ -880,7 +948,6 @@ function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
    ' we also need to add all of the Form and Control TYPE's and variables.
    if pDoc->IsDesigner then
       this.GenerateVisualDesignerVariables( pDoc )
-      'AFXMSG( "PARSE VISUAL DESIGN" )
    end if
 
    return true

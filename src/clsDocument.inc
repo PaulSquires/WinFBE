@@ -1073,40 +1073,55 @@ function clsDocument.SaveFormJSONdata() as boolean
       wst = wst & wcomma & _
       qstr("'controls':[") 
             
-      for i as long = this.Controls.ItemFirst to this.Controls.ItemLast
-         pCtrl = this.Controls.ItemAt(i)
-         if pCtrl then
+      ' We want to ensure that we output code for the Form first because
+      ' when the form is loaded the controls need to attach themselves
+      ' to the form that must exist otherwise a GPF will occur.
+      dim bOutputForm as boolean = true
+      for numLoops as long = 1 to 2
+         ' First time through the loop we get the Form data. The second time through
+         ' we get everything except for the form.
+         for i as long = this.Controls.ItemFirst to this.Controls.ItemLast
+            pCtrl = this.Controls.ItemAt(i)
+            if pCtrl then
+               if bOutputForm = true then
+                  if pCtrl->ControlType <> CTRL_FORM then continue for
+               elseif bOutputForm = false then
+                  if pCtrl->ControlType = CTRL_FORM then continue for
+               end if
 
-            wst = wst & _
-            "{" & _
-            qstr("'type':'" & GetToolBoxName(pCtrl->ControlType) & "'") & wcomma & _
-            qstr("'properties': [") 
+               wst = wst & _
+               "{" & _
+               qstr("'type':'" & GetToolBoxName(pCtrl->ControlType) & "'") & wcomma & _
+               qstr("'properties': [") 
 
-            for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
-               wst = wst & "{" & _
-               qstr("'name':'" & pCtrl->Properties(ii).wszPropName & "'") & wcomma & _
-               qstr("'value':'" & pCtrl->Properties(ii).wszPropValue & "'") & _
-               "},"
-            next
-            
-            wst = rtrim(wst, ",") & "]," & _
-            qstr("'events': [") 
-
-            for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
-               ' Only need to output the names of the Events that have been ticked as being in use.
-               if pCtrl->Events(ii).bIsSelected then
+               for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
                   wst = wst & "{" & _
-                  qstr("'name':'" & pCtrl->Events(ii).wszEventName & "'") & wcomma & _
+                  qstr("'name':'" & pCtrl->Properties(ii).wszPropName & "'") & wcomma & _
+                  qstr("'value':'" & pCtrl->Properties(ii).wszPropValue & "'") & _
                   "},"
-               end if   
-            next
-            wst = rtrim(wst, ",") & "]"
-      
-         end if
-         
-         wst = wst & "},"
-      next
+               next
+               
+               wst = rtrim(wst, ",") & "]," & _
+               qstr("'events': [") 
 
+               for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
+                  ' Only need to output the names of the Events that have been ticked as being in use.
+                  if pCtrl->Events(ii).bIsSelected then
+                     wst = wst & "{" & _
+                     qstr("'name':'" & pCtrl->Events(ii).wszEventName & "'") & wcomma & _
+                     "},"
+                  end if   
+               next
+               wst = rtrim(wst, ",") & "]"
+         
+            end if
+            
+            wst = wst & "},"
+         next
+
+         bOutputForm = false
+      next
+      
       wst = rtrim(wst, ",") & "]"
    end if
 

@@ -18,6 +18,7 @@ enum PARSINGACTION
    PARSE_SUB
    PARSE_FUNCTION
    PARSE_TYPE
+   PARSE_ENUM
    PARSE_DIM
    PARSE_TODO
 end enum
@@ -27,7 +28,7 @@ enum DIMSCOPE
    SCOPEFUNCTION
    SCOPETYPE
 end enum
-   
+
 type ctxParser
    as clsDocument ptr  pDoc
    as zstring ptr      text
@@ -81,6 +82,7 @@ type ctxParser
    declare function ParseFunctionParams() as boolean
    declare function ParseDIM( byval action as PARSEACTION, byval originFrom as DIMscope ) as boolean
    declare function ParseTYPE( byval action as PARSEACTION ) as boolean
+   declare function ParseENUM( byval action as PARSEACTION ) as boolean
    declare function ParseTODO( byval action as PARSEACTION ) as boolean
    declare function ReadQuoted( byval escapedonce as boolean = FALSE ) as boolean
 end type
