@@ -484,7 +484,7 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
             this.ParseDim( action, DIMSCOPE.SCOPEFUNCTION )
          case "'todo:"
             this.ParseTODO( PARSINGACTION.PARSE_TODO )
-         case "property"
+         case "property", "return"
             if action = PARSINGACTION.PARSE_PROPERTY then
                ' A Property statement found at this point would be a return statement
                ' indicating that this would be a (get) property.
