@@ -689,12 +689,9 @@ function LoadFilesAndFunctions() as long
                case DB2_FUNCTION
                   if wszFilename = ucase(pData->fileName) THEN
                      wszNodeName = pData->ElementName
-                     select case pData->GetSet 
-                        case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"
-                        case ClassProperty.Setter: wszNodeName = wszNodeName & " (set)"
-                        case ClassProperty.ctor:   wszNodeName = wszNodeName & " (ctor)"
-                        case ClassProperty.dtor:   wszNodeName = wszNodeName & " (dtor)"
-                     end select      
+                     if len(pData->GetSet) then 
+                        wszNodeName = wszNodeName & " " & pData->GetSet
+                     end if
                      ub = ubound(arrFuncs) + 1
                      redim preserve arrFuncs(ub)
                      arrFuncs(ub).wszFunctionName = wszNodeName
@@ -774,12 +771,9 @@ function LoadFunctionsOnly() as long
       select case pData->id 
          case DB2_FUNCTION
             wszNodeName = pData->ElementName
-            select case pData->GetSet 
-               case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"
-               case ClassProperty.Setter: wszNodeName = wszNodeName & " (set)"
-               case ClassProperty.ctor:   wszNodeName = wszNodeName & " (ctor)"
-               case ClassProperty.dtor:   wszNodeName = wszNodeName & " (dtor)"
-            end select      
+            if len(pData->GetSet) then
+               wszNodeName = wszNodeName & " " & pData->GetSet
+            end if
             ub = ubound(arrFuncs) + 1
             redim preserve arrFuncs(ub)
             arrFuncs(ub).wszFunctionName = wszNodeName

@@ -98,7 +98,6 @@ function clsDB2.dbAdd( _
             .nLineNum     = parser->objectStartLine
             .ElementName  = parser->typeName
             .VariableType = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
-            .IsEnum       = parser->isEnum
             .TypeExtends  = parser->TypeExtends
             if .ElementName = "" then exit function
 
@@ -112,7 +111,7 @@ function clsDB2.dbAdd( _
             .ElementName  = parser->functionName
             .ParentName   = parser->typeName          
             .CallTip      = parser->functionParams    ' Calltip
- '           .GetSet       = parser->GetSet
+            .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
         
          case DB2_VARIABLE

@@ -3,6 +3,7 @@ Editor:
 - Fixed bug where WinFBE 64-bit only would GPF if currently loaded file is edited by an external editor causing WinFBE to reload the file.
 - Fixed bug where focus would be lost from the Find textbox as the user typed a search word and a corresponding match was found.
 - Fixed bug where an invalid startup position for the editor would be saved if WinFBE closed while it is minimized to the Windows Taskbar.
+- Added new internal code parser that creates codetips and autocomplete popups.
 
 Visual Designer:
 - MAJOR FILE FORMAT CHANGE: Form data separated from code file and is now saved to external file with *.design file extension.
@@ -17,7 +18,6 @@ Visual Designer:
 - Added Control property (Anchor) which allows you to specify layout resize/movement at design time (uses the WinFBX CLayout class behind the scenes).
 - Added Anchor property for Forms.
 - Added ChildFormParent property for Forms.
-- Added new (mostly complete) internal code parser that creates codetips and autocomplete popups.
 - Added check to prevent duplicate code output into the resource file for images with the same path and filename as this would cause a compile error.
 - Added code to ensure that when saving Form data it is output to the JSON design file prior to any Controls on the form, otherwise a GPF may occur when loading.
 

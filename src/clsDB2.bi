@@ -46,9 +46,7 @@ type DB2_DATA
    Variabletype  as zstring * 75        ' The type of variable this is. Could be a TYPE name.
    TypeExtends   as zstring * 75        ' The type is extended from this TYPE
    VariableScope as DIMSCOPE      ' Element is public in a type (default) 
-   IsTHIS        as boolean             ' Dynamically set in DereferenceLine so caller can show/hide private elements
-   IsEnum        as boolean             ' If type is treated as an ENUM
-   GetSet        as ClassProperty       ' 0=sub/function, 1=propertyGet, 2=propertySet, 3=ctor, 4=dtor
+   GetSet        as zstring * 75        ' (get) (set)
 end type
 
 type clsDB2

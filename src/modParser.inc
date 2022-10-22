@@ -352,6 +352,7 @@ function ctxParser.ResetFunctionValues() as boolean
    this.varName = ""
    this.varType = ""
    this.varScope = SCOPEGLOBAL
+   this.GetSet = ""
    return true
 end function   
 
@@ -359,7 +360,7 @@ end function
 '':::::
 function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
 
-   ' This handles parsing FUNCTION, SUB, PROPERTY
+   ' This handles parsing FUNCTION, SUB, PROPERTY, CONSTRUCTOR, DESTRUCTOR
    
    dim as boolean readingAllParams = false
    dim as boolean readingSingleParam = false
@@ -392,12 +393,25 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
    this.objectStartLine = this.lineNum
    this.objectEndLine = this.lineNum
 
+   select case action
+      case PARSINGACTION.PARSE_PROPERTY
+         ' Default that this is a Set property. This could be changed later to Get
+         ' if a Property statement is found within the body.
+         this.GetSet = "(set)"
+      case PARSINGACTION.PARSE_CONSTRUCTOR
+         this.GetSet = "(ctor)"
+      case PARSINGACTION.PARSE_DESTRUCTOR
+         this.GetSet = "(dtor)"
+   end select
+
    ' Get next token (left parenthesis but is optional for sub/function)
    do until this.GetToken() = false
       if this.EOL then 
-         if action <> PARSINGACTION.PARSE_FUNCTION then
-            this.UnwindToken
+         if action = PARSINGACTION.PARSE_SUB then
             exit do  ' only for Sub b/c for Function we haven't encountered AS RETURN_TYPE yet
+         else
+            ' Functions/Properties   
+            this.UnwindToken
          end if   
       end if
 
@@ -444,7 +458,8 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
       end select
    loop
    
-   if action = PARSINGACTION.PARSE_FUNCTION then
+   if (action = PARSINGACTION.PARSE_FUNCTION) orelse _
+      (action = PARSINGACTION.PARSE_PROPERTY) then
       ' Look for the Function RETURN_TYPE
       do until this.GetToken() = false
          if this.EOL then exit do
@@ -469,6 +484,12 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
             this.ParseDim( action, DIMSCOPE.SCOPEFUNCTION )
          case "'todo:"
             this.ParseTODO( PARSINGACTION.PARSE_TODO )
+         case "property"
+            if action = PARSINGACTION.PARSE_PROPERTY then
+               ' A Property statement found at this point would be a return statement
+               ' indicating that this would be a (get) property.
+               this.GetSet = "(get)"
+            end if
       end select
 
       if( this.ltoken = "end" ) then
@@ -476,7 +497,9 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
             if this.EOL then return false
             if( this.ltoken = "sub" ) orelse _
                (this.ltoken = "function") orelse _
-               (this.ltoken = "property") then 
+               (this.ltoken = "property") orelse _
+               (this.ltoken = "constructor") orelse _
+               (this.ltoken = "destructor") then
                this.objectEndLine = this.lineNum
                exit do
             end if
@@ -919,8 +942,18 @@ function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
             end if
 
          case "property"
-            if this.ParseFunction( PARSINGACTION.PARSE_FUNCTION ) = false then
+            if this.ParseFunction( PARSINGACTION.PARSE_PROPERTY ) = false then
                '? this.lineNum, "Error parsing PROPERTY statement. Unexpected token: "; this.token
+            end if
+
+         case "constructor"
+            if this.ParseFunction( PARSINGACTION.PARSE_CONSTRUCTOR ) = false then
+               '? this.lineNum, "Error parsing CONSTRUCTORE statement. Unexpected token: "; this.token
+            end if
+
+         case "destructor"
+            if this.ParseFunction( PARSINGACTION.PARSE_DESTRUCTOR ) = false then
+               '? this.lineNum, "Error parsing DESTRUCTOR statement. Unexpected token: "; this.token
             end if
 
          case "type"

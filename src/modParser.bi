@@ -17,6 +17,9 @@ enum PARSINGACTION
    PARSE_NONE
    PARSE_SUB
    PARSE_FUNCTION
+   PARSE_PROPERTY
+   PARSE_CONSTRUCTOR
+   PARSE_DESTRUCTOR
    PARSE_TYPE
    PARSE_ENUM
    PARSE_DIM
@@ -55,12 +58,12 @@ type ctxParser
    as string           functionAlias 
    as string           functionParams
    as string           functionReturnType
+   as string           GetSet
    
    ' TYPES
    as string           typeName 
    as string           typeAlias
    as string           typeExtends
-   as boolean          isEnum
    
    ' VARIABLES
    as string           varName 

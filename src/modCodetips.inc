@@ -502,7 +502,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
     
             if pData->id = DB2_TYPE THEN
                if bTypesOnly then
-                  if pData->IsEnum then continue do
                   if bTypesNotPreloaded then
                      ' Only look at TYPES that are loaded into the editor. These would
                      ' be entries that have a Filename attached to them. Preloaded TYPES
