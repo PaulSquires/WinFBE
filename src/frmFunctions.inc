@@ -696,7 +696,7 @@ function LoadFilesAndFunctions() as long
                      redim preserve arrFuncs(ub)
                      arrFuncs(ub).wszFunctionName = wszNodeName
                      arrFuncs(ub).wszPrototype = pData->CallTip
-                     arrFuncs(ub).nLineNumber = pData->nLineNum
+                     arrFuncs(ub).nLineNumber = pData->nLineStart
                   end if
             end select
          loop      
@@ -778,7 +778,7 @@ function LoadFunctionsOnly() as long
             redim preserve arrFuncs(ub)
             arrFuncs(ub).wszFunctionName = wszNodeName
             arrFuncs(ub).wszPrototype = pData->CallTip
-            arrFuncs(ub).nLineNumber = pData->nLineNum
+            arrFuncs(ub).nLineNumber = pData->nLineStart
       end select
    loop      
          

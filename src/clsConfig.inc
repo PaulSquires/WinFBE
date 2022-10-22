@@ -300,7 +300,7 @@ function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
             end if   
          end if
       end if
-         
+     
    loop
    pStream.Close
 

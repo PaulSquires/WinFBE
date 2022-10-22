@@ -38,7 +38,8 @@ type DB2_DATA
    nFiletype     as integer             ' See list of DB2_FILETYPE above
    fileName      as wstring * MAX_PATH  ' Filename of source file (needed for deleting).
    id            as integer             ' See DB_* above for what type of record this is.
-   nLineNum      as integer             ' Location in the file where found
+   nLineStart    as integer             ' Location in the file where starts
+   nLineEnd      as integer             ' Location in the file where ends
    ParentName    as zstring * 75        ' Function name / TYPE Name  (blank if global)
    ElementName   as zstring * 75        ' Function name / Variable Name / TYPE Name
    ElementData   as zstring * MAX_PATH  ' Generic text data related to ElementName (todo text, etc)

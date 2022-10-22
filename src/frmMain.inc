@@ -654,20 +654,16 @@ function Scintilla_OnNotify( _
           
          case ")"      ' Close and active code tip 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            pDoc->wszLastCallTip = ""
-            pDoc->nLastCallTipLine = -1
             SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
                
          case "(", ","      ' Show code tip 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            pDoc->wszLastCallTip = ""
-            pDoc->nLastCallTipLine = -1
             if PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
 
          case chr(13)  ' ENTER KEY PRESSED
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
             AttemptAutoInsert()
-    
+  
          case chr(32)  ' Space key pressed (Insert AutoComplete constructs if applicable)
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
             if ShowAutocompleteList() then exit function

@@ -134,8 +134,6 @@ type clsDocument
       pCtrlAction       as clsControl ptr  ' The control that the size/move action is being performed on
       wszFormCodeGen    as CWSTR           ' Form code generated  
       wszFormMetaData   as CWSTR           ' Form metadata that defines the form
-      wszLastCallTip    as CWSTR           ' Last CallTip that was displayed before being cancelled by autocomplete popup.
-      nLastCallTipLine  as long            ' The line on which the last calltip popup displayed
       AppRunCount       as long = 0        ' Only one should exist in the whole project so track if one or more exists in the code.
                   
       ' SnapLines       

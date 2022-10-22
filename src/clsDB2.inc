@@ -95,19 +95,22 @@ function clsDB2.dbAdd( _
          case DB2_TYPE    ' this handles ENUM also
             ' If the type has already been added skip adding it again. 
             if this.dbFindTYPE( parser->typeName) then return 0
-            .nLineNum     = parser->objectStartLine
-            .ElementName  = parser->typeName
-            .VariableType = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
-            .TypeExtends  = parser->TypeExtends
+            .nLineStart    = parser->objectStartLine
+            .nLineEnd      = parser->objectEndLine
+            .ElementName   = parser->typeName
+            .VariableType  = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
+            .TypeExtends   = parser->TypeExtends
             if .ElementName = "" then exit function
 
          case DB2_TODO
             .ElementName  = ""
             .ElementData  = parser->fullLine
-            .nLineNum     = parser->objectStartLine + 1  ' display in listview
+            .nLineStart   = parser->objectStartLine + 1  ' display in listview
+            .nLineEnd     = parser->objectEndLine + 1  ' display in listview
     
          case DB2_FUNCTION
-            .nLineNum     = parser->objectStartLine
+            .nLineStart   = parser->objectStartLine
+            .nLineEnd     = parser->objectEndLine
             .ElementName  = parser->functionName
             .ParentName   = parser->typeName          
             .CallTip      = parser->functionParams    ' Calltip
@@ -115,7 +118,8 @@ function clsDB2.dbAdd( _
             if .ElementName = "" then exit function
         
          case DB2_VARIABLE
-            .nLineNum       = parser->objectStartLine
+            .nLineStart     = parser->objectStartLine
+            .nLineEnd       = parser->objectEndLine
             .ParentName     = parser->functionName
             .ElementName    = parser->varName
             .VariableType   = parser->varType
@@ -335,8 +339,9 @@ function clsDB2.dbDebug() as integer
          pStream.WriteLine "   TypeExtends: "       & pData->TypeExtends
          pStream.WriteLine "   VariableType:"       & pData->VariableType
          pStream.WriteLine "   CallTip: "           & pData->CallTip
-         pStream.WriteLine "   lineNum: "           & pData->nLineNum
-'         pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
+         pStream.WriteLine "   lineStart: "         & pData->nLineStart
+         pStream.WriteLine "   lineEnd: "           & pData->nLineEnd
+         pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
 '         pStream.WriteLine "   Scope:             " & pData->varScope
          pStream.WriteLine ""
       loop

@@ -228,15 +228,19 @@ function DereferenceLine( _
                   pData = gdb2.dbFindFunctionTYPE( sParent, sSearch )
                end if   
             end if   
-         else   
-            pData = gdb2.dbFindFunction( sSearch )
          end if
          if pData then
             pLastData = pData
-            exit do
          end if
       end if
-      
+
+      if pData = 0 then
+         pData = gdb2.dbFindFunction( sLookFor )
+         if pData then
+            pLastData = pData
+         end if
+      end if
+     
       ' If we did not get anymore unresolved matches then return
       ' the most recent match.
       if pData = 0 then exit do
@@ -269,7 +273,7 @@ function ShowCodetip( _
       ' current line and thereby closed the codetip. If user goes back to the line and
       ' presses a comma to enter another parameter for function, then we should do a 
       ' test to see if we can redisplay the codetip popup again.
-      ' Need to alo handle situations where there are multiple () array references
+      ' Need to also handle situations where there are multiple () array references
       ' in the expression. For example:  ListView1.Item(10).rc(5)
       dim as long nCol = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
       dim as string sLine = rtrim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
@@ -289,20 +293,10 @@ function ShowCodetip( _
       next
    end if
 
-   ' If a CodeTip already exists but was cancelled because an autocomplete
-   ' popup was displayed then we simply redisplay that popup now.
-   if len(pDoc->wszLastCallTip) andalso (pDoc->nLastCallTipLine = pDoc->GetCurrentLineNumber) then
-      codeTip = pDoc->wszLastCallTip   
-   else      
-      pDoc->wszLastCallTip = ""
-      pDoc->nLastCallTipLine = -1
-      pData = DereferenceLine(pDoc, "(", curPos-1)
-      if pData then codeTip = pData->CallTip
-   end if
+   pData = DereferenceLine(pDoc, "(", curPos-1)
+   if pData then codeTip = pData->CallTip
 
    if len(codeTip) THEN 
-      pDoc->wszLastCallTip = codeTip
-      pDoc->nLastCallTipLine = pDoc->GetCurrentLineNumber
       codeTip = FormatCodetip(codeTip)
       SciExec( hEdit, SCI_CALLTIPSHOW, curPos, strptr(codeTip))
       return TRUE

@@ -113,7 +113,7 @@ function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRES
          exit function
       end if
       wszFilename = pData->filename
-      nLineNum = pData->nLineNum
+      nLineNum = pData->nLineStart
    
    end if
    

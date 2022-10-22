@@ -428,7 +428,6 @@ private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
       iMenu = pDoc->MenuItems(i)
       if len(rtrim(iMenu.wszName)) = 0 then continue for
       if iMenu.nIndent = 0 then
-         'wszNodes(NextFreeNode) = sp(1) & "this.MainMenu.MenuItems.Add(" & iMenu.wszName & ")" 
          wszNodes(NextFreeNode) = sp(1) & "pForm->MainMenu.MenuItems.Add(" & iMenu.wszName & ")" 
          NextFreeNode = NextFreeNode + 1
       end if
@@ -515,6 +514,15 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 
    wszFormName = GetFormName(pDoc)
 
+
+      ' If the Event/function does not already exist in code then create it now.
+   if (pDoc->MainMenuExists = true) orelse _
+      (pDoc->ToolBarExists = true) orelse _
+      (pDoc->StatusBarExists = true) then
+         pDoc->bNeedsParsing = true
+         pDoc->ParseDocument()
+   end if      
+
    ''
    ''  Generate the Declares for all of the Events for any MainMenu for the Form 
    ''
@@ -534,19 +542,63 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          ' Add the event/function to the list of declares
          wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
          
-         ' If the Event/function does not already exist in code then create it now.
-         pDoc->bNeedsParsing = true
-         pDoc->ParseDocument()
-
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
          ' not yet been loaded.
          if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
-            if pData = 0 THEN
+
+            if pData then
+               dim as long nStartLine = pData->nLineStart
+               dim as long nEndLine = pData->nLineEnd
+               dim as CWSTR wszCasesToAdd
+
+               dim as long CaseElseLine = -1
+               for ii as long = nStartLine to nEndLine
+                  if ucase(pDoc->GetLine(ii)) = sp(2) & "CASE ELSE" then
+                     CaseElseLine = ii: exit for
+                  end if
+               next
+
+               ' Add any new CASE statements
+               if CaseElseLine <> -1 then
+                  for ii as long = 0 to ubound(pDoc->MenuItems) 
+                     if len(rtrim(pDoc->MenuItems(ii).wszName)) = 0 then continue for
+                     ' Bypass any Separators
+                     if rtrim(pDoc->MenuItems(ii).wszCaption) = "-" then continue for
+                     ' Popups only needed for menuitems with IsParent. If the indent level
+                     ' of the next menuitem is greater, then this is a Parent menuitem.
+                     if i = 1 then
+                        if ii = ubound(pDoc->MenuItems) then continue for
+                        if pDoc->MenuItems(ii+1).nIndent <= pDoc->MenuItems(ii).nIndent then continue for
+                     end if   
+                     wszText = sp(2) & "Case " & chr(34) & ucase(pDoc->MenuItems(ii).wszName) & chr(34)
+                     
+                     dim as boolean bFoundLine = false
+                     for iii as long = nStartLine to nEndLine
+                        if ucase(pDoc->GetLine(iii)) = ucase(wszText) then
+                           bFoundLine = true: exit for
+                        end if
+                     next
+                     if bFoundLine = false then
+                        wszCasesToAdd = wszCasesToAdd & wszText & vbcrlf
+                     end if   
+                  next
+                  ' Insert the wszCasesToAdd string imediately before the Case Else
+                  if len(wszCasesToAdd) then
+                     wszCasesToAdd = wszCasesToAdd & _
+                                       sp(2) & "Case Else" 
+                     pDoc->SetLine( CaseElseLine, wszCasesToAdd )
+                  end if   
+               end if
+            end if
+            
+            if pData = 0 then
                wszMenuSelect = sp(1) & "Select Case UCase(sender.Name)" & vbcrlf 
                for ii as long = 0 to ubound(pDoc->MenuItems) 
                   if len(rtrim(pDoc->MenuItems(ii).wszName)) = 0 then continue for
+                  ' Bypass any Separators
+                  if rtrim(pDoc->MenuItems(ii).wszCaption) = "-" then continue for
                   ' Popups only needed for menuitems with IsParent. If the indent level
                   ' of the next menuitem is greater, then this is a Parent menuitem.
                   if i = 1 then
@@ -590,16 +642,49 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          ' Add the event/function to the list of declares
          wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
          
-         ' If the Event/function does not already exist in code then create it now.
-         pDoc->bNeedsParsing = true
-         pDoc->ParseDocument()
-         
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
          ' not yet been loaded.
          if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
-            if pData = 0 THEN
+
+            if pData then
+               dim as long nStartLine = pData->nLineStart
+               dim as long nEndLine = pData->nLineEnd
+               dim as CWSTR wszCasesToAdd
+
+               dim as long CaseElseLine = -1
+               for ii as long = nStartLine to nEndLine
+                  if ucase(pDoc->GetLine(ii)) = sp(2) & "CASE ELSE" then
+                     CaseElseLine = ii: exit for
+                  end if
+               next
+
+               ' Add any new CASE statements
+               if CaseElseLine <> -1 then
+                  for ii as long = 0 to ubound(pDoc->ToolBarItems) 
+                     wszText = sp(2) & "Case " & ii 
+                     
+                     dim as boolean bFoundLine = false
+                     for iii as long = nStartLine to nEndLine
+                        if ucase(pDoc->GetLine(iii)) = ucase(wszText) then
+                           bFoundLine = true: exit for
+                        end if
+                     next
+                     if bFoundLine = false then
+                        wszCasesToAdd = wszCasesToAdd & wszText & vbcrlf
+                     end if   
+                  next
+                  ' Insert the wszCasesToAdd string imediately before the Case Else
+                  if len(wszCasesToAdd) then
+                     wszCasesToAdd = wszCasesToAdd & _
+                                       sp(2) & "Case Else" 
+                     pDoc->SetLine( CaseElseLine, wszCasesToAdd )
+                  end if   
+               end if
+            end if
+
+            if pData = 0 then
                wszToolBarSelect = sp(1) & "Select Case sender.ClickIndex" & vbcrlf 
                for ii as long = 0 to ubound(pDoc->ToolBarItems) 
                   wszToolBarSelect = wszToolBarSelect & _
@@ -641,16 +726,49 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          ' Add the event/function to the list of declares
          wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
          
-         ' If the Event/function does not already exist in code then create it now.
-         pDoc->bNeedsParsing = true
-         pDoc->ParseDocument()
-         
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
          ' not yet been loaded.
          if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
-            if pData = 0 THEN
+
+            if pData then
+               dim as long nStartLine = pData->nLineStart
+               dim as long nEndLine = pData->nLineEnd
+               dim as CWSTR wszCasesToAdd
+
+               dim as long CaseElseLine = -1
+               for ii as long = nStartLine to nEndLine
+                  if ucase(pDoc->GetLine(ii)) = sp(2) & "CASE ELSE" then
+                     CaseElseLine = ii: exit for
+                  end if
+               next
+
+               ' Add any new CASE statements
+               if CaseElseLine <> -1 then
+                  for ii as long = 0 to ubound(pDoc->PanelItems) 
+                     wszText = sp(2) & "Case " & ii 
+                     
+                     dim as boolean bFoundLine = false
+                     for iii as long = nStartLine to nEndLine
+                        if ucase(pDoc->GetLine(iii)) = ucase(wszText) then
+                           bFoundLine = true: exit for
+                        end if
+                     next
+                     if bFoundLine = false then
+                        wszCasesToAdd = wszCasesToAdd & wszText & vbcrlf
+                     end if   
+                  next
+                  ' Insert the wszCasesToAdd string imediately before the Case Else
+                  if len(wszCasesToAdd) then
+                     wszCasesToAdd = wszCasesToAdd & _
+                                       sp(2) & "Case Else" 
+                     pDoc->SetLine( CaseElseLine, wszCasesToAdd )
+                  end if   
+               end if
+            end if
+
+            if pData = 0 then
                wszStatusBarSelect = sp(1) & "Select Case sender.ClickIndex" & vbcrlf 
                for ii as long = 0 to ubound(pDoc->PanelItems) 
                   wszStatusBarSelect = wszStatusBarSelect & _
@@ -699,10 +817,6 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                ' Add the event/function to the list of declares
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
                
-               ' If the Event/function does not already exist in code then create it now.
-               pDoc->bNeedsParsing = true
-               pDoc->ParseDocument()
-               
                ' Only check if we are not loading the project because the event handling
                ' could already exist but just be in another source code file that has
                ' not yet been loaded.
@@ -717,7 +831,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                end if
             end if   
          next
-      END IF
+      end if
    next   
 
    

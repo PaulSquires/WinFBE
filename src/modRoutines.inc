@@ -628,7 +628,7 @@ function OpenSelectedDocument( _
       pData = gdb2.dbFindFunction( wszFunctionName, wszFilename) 
       if pData then
          wszFilename = pData->fileName
-         nLineNumber = pData->nLineNum
+         nLineNumber = pData->nLineStart
       end if
    end if
    
