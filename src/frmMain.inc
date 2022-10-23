@@ -539,7 +539,7 @@ function Scintilla_OnNotify( _
 							case ".", ">"    '  Show autocomplete list for TYPE variables
 								' dot "." or ">"  part of a pointer
 								' Need to PostMessage in order to give time for notification to complete. The "."
-								' is also used as a character that selects and closes the popup list. if no
+								' is also used as a character that selects and closes the popup list. If no
 								' PostMessage then the "." will automatically select the first entry in the list
 								' and close.
 								pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
@@ -591,7 +591,7 @@ function Scintilla_OnNotify( _
             hEdit = pDoc->hWndActiveScintilla
             
             ' Get the position where the listbox was opened.
-            dim as long nStartPos = pDoc->AutoCStartPos
+            dim as long nStartPos = pDoc->AutoCStartPos 
             dim as long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
             
             ' Get the match word that existed when the listbox was displayed
@@ -599,11 +599,14 @@ function Scintilla_OnNotify( _
             
             ' Set the word that was selected in the listbox
             dim as string sText = *cast(zstring ptr, pNSC->lpText)
-            SciExec( hEdit, SCI_SETSEL, nStartPos-nLenMatchWord, nPos)
-            SciExec( hEdit, SCI_REPLACESEL, 0, cast(LPARAM, strptr(sText)))
-            nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
-            SciExec( hEdit, SCI_SETSEL, nPos, nPos)
             
+            if ucase(sText) <> ucase(pDoc->sMatchWord) then
+               SciExec( hEdit, SCI_SETSEL, nStartPos-nLenMatchWord, nPos)
+               SciExec( hEdit, SCI_REPLACESEL, 0, cast(LPARAM, strptr(sText)))
+               nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            end if
+            SciExec( hEdit, SCI_SETSEL, nPos, nPos)
+               
             ' Now that we have inserted our own text, cancel the autoinsertion by
             ' the autocomplete listbox.
             SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)

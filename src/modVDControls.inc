@@ -154,6 +154,11 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "HideSelection", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         if pCtrl->ControlType = CTRL_TEXTBOX then
+         AddControlProperty(pCtrl, "MaxLength", "32767", PropertyType.EditEnterNumericOnly)
+         else
+         AddControlProperty(pCtrl, "MaxLength", "64000", PropertyType.EditEnterNumericOnly)
+         end if
          AddControlProperty(pCtrl, "Multiline", iif(pCtrl->ControlType=CTRL_TEXTBOX,"False","True"), PropertyType.TrueFalse)
          if pCtrl->ControlType = CTRL_TEXTBOX then
          AddControlProperty(pCtrl, "PasswordChar", "", PropertyType.EditEnter)

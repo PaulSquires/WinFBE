@@ -496,7 +496,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    
    dim pCtrl as clsControl ptr
    dim as CWSTR wszText, wszFormName, wszCtrlName, wszPropName, wszPropValue, wszPropDefault
-   dim as CWSTR wszFunction, wszAllEvents, wszPrototype, wszAllDeclares
+   dim as CWSTR wszFunction, wszAllEvents, wszPrototype, wszAllDeclares, wszCaseText
    dim as CWSTR wszCombinedName, wszCodeGen, wszMenuSelect, wszToolBarSelect, wszStatusBarSelect
    dim as CWSTR DQ = chr(34)
    dim as long nStartTag, nEndTag, nPropType
@@ -516,13 +516,15 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 
 
       ' If the Event/function does not already exist in code then create it now.
-   if (pDoc->MainMenuExists = true) orelse _
-      (pDoc->ToolBarExists = true) orelse _
-      (pDoc->StatusBarExists = true) then
-         pDoc->bNeedsParsing = true
-         pDoc->ParseDocument()
-   end if      
-
+   if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
+      if (pDoc->MainMenuExists = true) orelse _
+         (pDoc->ToolBarExists = true) orelse _
+         (pDoc->StatusBarExists = true) then
+            pDoc->bNeedsParsing = true
+            pDoc->ParseDocument()
+      end if      
+   end if
+   
    ''
    ''  Generate the Declares for all of the Events for any MainMenu for the Form 
    ''
@@ -572,16 +574,16 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                         if ii = ubound(pDoc->MenuItems) then continue for
                         if pDoc->MenuItems(ii+1).nIndent <= pDoc->MenuItems(ii).nIndent then continue for
                      end if   
-                     wszText = sp(2) & "Case " & chr(34) & ucase(pDoc->MenuItems(ii).wszName) & chr(34)
+                     wszCaseText = sp(2) & "Case " & chr(34) & ucase(pDoc->MenuItems(ii).wszName) & chr(34)
                      
                      dim as boolean bFoundLine = false
                      for iii as long = nStartLine to nEndLine
-                        if ucase(pDoc->GetLine(iii)) = ucase(wszText) then
+                        if ucase(pDoc->GetLine(iii)) = ucase(wszCaseText) then
                            bFoundLine = true: exit for
                         end if
                      next
                      if bFoundLine = false then
-                        wszCasesToAdd = wszCasesToAdd & wszText & vbcrlf
+                        wszCasesToAdd = wszCasesToAdd & wszCaseText & vbcrlf
                      end if   
                   next
                   ' Insert the wszCasesToAdd string imediately before the Case Else
@@ -663,23 +665,23 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                ' Add any new CASE statements
                if CaseElseLine <> -1 then
                   for ii as long = 0 to ubound(pDoc->ToolBarItems) 
-                     wszText = sp(2) & "Case " & ii 
+                     wszCaseText = sp(2) & "Case " & ii 
                      
                      dim as boolean bFoundLine = false
                      for iii as long = nStartLine to nEndLine
-                        if ucase(pDoc->GetLine(iii)) = ucase(wszText) then
+                        if ucase(pDoc->GetLine(iii)) = ucase(wszCaseText) then
                            bFoundLine = true: exit for
                         end if
                      next
                      if bFoundLine = false then
-                        wszCasesToAdd = wszCasesToAdd & wszText & vbcrlf
+                        wszCasesToAdd = wszCasesToAdd & wszCaseText & vbcrlf
                      end if   
                   next
                   ' Insert the wszCasesToAdd string imediately before the Case Else
                   if len(wszCasesToAdd) then
                      wszCasesToAdd = wszCasesToAdd & _
                                        sp(2) & "Case Else" 
-                     pDoc->SetLine( CaseElseLine, wszCasesToAdd )
+                    pDoc->SetLine( CaseElseLine, wszCasesToAdd )
                   end if   
                end if
             end if
@@ -747,16 +749,16 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                ' Add any new CASE statements
                if CaseElseLine <> -1 then
                   for ii as long = 0 to ubound(pDoc->PanelItems) 
-                     wszText = sp(2) & "Case " & ii 
+                     wszCaseText = sp(2) & "Case " & ii 
                      
                      dim as boolean bFoundLine = false
                      for iii as long = nStartLine to nEndLine
-                        if ucase(pDoc->GetLine(iii)) = ucase(wszText) then
+                        if ucase(pDoc->GetLine(iii)) = ucase(wszCaseText) then
                            bFoundLine = true: exit for
                         end if
                      next
                      if bFoundLine = false then
-                        wszCasesToAdd = wszCasesToAdd & wszText & vbcrlf
+                        wszCasesToAdd = wszCasesToAdd & wszCaseText & vbcrlf
                      end if   
                   next
                   ' Insert the wszCasesToAdd string imediately before the Case Else

@@ -337,7 +337,7 @@ function ExistsInAutocompleteList( _
             byref sMatch as string _
             ) as boolean
    if rtrim(sMatch) = "" then return true
-   dim as string sLookFor = "|" & ucase(sMatch) & "?" & "|"
+   dim as string sLookFor = "|" & ucase(sMatch) & "|"
    if instr( "|" & ucase(sList) & "|", sLookFor ) THEN return true
    return false
 end function
@@ -484,11 +484,15 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                   st = pData->VariableType
                   if nLenMatchWord then
                      if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
-                        sList = sList & st & "|"
+                        if instr(sList, st & "|") = 0 then
+                           sList = sList & st & "|"
+                        end if   
                      end if
                   else
                      if len(st) then      
-                        sList = sList & st & "|"
+                        if instr(sList, st & "|") = 0 then
+                           sList = sList & st & "|"
+                        end if   
                      end if   
                   end if
                end if   

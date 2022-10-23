@@ -1059,31 +1059,7 @@ function DesignerForm_WndProc( _
          Exit Function
                               
 
-      case WM_CTLCOLORSTATIC
-         ' Colors for WinFormsX Label controls are set in WM_DRAWITEM
-         
-         dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
-         if pDoc THEN 
-            ' Need to determine if the incoming control handle relates to
-            ' a snapline or is the fake topmenu label.
-            dim as hwnd hCtrl = cast(HWND, lParam)
-            if hCtrl = pDoc->hWndFakeMenu then
-               Return Cast( LRESULT, GetSysColorBrush(COLOR_MENU+1) )
-            else
-               for i as long = 0 to 3
-                  if hCtrl = pDoc->hSnapLine(i) then
-                     ' SnapLines labels have purple brush
-                     if pDoc->hBrushSnapLine = 0 then 
-                        pDoc->hBrushSnapLine = CreateSolidBrush( BGR(128,0,128) )  ' purple
-                     end if
-                     Return Cast(LRESULT, pDoc->hBrushSnapLine)
-                  end if
-               next
-            end if
-         end if
-               
-
-      case WM_CTLCOLOREDIT, WM_CTLCOLORBTN, WM_CTLCOLORLISTBOX 
+      case WM_CTLCOLOREDIT, WM_CTLCOLORBTN, WM_CTLCOLORLISTBOX, WM_CTLCOLORSTATIC
          ' wParam: HDC of the control. 
          ' lParam: Handle to the control.
          ' Need to determine the child control handle that is sending the request to be painted.
@@ -1092,22 +1068,48 @@ function DesignerForm_WndProc( _
          if pDoc THEN 
             pCtrl = pDoc->Controls.GetCtrlPtr(cast(hwnd, lParam) )
             if pCtrl then
-               dim pProp as clsProperty ptr
-               pProp = GetControlPropertyPtr(pCtrl, "FORECOLOR")
-               if pProp then 
-                  SetTextColor(cast(HDC, wParam), GetRGBColorFromProperty(pProp->wszPropValue))
-               end if
-               pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
-               if pProp then 
-                  dim as COLORREF clrBack = GetRGBColorFromProperty(pProp->wszPropValue)
-                  SetBkColor(cast(HDC, wParam), clrBack)
-                  if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
-                  pCtrl->hBackBrush = CreateSolidBrush(clrBack)
-                  Return Cast(LRESULT, pCtrl->hBackBrush)
+               ' Colors for WinFormsX Label controls are set in WM_DRAWITEM
+               if pCtrl->ControlType <> CTRL_LABEL then
+                  dim pProp as clsProperty ptr
+                  pProp = GetControlPropertyPtr(pCtrl, "FORECOLOR")
+                  if pProp then 
+                     SetTextColor(cast(HDC, wParam), GetRGBColorFromProperty(pProp->wszPropValue))
+                  end if
+                  pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
+                  if pProp then 
+                     dim as COLORREF clrBack = GetRGBColorFromProperty(pProp->wszPropValue)
+                     SetBkColor(cast(HDC, wParam), clrBack)
+                     if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
+                     pCtrl->hBackBrush = CreateSolidBrush(clrBack)
+                     Return Cast(LRESULT, pCtrl->hBackBrush)
+                  end if
                end if
             end if   
          end if
-   
+         
+         ' We would have handled any FRAME control backcolor in the code above. The following code
+         ' deals with color for fake menu and snap lines.
+         if uMsg = WM_CTLCOLORSTATIC then
+            if pDoc THEN 
+               ' Need to determine if the incoming control handle relates to
+               ' a snapline or is the fake topmenu label.
+               dim as hwnd hCtrl = cast(HWND, lParam)
+               if hCtrl = pDoc->hWndFakeMenu then
+                  Return Cast( LRESULT, GetSysColorBrush(COLOR_MENU+1) )
+               else
+                  for i as long = 0 to 3
+                     if hCtrl = pDoc->hSnapLine(i) then
+                        ' SnapLines labels have purple brush
+                        if pDoc->hBrushSnapLine = 0 then 
+                           pDoc->hBrushSnapLine = CreateSolidBrush( BGR(128,0,128) )  ' purple
+                        end if
+                        Return Cast(LRESULT, pDoc->hBrushSnapLine)
+                     end if
+                  next
+               end if
+            end if
+         end if            
+
 
       case WM_DRAWITEM
          dim lpdis As DRAWITEMSTRUCT Ptr = cast( DRAWITEMSTRUCT Ptr, lParam )
