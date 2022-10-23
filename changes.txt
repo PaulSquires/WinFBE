@@ -1,4 +1,4 @@
-Version 3.0.2 (beta 2)
+Version 3.0.2 (beta 3)
 Editor:
 - Fixed bug where WinFBE 64-bit only would GPF if currently loaded file is edited by an external editor causing WinFBE to reload the file.
 - Fixed bug where focus would be lost from the Find textbox as the user typed a search word and a corresponding match was found.
@@ -7,6 +7,7 @@ Editor:
 
 Visual Designer:
 - MAJOR FILE FORMAT CHANGE: Form data separated from code file and is now saved to external file with *.design file extension.
+- Existing visual designer files are saved with a "*.backup-before-upgrade" file extension prior to the new file format upgrade in case something goes wrong and the user needs revert to the older file.
 - When selecting a control from the toolbox and then just clicking on a form (not "drawing" it), it creates a control with a height and width of 0. There are now default sizes for all controls that may be created too small.
 - When double-clicking an event in the toolbox, automatically enable that event, create the placeholder (if needed) and switch to that event in the code view.
 - When double-clicking a control in design view, automatically switch to the code view for the default event handler for that control (e.g.: the _Click handler if it's a button).

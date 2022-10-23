@@ -1198,6 +1198,20 @@ function clsDocument.SaveFile( _
       if AfxFileExists(wszAutoSaveFilename) then AfxDeleteFile(wszAutoSaveFilename)
       wszSaveFilename = wszAutoSaveFilename
    else   
+      ' If we are upgrading to v3.02+ then save the original file because the original
+      ' file format has visual designer and code all in one file.
+      ' Save a copy of the original file to the backup in the event that there is
+      ' issues with the upgrade process. Fail if backup already exists.
+      if this.IsDesigner then
+         if (ConvertWinFBEversion(this.wszFormVersion) >= ConvertWinFBEversion("3.0.2")) orelse _
+            (ConvertWinFBEversion(this.wszFormVersion) = 0) then  'b/c upgraded form files do not have version loaded yet
+            ' We are already using new form file format
+         else   
+            dim as CWSTR wszBackupFilename = this.DiskFilename & ".backup-before-upgrade"
+            AfxCopyFile( this.DiskFilename, wszBackupFilename, CTRUE )   
+         end if
+      end if   
+
       ' ensure any previously created AutoSave files are delete should 
       ' the user had chosen a new filename
       if AfxFileExists(wszFilename) then AfxDeleteFile(wszFilename)
@@ -1205,6 +1219,7 @@ function clsDocument.SaveFile( _
       wszSaveFilename = wszFilename
    end if   
       
+   
    dim pStream as CFileStream
    if pStream.Open(wszSaveFilename, STGM_CREATE or STGM_WRITE) = S_OK then
       dim as string st
