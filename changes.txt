@@ -1,9 +1,11 @@
-Version 3.0.2 (beta 3)
+Version 3.0.2 (beta 4)
 Editor:
 - Fixed bug where WinFBE 64-bit only would GPF if currently loaded file is edited by an external editor causing WinFBE to reload the file.
 - Fixed bug where focus would be lost from the Find textbox as the user typed a search word and a corresponding match was found.
 - Fixed bug where an invalid startup position for the editor would be saved if WinFBE closed while it is minimized to the Windows Taskbar.
 - Added new internal code parser that creates codetips and autocomplete popups.
+- Fixed GPF for WinFBE 64-bit that was caused by some leftover array code from cache system that was removed from earlier BETA.
+- In-memory parser database not cleared when the same Project loaded multiple times resulting in duplicate entries in the Functions list.
 
 Visual Designer:
 - MAJOR FILE FORMAT CHANGE: Form data separated from code file and is now saved to external file with *.design file extension.

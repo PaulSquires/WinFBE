@@ -85,8 +85,7 @@ function clsDocument.ParseDocument() as boolean
    
    static as boolean bInParseDocument
    
-   ' GenerateFormCode can create recursive parsing so we test to exit
-   ' the parsing if we already in this function.
+   ' Prevent any potential recursive parsing 
    if bInParseDocument then exit function
    bInParseDocument = true
    
@@ -98,19 +97,6 @@ function clsDocument.ParseDocument() as boolean
    parser.parse(@this)
    frmOutput_UpdateToDoListview()
    
-   ' If this document also has a visual designer then we need to generate
-   ' DB2 entries for all forms, controls, etc.
-'   if (gApp.IsFileLoading = false) andalso (gApp.IsProjectLoading = false) then
-'      if this.IsDesigner then
-'         this.bRegenerateCode = true
-'         GenerateFormCode( @this )
-'         dim parserVD as ctxParser
-'         parserVD.nFileType = DB2_FILETYPE_USERCODE
-'         parserVD.parse(@this, true)
-'         this.bNeedsParsing = false   ' prevent recursion
-'      end if   
-'   end if
-      
    bInParseDocument = false
    return true
 end function
@@ -1681,7 +1667,7 @@ end function
 
 
 ''
-''  Gotonextfunction
+''  GotoNextfunction
 ''
 ''  Go to the next sub/function in the document
 ''

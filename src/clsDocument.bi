@@ -79,7 +79,6 @@ type PROJECT_FILELOAD_DATA
    nPosition1     as long         ' current position of second view
    nSplitPosition as long         ' pDoc->SplitY
    nFocusEdit     as long         ' View 0 or View 1
-   OnLoadBookmarks(any) as CWSTR  ' late load bookmarks
 end type
 
 
@@ -163,9 +162,6 @@ type clsDocument
       lastCaretPos      as long        ' used for checking in SCN_UPDATEUI
       lastXOffsetPos    as long        ' used for checking in SCN_UPDATEUI (horizontal offset)
             
-      wszOnLoadBookmarks(any) as CWSTR  
-      wszOnLoadFoldPoints as CWSTR      
-
       ' Following used for split edit views
       rcSplitButton     as RECT        ' Split gripper vertical for Scintilla window
       SplitY            as long        ' Y coordinate of vertical splitter

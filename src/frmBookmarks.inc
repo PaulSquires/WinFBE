@@ -424,30 +424,10 @@ function frmBookmarksListBox_SubclassProc ( _
                dim as long id = TrackPopupMenu(hPopUpMenu, TPM_RETURNCMD, pt.x, pt.y, 0, HWND_FRMMAIN, byval null)
                select case id
                   case IDM_CLEARALLBOOKMARKNODE
-                     if IsWindow(pDoc->hWindow(0)) then
-                        SciExec( pDoc->hWindow(0), SCI_MARKERDELETEALL, -1, 0 )
-                     else
-                        erase pDoc->wszOnLoadBookmarks
-                     end if      
+                     SciExec( pDoc->hWindow(0), SCI_MARKERDELETEALL, -1, 0 )
                   case IDM_REMOVEBOOKMARKNODE
                      dim as long nLineNum = val(AfxStrParse(wszCaption, 1, "%"))
-                     if IsWindow(pDoc->hWindow(0)) then
-                        pDoc->ToggleBookmark( nLineNum )
-                     else
-                        dim as long nFoundAt = -1
-                        for ii as long = lbound(pDoc->wszOnLoadBookmarks) to ubound(pDoc->wszOnLoadBookmarks)
-                           if nLineNum = val(AfxStrParse(pDoc->wszOnLoadBookmarks(ii), 1, "|")) then
-                              nFoundAt = ii: exit for
-                           end if   
-                        next
-                        if nFoundAt <> -1 then
-                           dim as long ub = ubound(pDoc->wszOnLoadBookmarks)
-                           for ii as long = nFoundAt to ub - 1
-                              pDoc->wszOnLoadBookmarks(ii) = pDoc->wszOnLoadBookmarks(ii+1)
-                           next
-                           redim preserve pDoc->wszOnLoadBookmarks(ub-1)
-                        end if   
-                     end if
+                     pDoc->ToggleBookmark( nLineNum )
                end select
                LoadBookmarksFiles()
                DestroyMenu( hPopUpMenu )
@@ -607,25 +587,7 @@ function LoadBookmarksFiles() as long
             next
          end if    
       end if
-      
-      ' Some files do not get immediately loaded so their Scintilla handles
-      ' will be null but the Bookmark preview would have been previously
-      ' saved in the project file and re-loaded into pDoc->wszOnLoadBookmarks().
-      if ubound(pDoc->wszOnLoadBookmarks) <> -1 then
-         wszText = wstr(pDoc->bBookmarkExpanded)
-         idx = Listbox_AddString( hList, @wszText )
-         ListBox_SetItemData( hList, idx, pDoc )
-         if pDoc->bBookmarkExpanded then
-            for ii as long = lbound(pDoc->wszOnLoadBookmarks) to ubound(pDoc->wszOnLoadBookmarks)
-               dim as long f = instr(pDoc->wszOnLoadBookmarks(ii), "|")
-               wszText = left(pDoc->wszOnLoadBookmarks(ii), f - 1) & _
-                         "%" & mid(pDoc->wszOnLoadBookmarks(ii), f + 1)
-               idx = Listbox_AddString( hList, @wszText )
-               ListBox_SetItemData( hList, idx, pDoc )
-            next
-         end if    
-      end if
-      
+            
       pDoc = pDoc->pDocNext
    loop
    

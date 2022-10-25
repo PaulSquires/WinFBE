@@ -248,11 +248,7 @@ function OnCommand_SearchBookmarks( _
          dim pDoc as clsDocument ptr = gApp.pDocList
          do until pDoc = 0
             hEdit = pDoc->hWindow(0)
-            if hEdit then
-               SciExec( hEdit, SCI_MARKERDELETEALL, -1, 0 )
-            else
-               erase pDoc->wszOnLoadBookmarks
-            end if
+            SciExec( hEdit, SCI_MARKERDELETEALL, -1, 0 )
             pDoc = pDoc->pDocNext
          loop
          LoadBookmarksFiles

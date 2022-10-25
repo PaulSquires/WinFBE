@@ -75,6 +75,8 @@ function clsApp.RemoveAllDocuments() as long
    dim pDocNext as clsDocument ptr = this.pDocList
 
    do until pDoc = 0
+      ' Remove any parsed data for this document from the in-memory database
+      gdb2.dbDeleteByDocumentPtr(pDoc)
       pDocNext = pDoc->pDocNext
       ' Release memory associated with this pDoc
       delete pDoc

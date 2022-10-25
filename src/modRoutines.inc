@@ -671,15 +671,6 @@ function OpenSelectedDocument( _
          end if   
       end if
 
-      pDoc->SetFoldPoints(pDoc->wszOnLoadFoldPoints)
-      dim as string sBookmarks
-      for ii as long = lbound(pDoc->wszOnLoadBookmarks) to ubound(pDoc->wszOnLoadBookmarks)
-         sBookmarks = sBookmarks & AfxStrParse(pDoc->wszOnLoadBookmarks(ii), 1, "|") & ","
-      next
-      sBookmarks = trim(sBookmarks, ",")
-      erase pDoc->wszOnLoadBookmarks    ' we no longer require this array
-      pDoc->SetBookmarks(sBookmarks)
-
       ' Do not reposition if incoming LineNumber is -1 because that value represents
       ' the caller specifically not wanting a repositioning.
       if nLineNumber <> -1 then 

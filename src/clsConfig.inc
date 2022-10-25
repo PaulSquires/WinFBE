@@ -1761,17 +1761,7 @@ function clsConfig.ProjectSaveToFile() as boolean
             pStream.WriteLine "File=" & wszText
             pStream.WriteLine "FileType=" & pDoc->ProjectFileType
             pStream.WriteLine "TabIndex=" & 0    
-
-            dim as string sBookmarks = pDoc->GetBookmarks()
-            if len(sBookmarks) then
-               dim as long nCount = AfxStrParseCount(sBookmarks, ",")
-               for ii as long = 1 to nCount
-                  dim as CWSTR wszLineNum = AfxStrParse(sBookmarks, ii, ",") 
-                  pStream.WriteLine "OnLoadBookmark=" & _
-                     wszLineNum & "|" & trim(pDoc->GetLine(val(wszLineNum)))
-               next
-            end if
-
+            pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
             pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
             pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
             pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
@@ -1823,7 +1813,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
    dim as boolean bReadingNote
    dim as boolean bIsDesigner
    dim as boolean bDesignerView
-   dim as CWSTR OnLoadBookmarks(any)
    
    if AfxFileExists(wszFile) = 0 then exit function
 
@@ -1894,19 +1883,12 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          case "ProjectCommandLine":  gApp.ProjectCommandLine = wData
          case "ProjectDefaultFont":  gApp.ProjectDefaultFont = wData
          case "ActiveTab":           nActiveTab = nData
-         
          case "File":                wszFilename = wData
          case "FileType":            wszFileType  = wData
-         
          case "Bookmarks":           sBookmarks  = str(wData)
-         case "OnLoadBookmark"
-            dim as long ub = ubound(OnLoadBookmarks) + 1
-            redim preserve OnLoadBookmarks(ub)
-            OnLoadBookmarks(ub) = wData
-            
+         case "FoldPoints":          sFoldPoints = str(wData)
          case "IsDesigner":          bIsDesigner = nData
          case "TabIndex":            bLoadInTab  = nData
-         case "FoldPoints":          sFoldPoints = str(wData)
          case "FirstLine":           nFirstLine  = nData
          case "Position":            nPosition   = nData
          case "FirstLine1":          nFirstLine1 = nData
@@ -1915,7 +1897,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          case "FocusEdit":           nFocusEdit  = nData
             
          case "FileEnd":
-
             ' if this is a relative filename then convert it back.
             if AfxPathIsRelative(wszFilename) then 
                wszFilename = AfxPathCombine( AfxStrPathName("PATH", gApp.ProjectFilename), wszFilename)
@@ -1942,10 +1923,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
                   .nPosition1     = nPosition1
                   .nSplitPosition = nSplitPosition
                   .nFocusEdit     = nFocusEdit
-                  redim .OnLoadBookmarks(ubound(OnLoadBookmarks))
-                  for ii as long = lbound(OnLoadBookmarks) to ubound(OnLoadBookmarks)
-                     .OnLoadBookmarks(ii) = OnLoadBookmarks(ii)
-                  next
                end with
 
                nFirstLine  = 0: nPosition  = 0
@@ -1956,7 +1933,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
                bLoadInTab    = false
                bIsDesigner   = false
                bDesignerView = false
-               erase OnLoadBookmarks
             end if
             
       end select
@@ -1987,17 +1963,18 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
 
       if docData(i).bLoadInTab then
          iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
-         ' Set the saved positions
-         pDoc->SplitY = docData(i).nSplitPosition
-         if pDoc->SplitY then pDoc->bEditorIsSplit = true
-         SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine, 0) 
-         SciExec( pDoc->hWindow(0), SCI_GOTOPOS, docData(i).nPosition, 0) 
-         SciExec( pDoc->hWindow(1), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine1, 0) 
-         SciExec( pDoc->hWindow(1), SCI_GOTOPOS, docData(i).nPosition1, 0) 
-         pDoc->hWndActiveScintilla = pDoc->hWindow(docData(i).nFocusEdit)
-         pDoc->SetBookmarks(docData(i).wszBookmarks)
-         pDoc->SetFoldPoints(docData(i).wszFoldPoints)
       end if
+         
+      ' Set the saved positions
+      pDoc->SplitY = docData(i).nSplitPosition
+      if pDoc->SplitY then pDoc->bEditorIsSplit = true
+      SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine, 0) 
+      SciExec( pDoc->hWindow(0), SCI_GOTOPOS, docData(i).nPosition, 0) 
+      SciExec( pDoc->hWindow(1), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine1, 0) 
+      SciExec( pDoc->hWindow(1), SCI_GOTOPOS, docData(i).nPosition1, 0) 
+      pDoc->hWndActiveScintilla = pDoc->hWindow(docData(i).nFocusEdit)
+      pDoc->SetBookmarks(docData(i).wszBookmarks)
+      pDoc->SetFoldPoints(docData(i).wszFoldPoints)
       
    next
                   
