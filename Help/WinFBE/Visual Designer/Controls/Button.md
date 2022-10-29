@@ -26,6 +26,7 @@
 | Left | Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).|
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
+| MultiLine | Gets or sets a value (true/false) indicating whether the control can have multiline text. Embedded {br} text is converted to chr(10) linefeed.|
 | Parent | Gets or sets the parent container of the control.|
 | Size | Gets or sets the size of the form. Get: returns [wfxSize](#wfxSize) object. Set: (width, height)|
 | TabIndex | Gets or sets the position that the control occupies in the TAB position.|

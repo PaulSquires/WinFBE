@@ -26,6 +26,7 @@ Visual Designer:
 - Added code that will update or add to existing SELECT CASE event structures in generated code for MENUS, STATUSBARS, and TOOLBARS.
 - Added TextBox and RichEdit control property (MaxLength).
 - Fixed display of Frame control text background color in both the visual designer and code generation.
+- Added Button control property (MultiLine).
 
 
 Version 3.0.1 (June 6, 2021)

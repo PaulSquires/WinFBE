@@ -207,7 +207,7 @@ public function DisplayPropertyDetails() as Long
       case "MULTICOLUMN"   
          wszPropDescribe = "Indicates if values should be displayed in columns horizontally."
       case "MULTILINE"   
-         wszPropDescribe = "Controls whether the text of the edit control or tabs of a tab control can span more than one line."
+         wszPropDescribe = "Controls whether the text of the control can span more than one line."
       case "MULTISELECT"
          wszPropDescribe = "Gets or sets a value indicating whether multiple items can be selected."
       case "ODDROWCOLOR"   

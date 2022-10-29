@@ -19,10 +19,11 @@
 ' ========================================================================================
 ' Apply properties to the form 
 ' ========================================================================================
-private function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                       byval pCtrl as clsControl ptr, _
-                                       byval pProp as clsProperty ptr _ 
-                                       ) as Long
+function Form_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
       
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -130,10 +131,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the button
 ' ========================================================================================
-private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                         byval pCtrl as clsControl ptr, _
-                                         byval pProp as clsProperty ptr _ 
-                                         ) as Long
+function Button_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -144,7 +146,7 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
    wszPropValue = pProp->wszPropValue
    nPropValue   = Val(pProp->wszPropValue)
    
-   select CASE ucase(wszPropName)
+   select case ucase(wszPropName)
    
    case "THEMESUPPORT"
       if wszPropValue = "True" then
@@ -197,6 +199,28 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
    case "TEXTMARGIN"
       pCtrl->AfxButtonPtr->SetTextMargin( nPropValue, true )
 
+   case "MULTILINE"
+      dim as long wsStyle
+      select case GetControlProperty(pCtrl, "TEXTALIGN")
+         CASE "ButtonAlignment.BottomCenter": wsStyle = DT_CENTER OR DT_BOTTOM
+         CASE "ButtonAlignment.BottomLeft":   wsStyle = DT_LEFT   OR DT_BOTTOM
+         CASE "ButtonAlignment.BottomRight":  wsStyle = DT_RIGHT  OR DT_BOTTOM
+         CASE "ButtonAlignment.MiddleCenter": wsStyle = DT_CENTER OR DT_VCENTER
+         CASE "ButtonAlignment.MiddleLeft":   wsStyle = DT_LEFT   OR DT_VCENTER
+         CASE "ButtonAlignment.MiddleRight":  wsStyle = DT_RIGHT  OR DT_VCENTER
+         CASE "ButtonAlignment.TopCenter":    wsStyle = DT_CENTER OR DT_TOP
+         CASE "ButtonAlignment.TopLeft":      wsStyle = DT_LEFT   OR DT_TOP
+         CASE "ButtonAlignment.TopRight":     wsStyle = DT_RIGHT  OR DT_TOP
+      end select
+      dim as CWSTR wszText = GetControlProperty(pCtrl, "TEXT")
+      if wszPropValue = "True" then
+         pCtrl->AfxButtonPtr->SetTextFormat(wsStyle OR DT_WORDBREAK, true)
+         wszText = AfxStrReplace(wszText, "{br}", chr(10))
+      else
+         pCtrl->AfxButtonPtr->SetTextFormat(wsStyle OR DT_SINGLELINE, true)
+      end if      
+      AfxSetWindowText(pCtrl->hWindow, wszText)     
+      
    case "TEXTALIGN"
       dim as long wsStyle
       select case wszPropValue
@@ -209,9 +233,13 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
          CASE "ButtonAlignment.TopCenter":    wsStyle = DT_CENTER OR DT_TOP
          CASE "ButtonAlignment.TopLeft":      wsStyle = DT_LEFT   OR DT_TOP
          CASE "ButtonAlignment.TopRight":     wsStyle = DT_RIGHT  OR DT_TOP
-      END SELECT
-      pCtrl->AfxButtonPtr->SetTextFormat(wsStyle OR DT_SINGLELINE, true)
-
+      end select
+      if GetControlProperty(pCtrl, "MULTILINE") = "True" then
+         pCtrl->AfxButtonPtr->SetTextFormat(wsStyle OR DT_WORDBREAK, true)
+      else
+         pCtrl->AfxButtonPtr->SetTextFormat(wsStyle OR DT_SINGLELINE, true)
+      end if
+      
    end select
    
    function = 0
@@ -221,10 +249,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the label
 ' ========================================================================================
-private function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                        byval pCtrl as clsControl ptr, _
-                                        byval pProp as clsProperty ptr _ 
-                                        ) as Long
+function Label_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -267,10 +296,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the checkbox
 ' ========================================================================================
-private function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                           byval pCtrl as clsControl ptr, _
-                                           byval pProp as clsProperty ptr _ 
-                                           ) as Long
+function CheckBox_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -339,10 +369,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the optionbutton
 ' ========================================================================================
-private function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                               byval pCtrl as clsControl ptr, _
-                                               byval pProp as clsProperty ptr _ 
-                                               ) as Long
+function OptionButton_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -412,10 +443,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the listbox
 ' ========================================================================================
-private function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                          byval pCtrl as clsControl ptr, _
-                                          byval pProp as clsProperty ptr _ 
-                                          ) as Long
+function ListBox_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
    if pWindow = 0 then exit function
@@ -466,10 +498,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the combobox
 ' ========================================================================================
-private function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                           byval pCtrl as clsControl ptr, _
-                                           byval pProp as clsProperty ptr _ 
-                                           ) as Long
+function ComboBox_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
    if pWindow = 0 then exit function
@@ -541,10 +574,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the textbox
 ' ========================================================================================
-private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                          byval pCtrl as clsControl ptr, _
-                                          byval pProp as clsProperty ptr _ 
-                                          ) as Long
+function TextBox_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -640,10 +674,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the MaskedEdit textbox
 ' ========================================================================================
-private function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                             byval pCtrl as clsControl ptr, _
-                                             byval pProp as clsProperty ptr _ 
-                                             ) as Long
+function MaskedEdit_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -693,10 +728,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the frame
 ' ========================================================================================
-private function Frame_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                        byval pCtrl as clsControl ptr, _
-                                        byval pProp as clsProperty ptr _ 
-                                        ) as Long
+function Frame_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -724,10 +760,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the PictureBox
 ' ========================================================================================
-private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                             byval pCtrl as clsControl ptr, _
-                                             byval pProp as clsProperty ptr _ 
-                                             ) as Long
+function PictureBox_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -787,10 +824,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the ProgressBar
 ' ========================================================================================
-private function ProgressBar_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                              byval pCtrl as clsControl ptr, _
-                                              byval pProp as clsProperty ptr _ 
-                                              ) as Long
+function ProgressBar_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -837,10 +875,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the Listview
 ' ========================================================================================
-private function ListView_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                           byval pCtrl as clsControl ptr, _
-                                           byval pProp as clsProperty ptr _ 
-                                           ) as Long
+function ListView_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -868,10 +907,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the MonthCalendar
 ' ========================================================================================
-private function MonthCalendar_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                                byval pCtrl as clsControl ptr, _
-                                                byval pProp as clsProperty ptr _ 
-                                                ) as Long
+function MonthCalendar_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -946,10 +986,11 @@ end function
 ' ========================================================================================
 ' Apply properties to the DateTimePicker
 ' ========================================================================================
-private function DateTimePicker_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                                 byval pCtrl as clsControl ptr, _
-                                                 byval pProp as clsProperty ptr _ 
-                                                 ) as Long
+function DateTimePicker_ApplyProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr, _
+            byval pProp as clsProperty ptr _ 
+            ) as Long
     
    ' This control gets recreated when properties change because visually some states 
    ' require a complete rebuilding of the control. No need to set properties here
@@ -962,9 +1003,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the incoming control
 ' ========================================================================================
-public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
-                                        byval pCtrl as clsControl ptr _
-                                        ) as long
+function ApplyControlProperties( _
+            byval pDoc as clsDocument ptr, _
+            byval pCtrl as clsControl ptr _
+            ) as long
 
    if pDoc = 0 then exit function
    if pCtrl = 0 then exit function
@@ -1025,9 +1067,12 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
                pWindow->SetWindowPos(pCtrl->hWindow, 0, 0, 0, nTemp, nHeight, SWP_NOZORDER or SWP_NOMOVE)
             end if 
          case "TEXT"
-            if pCtrl->ControlType <> CTRL_MASKEDEDIT then
-               AfxSetWindowText(pCtrl->hWindow, wszPropValue)     
-            end if   
+            select case pCtrl->ControlType 
+               case CTRL_BUTTON, CTRL_MASKEDEDIT
+                  ' skip these controls and set in special handlers below
+               case else   
+                  AfxSetWindowText(pCtrl->hWindow, wszPropValue)     
+            end select   
          case "FONT"
             dim as HFONT hFontOld = AfxGetWindowFont(pCtrl->hWindow)
             dim as LOGFONT lf

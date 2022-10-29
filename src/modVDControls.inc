@@ -107,6 +107,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "BackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         AddControlProperty(pCtrl, "MultiLine", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "TextForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextForeColorHot", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextBackColor", "SYSTEM|Control", PropertyType.ColorPicker)

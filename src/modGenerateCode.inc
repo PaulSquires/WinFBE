@@ -970,6 +970,17 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                      ' Ensure that any embedded double quotes are escaped
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ
+                     
+                     ' TEXT properties for MultiLine Buttons would have embedded chr(10)
+                     if pCtrl->ControlType = CTRL_BUTTON then
+                        dim pPropMultiLine as clsProperty ptr 
+                        pPropMultiLine = GetControlPropertyPtr(pCtrl, "MULTILINE")
+                        if pPropMultiLine then
+                           if pPropMultiLine->wszPropValue = "True" then
+                              wszPropValue = AfxStrReplace(wszPropValue, "{br}" , DQ & " & chr(10) & " & DQ)
+                           end if
+                        end if      
+                     end if
                   case "ACCEPTBUTTON", "CANCELBUTTON"
                      if len(rtrim(wszPropValue)) then
                         wszPropValue = "@pForm->" & wszPropValue 

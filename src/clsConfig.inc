@@ -1964,7 +1964,7 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
       if docData(i).bLoadInTab then
          iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
       end if
-         
+
       ' Set the saved positions
       pDoc->SplitY = docData(i).nSplitPosition
       if pDoc->SplitY then pDoc->bEditorIsSplit = true
@@ -1975,7 +1975,6 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
       pDoc->hWndActiveScintilla = pDoc->hWindow(docData(i).nFocusEdit)
       pDoc->SetBookmarks(docData(i).wszBookmarks)
       pDoc->SetFoldPoints(docData(i).wszFoldPoints)
-      
    next
                   
    gApp.IsProjectLoading = false

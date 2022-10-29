@@ -745,6 +745,11 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.wszOutputMsg = ""
    gCompile.bInvalidImagePath = false
    
+   
+   ' Indicate in the StatusBar that we have started to compile
+   SetCompileStatusBarMessage( L(449, "Generating compiler files") & "...", 0 )
+   
+
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
    if wID <> IDM_QUICKRUN THEN
@@ -758,6 +763,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
             pDoc = pDoc->pDocNext
          loop
          If OnCommand_FileSaveAll(HWND_FRMMAIN) Then 
+            SetCompileStatusBarMessage( "", 0 )
             Return True  ' user cancelled save
          end if   
          ' Reload the main form files combobox in case names have changed
@@ -791,6 +797,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    If AfxFileExists(gCompile.CompilerPath) = 0 Then 
       wszTemp = L(202,"Invalid defined compiler path.")
       wszTemp = wszTemp & vbcrlf & "Path: " & gCompile.CompilerPath
+      SetCompileStatusBarMessage( "", 0 )
       MessageBox( HWND_FRMMAIN, wszTemp, L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
@@ -810,6 +817,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    If gApp.IsProjectActive Then
       pDocMain = gApp.GetMainDocumentPtr()
       If pDocMain = 0 Then
+         SetCompileStatusBarMessage( "", 0 )
          MessageBox( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
                            MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
          Function = False: Exit Function
@@ -817,7 +825,10 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    Else
       pDocMain = gTTabCtl.GetActiveDocumentPtr()
    End If
-   If pDocMain = 0 Then return 0
+   If pDocMain = 0 Then 
+      SetCompileStatusBarMessage( "", 0 )
+      return 0
+   end if
    
  
    ' Do a check to ensure that only one call to Application.Run exists, otherwise
@@ -833,6 +844,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       pDoc = pDoc->pDocNext
    loop
    if TotalAppRunCount > 1 then
+      SetCompileStatusBarMessage( "", 0 )
       MessageBox( HWND_FRMMAIN, wszWarning, L(109,"Warning"), _
                         MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 )
       Function = False: Exit Function
@@ -957,6 +969,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
    If IsProcessRunning(@gCompile.OutputFilename) Then
+      SetCompileStatusBarMessage( "", 0 )
       MessageBox( HWND_FRMMAIN, L(200,"Program running") & "...", L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
@@ -1000,10 +1013,6 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Change to the output code directory
    ChDir gCompile.MainFolder
-   
-   
-   ' Indicate in the StatusBar that we have started to compile
-   SetCompileStatusBarMessage( L(203, "Compiling") & "...", 0 )
    
    gCompile.StartTime = Timer
    
