@@ -542,11 +542,11 @@ function Scintilla_OnNotify( _
 								' is also used as a character that selects and closes the popup list. If no
 								' PostMessage then the "." will automatically select the first entry in the list
 								' and close.
+                        pDoc->AutoCTriggerStartPos = nPos
 								pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
 								PostMessage( HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, nChar, 0 )
 						end select 
 					end if
-
             end if
          end if
          return true
@@ -571,14 +571,26 @@ function Scintilla_OnNotify( _
             end select 
          end if           
                      
-               
+       
       case SCN_AUTOCCANCELLED
          ' Destroy the popup information window
          pDoc = gTTabCtl.GetActiveDocumentPtr()
          if pDoc then 
-            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            ' If the last typed character was a BACKSPACE then do NOT reset the 
+            ' autocomplete type otherwise the autocomplete popup will not continue
+            ' to popup on subsequent characters being added.
+            if pDoc->LastCharTyped = VK_BACK then
+               ' backspace pressed... do nothing, unless we are backspacing past where
+               ' the popup trigger occurred.
+               dim as long curPos = SciExec(pDoc->hWndActiveScintilla, SCI_GETCURRENTPOS, 0, 0) 
+               if curPos <= pDoc->AutoCTriggerStartPos then
+                  pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+               end if
+            else
+               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            end if   
          end if
-         
+
          
       case SCN_AUTOCSELECTION
          ' A selection occured from the AutoComplete listbox. We do the insertion
@@ -625,14 +637,14 @@ function Scintilla_OnNotify( _
             return true   
          end if
  
-      
+
       case SCN_AUTOCCHARDELETED    
          if gConfig.CodeTips then
-            ' Use deleted a character while autocompletion list was active. Display
+            ' User deleted a character while autocompletion list was active. Display
             ' new contents of list because the underlying word being typed as changed.
             ShowAutocompleteList(SCN_AUTOCCHARDELETED)
          end if
-                                    
+                                 
       
       case SCN_CHARADDED
          if gApp.SuppressNotify then exit function
@@ -652,6 +664,7 @@ function Scintilla_OnNotify( _
             ' is also used as a character that selects and closes the popup list. if no
             ' PostMessage then the "." will automatically select the first entry in the list
             ' and close.
+            pDoc->AutoCTriggerStartPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
             if PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
           
@@ -673,7 +686,7 @@ function Scintilla_OnNotify( _
 
          case else   ' all other letters
             if ShowAutocompleteList() then exit function
-             
+
          end select 
          
    end select 
@@ -2008,6 +2021,15 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
             ' get shown as an embedded control graphic. Allow backspace.
             if (uMsg.message = WM_CHAR) then
                if (uMsg.wParam < 32) andalso (uMsg.wParam <> 8) then continue do
+               ' Save the pdoc->LastCharTyped to use in our autocomplete popups
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+               If pDoc = 0 then pdoc->LastCharTyped = uMsg.wParam
+            end if
+ 
+            ' Save the pdoc->LastCharTyped to use in our autocomplete popups
+            if (uMsg.message = WM_KEYDOWN) then
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+               if pDoc then pdoc->LastCharTyped = uMsg.wParam
             end if
             
             ' if topmenus or menubar are active then process all keyboard input for them rather than 

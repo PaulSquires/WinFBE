@@ -159,9 +159,11 @@ type clsDocument
       sMatchWord        as string      ' for the incremental autocomplete search
       AutoCompletetype  as long        ' AUTOC_DIMAS, AUTOC_TYPE
       AutoCStartPos     as long
+      AutoCTriggerStartPos as long
       lastCaretPos      as long        ' used for checking in SCN_UPDATEUI
       lastXOffsetPos    as long        ' used for checking in SCN_UPDATEUI (horizontal offset)
-            
+      LastCharTyped     as long        ' most recent entered character. Used to test for BACKSPACE resetting the autocomplete popup.
+
       ' Following used for split edit views
       rcSplitButton     as RECT        ' Split gripper vertical for Scintilla window
       SplitY            as long        ' Y coordinate of vertical splitter

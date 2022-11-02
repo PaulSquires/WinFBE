@@ -1071,6 +1071,10 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SCN_FOCUSIN                                     2028
 #Define SCN_FOCUSOUT                                    2029
 #Define SCN_AUTOCCOMPLETED                              2030
+#define SC_AUTOCOMPLETE_NORMAL                          0
+#define SC_AUTOCOMPLETE_FIXED_SIZE                      1
+#define SCI_AUTOCSETOPTIONS                             2638
+#define SCI_AUTOCGETOPTIONS                             2639
 
 #IfnDef SCI_DISABLE_PROVISIONAL
    #Define SC_LINE_END_TYPE_DEFAULT        0

@@ -93,7 +93,7 @@ function DetermineWithVariable( byval pDoc as clsDocument ptr) as string
       if left(ucase(sLine), 5) = "WITH " then
          sWithVariable = AfxStrParse(sLine, 2, " ")
          exit for
-      END IF
+      end if
    next
    
    function = sWithVariable
@@ -111,6 +111,7 @@ function DereferenceLine( _
             byval sTrigger as String, _
             byval nPosition as long _
             ) as DB2_DATA ptr
+   
    if pDoc = 0 then exit function
    
    dim pData     as DB2_DATA ptr
@@ -133,7 +134,7 @@ function DereferenceLine( _
    ' is good and we can proceed to dereference elements on the line.
    ' The identifer that triggers an autocomplete list for a TYPE variable
    ' is either a dot "." or a pointer dereference "->"
-   if right(sLine, len(sTrigger)) <> sTrigger THEN exit function
+   if right(sLine, len(sTrigger)) <> sTrigger then exit function
    sLine = rtrim(sLine, sTrigger)
 
 
@@ -296,16 +297,16 @@ function ShowCodetip( _
    pData = DereferenceLine(pDoc, "(", curPos-1)
    if pData then codeTip = pData->CallTip
 
-   if len(codeTip) THEN 
+   if len(codeTip) then 
       codeTip = FormatCodetip(codeTip)
       SciExec( hEdit, SCI_CALLTIPSHOW, curPos, strptr(codeTip))
-      return TRUE
+      return true
    else
       pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
    END IF
    
-   return FALSE
-END FUNCTION
+   return false
+end function
 
   
 ' ========================================================================================
@@ -324,6 +325,7 @@ function ShowAutoCompletePopup( _
    SciExec(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
    SciExec(hEdit, SCI_AUTOCSETMAXHEIGHT, 9, 0)
    SciExec(hEdit, SCI_AUTOCSHOW, 0, strptr(sList))
+   SciExec(hEdit, SCI_AUTOCSETOPTIONS, SC_AUTOCOMPLETE_FIXED_SIZE, 0)
                             
    function = 0
 end function
@@ -371,12 +373,11 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    ' If an autocomplete is active but now there is no match word then
    ' a space or tab must have been pressed so autocomplete cancel and now exit.
    if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
-      if nLenMatchWord = 0 THEN 
+      if nLenMatchWord = 0 then 
          SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
          exit function
       end if   
    end if
-
 
    ' Retrieve the position
    curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
@@ -389,20 +390,29 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          exit function
    end select
 
-
    dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
    dim as string sLine_ucase
 
    ' If no active autocomplete then create the list based on the current underlying match word.
-   if (SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) = 0) andalso _
-      (notification <> SCN_AUTOCCHARDELETED) andalso _
-      (pDoc->AutoCompleteType = AUTOCOMPLETE_NONE) then
-     
+   ' also continue to display the popup if we have simply backspaced while a popup is open.
+   dim as boolean bShowPopup = false
+   if (notification = SCN_AUTOCCHARDELETED) then
+      bShowPopup = true
+   else   
+      if (SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) = 0) andalso _
+         (pDoc->AutoCompleteType = AUTOCOMPLETE_NONE) then
+         bShowPopup = true
+      end if
+   end if
+
+   if bShowPopup = true then     
       ' Comment out any comment line so the popup isn't activated when in a comment.
       sLine = MaskStringCharacters(sLine)
       sLine = RemoveComments(sLine)
-      pDoc->sMatchWord = ""
-      nLenMatchWord = 0         
+      if (notification <> SCN_AUTOCCHARDELETED) then
+         pDoc->sMatchWord = ""
+         nLenMatchWord = 0         
+      end if
       sLine_ucase = ucase(sLine)
 
       if right(sLine_ucase, 4) = " AS " then 
@@ -578,8 +588,9 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
             end if
             if len(sLookFor) = 0 then exit do
          loop
+      
    end select
-     
+   
    sList = trim(sList, any "| ")
    if len(sList) THEN
       ' Save the code editor starting position 
@@ -587,11 +598,14 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       ShowAutoCompletePopup(hEdit, sList)
       return true
    else
-      SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
+      if (notification <> SCN_AUTOCCHARDELETED) then
+         SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
+      end if   
    end if 
 
    function = true
-END FUNCTION
+
+end function
 
 
 
