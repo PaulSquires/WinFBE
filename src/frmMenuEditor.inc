@@ -24,7 +24,7 @@ dim shared gMenuItems(any) as clsMenuItem
 ' ========================================================================================
 ' Create the "fake" topmenu to display on the Form
 ' ========================================================================================
-public Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
+function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
 
    ' Rather than create a bunch of individual labels, create the one string
    ' and then only one label. If the label is clicked, then display the Menu Editor.
@@ -35,7 +35,7 @@ public Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr 
    end if
    
    dim as CWSTR wszMenu = wspace(2)
-   for i as long = 0 to ubound(pDoc->MenuItems)
+   for i as long = lbound(pDoc->MenuItems) to ubound(pDoc->MenuItems)
       if pDoc->MenuItems(i).nIndent = 0 then
          wszMenu = wszMenu & pDoc->MenuItems(i).wszCaption & wspace(4)
       end if
@@ -59,7 +59,7 @@ End Function
 ' ========================================================================================
 ' Display menu information for the specified line.
 ' ========================================================================================
-private function frmMenuEditor_ListBoxLine( byval nCurSel as long ) as CWSTR
+function frmMenuEditor_ListBoxLine( byval nCurSel as long ) as CWSTR
    dim as long nBullet, nDash
    IF AfxWindowsVersion >= 600 AND CLNG(AfxIsProcessDpiAware) THEN 
       ' Segoe UI
@@ -94,7 +94,7 @@ end function
 ' ========================================================================================
 ' Determine if a blank entry should be added to the end of the listbox.
 ' ========================================================================================
-private Function frmMenuEditor_EnsureLastLine() As Long
+function frmMenuEditor_EnsureLastLine() As Long
 
    dim as HWND hListBox = GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL )
    dim as long NumItems = Listbox_GetCount(hListBox)
@@ -118,7 +118,7 @@ End Function
 ' ========================================================================================
 ' Display the details of this MenuItem
 ' ========================================================================================
-private Function frmMenuEditor_DisplayMenuItem() As Long
+function frmMenuEditor_DisplayMenuItem() As Long
 
    dim as long nCurSel 
    dim as Boolean bEnabled = true
@@ -167,7 +167,7 @@ End Function
 ' ========================================================================================
 ' Generate a default MenuItem Name based on the MenuItem Caption
 ' ========================================================================================
-private Function frmMenuEditor_GenerateMenuItemName( byval nCurSel as long ) As CWSTR
+function frmMenuEditor_GenerateMenuItemName( byval nCurSel as long ) As CWSTR
    
    dim as CWSTR wszCaption = gMenuItems(nCurSel).wszCaption
    dim as CWSTR wszName
@@ -198,9 +198,10 @@ end function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmMenuEditor
 ' ========================================================================================
-private Function frmMenuEditor_OnCreate( ByVal HWnd As HWnd, _
-                                         ByVal lpCreateStructPtr As LPCREATESTRUCT _
-                                         ) As BOOLEAN
+function frmMenuEditor_OnCreate( _
+            ByVal HWnd As HWnd, _
+            ByVal lpCreateStructPtr As LPCREATESTRUCT _
+            ) as boolean
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -216,11 +217,12 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmMenuEditor
 ' ========================================================================================
-private Function frmMenuEditor_OnCommand( ByVal HWnd As HWnd, _
-                                          ByVal id As Long, _
-                                          ByVal hwndCtl As HWnd, _
-                                          ByVal codeNotify As UINT _
-                                          ) As LRESULT
+function frmMenuEditor_OnCommand( _
+            ByVal HWnd As HWnd, _
+            ByVal id As Long, _
+            ByVal hwndCtl As HWnd, _
+            ByVal codeNotify As UINT _
+            ) As LRESULT
 
    dim as HWND hListBox = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL)
    dim as long nCurSel = ListBox_GetCurSel(hListBox)
@@ -471,33 +473,34 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmMenuEditor
 ' ========================================================================================
-private Function frmMenuEditor_OnClose( byval HWnd As HWnd ) As LRESULT
+function frmMenuEditor_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Reset the global MenuItems array
    erase gMenuItems
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
    Function = 0
-End Function
+end function
 
 
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmMenuEditor
 ' ========================================================================================
-private Function frmMenuEditor_OnDestroy( byval HWnd As HWnd ) As LRESULT
+function frmMenuEditor_OnDestroy( byval HWnd As HWnd ) As LRESULT
    PostQuitMessage(0)
    Function = 0
-End Function
+end function
 
 
 ' ========================================================================================
 ' frmMenuEditor Window procedure
 ' ========================================================================================
-private Function frmMenuEditor_WndProc( ByVal HWnd   As HWnd, _
-                                        ByVal uMsg   As UINT, _
-                                        ByVal wParam As WPARAM, _
-                                        ByVal lParam As LPARAM _
-                                        ) As LRESULT
+function frmMenuEditor_WndProc( _
+            ByVal HWnd   As HWnd, _
+            ByVal uMsg   As UINT, _
+            ByVal wParam As WPARAM, _
+            ByVal lParam As LPARAM _
+            ) As LRESULT
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmMenuEditor_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmMenuEditor_OnClose)
@@ -506,14 +509,13 @@ private Function frmMenuEditor_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
-
-End Function
+end function
 
 
 ' ========================================================================================
 ' frmMenuEditor_Show
 ' ========================================================================================
-public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
+function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -699,7 +701,7 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Erase the temporary global MenuItems array
    erase gMenuItems
 
-End Function
+end function
 
 
 

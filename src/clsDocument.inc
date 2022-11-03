@@ -501,12 +501,22 @@ function clsDocument.LoadFormJSONdata( _
    dim as RECT rc
    dim as string wst, wszPropName, wszPropValue, wszEventName
    dim as boolean bIsValidControl = true
+   
    dim as long numItems
    
-   dim json as JsonItem = JsonItem(JSONtext)
+   dim as cJSON ptr filePtr, keyPtr
+   dim as cJSON ptr itemsPtr, itemPtr
+   dim as cJSON ptr ctrlsPtr, ctrlPtr
+   dim as cJSON ptr propsPtr, propPtr
+   dim as cJSON ptr eventsPtr, eventPtr
+   
+   dim json as CJSON_TYPE
+   
+   filePtr = json.parse(JSONtext)
+   if filePtr = NULL then exit function
    
    ' First, make sure that this is actually a Form file!
-   if json["form"].value <> "true" then exit function
+   if json.getbool( filePtr, "form" ) <> true then exit function
    
    this.IsDesigner = true
 
@@ -519,21 +529,23 @@ function clsDocument.LoadFormJSONdata( _
       this.CreateDesignerWindow(hWndParent)
    end if
 
-   this.wszFormVersion = json["version"].value
+   this.wszFormVersion = json.gettext(filePtr, "version")
    if this.wszFormVersion = "" then this.wszFormVersion = APPVERSION
          
-   if json["lockcontrols"].value = "true" then this.bLockControls = true
-   if json["snaplines"].value = "true" then this.bSnapLines = true
+   this.bLockControls = json.getbool(filePtr, "lockcontrols")
+   this.bSnapLines = json.getbool(filePtr, "snaplines")
 
    ' Retrieve data related to IMAGES
-   numItems = json["images"].count
+   itemsPtr = json.getptr(filePtr, "images")
+   numItems = json.arraycount(itemsPtr)
    if numItems then
       redim preserve this.AllImages(numItems - 1)
-      for i as long = 0 to numItems - 1
+      dim as long i = 0
+      itemPtr = json.arrayitem(itemsPtr, i)
+      do until itemPtr = 0
          this.AllImages(i).pDoc = @this
-         this.AllImages(i).wszImageName = json["images"][i]["imagename"].value
-
-         wst = json["images"][i]["filename"].value
+         this.AllImages(i).wszImageName = json.gettext(itemPtr, "imagename")
+         wst = json.gettext(itemPtr, "filename")
          ' if this is a relative filename then convert it back.
          dim as CWSTR wszImageFilename = ProcessFromCurdriveProject(wst)
          if AfxPathIsRelative(wszImageFilename) then 
@@ -541,84 +553,107 @@ function clsDocument.LoadFormJSONdata( _
          end if
          this.AllImages(i).wszFileName = wszImageFilename
          
-         this.AllImages(i).wszFormat = json["images"][i]["resourcetype"].value
-      next
+         this.AllImages(i).wszFormat = json.gettext(itemPtr, "resourcetype")
+         i += 1
+         itemPtr = itemPtr->next
+      loop   
    end if   
 
-   ' Retrieve data related to MAINMENU
-   numItems = json["mainmenu"]["items"].count
-   this.GenerateMenu = iif(json["mainmenu"]["display"].value = "true", true, false)
-   
+   ' Retrieve data related to MAINMENU 
+   keyPtr = json.getptr(filePtr, "mainmenu")
+   this.GenerateMenu = json.getbool(keyPtr, "display")
+   itemsPtr = json.getptr(keyPtr, "items")
+   numItems = json.arraycount(itemsPtr)
    if numItems then
       redim preserve this.MenuItems(numItems - 1)
-      for i as long = 0 to numItems - 1
-         this.MenuItems(i).wszName = json["mainmenu"]["items"][i]["name"].value
-         this.MenuItems(i).wszCaption = json["mainmenu"]["items"][i]["caption"].value
-         this.MenuItems(i).nIndent = val(json["mainmenu"]["items"][i]["indent"].value)
-         this.MenuItems(i).chkAlt = val(json["mainmenu"]["items"][i]["alt"].value)
-         this.MenuItems(i).chkShift = val(json["mainmenu"]["items"][i]["shift"].value)
-         this.MenuItems(i).chkCtrl = val(json["mainmenu"]["items"][i]["ctrl"].value)
-         this.MenuItems(i).wszShortcut = json["mainmenu"]["items"][i]["shortcut"].value
-         this.MenuItems(i).chkChecked = val(json["mainmenu"]["items"][i]["checked"].value)
-         this.MenuItems(i).chkGrayed = val(json["mainmenu"]["items"][i]["grayed"].value)
-      next
-   end if
-
-   ' Retrieve data related to TOOLBAR
-   numItems = json["toolbar"]["items"].count
-   this.GenerateToolbar = iif(json["toolbar"]["display"].value = "true", true, false)
-   this.wszToolBarSize = json["toolbar"]["size"].value
-   
-   if numItems then
-      redim preserve this.ToolBarItems(numItems - 1)
-      for i as long = 0 to numItems - 1
-         this.ToolBarItems(i).wszName = json["toolbar"]["items"][i]["name"].value
-         this.ToolBarItems(i).wszButtonType = json["toolbar"]["items"][i]["type"].value
-         this.ToolBarItems(i).wszTooltip = json["toolbar"]["items"][i]["tooltip"].value
-         this.ToolBarItems(i).pPropNormalImage.wszPropValue = json["toolbar"]["items"][i]["normalimage"].value
-         this.ToolBarItems(i).pPropHotImage.wszPropValue = json["toolbar"]["items"][i]["hotimage"].value
-         this.ToolBarItems(i).pPropDisabledImage.wszPropValue = json["toolbar"]["items"][i]["disabledimage"].value
-      next
+      dim as long i = 0
+      itemPtr = json.arrayitem(itemsPtr, i)
+      do until itemPtr = 0
+         dim as string wszName = json.gettext(itemPtr, "name")
+         if len(rtrim(wszName)) > 0 then 
+            this.MenuItems(i).wszName = wszName
+            this.MenuItems(i).wszCaption = json.gettext(itemPtr, "caption")
+            this.MenuItems(i).nIndent = json.getnumber(itemPtr, "indent") 
+            this.MenuItems(i).chkAlt = json.getnumber(itemPtr, "alt")
+            this.MenuItems(i).chkShift = json.getnumber(itemPtr, "shift")
+            this.MenuItems(i).chkCtrl = json.getnumber(itemPtr, "ctrl")
+            this.MenuItems(i).wszShortcut = json.gettext(itemPtr, "shortcut")
+            this.MenuItems(i).chkChecked = json.getnumber(itemPtr, "checked")
+            this.MenuItems(i).chkGrayed = json.getnumber(itemPtr, "grayed")
+            i += 1
+         end if   
+         itemPtr = itemPtr->next
+      loop
    end if
 
    ' Retrieve data related to STATUSBAR
-   numItems = json["statusbar"]["items"].count
-   this.GenerateStatusBar = iif(json["statusbar"]["display"].value = "true", true, false)
-   
+   keyPtr = json.getptr(filePtr, "statusbar")
+   this.GenerateStatusBar = json.getbool(keyPtr, "display")
+   itemsPtr = json.getptr(keyPtr, "items")
+   numItems = json.arraycount(itemsPtr)
    if numItems then
       redim preserve this.PanelItems(numItems - 1)
-      for i as long = 0 to numItems - 1
-         this.PanelItems(i).wszName = json["statusbar"]["items"][i]["name"].value
-         this.PanelItems(i).wszText = json["statusbar"]["items"][i]["text"].value
-         this.PanelItems(i).wszTooltip = json["statusbar"]["items"][i]["tooltip"].value
-         this.PanelItems(i).wszAlignment = json["statusbar"]["items"][i]["alignment"].value
-         this.PanelItems(i).wszAutoSize = json["statusbar"]["items"][i]["autosize"].value
-         this.PanelItems(i).wszWidth = json["statusbar"]["items"][i]["width"].value
-         this.PanelItems(i).wszMinWidth = json["statusbar"]["items"][i]["minwidth"].value
-         this.PanelItems(i).pProp.wszPropValue = json["statusbar"]["items"][i]["image"].value
-         this.PanelItems(i).wszBackColor = json["statusbar"]["items"][i]["backcolor"].value
-         this.PanelItems(i).wszBackColorHot = json["statusbar"]["items"][i]["backcolorhot"].value
-         this.PanelItems(i).wszForeColor = json["statusbar"]["items"][i]["forecolor"].value
-         this.PanelItems(i).wszForeColorHot = json["statusbar"]["items"][i]["forecolorhot"].value
+      dim as long i = 0
+      itemPtr = json.arrayitem(itemsPtr, i)
+      do until itemPtr = 0
+         this.PanelItems(i).wszName = json.gettext(itemPtr, "name") 
+         this.PanelItems(i).wszText = json.gettext(itemPtr, "text")
+         this.PanelItems(i).wszTooltip = json.gettext(itemPtr, "tooltip")
+         this.PanelItems(i).wszAlignment = json.gettext(itemPtr, "alignment")
+         this.PanelItems(i).wszAutoSize = json.gettext(itemPtr, "autosize")
+         this.PanelItems(i).wszWidth = json.gettext(itemPtr, "width")
+         this.PanelItems(i).wszMinWidth = json.gettext(itemPtr, "minwidth")
+         this.PanelItems(i).pProp.wszPropValue = json.gettext(itemPtr, "image")
+         this.PanelItems(i).wszBackColor = json.gettext(itemPtr, "backcolor")
+         this.PanelItems(i).wszBackColorHot = json.gettext(itemPtr, "backcolorhot")
+         this.PanelItems(i).wszForeColor = json.gettext(itemPtr, "forecolor")
+         this.PanelItems(i).wszForeColorHot = json.gettext(itemPtr, "forecolorhot")
          ' BorderStyle is deprecated as of v2.0.4 as it has no effect
          ' in WinFBE programs where Windows Themes are enabled.
-      next
+         i += 1
+         itemPtr = itemPtr->next
+      loop
+   end if
+
+   ' Retrieve data related to TOOLBAR
+   keyPtr = json.getptr(filePtr, "toolbar")
+   this.GenerateToolbar = json.getbool(keyPtr, "display")
+   this.wszToolBarSize = json.gettext(keyPtr, "size")
+   itemsPtr = json.getptr(keyPtr, "items")
+   numItems = json.arraycount(itemsPtr)
+   if numItems then
+      redim preserve this.ToolBarItems(numItems - 1)
+      dim as long i = 0
+      itemPtr = json.arrayitem(itemsPtr, i)
+      do until itemPtr = 0
+         this.ToolBarItems(i).wszName = json.gettext(itemPtr, "name") 
+         this.ToolBarItems(i).wszButtonType = json.gettext(itemPtr, "type")
+         this.ToolBarItems(i).wszTooltip = json.gettext(itemPtr, "tooltip")
+         this.ToolBarItems(i).pPropNormalImage.wszPropValue = json.gettext(itemPtr, "normalimage")
+         this.ToolBarItems(i).pPropHotImage.wszPropValue = json.gettext(itemPtr, "hotimage")
+         this.ToolBarItems(i).pPropDisabledImage.wszPropValue = json.gettext(itemPtr, "disabledimage")
+         i += 1
+         itemPtr = itemPtr->next
+      loop
    end if
 
 
-   dim as long numControls = json["controls"].count
+   ctrlsPtr = json.getptr(filePtr, "controls")
+   dim as long numControls = json.arraycount(ctrlsPtr)
    if numControls then
       dim wszControlType as CWSTR
       dim nControlType as long
-      
-      for i as long = 0 to numControls - 1
-         wszControlType = json["controls"][i]["type"].value
+
+      ctrlPtr = json.arrayitem(ctrlsPtr, 0)
+      do until ctrlPtr = 0
+         wszControlType = json.gettext(ctrlPtr, "type") 
          nControlType = GetControlType( wszControlType)
 
          ' Control Start
          if nControlType = 0 then   
             ' no longer a valid toolbox control
-            continue for
+            ctrlPtr = ctrlPtr->next
+            continue do
          else
             if bLoadOnly = true then
                dim pCtrlTemp as clsControl ptr = new clsControl
@@ -630,23 +665,33 @@ function clsDocument.LoadFormJSONdata( _
             end if   
          end if
          
-         dim as long numProps = json["controls"][i]["properties"].count
-         for ii as long = 0 to numProps - 1
-            wszPropName = json["controls"][i]["properties"][ii]["name"].value
-            wszPropValue = json["controls"][i]["properties"][ii]["value"].value
-            ' Only set the loading property if it exists in the current property
-            ' listing. We do this otherwise older now unused properties will continue
-            ' to get loaded when we no longer want them to.
-            if IsPropertyExists( pCtrl, wszPropName ) then
-               SetControlProperty( pCtrl, wszPropName, wszPropValue ) 
-            end if
-         next
+         propsPtr = json.getptr(ctrlPtr, "properties")
+         dim as long numProps = json.arraycount(propsPtr)
+         if numProps then
+            propPtr = json.arrayitem(propsPtr, 0)
+            do until propPtr = 0
+               wszPropName = json.gettext(propPtr, "name")
+               wszPropValue = json.gettext(propPtr, "value")
+               ' Only set the loading property if it exists in the current property
+               ' listing. We do this otherwise older now unused properties will continue
+               ' to get loaded when we no longer want them to.
+               if IsPropertyExists( pCtrl, wszPropName ) then
+                  SetControlProperty( pCtrl, wszPropName, wszPropValue ) 
+               end if
+               propPtr = propPtr->next
+            loop
+         end if   
 
-         dim as long numEvents = json["controls"][i]["events"].count
-         for ii as long = 0 to numEvents - 1
-            wszEventName = json["controls"][i]["events"][ii]["name"].value
-            SetControlEvent( pCtrl, wszEventName, true )
-         next
+         eventsPtr = json.getptr(ctrlPtr, "events")
+         dim as long numEvents = json.arraycount(eventsPtr)
+         if numEvents then
+            eventPtr = json.arrayitem(eventsPtr, 0)
+            do until eventPtr = 0
+               wszEventName = json.gettext(eventPtr, "name")
+               SetControlEvent( pCtrl, wszEventName, true )
+               eventPtr = eventPtr->next
+            loop
+         end if   
 
          ' Control End
          if bLoadOnly = false then
@@ -654,9 +699,13 @@ function clsDocument.LoadFormJSONdata( _
             ApplyControlProperties( @this, pCtrl )
             pCtrl->SuspendLayout = false
          end if
-      next
+
+         ctrlPtr = ctrlPtr->next
+      loop
 
    end if
+
+   if filePtr then json.deleteptr(filePtr)
 
    return 0
    
@@ -980,6 +1029,9 @@ function clsDocument.SaveFormJSONdata() as boolean
       wst = wst & _
       qstr("'items': [")
       for ii as long = lbound(this.MenuItems) to ubound(this.MenuItems)
+         ' Skip any "blank" lines that may have been added from the Menu Editor
+         if rtrim(this.MenuItems(ii).wszName) = "" then continue for
+         
          wst = wst & _
          "{" & _
          qstr("'name':'"     & this.MenuItems(ii).wszName & "'") & wcomma & _
@@ -1093,9 +1145,11 @@ function clsDocument.SaveFormJSONdata() as boolean
                for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
                   ' Only need to output the names of the Events that have been ticked as being in use.
                   if pCtrl->Events(ii).bIsSelected then
-                     wst = wst & "{" & _
-                     qstr("'name':'" & pCtrl->Events(ii).wszEventName & "'") & wcomma & _
-                     "},"
+                     if rtrim(pCtrl->Events(ii).wszEventName) > "" then
+                        wst = wst & "{" & _
+                        qstr("'name':'" & pCtrl->Events(ii).wszEventName & "'") & _
+                        "},"
+                     end if   
                   end if   
                next
                wst = rtrim(wst, ",") & "]"

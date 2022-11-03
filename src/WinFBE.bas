@@ -20,8 +20,6 @@
 #define UNICODE
 #define _WIN32_WINNT &h0602  
 
-#include once "modJSON.inc"
-
 #include once "windows.bi"
 #include once "vbcompat.bi"
 #include once "win\shobjidl.bi"
@@ -62,6 +60,7 @@ dim shared as CWSTR gwszDefaultToolchain = "FreeBASIC-1.09.0-winlibs-gcc-9.3.0"
 
 #include once "modScintilla.bi"
 #include once "modDeclares.bi"         
+#include once "cJSON.bi"
 
 #include once "clsLasso.bi"
 #include once "clsDocument.bi"
