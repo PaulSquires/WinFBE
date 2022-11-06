@@ -46,9 +46,6 @@ Type COMPILE_TYPE
    pDocMainOffset     as long                 ' Line in file where the pDocMain code is output
 End Type
 
-declare function ResetScintillaCursors() as Long
-declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
-declare Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Long
 declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
 

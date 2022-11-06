@@ -27,6 +27,7 @@ Visual Designer:
 - Added TextBox and RichEdit control property (MaxLength).
 - Fixed display of Frame control text background color in both the visual designer and code generation.
 - Added Button control property (MultiLine).
+- Replaced existing fbJSON parser with the cJSON "C" based parser (32 and 64 bit DLL's).
 
 
 Version 3.0.1 (June 6, 2021)

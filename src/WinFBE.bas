@@ -99,6 +99,7 @@ dim shared gLasso   as clsLasso
 #include once "modVDToolbox.inc"
 #include once "modAutoInsert.inc"
 #include once "modCompile.inc"
+#include once "modCompileErrors.inc"
 #include once "modMenus.inc"
 #include once "modCodetips.inc"
 #include once "modGenerateCode.inc"

@@ -364,12 +364,28 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
              
-   ' Get the current entered word/characters to only match.
-   ' Remove any trailing "." because we have modified valid scintilla to recognize
-   ' the period as part of a valid word.
-   pDoc->sMatchWord = ucase( trim( pDoc->GetWord, any " .") )
-   nLenMatchWord = len(pDoc->sMatchWord )
+   ' Retrieve the position
+   curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
+   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
+  
+   dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
+   dim as string sLine_ucase
 
+   ' Get the current entered word. We get the text between the "." or ">" and the current
+   ' editing position. We do this rather than pDoc->GetWord because text may already
+   ' exist after the current editing position.
+   pDoc->sMatchWord = ""
+   for i as long = len(sLine) to 1 step -1
+      dim as string ch = mid(sLine, i, 1)
+      select case ch
+         case ".", ">"
+            exit for
+         case else
+            pDoc->sMatchWord = ucase(ch) & pDoc->sMatchWord   
+      end select
+   next
+   nLenMatchWord = len(pDoc->sMatchWord )
+               
    ' If an autocomplete is active but now there is no match word then
    ' a space or tab must have been pressed so autocomplete cancel and now exit.
    if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
@@ -379,19 +395,13 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       end if   
    end if
 
-   ' Retrieve the position
-   curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
-   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
-  
+
    ' Get the styling of the current line to determine if we are in a 
    ' multiline or single line comment block then abort the autoinsert.
    select case SciExec(hEdit, SCI_GETSTYLEAT, curPos, 0)
       case SCE_B_MULTILINECOMMENT, SCE_B_COMMENT
          exit function
    end select
-
-   dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
-   dim as string sLine_ucase
 
    ' If no active autocomplete then create the list based on the current underlying match word.
    ' also continue to display the popup if we have simply backspaced while a popup is open.
