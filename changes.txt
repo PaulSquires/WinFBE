@@ -30,7 +30,7 @@ Visual Designer:
 - Replaced existing fbJSON parser with the cJSON "C" based parser (32 and 64 bit DLL's).
 
 
-Version 3.0.1 (June 6, 2021)
+Version 3.0.1 (June 6, 2022)
 Editor:
 - "Save All" was not correctly adding the saved file to the Explorer list.
 - When closing all files sometimes not positioning editor to a dirty file that needed to be saved.
