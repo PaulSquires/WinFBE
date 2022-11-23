@@ -640,9 +640,9 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    gApp.IsCompiling = false
 
-   if AfxFileExists( wszVDMain ) then
-      AfxDeleteFile( wszVDMain )
-   end if
+'   if AfxFileExists( wszVDMain ) then
+'      AfxDeleteFile( wszVDMain )
+'   end if
 
    Function = True   ' successful
 End Function

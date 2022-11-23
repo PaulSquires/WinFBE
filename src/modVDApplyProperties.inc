@@ -1068,7 +1068,7 @@ function ApplyControlProperties( _
             end if 
          case "TEXT"
             select case pCtrl->ControlType 
-               case CTRL_BUTTON, CTRL_MASKEDEDIT
+               case CTRL_MASKEDEDIT
                   ' skip these controls and set in special handlers below
                case else   
                   AfxSetWindowText(pCtrl->hWindow, wszPropValue)     

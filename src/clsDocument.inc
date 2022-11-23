@@ -1090,8 +1090,8 @@ function clsDocument.SaveFormJSONdata() as boolean
          qstr("'tooltip':'"        & this.PanelItems(ii).wszTooltip & "'") & wcomma & _
          qstr("'alignment':'"      & this.PanelItems(ii).wszAlignment & "'") & wcomma & _
          qstr("'autosize':'"       & this.PanelItems(ii).wszAutoSize & "'") & wcomma & _
-         qstr("'width':"           & this.PanelItems(ii).wszWidth) & wcomma & _
-         qstr("'minwidth':"        & this.PanelItems(ii).wszMinWidth) & wcomma & _
+         qstr("'width':'"          & this.PanelItems(ii).wszWidth & "'") & wcomma & _
+         qstr("'minwidth':'"       & this.PanelItems(ii).wszMinWidth & "'") & wcomma & _
          qstr("'image':'"          & this.PanelItems(ii).pProp.wszPropValue & "'") & wcomma & _
          qstr("'backcolor':'"      & this.PanelItems(ii).wszBackColor & "'") & wcomma & _
          qstr("'backcolorhot':'"   & this.PanelItems(ii).wszBackColorHot & "'") & wcomma & _
