@@ -168,13 +168,13 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' and compile that bas file instead. The resulting bas file will be deleted after the compiling
    ' has completed and exe will be deleted when the exe is terminated. 
    dim as CWSTR wszTempMainFilename
-   if wID = IDM_QUICKRUN THEN
+   if wID = IDM_QUICKRUN then
       if pDocMain->IsNewFlag then 
          gCompile.MainFolder = AfxGetExePathName
       else
          gCompile.MainFolder = AfxStrPathname("PATH", pDocMain->DiskFilename)
       end if
-      wszTempMainFilename = GetTemporaryFilename(gCompile.MainFolder, "bas")
+      wszTempMainFilename   = GetTemporaryFilename(gCompile.MainFolder, "bas")
       gCompile.MainFilename = wszTempMainFilename
       gCompile.MainName     = AfxStrPathname("NAME", gCompile.MainFilename)
       
@@ -194,7 +194,6 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
          end if
          pDoc = pDoc->pDocNext
       loop
-      
 
       dim pTextStream as CTextStream
       if pTextStream.OpenUnicode(gCompile.MainFilename, IOMODE_FORWRITING, true) = S_OK then
@@ -206,7 +205,7 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.MainFilename = pDocMain->DiskFilename
       gCompile.MainName     = AfxStrPathname("NAME", pDocMain->DiskFilename)
       gCompile.MainFolder   = AfxStrPathname("PATH", pDocMain->DiskFilename)
-   END IF
+   end if
    
    gCompile.ResourceFile = ""    ' default that there is no resource
    gCompile.CompileFlags = gConfig.Builds(idxBuild).wszOptions
@@ -312,10 +311,11 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       pDoc = pDoc->pDocNext
    loop
    
-   ' Do another SaveAll because a call to GenerateFormCode may have created
+   ' Do another Save All because a call to GenerateFormCode may have created
    ' Event code that previously did not exist.
-   OnCommand_FileSaveAll(HWND_FRMMAIN)
-
+   if wID <> IDM_QUICKRUN then
+      OnCommand_FileSaveAll(HWND_FRMMAIN)
+   end if
 
    ' Run any precompile tools
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)

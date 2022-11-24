@@ -1,3 +1,8 @@
+Version 3.0.3 (November 24, 2022)
+Editor:
+- Fixed bug whereby SaveAs dialog would appear for Quick Run files.
+
+
 Version 3.0.2 (November 23, 2022)
 Editor:
 - Fixed bug where WinFBE 64-bit only would GPF if currently loaded file is edited by an external editor causing WinFBE to reload the file.
