@@ -313,14 +313,22 @@ end function
 function clsConfig.LoadCodetipsWinFormsX() as boolean
    gdb2.dbDeleteByFileType( DB2_FILETYPE_WINFORMSX )
    function = this.LoadCodetipsWinForms(_WinFormsXCodetipsFilename)
+
    dim parser as ctxParser
    parser.nFileType = DB2_FILETYPE_WINFORMSX
-   parser.functionName = "Application"
-   parser.functionAlias = "wfxApplication"
-   gdb2.dbAdd( @parser, DB2_TYPE )
-   parser.functionName = "Colors"
-   parser.functionAlias = "wfxColors"
-   gdb2.dbAdd( @parser, DB2_TYPE )
+   
+   parser.varName = "Application"
+   parser.varType = "wfxApplication"
+   parser.varScope = DIMSCOPE.SCOPEGLOBAL
+   parser.functionName = ""
+   gdb2.dbAdd( @parser, DB2_VARIABLE )
+   
+   parser.varName = "Colors"
+   parser.varType = "wfxColors"
+   parser.varScope = DIMSCOPE.SCOPEGLOBAL
+   parser.functionName = ""
+   gdb2.dbAdd( @parser, DB2_VARIABLE )
+   
    function = 0
 end function
 

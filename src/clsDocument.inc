@@ -382,7 +382,6 @@ function clsDocument.CreateCodeWindow( _
                   ' Need to save and then restore the File Encoding for this pDoc because the call to GetFileString
                   ' for the designer file could reset the encoding of the main file.
                   dim as long savedEncoding = this.FileEncoding
-? "createwindow after version check"; this.DesignerFilename
                   if GetFileToString(this.DesignerFilename, sText, @this) = false then
                      this.CreateDesignerWindow(hWndParent)  ' Create the new visual designer window
                      this.LoadFormJSONdata(HWND_FRMMAIN, sText)   ' this should now be UTF-8
