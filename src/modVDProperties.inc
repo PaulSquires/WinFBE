@@ -161,7 +161,7 @@ public function DisplayPropertyDetails() as Long
       case "IMAGEWIDTH", "IMAGEHEIGHT"   
          wszPropDescribe = "The size of the image in pixels."
       case "IMAGEALIGN"   
-         wszPropDescribe = "The alignment of the image that will be displayed on the control."
+         wszPropDescribe = "The alignment of the image that will be displayed on the control. MiddleCenter will disable displaying Text."
       case "IMAGEMARGIN"   
          wszPropDescribe = "The margin in pixels to apply to the image of a Button control."
       CASE "INPUTSTRING"

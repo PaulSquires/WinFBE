@@ -458,6 +458,11 @@ function GetFileToString( _
       pDoc->FileEncoding = FILE_ENCODING_ANSI
    END IF
 
+
+? "GetFileToString "; pDoc->DiskFilename; " "; pDoc->FileEncoding
+
+
+
    select case pDoc->FileEncoding
       case FILE_ENCODING_ANSI 
          ' No conversion needed. clsDocument ApplyProperties will *not*

@@ -173,6 +173,24 @@ function Button_ApplyProperties( _
          end if   
       end if
 
+   case "IMAGEALIGN"
+      dim as long wsStyle
+      select case wszPropValue
+         CASE "ImageAlignment.BottomCenter": wsStyle = &H20 OR &H4
+         CASE "ImageAlignment.BottomLeft":   wsStyle = &H20 OR &H1
+         CASE "ImageAlignment.BottomRight":  wsStyle = &H20 OR &H2
+         CASE "ImageAlignment.MiddleCenter": wsStyle = &H8  OR &H4    ' no text 
+         CASE "ImageAlignment.MiddleLeft":   wsStyle = &H8  OR &H1
+         CASE "ImageAlignment.MiddleRight":  wsStyle = &H8  OR &H2
+         CASE "ImageAlignment.TopCenter":    wsStyle = &H10 OR &H4
+         CASE "ImageAlignment.TopLeft":      wsStyle = &H10 OR &H1
+         CASE "ImageAlignment.TopRight":     wsStyle = &H10 OR &H2
+      end select
+      pCtrl->AfxButtonPtr->SetImagePos(wsStyle, true)
+
+   case "IMAGEMARGIN"
+      pCtrl->AfxButtonPtr->SetImageMargin( nPropValue, true )
+
    case "IMAGEWIDTH"
       pCtrl->AfxButtonPtr->SetImageWidth( nPropValue, true )
       
@@ -1089,7 +1107,8 @@ function ApplyControlProperties( _
       
       ' Handle control specific properties
       ' Only act on properties where the value has changed.
-      if pProp->wszPropValue = pProp->wszPropValuePrev then continue for
+' Comment out next line because controls loaded from file will not change properties visually otherwise.
+'      if pProp->wszPropValue = pProp->wszPropValuePrev then continue for
       select CASE pCtrl->ControlType
          case CTRL_FORM:           Form_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_BUTTON:         Button_ApplyProperties(pDoc, pCtrl, pProp)

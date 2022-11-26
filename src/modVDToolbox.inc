@@ -119,6 +119,17 @@ function LoadPropertyComboListbox( _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDown"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDownList"))
 
+      case "IMAGEALIGN"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.BottomCenter"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.BottomLeft"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.BottomRight"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.MiddleCenter"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.MiddleLeft"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.MiddleRight"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.TopCenter"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.TopLeft"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageAlignment.TopRight"))
+
       case "IMAGESCALING"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.None"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.AutoSize"))

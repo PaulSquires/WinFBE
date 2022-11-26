@@ -91,110 +91,114 @@
 <td>Gets or set the image to display.</td>
 </tr>
 <tr class="even">
+<td>ImageAlign</td>
+<td>Gets or sets a value indicating the alignment of the image on a control. Refer to <a href="#ImageAlignment">ImageAlignment</a> enum.</td>
+</tr>
+<tr class="odd">
 <td>ImageHighDPI</td>
 <td>Gets or sets a value (true/false) indicating whether to apply high DPI scaling to the image.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ImageHeight</td>
 <td>Gets or sets the height of the image.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>ImageWidth</td>
 <td>Gets or sets the width of the image.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ImageMargin</td>
 <td>Gets or set the margin in pixels of the image.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Left</td>
 <td>Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Location</td>
 <td>Gets or sets the top and left position of the control. Get: returns <a href="#wfxPoint">wfxPoint</a> object. Set: (left, top).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Locked</td>
 <td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MultiLine</td>
 <td>Gets or sets a value (true/false) indicating whether the control can have multiline text. Embedded {br} text is converted to chr(10) linefeed.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Parent</td>
 <td>Gets or sets the parent container of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Size</td>
 <td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>TabIndex</td>
 <td>Gets or sets the position that the control occupies in the TAB position.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>TabStop</td>
 <td>Gets or sets a value (true/false) indicating whether the user can use the TAB key to give focus to the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Tag</td>
 <td>Gets or sets user defined text associated with the form.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Text</td>
 <td>Gets or sets the text (caption) associated with this form.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>TextAlign</td>
 <td>Gets or sets a value indicating the alignment of the text on a control. Refer to <a href="#ButtonAlignment">ButtonAlignment</a> enum.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>TextBackColor</td>
 <td>Gets or sets the background color of the control. ThemeSupport property must be set to False.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>TextBackColorDown</td>
 <td>Gets or sets the background color of the control when the button is pressed. ThemeSupport property must be set to False.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>TextForeColor</td>
 <td>Gets or sets the foreground color of the control. ThemeSupport property must be set to False.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>TextForeColorHot</td>
 <td>Gets or sets the foreground hot color of the control when the mouse is over the button. Refer to the <strong>Colors</strong> object. ThemeSupport property must be set to False.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>TextForeColorDown</td>
 <td>Gets or sets the foreground color of the control when the button is pressed. ThemeSupport property must be set to False.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>TextMargin</td>
 <td>Gets or sets a value indicating the margin in pixels to the text of a button control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ThemeSupport</td>
 <td>Gets or sets a value (true/false) indicating whether Windows Theme will be applied to the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>ToggleMode</td>
 <td>Gets or sets a value (true/false) indicating whether the button allows dual states to toggle between On and Off.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Top</td>
 <td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>UseMnemonic</td>
 <td>Gets or sets a value (true/false) indicating whether the first character preceded by an ampersand (&amp;) character will be used as the control’s accelerator key.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Visible</td>
 <td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Width</td>
 <td>Gets or sets the width of the control.</td>
 </tr>
@@ -319,6 +323,19 @@ End Enum
    BottomLeft   
    BottomRight  
    MiddleCenter 
+   MiddleLeft   
+   MiddleRight  
+   TopCenter    
+   TopLeft      
+   TopRight     
+End Enum
+</code></pre>
+<h5 id="imagealignment">ImageAlignment</h5>
+<pre><code>Enum ImageAlignment
+   BottomCenter = 1
+   BottomLeft   
+   BottomRight  
+   MiddleCenter    ' Button Text is not displayed when this is selected
    MiddleLeft   
    MiddleRight  
    TopCenter    

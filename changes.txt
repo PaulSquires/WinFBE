@@ -1,3 +1,13 @@
+Version 3.0.4 ()
+Editor:
+
+Visual Designer:
+- Added Button control propert (ImageAlign) to position an image within the button.
+- Corrected issues with selected Button image properties properly being reflected for the button during design time.
+- Form files would have their file encoding reset to ANSI on subsequent reloading of the project.
+- New Projects created with a Visual Designer template would not have the new Form located in the Normal section of the Explorer treeview.
+
+
 Version 3.0.3 (November 24, 2022)
 Editor:
 - Fixed bug whereby SaveAs dialog would appear for Quick Run files.

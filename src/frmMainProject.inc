@@ -199,8 +199,12 @@ Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
             pCtrl = GetFormCtrlPtr(pDoc)
             if pCtrl then SetControlProperty( pCtrl, "NAME", "frmMain" )
          
-            ' Add something to the code editor so that it does not automatically 
-            ' generate the Application.Run code for the form.
+            ' Force the new Form to move to the Normal tree branch
+            pDoc->ProjectFileType = ""
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILENORMAL, 0), 0)
+
+            pDoc->FileEncoding = FILE_ENCODING_ANSI
+
             szText = "' frmMain form code file" & vbcrlf
             pDoc->SetText( szText )
 

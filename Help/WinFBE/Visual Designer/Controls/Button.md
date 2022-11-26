@@ -19,6 +19,7 @@
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
 | Image | Gets or set the image to display.|
+| ImageAlign | Gets or sets a value indicating the alignment of the image on a control. Refer to [ImageAlignment](#ImageAlignment) enum. |
 | ImageHighDPI | Gets or sets a value (true/false) indicating whether to apply high DPI scaling to the image.|
 | ImageHeight | Gets or sets the height of the image.|
 | ImageWidth | Gets or sets the width of the image.|
@@ -91,6 +92,20 @@ Enum ButtonAlignment
    BottomLeft   
    BottomRight  
    MiddleCenter 
+   MiddleLeft   
+   MiddleRight  
+   TopCenter    
+   TopLeft      
+   TopRight     
+End Enum
+```
+##### ImageAlignment
+```
+Enum ImageAlignment
+   BottomCenter = 1
+   BottomLeft   
+   BottomRight  
+   MiddleCenter    ' Button Text is not displayed when this is selected
    MiddleLeft   
    MiddleRight  
    TopCenter    

@@ -187,9 +187,10 @@ function clsDocument.CreateDesignerWindow( byval hWndParent as HWnd ) as hwnd
    
    ' In version 3.02+ form file encoding does not have to be unicode because the form meta
    ' data is saved to a separate .design file (UTF-8 encoded no sigature). Therefore, unless
-   ' the user specifically changes the code file encoding then we will default to ANSI.
+   ' the user specifically changes the code file encoding then we will default to ANSI. That
+   ' ANSI setting for the file was set on pDoc creation. Do not reset the value here otherwise
+   ' it will affect any existing user files and essentially make all Form files as ANSI.
    ' this.FileEncoding = FILE_ENCODING_UTF16_BOM
-   this.FileEncoding = FILE_ENCODING_ANSI
    
    dim rc as RECT
    
@@ -346,14 +347,15 @@ function clsDocument.CreateCodeWindow( _
             ' Set a flag that we are loading code from a file. This is important because if the file
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
+            this.LoadingFromFile = true
             this.DiskFilename = wszFile   ' assign before GetFileTostring because needed for RelativeFile calculation.
             this.DesignerFilename = wszFile & ".design"
-            this.LoadingFromFile = true
             
             ' GetFileTostring has a call to pDoc->ParseFormMetaData which will create/recreate the designer form.
             ' We continue to use this function in post version 3.02 form file format in order to ensure
             ' that older form files can be imported. 
             dim sText as string  ' this will be an UTF-8 encoded string
+
             if GetFileToString(wszFile, sText, @this) = false then
                ' Take this opportunity to determine the text line endings
                if instr(sText, chr(13,10)) then
@@ -377,10 +379,15 @@ function clsDocument.CreateCodeWindow( _
                if (ConvertWinFBEversion(this.wszFormVersion) >= ConvertWinFBEversion("3.0.2")) orelse _
                   (ConvertWinFBEversion(this.wszFormVersion) = 0) then  'b/c upgraded form files do not have version loaded yet
                   sText = ""
+                  ' Need to save and then restore the File Encoding for this pDoc because the call to GetFileString
+                  ' for the designer file could reset the encoding of the main file.
+                  dim as long savedEncoding = this.FileEncoding
+? "createwindow after version check"; this.DesignerFilename
                   if GetFileToString(this.DesignerFilename, sText, @this) = false then
                      this.CreateDesignerWindow(hWndParent)  ' Create the new visual designer window
                      this.LoadFormJSONdata(HWND_FRMMAIN, sText)   ' this should now be UTF-8
                   end if   
+                  this.FileEncoding = savedEncoding
                end if
             end if
 

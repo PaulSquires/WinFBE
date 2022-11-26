@@ -106,15 +106,12 @@ function frmMain_SetStatusbar() as long
          case FILETYPE_MAIN:      wszText = L(212,"Main")
          case FILETYPE_RESOURCE:  wszText = L(213,"Resource")
       end select 
-      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then 
-         wszText = "FORM"
-      end if
       gSBPanels(3).wszText = wszText
       
       ' PANEL (4) Spacing
       gSBPanels(4).wszText = "Spaces: " & gConfig.TabSize
       
-      ' PANEL (5) File Encoding (Ansi, UTF-8, etc)
+      ' PANEL (5) File Encoding (Ansi, UTF-8, UTF-16)
       wszText = ""
       select case pDoc->FileEncoding
          case FILE_ENCODING_UTF8_BOM
@@ -1063,7 +1060,7 @@ function frmMain_OpenFileSafely( _
       pDoc->IsDesigner = bIsDesigner 
       if bIsNewFile then
          pDoc->CreateCodeWindow( HWnd, true )  ' Create the new Scintilla window
-      Else
+      else
          wszName = OnCommand_FileAutoSaveFileCheck( wszName )
          pDoc->CreateCodeWindow( HWnd, false, bIsTemplate, wszName )
          pDoc->bNeedsParsing = true

@@ -118,13 +118,14 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          ' to ensure that the properties are acted on in a specific order. The width and height
          ' need to be set before scaling is called.
          AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
+         AddControlProperty(pCtrl, "ImageAlign", "ImageAlignment.TopLeft", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "ImageWidth", "16", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "ImageHeight", "16", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "ImageMargin", "4", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "ImageMargin", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "ImageHighDPI", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "TextMargin", "4", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TextMargin", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ThemeSupport", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ToggleMode", "False", PropertyType.TrueFalse)

@@ -152,7 +152,7 @@ type clsDocument
       bBookmarkExpanded as boolean = true     ' Bookmarks list expand/collapse state
       bFunctionsExpanded as boolean = true    ' Functions list expand/collapse state
       bHasFunctions     as boolean = false    ' FunctionList to determine if click will display the File
-      FileEncoding      as long       
+      FileEncoding      as long = FILE_ENCODING_ANSI       
       bNeedsParsing     as boolean     ' Document requires to be parsed due to changes.
       DeletedButKeep    as boolean     ' file no longer exists but keep open anyway
       DocumentBuild     as string      ' specific build configuration to use for this document

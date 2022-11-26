@@ -2031,7 +2031,9 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
             ' Apply all control properties 
             for ii as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
                dim pCtrl as clsControl ptr = pDoc->Controls.ItemAt(ii)
-               if pCtrl then ApplyControlProperties(pDoc, pCtrl)
+               if pCtrl then 
+                  ApplyControlProperties(pDoc, pCtrl)
+               end if   
             next         
          end if
       end if

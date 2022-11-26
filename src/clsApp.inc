@@ -245,7 +245,7 @@ function clsApp.ProjectSetFileType( _
 
    wzFileExt = AfxStrPathname( "EXTN",  pDoc->DiskFilename )
  
-   ' Determine if the document already exists in the project. if it does not then
+   ' Determine if the document already exists in the project. If it does not then
    ' make a determination of a default file type for this new file being added to the project.
    dim bFound as boolean = false
    dim pDocSearch as clsDocument ptr 
