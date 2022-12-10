@@ -252,13 +252,13 @@ function ctxParser.ParseENUM( byval action as PARSEACTION ) as boolean
    ' Finally, look for the END ENUM that will complete the parsing
    do until this.GetToken() = false
       ' tokens from the body of the ENUM should be processed here
-      
+
       select case this.ltoken 
          case "explicit", "="
             this.ReadToEOL()
          case "'todo:"
             this.ParseTODO( PARSINGACTION.PARSE_TODO )
-         case "end", "enum"   
+         case "end"   
          case else
             if len(this.token) then
                ' Everything else in this structure must be an actual ENUM 
@@ -277,6 +277,15 @@ function ctxParser.ParseENUM( byval action as PARSEACTION ) as boolean
                this.objectEndLine = this.lineNum
                this.typeAlias = this.typeName
                gdb2.dbAdd( @this, DB2_TYPE )
+
+               ' Also add a variable so that the enum can be accessed directly
+               ' without having to assign it first to a variable.
+               this.varName = this.typeName
+               this.varType = this.typeName
+               this.varScope = DIMSCOPE.SCOPEGLOBAL
+               this.functionName = ""
+               gdb2.dbAdd( @this, DB2_VARIABLE )
+
                exit do
             end if
          end if      

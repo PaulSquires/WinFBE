@@ -378,7 +378,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    for i as long = len(sLine) to 1 step -1
       dim as string ch = mid(sLine, i, 1)
       select case ch
-         case ".", ">"
+         case ".", ">", " "
             exit for
          case else
             pDoc->sMatchWord = ucase(ch) & pDoc->sMatchWord   
@@ -531,6 +531,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                ' nLenMatchWord will allow partial matches to be added to the popup
                ' based on what the user has currently typed.
                st = rtrim(pData->VariableType)
+
                if nLenMatchWord then
                   if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord then
                      if ExistsInAutocompleteList(sList, st) = false then

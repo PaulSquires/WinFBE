@@ -161,8 +161,10 @@ function OnCommand_FileSave( _
             ByVal bSaveAll As boolean _
             ) As LRESULT
 
+   if gApp.GetDocumentCount = 0 then exit function
+   
    Dim as long i, iStart, iEnd
-
+   
    if bSaveAll then
       ' Save All
       iStart = 0
