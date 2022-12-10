@@ -1,11 +1,16 @@
 Version 3.0.4 ()
 Editor:
+- Fixed ENUM code parsing and autocomplete popup.
+- Fixed DIM AS autocomplete popup not reducing popup list as word is being typed.
+- Fixed regression whereby Ctrl+S Save (or SaveAs) with no open documents would crash the application.
 
 Visual Designer:
 - Added Button control propert (ImageAlign) to position an image within the button.
 - Corrected issues with selected Button image properties properly being reflected for the button during design time.
 - Form files would have their file encoding reset to ANSI on subsequent reloading of the project.
 - New Projects created with a Visual Designer template would not have the new Form located in the Normal section of the Explorer treeview.
+- Fixed regression. The popup code completion intellisense now correctly displays popup list for WinFormsX global variables "Colors" and "Application".
+- Added MCS_DAYSTATE style for MonthCalendar allowing the user to correctly handle the MCN_GETDAYSTATE notification in their form's AllEvents handler.
 
 
 Version 3.0.3 (November 24, 2022)
