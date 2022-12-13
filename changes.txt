@@ -1,4 +1,4 @@
-Version 3.0.4 ()
+Version 3.0.4 (December 13, 2022)
 Editor:
 - Fixed ENUM code parsing and autocomplete popup.
 - Fixed DIM AS autocomplete popup not reducing popup list as word is being typed.
