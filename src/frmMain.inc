@@ -1411,13 +1411,27 @@ function frmMain_OnDropFiles( _
                   if pDoc->GetActiveScintillaPtr = 0 then pDocIn = pDoc
                end if   
                if (pDoc = 0) orelse (pDocIn <> 0) then 
-                  frmMain_OpenFileSafely(HWnd, _
+                  pDoc = frmMain_OpenFileSafely(HWnd, _
                                           false, _    ' bIsNewFile
                                           false, _    ' bIsTemplate
                                           true,  _    ' bShowInTab
                                           false, _    ' bIsInclude
                                           wszPath, _  ' wszName
-                                          pDocIn )    ' pDocIn
+                                          pDocIn, _   ' pDocIn
+                                          IsFormFilename(wszPath) _
+                                          )
+                                          
+                  ' Give this document a default project type depending on its file extension
+                  if (pDoc->IsNewFlag = false) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then
+                     if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+                        if pDoc->IsDesigner then 
+                           pDoc->ProjectFileType = FILETYPE_NORMAL 
+                        else
+                           gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )
+                        end if
+                     end if   
+                  end if
+
                end if
             end if                           
          end if
@@ -1425,7 +1439,10 @@ function frmMain_OnDropFiles( _
    Next
    
    DragFinish hDrop
-   
+
+   LoadExplorerFiles()
+   LoadFunctionsFiles()
+
    function = 0
 end Function
 

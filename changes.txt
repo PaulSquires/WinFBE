@@ -1,3 +1,9 @@
+Version 3.0.5 (December 14, 2022)
+Editor:
+- Fixed duplicate events when loading Form file via MRU list or drag/drop into editor from outside of a Project.
+- Fixed issue whereby files added to Project via MRU list or drag/drop would not show in the Explorer list.
+
+
 Version 3.0.4 (December 13, 2022)
 Editor:
 - Fixed ENUM code parsing and autocomplete popup.

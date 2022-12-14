@@ -46,7 +46,7 @@ using Afx
 #define APPNAME        wstr("WinFBE - FreeBASIC Editor")
 #define APPNAMESHORT   wstr("WinFBE")
 
-#define APPVERSION     wstr("3.0.4") 
+#define APPVERSION     wstr("3.0.5") 
 #define PREVENT_UPDATE_CHECK FALSE     ' used for betas
 
 #define APPCOPYRIGHT   wstr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2022") 

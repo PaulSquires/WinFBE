@@ -76,8 +76,8 @@ Function OnCommand_FileOpen( _
             end if   
             if (pDoc = 0) orelse (pDocIn <> 0) then 
                pDoc = frmMain_OpenFileSafely(HWnd, _
-                                             False, _     ' bIsNewFile
-                                             False, _     ' bIsTemplate
+                                             false, _     ' bIsNewFile
+                                             false, _     ' bIsTemplate
                                              false, _     ' bShowInTab
                                              false, _     ' bIsInclude
                                              *pwszName, _ ' pwszName

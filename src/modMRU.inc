@@ -137,7 +137,7 @@ public function OpenMRUFile( byval HWnd As HWnd, _
    ' If file is already loaded then simply switch to that file
    ' within the editor.
    pDocIn = gApp.GetDocumentPtrByFilename( wszFile )
-   
+
    pDoc = frmMain_OpenFileSafely( _
                   HWND_FRMMAIN, _
                   false, _    ' bIsNewFile
@@ -145,8 +145,24 @@ public function OpenMRUFile( byval HWnd As HWnd, _
                   true, _     ' bShowInTab
                   false, _    ' bIsInclude
                   wszFile, _  ' wszName
-                  pDocIn )    ' pDocIn
-   
+                  pDocIn, _   ' pDocIn
+                  IsFormFilename(wszFile) _
+                  )
+
+   ' Give this document a default project type depending on its file extension
+   if (pDoc->IsNewFlag = false) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then
+      if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+         if pDoc->IsDesigner then 
+            pDoc->ProjectFileType = FILETYPE_NORMAL 
+         else
+            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )
+         end if
+      end if   
+   end if
+
+   LoadExplorerFiles()
+   LoadFunctionsFiles()
+
    function = 0
 end function
 

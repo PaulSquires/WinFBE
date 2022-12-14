@@ -82,7 +82,7 @@ function clsDocument.ParseDocument() as boolean
    if this.bNeedsParsing = false then 
       return false
    end if
-   
+
    static as boolean bInParseDocument
    
    ' Prevent any potential recursive parsing 
@@ -383,7 +383,7 @@ function clsDocument.CreateCodeWindow( _
                   ' for the designer file could reset the encoding of the main file.
                   dim as long savedEncoding = this.FileEncoding
                   if GetFileToString(this.DesignerFilename, sText, @this) = false then
-                     this.CreateDesignerWindow(hWndParent)  ' Create the new visual designer window
+                     this.CreateDesignerWindow(hWndParent)        ' Create the new visual designer window
                      this.LoadFormJSONdata(HWND_FRMMAIN, sText)   ' this should now be UTF-8
                   end if   
                   this.FileEncoding = savedEncoding
@@ -417,9 +417,6 @@ function clsDocument.CreateCodeWindow( _
          if this.IsNewFlag = false then this.SaveFile
       end if   
 
-      ' In any event, regenerate code for the visual designer 
-      this.bRegenerateCode = true
-      GenerateFormCode( @this )
    end if   
 
    ' Apply code editor properties to the edit window
