@@ -360,6 +360,9 @@ function ctxParser.ResetFunctionValues() as boolean
    this.objectEndLine = -1
    this.varName = ""
    this.varType = ""
+   this.typeName = ""
+   this.typeAlias = ""
+   this.typeExtends = ""
    this.varScope = SCOPEGLOBAL
    this.GetSet = ""
    return true

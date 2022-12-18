@@ -1,3 +1,8 @@
+Version 3.0.6 ()
+Editor:
+- Fixed parser bug causing duplicate events when TYPE/END TYPE struture exists inside visual designer Form file.
+
+
 Version 3.0.5 (December 14, 2022)
 Editor:
 - Fixed duplicate events when loading Form file via MRU list or drag/drop into editor from outside of a Project.

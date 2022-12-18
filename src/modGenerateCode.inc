@@ -514,8 +514,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 
    wszFormName = GetFormName(pDoc)
 
-
-      ' If the Event/function does not already exist in code then create it now.
+   ' If the Event/function does not already exist in code then create it now.
    if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
       if (pDoc->MainMenuExists = true) orelse _
          (pDoc->ToolBarExists = true) orelse _
