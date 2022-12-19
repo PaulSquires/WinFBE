@@ -1,4 +1,4 @@
-Version 3.0.6 ()
+Version 3.0.6 (December 19, 2022)
 Editor:
 - Fixed parser bug causing duplicate events when TYPE/END TYPE struture exists inside visual designer Form file.
 
