@@ -34,4 +34,12 @@ Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
 
 The WinFBE editor is licensed under the GNU GPLv3 or later.
 
-file:///home/rambo/Desktop/dark1.png![image](https://user-images.githubusercontent.com/14793592/208562717-2d79a53e-d3ba-4c1a-ba6e-f8d75c40e02d.png)
+
+[image](https://user-images.githubusercontent.com/14793592/208562717-2d79a53e-d3ba-4c1a-ba6e-f8d75c40e02d.png)
+
+[image](https://user-images.githubusercontent.com/14793592/208562851-dbfcf08d-7bb9-461b-9bbb-4d6bbfab8512.png)
+
+[image](https://user-images.githubusercontent.com/14793592/208562894-dd6a07e6-1ec5-4593-98d1-2b1ebfde0056.png)
+
+
+
