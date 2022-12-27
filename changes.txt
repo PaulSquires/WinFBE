@@ -1,6 +1,11 @@
+Version 3.0.7 ()
+Editor:
+- Fixed bug loading Form Design files containing foreign characters (for example Chinese language).
+
+
 Version 3.0.6 (December 19, 2022)
 Editor:
-- Fixed parser bug causing duplicate events when TYPE/END TYPE struture exists inside visual designer Form file.
+- Fixed parser bug causing duplicate events when TYPE/END TYPE structure exists inside visual designer Form file.
 
 
 Version 3.0.5 (December 14, 2022)

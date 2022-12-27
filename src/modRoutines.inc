@@ -445,27 +445,34 @@ function GetFileToString( _
    CloseHandle(hFile)
    IF bSuccess = FALSE THEN return true
 
-   ' Check for BOM signatures
-   if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
-      ' UTF8 BOM encoded 
+   ' A JSON Design file will not have a BOM signature but it is UTF8
+   dim as CWSTR wst = wszFilename
+   if ucase(AfxStrPathName("EXTN", wst)) = ".DESIGN" then
       pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
-      txtBuffer = mid(txtBuffer, 4)   ' bypass the BOM
-   elseif left(txtBuffer, 2) = chr(&HFF, &HFE) THEN
-      ' UTF16 BOM (little endian) encoded
-      pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
-      txtBuffer = mid(txtBuffer, 3)   ' bypass the BOM
    else
-      pDoc->FileEncoding = FILE_ENCODING_ANSI
-   END IF
-
+      ' Check for BOM signatures
+      if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
+         ' UTF8 BOM encoded 
+         pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
+         txtBuffer = mid(txtBuffer, 4)   ' bypass the BOM
+      elseif left(txtBuffer, 2) = chr(&HFF, &HFE) THEN
+         ' UTF16 BOM (little endian) encoded
+         pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
+         txtBuffer = mid(txtBuffer, 3)   ' bypass the BOM
+      else
+         pDoc->FileEncoding = FILE_ENCODING_ANSI
+      end if
+   end if
 
    select case pDoc->FileEncoding
       case FILE_ENCODING_ANSI 
          ' No conversion needed. clsDocument ApplyProperties will *not*
          ' set the editor to UTF8 code.
+      
       case FILE_ENCODING_UTF8_BOM   
          ' No conversion needed. clsDocument ApplyProperties will set
          ' the editor to UTF8 code.
+         
       case FILE_ENCODING_UTF16_BOM
          ' Convert the whole buffer to UTF-16 unicode string
          dim as CWSTR wszText = string(len(txtBuffer),0)
@@ -483,7 +490,7 @@ function GetFileToString( _
    end select
       
    function = false
-END FUNCTION
+end function
 
 
 ' ========================================================================================

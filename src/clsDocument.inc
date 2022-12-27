@@ -497,12 +497,12 @@ function clsDocument.LoadFormJSONdata( _
             byref JSONtext as string, _    ' this will be UTF-8 text
             byval bLoadOnly  as boolean = false _
             ) as long
-            
+
    dim pCtrl as clsControl ptr
    dim pCtrlActive as clsControl ptr
    
    dim as RECT rc
-   dim as string wst, wszPropName, wszPropValue, wszEventName
+   dim as CWSTR wst, wszPropName, wszPropValue, wszEventName
    dim as boolean bIsValidControl = true
    
    dim as long numItems
@@ -532,7 +532,7 @@ function clsDocument.LoadFormJSONdata( _
       this.CreateDesignerWindow(hWndParent)
    end if
 
-   this.wszFormVersion = json.gettext(filePtr, "version")
+   this.wszFormVersion.Utf8 = json.gettext(filePtr, "version")
    if this.wszFormVersion = "" then this.wszFormVersion = APPVERSION
          
    this.bLockControls = json.getbool(filePtr, "lockcontrols")
@@ -547,8 +547,8 @@ function clsDocument.LoadFormJSONdata( _
       itemPtr = json.arrayitem(itemsPtr, i)
       do until itemPtr = 0
          this.AllImages(i).pDoc = @this
-         this.AllImages(i).wszImageName = json.gettext(itemPtr, "imagename")
-         wst = json.gettext(itemPtr, "filename")
+         this.AllImages(i).wszImageName.Utf8 = json.gettext(itemPtr, "imagename")
+         wst.Utf8 = json.gettext(itemPtr, "filename")
          ' if this is a relative filename then convert it back.
          dim as CWSTR wszImageFilename = ProcessFromCurdriveProject(wst)
          if AfxPathIsRelative(wszImageFilename) then 
@@ -556,7 +556,7 @@ function clsDocument.LoadFormJSONdata( _
          end if
          this.AllImages(i).wszFileName = wszImageFilename
          
-         this.AllImages(i).wszFormat = json.gettext(itemPtr, "resourcetype")
+         this.AllImages(i).wszFormat.Utf8 = json.gettext(itemPtr, "resourcetype")
          i += 1
          itemPtr = itemPtr->next
       loop   
@@ -572,15 +572,16 @@ function clsDocument.LoadFormJSONdata( _
       dim as long i = 0
       itemPtr = json.arrayitem(itemsPtr, i)
       do until itemPtr = 0
-         dim as string wszName = json.gettext(itemPtr, "name")
+         dim as CWSTR wszName
+         wszName.Utf8 = json.gettext(itemPtr, "name")
          if len(rtrim(wszName)) > 0 then 
             this.MenuItems(i).wszName = wszName
-            this.MenuItems(i).wszCaption = json.gettext(itemPtr, "caption")
+            this.MenuItems(i).wszCaption.Utf8 = json.gettext(itemPtr, "caption")
             this.MenuItems(i).nIndent = json.getnumber(itemPtr, "indent") 
             this.MenuItems(i).chkAlt = json.getnumber(itemPtr, "alt")
             this.MenuItems(i).chkShift = json.getnumber(itemPtr, "shift")
             this.MenuItems(i).chkCtrl = json.getnumber(itemPtr, "ctrl")
-            this.MenuItems(i).wszShortcut = json.gettext(itemPtr, "shortcut")
+            this.MenuItems(i).wszShortcut.Utf8 = json.gettext(itemPtr, "shortcut")
             this.MenuItems(i).chkChecked = json.getnumber(itemPtr, "checked")
             this.MenuItems(i).chkGrayed = json.getnumber(itemPtr, "grayed")
             i += 1
@@ -599,18 +600,18 @@ function clsDocument.LoadFormJSONdata( _
       dim as long i = 0
       itemPtr = json.arrayitem(itemsPtr, i)
       do until itemPtr = 0
-         this.PanelItems(i).wszName = json.gettext(itemPtr, "name") 
-         this.PanelItems(i).wszText = json.gettext(itemPtr, "text")
-         this.PanelItems(i).wszTooltip = json.gettext(itemPtr, "tooltip")
-         this.PanelItems(i).wszAlignment = json.gettext(itemPtr, "alignment")
-         this.PanelItems(i).wszAutoSize = json.gettext(itemPtr, "autosize")
-         this.PanelItems(i).wszWidth = json.gettext(itemPtr, "width")
-         this.PanelItems(i).wszMinWidth = json.gettext(itemPtr, "minwidth")
-         this.PanelItems(i).pProp.wszPropValue = json.gettext(itemPtr, "image")
-         this.PanelItems(i).wszBackColor = json.gettext(itemPtr, "backcolor")
-         this.PanelItems(i).wszBackColorHot = json.gettext(itemPtr, "backcolorhot")
-         this.PanelItems(i).wszForeColor = json.gettext(itemPtr, "forecolor")
-         this.PanelItems(i).wszForeColorHot = json.gettext(itemPtr, "forecolorhot")
+         this.PanelItems(i).wszName.Utf8 = json.gettext(itemPtr, "name") 
+         this.PanelItems(i).wszText.Utf8 = json.gettext(itemPtr, "text")
+         this.PanelItems(i).wszTooltip.Utf8 = json.gettext(itemPtr, "tooltip")
+         this.PanelItems(i).wszAlignment.Utf8 = json.gettext(itemPtr, "alignment")
+         this.PanelItems(i).wszAutoSize.Utf8 = json.gettext(itemPtr, "autosize")
+         this.PanelItems(i).wszWidth.Utf8 = json.gettext(itemPtr, "width")
+         this.PanelItems(i).wszMinWidth.Utf8 = json.gettext(itemPtr, "minwidth")
+         this.PanelItems(i).pProp.wszPropValue.Utf8 = json.gettext(itemPtr, "image")
+         this.PanelItems(i).wszBackColor.Utf8 = json.gettext(itemPtr, "backcolor")
+         this.PanelItems(i).wszBackColorHot.Utf8 = json.gettext(itemPtr, "backcolorhot")
+         this.PanelItems(i).wszForeColor.Utf8 = json.gettext(itemPtr, "forecolor")
+         this.PanelItems(i).wszForeColorHot.Utf8 = json.gettext(itemPtr, "forecolorhot")
          ' BorderStyle is deprecated as of v2.0.4 as it has no effect
          ' in WinFBE programs where Windows Themes are enabled.
          i += 1
@@ -621,7 +622,7 @@ function clsDocument.LoadFormJSONdata( _
    ' Retrieve data related to TOOLBAR
    keyPtr = json.getptr(filePtr, "toolbar")
    this.GenerateToolbar = json.getbool(keyPtr, "display")
-   this.wszToolBarSize = json.gettext(keyPtr, "size")
+   this.wszToolBarSize.Utf8 = json.gettext(keyPtr, "size")
    itemsPtr = json.getptr(keyPtr, "items")
    numItems = json.arraycount(itemsPtr)
    if numItems then
@@ -629,12 +630,12 @@ function clsDocument.LoadFormJSONdata( _
       dim as long i = 0
       itemPtr = json.arrayitem(itemsPtr, i)
       do until itemPtr = 0
-         this.ToolBarItems(i).wszName = json.gettext(itemPtr, "name") 
-         this.ToolBarItems(i).wszButtonType = json.gettext(itemPtr, "type")
-         this.ToolBarItems(i).wszTooltip = json.gettext(itemPtr, "tooltip")
-         this.ToolBarItems(i).pPropNormalImage.wszPropValue = json.gettext(itemPtr, "normalimage")
-         this.ToolBarItems(i).pPropHotImage.wszPropValue = json.gettext(itemPtr, "hotimage")
-         this.ToolBarItems(i).pPropDisabledImage.wszPropValue = json.gettext(itemPtr, "disabledimage")
+         this.ToolBarItems(i).wszName.Utf8 = json.gettext(itemPtr, "name") 
+         this.ToolBarItems(i).wszButtonType.Utf8 = json.gettext(itemPtr, "type")
+         this.ToolBarItems(i).wszTooltip.Utf8 = json.gettext(itemPtr, "tooltip")
+         this.ToolBarItems(i).pPropNormalImage.wszPropValue.Utf8 = json.gettext(itemPtr, "normalimage")
+         this.ToolBarItems(i).pPropHotImage.wszPropValue.Utf8 = json.gettext(itemPtr, "hotimage")
+         this.ToolBarItems(i).pPropDisabledImage.wszPropValue.Utf8 = json.gettext(itemPtr, "disabledimage")
          i += 1
          itemPtr = itemPtr->next
       loop
@@ -649,7 +650,7 @@ function clsDocument.LoadFormJSONdata( _
 
       ctrlPtr = json.arrayitem(ctrlsPtr, 0)
       do until ctrlPtr = 0
-         wszControlType = json.gettext(ctrlPtr, "type") 
+         wszControlType.Utf8 = json.gettext(ctrlPtr, "type") 
          nControlType = GetControlType( wszControlType)
 
          ' Control Start
@@ -673,8 +674,8 @@ function clsDocument.LoadFormJSONdata( _
          if numProps then
             propPtr = json.arrayitem(propsPtr, 0)
             do until propPtr = 0
-               wszPropName = json.gettext(propPtr, "name")
-               wszPropValue = json.gettext(propPtr, "value")
+               wszPropName.Utf8 = json.gettext(propPtr, "name")
+               wszPropValue.Utf8 = json.gettext(propPtr, "value")
                ' Only set the loading property if it exists in the current property
                ' listing. We do this otherwise older now unused properties will continue
                ' to get loaded when we no longer want them to.
@@ -690,7 +691,7 @@ function clsDocument.LoadFormJSONdata( _
          if numEvents then
             eventPtr = json.arrayitem(eventsPtr, 0)
             do until eventPtr = 0
-               wszEventName = json.gettext(eventPtr, "name")
+               wszEventName.Utf8 = json.gettext(eventPtr, "name")
                SetControlEvent( pCtrl, wszEventName, true )
                eventPtr = eventPtr->next
             loop
