@@ -34,17 +34,28 @@ end function
 
 
 ' ========================================================================================
-' Convert embedded single quote characters to double quote within a string
-' This is used mostly for creating JSON strings.
+' Enclose JSON string (both sides) in double quotes
 ' ========================================================================================
-function qstr( byval singleQuoteString as CWSTR ) as CWSTR
-   dim as long length = len(singleQuoteString)
-   if length = 0 then return singleQuoteString
-   for i as long = 0 to length - 1
-      if singleQuoteString[i] = 39 then singleQuoteString[i] = 34
-   next
-   return singleQuoteString
+function qstr( byval wst as CWSTR ) as CWSTR
+   if len(wst) = 0 then return wst
+   dim as CWSTR stLeft = AfxStrParse(wst, 1, ":")
+   dim as CWSTR stRight = AfxStrParse(wst, 2, ":")
+   dim as CWSTR newSt = AfxStrWrap(stLeft) & ":" & AfxStrWrap(stRight)
+   return newSt
 end function
+
+' ========================================================================================
+' Enclose JSON string (left side) in double quotes
+' This is used mostly for creating JSON numbers/booleans/arrays.
+' ========================================================================================
+function qnum( byval wst as CWSTR ) as CWSTR
+   if len(wst) = 0 then return wst
+   dim as CWSTR stLeft = AfxStrParse(wst, 1, ":")
+   dim as CWSTR stRight = AfxStrParse(wst, 2, ":")
+   dim as CWSTR newSt = AfxStrWrap(stLeft) & ":" & stRight
+   return newSt
+end function
+
 
 ' ========================================================================================
 ' Get the width of the text in unscaled pixels because we feed this value

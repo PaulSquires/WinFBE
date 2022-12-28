@@ -993,16 +993,16 @@ function clsDocument.SaveFormJSONdata() as boolean
    dim as CWSTR wcomma = ","
    
    wst = _
-   qstr("'form':true")        & wcomma & _
-   qstr("'version':'3.0.2'")  & wcomma & _
-   qstr("'lockcontrols':"     & iif(this.bLockControls, "true", "false")) & wcomma & _
-   qstr("'snaplines':"        & iif(this.bSnapLines, "true", "false")) 
+   qnum("form:true")      & wcomma & _
+   qstr("version:3.0.2")  & wcomma & _
+   qnum("lockcontrols:"   & iif(this.bLockControls, "true", "false")) & wcomma & _
+   qnum("snaplines:"      & iif(this.bSnapLines, "true", "false")) 
 
    ' Save Images(if applicable)
    dim as long numImageItems = ubound(this.AllImages) - lbound(this.AllImages) + 1
    if numImageItems > 0 then
       wst = wst & wcomma & _
-      qstr("'images': [")
+      qnum("images: [")
       for ii as long = lbound(this.AllImages) to ubound(this.AllImages)
          dim as CWSTR wszRelative
          dim as CWSTR wszImageFilename = this.AllImages(ii).wszFilename
@@ -1015,9 +1015,9 @@ function clsDocument.SaveFormJSONdata() as boolean
          
          wst = wst & _
          "{" & _
-         qstr("'imagename':'"        & this.AllImages(ii).wszImageName & "'") & wcomma & _ 
-         qstr("'filename':'"         & AfxStrReplace(ProcessToCurdriveProject(wszImageFilename), "\", "\\") & "'") & wcomma & _ 
-         qstr("'resourcetype':'"     & this.AllImages(ii).wszFormat & "'") & _ 
+         qstr("imagename:"        & this.AllImages(ii).wszImageName) & wcomma & _ 
+         qstr("filename:"         & AfxStrReplace(ProcessToCurdriveProject(wszImageFilename), "\", "\\")) & wcomma & _ 
+         qstr("resourcetype:"     & this.AllImages(ii).wszFormat) & _ 
          "},"
       next
       wst = rtrim(wst, ",") & "]"
@@ -1027,26 +1027,26 @@ function clsDocument.SaveFormJSONdata() as boolean
    dim as long numMenuItems = ubound(this.MenuItems) - lbound(this.MenuItems) + 1
    if numMenuItems > 0 then
       wst = wst & wcomma & _
-      qstr("'mainmenu':{") & _
-      qstr("'display':" & iif(this.GenerateMenu, "true", "false")) & wcomma 
+      qnum("mainmenu:{") & _
+      qnum("display:" & iif(this.GenerateMenu, "true", "false")) & wcomma 
 
       wst = wst & _
-      qstr("'items': [")
+      qnum("items: [")
       for ii as long = lbound(this.MenuItems) to ubound(this.MenuItems)
          ' Skip any "blank" lines that may have been added from the Menu Editor
          if rtrim(this.MenuItems(ii).wszName) = "" then continue for
          
          wst = wst & _
          "{" & _
-         qstr("'name':'"     & this.MenuItems(ii).wszName & "'") & wcomma & _
-         qstr("'caption':'"  & this.MenuItems(ii).wszCaption & "'") & wcomma & _
-         qstr("'indent':"    & this.MenuItems(ii).nIndent) & wcomma & _
-         qstr("'alt':"       & this.MenuItems(ii).chkAlt) & wcomma & _
-         qstr("'shift':"     & this.MenuItems(ii).chkShift) & wcomma & _
-         qstr("'ctrl':"      & this.MenuItems(ii).chkCtrl) & wcomma & _
-         qstr("'shortcut':'" & this.MenuItems(ii).wszShortcut & "'") & wcomma & _
-         qstr("'checked':"   & this.MenuItems(ii).chkChecked) & wcomma & _
-         qstr("'grayed':"    & this.MenuItems(ii).chkGrayed) & _
+         qstr("name:"      & this.MenuItems(ii).wszName) & wcomma & _
+         qstr("caption:"   & this.MenuItems(ii).wszCaption) & wcomma & _
+         qnum("indent:"    & this.MenuItems(ii).nIndent) & wcomma & _
+         qnum("alt:"       & this.MenuItems(ii).chkAlt) & wcomma & _
+         qnum("shift:"     & this.MenuItems(ii).chkShift) & wcomma & _
+         qnum("ctrl:"      & this.MenuItems(ii).chkCtrl) & wcomma & _
+         qstr("shortcut:"  & this.MenuItems(ii).wszShortcut) & wcomma & _
+         qnum("checked:"   & this.MenuItems(ii).chkChecked) & wcomma & _
+         qnum("grayed:"    & this.MenuItems(ii).chkGrayed) & _
          "}," 
       next
       wst = rtrim(wst, ",") & "]}"
@@ -1056,21 +1056,21 @@ function clsDocument.SaveFormJSONdata() as boolean
    dim as long numToolBarItems = Ubound(this.ToolBarItems) - lbound(this.ToolBarItems) + 1
    if numToolBarItems > 0 then
       wst = wst & wcomma & _
-      qstr("'toolbar':{") & _
-      qstr("'display':" & iif(this.GenerateToolBar, "true", "false")) & wcomma & _
-      qstr("'size':'" & this.wszToolBarSize & "'") & wcomma 
+      qnum("toolbar:{") & _
+      qnum("display:" & iif(this.GenerateToolBar, "true", "false")) & wcomma & _
+      qstr("size:" & this.wszToolBarSize) & wcomma 
 
       wst = wst & _
-      qstr("'items': [")
+      qnum("items: [")
       for ii as long = lbound(this.ToolBarItems) to ubound(this.ToolBarItems)
          wst = wst & _
          "{" & _
-         qstr("'name':'"           & this.ToolBarItems(ii).wszName & "'") & wcomma & _
-         qstr("'type':'"           & this.ToolBarItems(ii).wszButtonType & "'") & wcomma & _
-         qstr("'tooltip':'"        & this.ToolBarItems(ii).wszTooltip & "'") & wcomma & _
-         qstr("'hotimage':'"       & this.ToolBarItems(ii).pPropHotImage.wszPropValue & "'") & wcomma & _
-         qstr("'normalimage':'"    & this.ToolBarItems(ii).pPropNormalImage.wszPropValue & "'") & wcomma & _
-         qstr("'disabledimage':'"  & this.ToolBarItems(ii).pPropDisabledImage.wszPropValue & "'") & _
+         qstr("name:"           & this.ToolBarItems(ii).wszName) & wcomma & _
+         qstr("type:"           & this.ToolBarItems(ii).wszButtonType) & wcomma & _
+         qstr("tooltip:"        & this.ToolBarItems(ii).wszTooltip) & wcomma & _
+         qstr("hotimage:"       & this.ToolBarItems(ii).pPropHotImage.wszPropValue) & wcomma & _
+         qstr("normalimage:"    & this.ToolBarItems(ii).pPropNormalImage.wszPropValue) & wcomma & _
+         qstr("disabledimage:"  & this.ToolBarItems(ii).pPropDisabledImage.wszPropValue) & _
          "}," 
       next
       wst = rtrim(wst, ",") & "]}"
@@ -1081,26 +1081,26 @@ function clsDocument.SaveFormJSONdata() as boolean
    dim as long numPanelItems = Ubound(this.PanelItems) - lbound(this.PanelItems) + 1
    if numPanelItems > 0 then
       wst = wst & wcomma & _
-      qstr("'statusbar':{") & _
-      qstr("'display':" & iif(this.GenerateStatusBar, "true", "false")) & wcomma 
+      qnum("statusbar:{") & _
+      qnum("display:" & iif(this.GenerateStatusBar, "true", "false")) & wcomma 
 
       wst = wst & _
-      qstr("'items': [")
+      qnum("items: [")
       for ii as long = lbound(this.PanelItems) to ubound(this.PanelItems)
          wst = wst & _
          "{" & _
-         qstr("'name':'"           & this.PanelItems(ii).wszName & "'") & wcomma & _
-         qstr("'text':'"           & this.PanelItems(ii).wszText & "'") & wcomma & _
-         qstr("'tooltip':'"        & this.PanelItems(ii).wszTooltip & "'") & wcomma & _
-         qstr("'alignment':'"      & this.PanelItems(ii).wszAlignment & "'") & wcomma & _
-         qstr("'autosize':'"       & this.PanelItems(ii).wszAutoSize & "'") & wcomma & _
-         qstr("'width':'"          & this.PanelItems(ii).wszWidth & "'") & wcomma & _
-         qstr("'minwidth':'"       & this.PanelItems(ii).wszMinWidth & "'") & wcomma & _
-         qstr("'image':'"          & this.PanelItems(ii).pProp.wszPropValue & "'") & wcomma & _
-         qstr("'backcolor':'"      & this.PanelItems(ii).wszBackColor & "'") & wcomma & _
-         qstr("'backcolorhot':'"   & this.PanelItems(ii).wszBackColorHot & "'") & wcomma & _
-         qstr("'forecolor':'"      & this.PanelItems(ii).wszForeColor & "'") & wcomma & _
-         qstr("'forecolorhot':'"   & this.PanelItems(ii).wszForeColorHot & "'") & _
+         qstr("name:"           & this.PanelItems(ii).wszName) & wcomma & _
+         qstr("text:"           & this.PanelItems(ii).wszText) & wcomma & _
+         qstr("tooltip:"        & this.PanelItems(ii).wszTooltip) & wcomma & _
+         qstr("alignment:"      & this.PanelItems(ii).wszAlignment) & wcomma & _
+         qstr("autosize:"       & this.PanelItems(ii).wszAutoSize) & wcomma & _
+         qstr("width:"          & this.PanelItems(ii).wszWidth) & wcomma & _
+         qstr("minwidth:"       & this.PanelItems(ii).wszMinWidth) & wcomma & _
+         qstr("image:"          & this.PanelItems(ii).pProp.wszPropValue) & wcomma & _
+         qstr("backcolor:"      & this.PanelItems(ii).wszBackColor) & wcomma & _
+         qstr("backcolorhot:"   & this.PanelItems(ii).wszBackColorHot) & wcomma & _
+         qstr("forecolor:"      & this.PanelItems(ii).wszForeColor) & wcomma & _
+         qstr("forecolorhot:"   & this.PanelItems(ii).wszForeColorHot) & _
          "}," 
               ' BorderStyle is deprecated as of v2.0.4 as it has no effect
               ' in WinFBE programs where Windows Themes are enabled.
@@ -1113,7 +1113,7 @@ function clsDocument.SaveFormJSONdata() as boolean
    ' Iterate all of the controls on the form
    if this.Controls.Count then
       wst = wst & wcomma & _
-      qstr("'controls':[") 
+      qnum("controls:[") 
             
       ' We want to ensure that we output code for the Form first because
       ' when the form is loaded the controls need to attach themselves
@@ -1133,25 +1133,25 @@ function clsDocument.SaveFormJSONdata() as boolean
 
                wst = wst & _
                "{" & _
-               qstr("'type':'" & GetToolBoxName(pCtrl->ControlType) & "'") & wcomma & _
-               qstr("'properties': [") 
+               qstr("type:" & GetToolBoxName(pCtrl->ControlType)) & wcomma & _
+               qnum("properties: [") 
 
                for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
                   wst = wst & "{" & _
-                  qstr("'name':'" & pCtrl->Properties(ii).wszPropName & "'") & wcomma & _
-                  qstr("'value':'" & pCtrl->Properties(ii).wszPropValue & "'") & _
+                  qstr("name:" & pCtrl->Properties(ii).wszPropName) & wcomma & _
+                  qstr("value:" & pCtrl->Properties(ii).wszPropValue) & _
                   "},"
                next
                
                wst = rtrim(wst, ",") & "]," & _
-               qstr("'events': [") 
+               qnum("events: [") 
 
                for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
                   ' Only need to output the names of the Events that have been ticked as being in use.
                   if pCtrl->Events(ii).bIsSelected then
                      if rtrim(pCtrl->Events(ii).wszEventName) > "" then
                         wst = wst & "{" & _
-                        qstr("'name':'" & pCtrl->Events(ii).wszEventName & "'") & _
+                        qstr("name:" & pCtrl->Events(ii).wszEventName) & _
                         "},"
                      end if   
                   end if   

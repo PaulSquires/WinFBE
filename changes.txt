@@ -1,7 +1,7 @@
 Version 3.0.7 ()
 Editor:
 - Fixed bug loading Form Design files containing foreign characters (for example Chinese language).
-
+- Fixed bug saving text to visual designer *.DESIGN json files that contain embedded single quote character.
 
 Version 3.0.6 (December 19, 2022)
 Editor:
