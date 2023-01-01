@@ -449,7 +449,8 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
                end if
                ' Save the value indicating that we want the statusbar to display in
                ' the generated code for the form.
-               pDoc->GenerateStatusBar = Button_GetCheck( GetDlgItem(HWND, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM) )
+               pDoc->GenerateStatusBar = _
+                  iif(Button_GetCheck(GetDlgItem(HWND, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM)) = BST_CHECKED, true, false)
                pDoc->UserModified = true
             end if
             SendMessage(HWnd, WM_CLOSE, 0, 0)
@@ -863,7 +864,7 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd, byval nDefaul
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
       hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM ) 
-      Button_SetCheck( hCtrl, pDoc->GenerateStatusBar )
+      Button_SetCheck( hCtrl, iif(pDoc->GenerateStatusBar, BST_CHECKED, BST_UNCHECKED))
       dim as long numItems = ubound(pDoc->PanelItems)
       if numItems > -1 then
          redim gPanelItems(numItems)

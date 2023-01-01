@@ -147,7 +147,7 @@ function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    gApp.ProjectNotes       = ""
    gApp.ProjectCommandLine = ""
    
-
+ 
    ' Create the resource file and manifest if applicable
    if gApp.ProjectManifest THEN frmProjectOptions_CreateResourceManifest()
 

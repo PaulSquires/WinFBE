@@ -17,6 +17,8 @@
 
 function handleMouseScrollBar( byval uMsg as MSG ) as boolean
    if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then return false
+   if HWND_FRMPANEL_VSCROLLBAR = 0 then return false
+
    ' Determine if the mouse message should be intercepted by the 
    ' transparent WS_EX_LAYERED scrollbar
    select case uMsg.message 
@@ -41,7 +43,7 @@ end function
 
 function handleMouseShowScrollBar( byval uMsg as MSG ) as boolean
    if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then return false
-
+   
    ' Determine if the mouse has moved over (or away from) a window that should invoke
    ' showing or hiding our custom Panel VScroll or Editor HScroll.
    if (uMsg.message = WM_MOUSEMOVE) orelse (uMsg.message = WM_NCMOUSEMOVE) then
@@ -92,6 +94,7 @@ end function
 function handleMouseTopMenu( byval uMsg as MSG ) as boolean
    ' Handle any mouse clicks that are outside of a popup menu in order
    ' to close any open top menu popups.
+
    if uMsg.message = WM_LBUTTONDOWN then
       if (uMsg.HWnd <> ghWndActiveMenuBarButton) andalso _
          (uMsg.HWnd <> HWND_MENU(0)) andalso _

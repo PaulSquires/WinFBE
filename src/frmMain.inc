@@ -770,7 +770,7 @@ function frmMain_PositionWindows() as LRESULT
    dim as HWnd hEdit
    dim as long nHeightTabControl, nLeft, nTop
    dim as Rect rc
-   
+
    dim pWindow as CWindow ptr = AfxCWindowPtr( HWND_FRMMAIN )
    if pWindow = 0 then exit function
    
@@ -1611,7 +1611,7 @@ end function
 
 
 ' ========================================================================================
-' Process WM_LBUTTONDOWN message for window/dialog: frmMain
+' Process WM_LBUTTONDBLCLK message for window/dialog: frmMain
 ' ========================================================================================
 function frmMain_OnLButtonDblClk( _
             byval HWnd as HWnd, _

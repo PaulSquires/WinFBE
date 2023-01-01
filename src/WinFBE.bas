@@ -46,10 +46,10 @@ using Afx
 #define APPNAME        wstr("WinFBE - FreeBASIC Editor")
 #define APPNAMESHORT   wstr("WinFBE")
 
-#define APPVERSION     wstr("3.0.6") 
+#define APPVERSION     wstr("3.0.7") 
 #define PREVENT_UPDATE_CHECK FALSE     ' used for betas
 
-#define APPCOPYRIGHT   wstr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2022") 
+#define APPCOPYRIGHT   wstr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2023") 
 dim shared as CWSTR gwszDefaultToolchain = "FreeBASIC-1.09.0-winlibs-gcc-9.3.0"
 
 #ifdef __FB_64BIT__

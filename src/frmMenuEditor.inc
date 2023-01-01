@@ -283,10 +283,11 @@ function frmMenuEditor_OnCommand( _
 
                ' Save the value indicating that we want the menu to display in
                ' the generated code for the form.
-               pDoc->GenerateMenu = Button_GetCheck( GetDlgItem(HWND, IDC_FRMMENUEDITOR_CHKDISPLAYONFORM) )
+               pDoc->GenerateMenu = _
+                  iif(Button_GetCheck(GetDlgItem(HWND, IDC_FRMMENUEDITOR_CHKDISPLAYONFORM)) = BST_CHECKED, true, false)
 
                ' If there are no valid MenuItems then set the GenerateMenu to False.
-               if numItems < 0 then pDoc->GenerateMenu = 0
+               if numItems < 0 then pDoc->GenerateMenu = false
                
                pDoc->UserModified = true
             end if
@@ -673,7 +674,7 @@ function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
       hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKDISPLAYONFORM )
-      Button_SetCheck( hCtrl, pDoc->GenerateMenu )
+      Button_SetCheck( hCtrl, iif(pDoc->GenerateMenu, BST_CHECKED, BST_UNCHECKED))
       dim as long numItems = ubound(pDoc->MenuItems)
       if numItems > -1 then
          redim gMenuItems(numItems)

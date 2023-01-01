@@ -140,7 +140,7 @@ end property
 ''  Returns true/False indicating that a valid top mainmenu exists for this form.
 function clsDocument.MainMenuExists() as boolean
    dim as long numItems = (ubound(this.MenuItems) - lbound(this.MenuItems)) + 1
-   if (this.GenerateMenu = BST_CHECKED or this.GenerateMenu = true) andalso (numItems > 0) then
+   if (this.GenerateMenu = true) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -151,7 +151,7 @@ end function
 ''  Returns true/False indicating that a valid top toolbar exists for this form.
 function clsDocument.ToolBarExists() as boolean
    dim as long numItems = (ubound(this.ToolBarItems) - lbound(this.ToolBarItems)) + 1
-   if (this.GenerateToolBar = BST_CHECKED or this.GenerateToolBar = true) andalso (numItems > 0) then
+   if (this.GenerateToolBar = true) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -162,7 +162,7 @@ end function
 ''  Returns true/False indicating that a valid top statusbar exists for this form.
 function clsDocument.StatusBarExists() as boolean
    dim as long numItems = (ubound(this.PanelItems) - lbound(this.PanelItems)) + 1
-   if (this.GenerateStatusBar = BST_CHECKED or this.GenerateStatusBar = true) andalso (numItems > 0) then
+   if (this.GenerateStatusBar = true) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -564,83 +564,88 @@ function clsDocument.LoadFormJSONdata( _
 
    ' Retrieve data related to MAINMENU 
    keyPtr = json.getptr(filePtr, "mainmenu")
-   this.GenerateMenu = json.getbool(keyPtr, "display")
-   itemsPtr = json.getptr(keyPtr, "items")
-   numItems = json.arraycount(itemsPtr)
-   if numItems then
-      redim preserve this.MenuItems(numItems - 1)
-      dim as long i = 0
-      itemPtr = json.arrayitem(itemsPtr, i)
-      do until itemPtr = 0
-         dim as CWSTR wszName
-         wszName.Utf8 = json.gettext(itemPtr, "name")
-         if len(rtrim(wszName)) > 0 then 
-            this.MenuItems(i).wszName = wszName
-            this.MenuItems(i).wszCaption.Utf8 = json.gettext(itemPtr, "caption")
-            this.MenuItems(i).nIndent = json.getnumber(itemPtr, "indent") 
-            this.MenuItems(i).chkAlt = json.getnumber(itemPtr, "alt")
-            this.MenuItems(i).chkShift = json.getnumber(itemPtr, "shift")
-            this.MenuItems(i).chkCtrl = json.getnumber(itemPtr, "ctrl")
-            this.MenuItems(i).wszShortcut.Utf8 = json.gettext(itemPtr, "shortcut")
-            this.MenuItems(i).chkChecked = json.getnumber(itemPtr, "checked")
-            this.MenuItems(i).chkGrayed = json.getnumber(itemPtr, "grayed")
-            i += 1
-         end if   
-         itemPtr = itemPtr->next
-      loop
+   if keyPtr then
+      this.GenerateMenu = json.getbool(keyPtr, "display")
+      itemsPtr = json.getptr(keyPtr, "items")
+      numItems = json.arraycount(itemsPtr)
+      if numItems then
+         redim preserve this.MenuItems(numItems - 1)
+         dim as long i = 0
+         itemPtr = json.arrayitem(itemsPtr, i)
+         do until itemPtr = 0
+            dim as CWSTR wszName
+            wszName.Utf8 = json.gettext(itemPtr, "name")
+            if len(rtrim(wszName)) > 0 then 
+               this.MenuItems(i).wszName = wszName
+               this.MenuItems(i).wszCaption.Utf8 = json.gettext(itemPtr, "caption")
+               this.MenuItems(i).nIndent = json.getnumber(itemPtr, "indent") 
+               this.MenuItems(i).chkAlt = json.getnumber(itemPtr, "alt")
+               this.MenuItems(i).chkShift = json.getnumber(itemPtr, "shift")
+               this.MenuItems(i).chkCtrl = json.getnumber(itemPtr, "ctrl")
+               this.MenuItems(i).wszShortcut.Utf8 = json.gettext(itemPtr, "shortcut")
+               this.MenuItems(i).chkChecked = json.getnumber(itemPtr, "checked")
+               this.MenuItems(i).chkGrayed = json.getnumber(itemPtr, "grayed")
+               i += 1
+            end if   
+            itemPtr = itemPtr->next
+         loop
+      end if
    end if
-
+   
    ' Retrieve data related to STATUSBAR
    keyPtr = json.getptr(filePtr, "statusbar")
-   this.GenerateStatusBar = json.getbool(keyPtr, "display")
-   itemsPtr = json.getptr(keyPtr, "items")
-   numItems = json.arraycount(itemsPtr)
-   if numItems then
-      redim preserve this.PanelItems(numItems - 1)
-      dim as long i = 0
-      itemPtr = json.arrayitem(itemsPtr, i)
-      do until itemPtr = 0
-         this.PanelItems(i).wszName.Utf8 = json.gettext(itemPtr, "name") 
-         this.PanelItems(i).wszText.Utf8 = json.gettext(itemPtr, "text")
-         this.PanelItems(i).wszTooltip.Utf8 = json.gettext(itemPtr, "tooltip")
-         this.PanelItems(i).wszAlignment.Utf8 = json.gettext(itemPtr, "alignment")
-         this.PanelItems(i).wszAutoSize.Utf8 = json.gettext(itemPtr, "autosize")
-         this.PanelItems(i).wszWidth.Utf8 = json.gettext(itemPtr, "width")
-         this.PanelItems(i).wszMinWidth.Utf8 = json.gettext(itemPtr, "minwidth")
-         this.PanelItems(i).pProp.wszPropValue.Utf8 = json.gettext(itemPtr, "image")
-         this.PanelItems(i).wszBackColor.Utf8 = json.gettext(itemPtr, "backcolor")
-         this.PanelItems(i).wszBackColorHot.Utf8 = json.gettext(itemPtr, "backcolorhot")
-         this.PanelItems(i).wszForeColor.Utf8 = json.gettext(itemPtr, "forecolor")
-         this.PanelItems(i).wszForeColorHot.Utf8 = json.gettext(itemPtr, "forecolorhot")
-         ' BorderStyle is deprecated as of v2.0.4 as it has no effect
-         ' in WinFBE programs where Windows Themes are enabled.
-         i += 1
-         itemPtr = itemPtr->next
-      loop
+   if keyPtr then
+      this.GenerateStatusBar = json.getbool(keyPtr, "display")
+      itemsPtr = json.getptr(keyPtr, "items")
+      numItems = json.arraycount(itemsPtr)
+      if numItems then
+         redim preserve this.PanelItems(numItems - 1)
+         dim as long i = 0
+         itemPtr = json.arrayitem(itemsPtr, i)
+         do until itemPtr = 0
+            this.PanelItems(i).wszName.Utf8 = json.gettext(itemPtr, "name") 
+            this.PanelItems(i).wszText.Utf8 = json.gettext(itemPtr, "text")
+            this.PanelItems(i).wszTooltip.Utf8 = json.gettext(itemPtr, "tooltip")
+            this.PanelItems(i).wszAlignment.Utf8 = json.gettext(itemPtr, "alignment")
+            this.PanelItems(i).wszAutoSize.Utf8 = json.gettext(itemPtr, "autosize")
+            this.PanelItems(i).wszWidth.Utf8 = json.gettext(itemPtr, "width")
+            this.PanelItems(i).wszMinWidth.Utf8 = json.gettext(itemPtr, "minwidth")
+            this.PanelItems(i).pProp.wszPropValue.Utf8 = json.gettext(itemPtr, "image")
+            this.PanelItems(i).wszBackColor.Utf8 = json.gettext(itemPtr, "backcolor")
+            this.PanelItems(i).wszBackColorHot.Utf8 = json.gettext(itemPtr, "backcolorhot")
+            this.PanelItems(i).wszForeColor.Utf8 = json.gettext(itemPtr, "forecolor")
+            this.PanelItems(i).wszForeColorHot.Utf8 = json.gettext(itemPtr, "forecolorhot")
+            ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+            ' in WinFBE programs where Windows Themes are enabled.
+            i += 1
+            itemPtr = itemPtr->next
+         loop
+      end if
    end if
-
+   
    ' Retrieve data related to TOOLBAR
    keyPtr = json.getptr(filePtr, "toolbar")
-   this.GenerateToolbar = json.getbool(keyPtr, "display")
-   this.wszToolBarSize.Utf8 = json.gettext(keyPtr, "size")
-   itemsPtr = json.getptr(keyPtr, "items")
-   numItems = json.arraycount(itemsPtr)
-   if numItems then
-      redim preserve this.ToolBarItems(numItems - 1)
-      dim as long i = 0
-      itemPtr = json.arrayitem(itemsPtr, i)
-      do until itemPtr = 0
-         this.ToolBarItems(i).wszName.Utf8 = json.gettext(itemPtr, "name") 
-         this.ToolBarItems(i).wszButtonType.Utf8 = json.gettext(itemPtr, "type")
-         this.ToolBarItems(i).wszTooltip.Utf8 = json.gettext(itemPtr, "tooltip")
-         this.ToolBarItems(i).pPropNormalImage.wszPropValue.Utf8 = json.gettext(itemPtr, "normalimage")
-         this.ToolBarItems(i).pPropHotImage.wszPropValue.Utf8 = json.gettext(itemPtr, "hotimage")
-         this.ToolBarItems(i).pPropDisabledImage.wszPropValue.Utf8 = json.gettext(itemPtr, "disabledimage")
-         i += 1
-         itemPtr = itemPtr->next
-      loop
+   if keyPtr then
+      this.GenerateToolbar = json.getbool(keyPtr, "display")
+      this.wszToolBarSize.Utf8 = json.gettext(keyPtr, "size")
+      itemsPtr = json.getptr(keyPtr, "items")
+      numItems = json.arraycount(itemsPtr)
+      if numItems then
+         redim preserve this.ToolBarItems(numItems - 1)
+         dim as long i = 0
+         itemPtr = json.arrayitem(itemsPtr, i)
+         do until itemPtr = 0
+            this.ToolBarItems(i).wszName.Utf8 = json.gettext(itemPtr, "name") 
+            this.ToolBarItems(i).wszButtonType.Utf8 = json.gettext(itemPtr, "type")
+            this.ToolBarItems(i).wszTooltip.Utf8 = json.gettext(itemPtr, "tooltip")
+            this.ToolBarItems(i).pPropNormalImage.wszPropValue.Utf8 = json.gettext(itemPtr, "normalimage")
+            this.ToolBarItems(i).pPropHotImage.wszPropValue.Utf8 = json.gettext(itemPtr, "hotimage")
+            this.ToolBarItems(i).pPropDisabledImage.wszPropValue.Utf8 = json.gettext(itemPtr, "disabledimage")
+            i += 1
+            itemPtr = itemPtr->next
+         loop
+      end if
    end if
-
 
    ctrlsPtr = json.getptr(filePtr, "controls")
    dim as long numControls = json.arraycount(ctrlsPtr)

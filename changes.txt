@@ -1,7 +1,12 @@
-Version 3.0.7 ()
+Version 3.0.7 (January 1, 2023)
 Editor:
+- Fixed issue causing full Windows Desktop refresh that could cause flicker in other applications whenever the left mouse button pressed in WinFBE.
+
+Visual Designer:
 - Fixed bug loading Form Design files containing foreign characters (for example Chinese language).
 - Fixed bug saving text to visual designer *.DESIGN json files that contain embedded single quote character.
+- Fixed logic related to "Display on Form" checkbox for Menu, ToolBar and StatusBar editor dialogs.
+
 
 Version 3.0.6 (December 19, 2022)
 Editor:
