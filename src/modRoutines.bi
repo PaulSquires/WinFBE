@@ -30,7 +30,7 @@ declare function ConvertCase( byval sText as string) as string
 declare FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
 declare FUNCTION AnsiToUtf8(BYREF sAnsi AS STRING) AS STRING
 declare FUNCTION Utf8ToUnicode(BYREF ansiStr AS CONST STRING) AS STRING
-declare FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
+declare FUNCTION UnicodeToUtf8(byval wzUnicode as CWSTR) AS STRING
 declare function GetStringToArray( byref txtBuffer as string, txtArray() as string ) as long
 declare function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr ) as boolean
 declare function ConvertTextBuffer( byval pDoc as clsDocument ptr, byval FileEncoding as long ) as Long

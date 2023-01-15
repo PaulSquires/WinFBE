@@ -383,23 +383,26 @@ end function
 ' ========================================================================================
 ' Maps Unicode character string to a UTF-8 string.
 ' ========================================================================================
-FUNCTION UnicodeToUtf8( byval pswzUnicode as wstring ptr ) AS STRING
+FUNCTION UnicodeToUtf8( byval wzUnicode as CWSTR ) AS STRING
  dim sUtf8 AS STRING
 
- 'Maps Unicode character string to a UTF-8 string.
- sUtf8 = string(LEN(*pswzUnicode) * 2, 0)
- WideCharToMultiByte(CP_UTF8, _                 'Set to UTF-8
-                     0, _                       'Conversion type
-                     cast(LPCWSTR, pswzUnicode), _  'Unicode string to convert
-                     LEN(*pswzUnicode), _       'Length of Unicode string
-                     cast(LPSTR, STRPTR(sUtf8)), _     'UTF-8 string
-                     LEN(sUtf8), _              'Length of UTF-8 buffer
-                     BYVAL 0, _                 'Invalid character replacement
-                     BYVAL 0)                   'Replacement was used flag
- FUNCTION = rtrim(sUtf8, chr(0))
+ ' Maps Unicode character string to a UTF-8 string.
+ sUtf8 = string(len(wzUnicode) * 2, 0)
+ 
+ dim as long bytesWritten = _
+      WideCharToMultiByte ( _
+      CP_UTF8, _                        'Set to UTF-8
+      0, _                              'Conversion type
+      cast(LPCWSTR, wzUnicode.vptr), _  'Unicode string to convert
+      LEN(wzUnicode), _                 'Length of Unicode string
+      cast(LPSTR, STRPTR(sUtf8)), _     'UTF-8 string
+      LEN(sUtf8), _                     'Length of UTF-8 buffer
+      BYVAL 0, _                        'Invalid character replacement
+      BYVAL 0)                          'Replacement was used flag
+
+ FUNCTION = left(sUtf8, bytesWritten)
 
 END FUNCTION
-
 
 ' ========================================================================================
 ' Parse a string to a string array and return the number of lines.

@@ -990,9 +990,6 @@ end function
 function clsDocument.SaveFormJSONdata() as boolean
    if this.IsDesigner = false then return true
    
-   dim pStream as CTextStream  
-   if pStream.Create(this.DesignerFilename, true, false) <> S_OK then return true   ' error
-
    dim pCtrl as clsControl ptr
    dim as CWSTR wst 
    dim as CWSTR wcomma = ","
@@ -1176,8 +1173,26 @@ function clsDocument.SaveFormJSONdata() as boolean
 
    ' Convert UTF-16 to UTF-8 encoding
    wst = "{" & wst & "}"
-   pStream.WriteLine( UnicodeToUtf8(wst) )
-   pStream.Close
+
+'   dim pStream as CTextStream  
+'   if pStream.Create(this.DesignerFilename, true, false) <> S_OK then return true   ' error
+'   pStream.WriteLine( UnicodeToUtf8(wst) )
+'   pStream.Close
+
+   '// Per email from "Allan" on Jan 14, 2023. His tests show that the code below that uses
+   '// native FB save file code results in correct Chinese output saved to file. I will use
+   '// this code instead of the above CTextStream even though I am not 100% convinced as to
+   '// why there would be any difference.
+   '// Rather than there being a problem with CTextStrem, the fix I made to UnicodeToUtf8
+   '// function (eliminating the ending Trim(0), and use BytesWritten instead) seems to be
+   '// the reason for the Chinese characters now writing 100% correctly.
+   dim as long f = freefile
+   if open( this.DesignerFilename for output as #f) = 0 then
+      print #f, UnicodeToUtf8(wst)
+      close #f
+   else
+      return true   ' error   
+   end if
 
    function = false
 end function
