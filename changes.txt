@@ -1,3 +1,12 @@
+Version 3.0.8 ()
+Editor:
+- Updated the Scintilla DLL's to the latest version 5.3.2 (Dec 6, 2022).
+- Modified the Scintilla & Lexilla DLL's to fix a long standing syntax coloring issue whereby code appearing after a pound sign character ("#") would not be syntax highlighted.
+- Modified AutoCompletion to always insert the corresponding completion statement (eg. Next, End If, End Select, Wend...).
+- Fixed bug in UnicodeToUtf8 conversion function that could corrupt some foriegn characters by removing trailing null characters. This impacted the output of visual designer *.design files.
+- Fixed minor parser bug that would not complete the parse of an "end constructor" or "end destructor" correctly.
+
+
 Version 3.0.7 (January 1, 2023)
 Editor:
 - Fixed issue causing full Windows Desktop refresh that could cause flicker in other applications whenever the left mouse button pressed in WinFBE.

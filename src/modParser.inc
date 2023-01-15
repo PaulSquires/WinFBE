@@ -419,7 +419,9 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
    ' Get next token (left parenthesis but is optional for sub/function)
    do until this.GetToken() = false
       if this.EOL then 
-         if action = PARSINGACTION.PARSE_SUB then
+         if (action = PARSINGACTION.PARSE_SUB) orelse _
+            (action = PARSINGACTION.PARSE_CONSTRUCTOR) orelse _
+            (action = PARSINGACTION.PARSE_DESTRUCTOR) then
             exit do  ' only for Sub b/c for Function we haven't encountered AS RETURN_TYPE yet
          else
             ' Functions/Properties   
