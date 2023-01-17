@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2023 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -1174,7 +1174,7 @@ function clsDocument.SaveFormJSONdata() as boolean
    ' Convert UTF-16 to UTF-8 encoding
    wst = "{" & wst & "}"
 
-   '// Per email from "Allan" on Jan 14, 2023, I made to UnicodeToUtf8
+   '// Per email from "Allan" on Jan 14, 2023, changes I made to UnicodeToUtf8
    '// function (eliminating the ending Trim(0), and use BytesWritten instead) seems to be
    '// the reason for the Chinese characters now writing 100% correctly.
    dim pStream as CTextStream  

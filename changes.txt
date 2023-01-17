@@ -1,4 +1,4 @@
-Version 3.0.8 ()
+Version 3.0.8 (January 17, 2023)
 Editor:
 - Updated the Scintilla DLL's to the latest version 5.3.2 (Dec 6, 2022).
 - Modified the Scintilla & Lexilla DLL's to fix a long standing syntax coloring issue whereby code appearing after a pound sign character ("#") would not be syntax highlighted.

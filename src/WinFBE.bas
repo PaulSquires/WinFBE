@@ -1,11 +1,11 @@
 ' ========================================================================================
 ' WinFBE
 ' Windows FreeBASIC Editor (Windows 32/64 bit)
-' Paul Squires (2016-2022)
+' Paul Squires (2016-2023)
 ' ========================================================================================
 
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2022 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2023 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
