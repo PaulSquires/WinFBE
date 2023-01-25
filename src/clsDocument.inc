@@ -1177,11 +1177,23 @@ function clsDocument.SaveFormJSONdata() as boolean
    '// Per email from "Allan" on Jan 14, 2023, changes I made to UnicodeToUtf8
    '// function (eliminating the ending Trim(0), and use BytesWritten instead) seems to be
    '// the reason for the Chinese characters now writing 100% correctly.
-   dim pStream as CTextStream  
-   if pStream.Create(this.DesignerFilename, true, false) <> S_OK then return true   ' error
-   pStream.WriteLine( UnicodeToUtf8(wst) )
-   pStream.Close
+'   dim pStream as CTextStream  
+'   if pStream.Create(this.DesignerFilename, true, false) <> S_OK then return true   ' error
+'   pStream.WriteLine( UnicodeToUtf8(wst) )
+'   pStream.Close
 
+   ' Use the native FreeBasic file handling commands to save the data to disk. This is a test
+   ' to see if the CTextStream approach is somehow causing problems with the UTF-8 output. Allan
+   ' is still experiencing on his computer whereas I am not. Everything seems to work correctly
+   ' on my side.
+   dim as long f = freefile
+   if open (this.DesignerFilename for output as #f) = 0 then
+      print #f, UnicodeToUtf8(wst)
+      close #f
+   else
+      return true   ' error
+   end if
+   
    function = false
 end function
 
