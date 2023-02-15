@@ -1174,18 +1174,19 @@ function clsDocument.SaveFormJSONdata() as boolean
    ' Convert UTF-16 to UTF-8 encoding
    wst = "{" & wst & "}"
 
-   '// Per email from "Allan" on Jan 14, 2023, changes I made to UnicodeToUtf8
-   '// function (eliminating the ending Trim(0), and use BytesWritten instead) seems to be
-   '// the reason for the Chinese characters now writing 100% correctly.
 '   dim pStream as CTextStream  
 '   if pStream.Create(this.DesignerFilename, true, false) <> S_OK then return true   ' error
 '   pStream.WriteLine( UnicodeToUtf8(wst) )
 '   pStream.Close
 
+   ' Per email from "Allan" on Jan 14, 2023, changes I made to UnicodeToUtf8
+   ' function (eliminating the ending Trim(0), and use BytesWritten instead) seems to be
+   ' the reason for the Chinese characters now writing 100% correctly.
    ' Use the native FreeBasic file handling commands to save the data to disk. This is a test
    ' to see if the CTextStream approach is somehow causing problems with the UTF-8 output. Allan
    ' is still experiencing on his computer whereas I am not. Everything seems to work correctly
-   ' on my side.
+   ' on my side. 2023-01-27, Allan confirmed that using the native FB file operations has
+   ' corrected his issue with garbled Chinese characters.
    dim as long f = freefile
    if open (this.DesignerFilename for output as #f) = 0 then
       print #f, UnicodeToUtf8(wst)
@@ -1514,7 +1515,7 @@ function clsDocument.GetLine( byval nLine as long ) as string
    if nLen < 1 then exit function
    buffer = space(nLen)
    SciMsg( pSci, SCI_GETLINE, nLine, cast(LPARAM, strptr(buffer)))
-   function = rtrim(buffer, any chr(13,10,0))
+   function = rtrim(buffer, any chr(13,10))
 end function
 
 ''
@@ -1539,7 +1540,7 @@ function clsDocument.GetSelText() as string
    if nLen < 1 then exit function
    buffer = space(nLen)
    SciMsg( pSci, SCI_GETSELTEXT, 0, cast(LPARAM, strptr(buffer)))
-   function = trim(buffer, chr(0))
+   function = buffer
 end function
 
 ''
@@ -1552,7 +1553,7 @@ function clsDocument.GetText() as string
    if nLen < 1 then exit function
    buffer = space(nLen+1)
    SciMsg( pSci, SCI_GETTEXT, nLen+1, cast(LPARAM, strptr(buffer)) )
-   function = trim(buffer, chr(0))
+   function = buffer
 end function
 
 ''

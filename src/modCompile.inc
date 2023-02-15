@@ -79,10 +79,8 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
             SetCompileStatusBarMessage( "", 0 )
             Return True  ' user cancelled save
          end if   
-         ' Reload the main form files combobox in case names have changed
-         ' pDoc->SaveFile do this (OnCommand_FileSaveAll calls pDoc->SaveFile)
       End If
-   END IF
+   end if
    
    ' Get the array index for the current selected build (project or document)
    idxBuild = frmBuildConfig_getActiveBuildIndex()
@@ -178,8 +176,6 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.MainFilename = wszTempMainFilename
       gCompile.MainName     = AfxStrPathname("NAME", gCompile.MainFilename)
       
-      dim as CWSTR wszText = pDocMain->GetText()
-
       ' Regenerate any visual designer code for Forms.
       ' The codegen is stored in each pDoc's wszFormCodeGen
       dim as long initialCtrlID = 10000
@@ -194,6 +190,9 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
          end if
          pDoc = pDoc->pDocNext
       loop
+
+      dim as CWSTR wszText
+      wszText.Utf8 = pDocMain->GetText()
 
       dim pTextStream as CTextStream
       if pTextStream.OpenUnicode(gCompile.MainFilename, IOMODE_FORWRITING, true) = S_OK then
