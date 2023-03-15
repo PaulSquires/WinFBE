@@ -1,3 +1,11 @@
+Version 3.0.9 ()
+Editor:
+- Fixed "Quick Run" bug for non-Latin text (eg. Chinese) where editor text was not correctly converted to unicode text.
+- Changed "Quick Run" to save to UTF-8 encoded file rather than UTF-16.
+- Added recognize VAR keyword in parser for dimension variables in order to popup codetips (same behaviour as DIM and REDIM).
+- Updated WinFBX library source files to the latest version per Jose Roca's Github.
+
+
 Version 3.0.8 (January 17, 2023)
 Editor:
 - Updated the Scintilla DLL's to the latest version 5.3.2 (Dec 6, 2022).

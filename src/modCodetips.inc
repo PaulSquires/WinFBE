@@ -18,7 +18,7 @@
 ' ========================================================================================
 ' Format the codetip prior to showing it
 ' ========================================================================================
-function FormatCodetip( byval strCodeTip as string ) as STRING
+function FormatCodetip( byval strCodeTip as string ) as string
    dim as long p
 
    ' remove multiple duplicate spaces 
@@ -26,29 +26,29 @@ function FormatCodetip( byval strCodeTip as string ) as STRING
 
    ' If this is only a small CodeTip then don't bother trying
    ' to format it into multiple lines.
-   if len(strCodeTip) < 75 THEN return strCodeTip
+   if len(strCodeTip) < 75 then return strCodeTip
 
-   IF INSTR(strCodeTip, "( ") THEN
+   if instr(strCodeTip, "( ") then
       strCodeTip = AfxStrReplace(strCodeTip, "( ", "(  ")
-   ELSEIF INSTR(strCodeTip, "(") THEN
+   elseif instr(strCodeTip, "(") then
       strCodeTip = AfxStrReplace(strCodeTip, "(", "(  ")
-   END IF
-   p = INSTR(strCodeTip, "(")
-   IF p THEN
-      IF MID(strCodeTip, p + 1, 1) <> ")" AND MID(strCodeTip, p + 1, 2) <> " )" THEN
+   end if
+   p = instr(strCodeTip, "(")
+   if p then
+      if mid(strCodeTip, p + 1, 1) <> ")" andalso mid(strCodeTip, p + 1, 2) <> " )" then
          strCodeTip = AfxStrReplace(strCodeTip, "(", "( _" & vblf)
-         IF INSTR(strCodeTip, " )") THEN
+         IF instr(strCodeTip, " )") then
             strCodeTip = AfxStrReplace(strCodeTip, ")", "_" & vblf & ")")
-         ELSEIF INSTR(strCodeTip, ")") THEN
+         elseif instr(strCodeTip, ")") then
             strCodeTip = AfxStrReplace(strCodeTip, ")", " _" & vblf & ")")
-         END IF
-      END IF
-   END IF
+         end if
+      end if
+   end if
    strCodeTip = AfxStrReplace(strCodeTip, ", ", ",")
    strCodeTip = AfxStrReplace(strCodeTip, " ,", ",")
    strCodeTip = AfxStrReplace(strCodeTip, ",", ", _" & vblf & "  ")
    
-   FUNCTION = strCodeTip
+   function = strCodeTip
 end function
 
 
@@ -60,12 +60,12 @@ function MaskStringCharacters( byval st as string) as string
    ' ensures that we correctly deal with strings that have embedded single 
    ' quote characters.
    dim as long i 
-   dim as Boolean bInString = false
+   dim as Boolean binstring = false
    for i = 0 to len(st) - 1
-      if st[i] = 34 THEN bInString = not(bInString)
-      if bInString THEN  
-         if st[i] <> 34 THEN st[i] = 35   ' # symbol
-      END IF
+      if st[i] = 34 then binstring = not(binstring)
+      if binstring then  
+         if st[i] <> 34 then st[i] = 35   ' # symbol
+      end if
    NEXT
    function = st
 end function
@@ -152,9 +152,9 @@ function DereferenceLine( _
    dim as long nStart, nEnd
    do
       do
-         nEnd = InStrRev(sLine, ")", -1)
+         nEnd = instrRev(sLine, ")", -1)
          if nEnd = 0 then exit do
-         nStart = InStrRev(sLine, "(", nEnd)
+         nStart = instrRev(sLine, "(", nEnd)
          if nStart = 0 then exit do
          ' Remove any array parenthesis.
          sLine = left(sLine, nStart-1) & mid(sLine, nEnd+1)
@@ -164,13 +164,13 @@ function DereferenceLine( _
    
    ' All of the array parenthesis should now be removed so now we can simply
    ' search for the start of the line.
-   dim as long i = InStrRev(sLine, any " (*[&@", -1)
+   dim as long i = instrRev(sLine, any " (*[&@", -1)
    if i then sLine = mid(sLine, i+1)
    
    ' Need to check if this line is part of a WITH / END WITH block.
    if (len(sLine) = 0) or (left(sLine, 1) = ".") then
       sLine = DetermineWithVariable(pDoc) & sLine
-   END IF
+   end if
    
    ' Make it easier to parse by converting line to uppercase
    sLine = ucase(sLine)
@@ -268,7 +268,7 @@ function ShowCodetip( _
    dim as string codeTip
    dim as hwnd hEdit  = pDoc->hWndActiveScintilla
    dim as long curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
-   
+
    if bCommaTrigger then
       ' It is possible that a codetip had been displayed but the user moved off of the
       ' current line and thereby closed the codetip. If user goes back to the line and
@@ -303,7 +303,7 @@ function ShowCodetip( _
       return true
    else
       pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-   END IF
+   end if
    
    return false
 end function
@@ -316,7 +316,7 @@ function ShowAutoCompletePopup( _
             byval hEdit as hwnd, _
             byref sList as string _
             ) as Long
-   if len(sList) = 0 THEN exit function
+   if len(sList) = 0 then exit function
    dim as string sFillups = "(=."
                                 
    SciExec(hEdit, SCI_AUTOCSETFILLUPS, 0, strptr(sFillups))  ' characters that also select and close the popup
@@ -340,7 +340,7 @@ function ExistsInAutocompleteList( _
             ) as boolean
    if rtrim(sMatch) = "" then return true
    dim as string sLookFor = "|" & ucase(sMatch) & "|"
-   if instr( "|" & ucase(sList) & "|", sLookFor ) THEN return true
+   if instr( "|" & ucase(sList) & "|", sLookFor ) then return true
    return false
 end function
 
@@ -350,7 +350,7 @@ end function
 ' ========================================================================================
 function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
   
-   IF gConfig.AutoComplete = false THEN exit function
+   IF gConfig.AutoComplete = false then exit function
    
    dim as long curPos, nCol, nLenMatchWord, ub, iNextType
    dim as string sWord, sList, st, sDot, sLookFor, sElement, sProp
@@ -360,7 +360,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    dim pData as DB2_DATA ptr
    
    pDoc = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc = 0 Then exit function
+   If pDoc = 0 then exit function
    
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
              
@@ -483,7 +483,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          If cbool(SciExec(pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) = true orelse _
             (pDoc->UserModified = true) then
             pDoc->ParseDocument()
-			End If   
+			end if   
       end if
    end if
    
@@ -497,7 +497,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          gdb2.dbRewind()
          do 
             pData = gdb2.dbGetNext()
-            if pData = 0 THEN exit do
+            if pData = 0 then exit do
 
             if bTypesOnly = false then
                if pData->id = DB2_STANDARDDATATYPE then
@@ -518,7 +518,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                end if   
             end if
     
-            if pData->id = DB2_TYPE THEN
+            if pData->id = DB2_TYPE then
                if bTypesOnly then
                   if bTypesNotPreloaded then
                      ' Only look at TYPES that are loaded into the editor. These would
@@ -603,7 +603,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    end select
    
    sList = trim(sList, any "| ")
-   if len(sList) THEN
+   if len(sList) then
       ' Save the code editor starting position 
       pDoc->AutoCStartPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
       ShowAutoCompletePopup(hEdit, sList)

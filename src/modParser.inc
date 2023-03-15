@@ -439,6 +439,7 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
             end if
             readingAllParams = true
             readingSingleParam = true
+
          case ")"    ' end of the list of parameters
             if readingArrayParam then
                ' This is end of an Array() parameter within the list so save it.
@@ -449,13 +450,15 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
             readingAllParams = false
             readingSingleParam = false
             exit do
+
          case "="
             ' if reading a parameter then need to bypass any initializer
             if readingSingleParam then
                ' Need to continue until we reach a comma that separates the parameters
                ' or until we hit the closing parenthesis.
-               readingSingleParam = false
+               readingSingleParam = true
             end if
+
          case else
             ' Get the parameter tokens until we get (right parenthesis)
             if readingAllParams andalso readingSingleParam then
@@ -940,7 +943,7 @@ function ctxParser.Parse( byval pDoc as clsDocument ptr ) as boolean
    do until this.GetToken() = false 
 
       select case this.ltoken
-         case "dim", "redim"
+         case "dim", "redim", "var"
             if this.ParseDIM( PARSINGACTION.PARSE_DIM, DIMSCOPE.SCOPEGLOBAL ) = false then
                '? this.lineNum, "Error parsing DIM statement. Unexpected token: "; this.token
             end if

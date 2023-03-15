@@ -192,13 +192,13 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
       loop
 
       dim as CWSTR wszText
-      wszText.Utf8 = pDocMain->GetText()
+      wszText = pDocMain->GetText()
 
-      dim pTextStream as CTextStream
-      if pTextStream.OpenUnicode(gCompile.MainFilename, IOMODE_FORWRITING, true) = S_OK then
-         pTextStream.Write( wszText )
-      end if    
-      pTextStream.Close
+      dim as long f = freefile
+      if open (gCompile.MainFilename for output as #f) = 0 then
+         print #f, UnicodeToUtf8(wszText)
+         close #f
+      end if
 
    else
       gCompile.MainFilename = pDocMain->DiskFilename
