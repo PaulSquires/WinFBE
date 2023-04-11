@@ -65,7 +65,6 @@ function frmPanelVScroll_UpdateUI() as LRESULT
    dim as HBITMAP hBmp = CreateCompatibleBitmap(hdcScreen, nWidth, nHeight)
    dim as HBITMAP hBmpOld = SelectObject(hDC, hBmp)
 
-   '// Draw to StatusBar into the memory DC
    FillRect( hDC, @gPanelVScroll.rc, ghPanel.hBackBrushThumb )
 
    '// Call UpdateLayeredWindow
