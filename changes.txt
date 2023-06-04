@@ -1,4 +1,6 @@
-Version 3.0.9 ()
+Version 3.1.0 (June 4, 2023)
+- Updated included FreeBasic Compiler to version 1.10 (located in toolchain: "FreeBASIC-1.10.0-winlibs-gcc-9.3.0").
+
 Editor:
 - Fixed "Quick Run" bug for non-Latin text (eg. Chinese) where editor text was not correctly converted to unicode text.
 - Changed "Quick Run" to save to UTF-8 encoded file rather than UTF-16.
