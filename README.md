@@ -1,4 +1,8 @@
 # WinFBE
+https://img.shields.io/github/v/release/PaulSquires/WinFBE?style=flat-square
+https://img.shields.io/github/downloads/PaulSquires/WinFBE/total?style=flat-square
+https://img.shields.io/github/license/PaulSquires/WinFBE?style=flat-square
+
 FreeBASIC Editor for Windows
 
 Code is written using the FreeBASIC language and uses the Scintilla editing library (in DLL form).
