@@ -1,7 +1,7 @@
 # WinFBE
-https://img.shields.io/github/v/release/PaulSquires/WinFBE?style=flat-square
-https://img.shields.io/github/downloads/PaulSquires/WinFBE/total?style=flat-square
-https://img.shields.io/github/license/PaulSquires/WinFBE?style=flat-square
+[![Release](https://img.shields.io/github/v/release/PaulSquires/WinFBE?style=flat-square)](https://github.com/PaulSquires/IB-Tracker/releases)
+![Downloads](https://img.shields.io/github/downloads/PaulSquires/WinFBE/total?style=flat-square)
+[![License](https://img.shields.io/github/license/PaulSquires/WinFBE?style=flat-square)](LICENSE)
 
 FreeBASIC Editor for Windows
 
