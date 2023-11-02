@@ -29,6 +29,8 @@ Requirements:
 - Windows Vista or later operating system. Windows XP is not supported because many newer API's are used in the source code.
 - FreeBASIC Compiler http://www.freebasic.net/
 
+**NOTE:** If you get a popup warning message box from the operating system saying that "a DLL is not found and reinstalling the program may fix this problem", then it means that you are missing the Visual C++ redistributable package that is normally available on most Windows 10 and Windows 11 machines. Download and install it from this Microsoft page:  https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170   Here is the direct link to the file: https://aka.ms/vs/17/release/vc_redist.x86.exe  
+
 Resources:
 - Jose Roca WinFBX library:[https://github.com/JoseRoca/WinFBX](https://github.com/JoseRoca/WinFBX)
 - Visit http://www.planetsquires.com/protect/forum/index.php for support forum.
