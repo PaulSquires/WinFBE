@@ -1,5 +1,5 @@
 # WinFBE
-[![Release](https://img.shields.io/github/v/release/PaulSquires/WinFBE?style=flat-square)](https://github.com/PaulSquires/IB-Tracker/releases)
+[![Release](https://img.shields.io/github/v/release/PaulSquires/WinFBE?style=flat-square)](https://github.com/PaulSquires/WinFBE/releases)
 ![Downloads](https://img.shields.io/github/downloads/PaulSquires/WinFBE/total?style=flat-square)
 [![License](https://img.shields.io/github/license/PaulSquires/WinFBE?style=flat-square)](LICENSE)
 
