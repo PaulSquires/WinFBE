@@ -457,6 +457,15 @@ function frmExplorerListBox_SubclassProc ( _
          if hiword(idx) <> 1 then
             dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
             if pDoc then
+               ' If only 1 line has been previously selected then unselect that line
+               ' and select this current line, otherwise, the menu actions on all selected lines.
+               dim as long nSelCount = SendMessage( hWin, LB_GETSELCOUNT, 0, 0 )
+               if nSelCount = 1 then
+                   for i as long = 0 to ListBox_GetCount( hWin ) - 1 
+                      ListBox_SetSel( hWin, false, i )
+                   next 
+               end if
+                
                ListBox_SetSel( hWin, true, idx )
                dim as HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
                dim as POINT pt: GetCursorPos( @pt )
@@ -466,7 +475,7 @@ function frmExplorerListBox_SubclassProc ( _
                ' actions may reset the state of listbox. We save the pDoc's in an array
                ' rather than index values because the listbox may get reloaded during
                ' some actions invalidating some indexes. 
-               dim as long nSelCount = SendMessage( hWin, LB_GETSELCOUNT, 0, 0 )
+               nSelCount = SendMessage( hWin, LB_GETSELCOUNT, 0, 0 )
                dim pDocArray(nSelCount-1) as clsDocument ptr 
                dim as long nextIdx = 0
                for i as long = 0 to ListBox_GetCount( hWin ) - 1
