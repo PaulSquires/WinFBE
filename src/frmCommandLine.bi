@@ -17,3 +17,4 @@
 #Define IDC_FRMCOMMANDLINE_TEXTBOX1                 1001
 
 declare Function frmCommandLine_Show( ByVal hWndParent As HWnd ) as LRESULT
+' this is a new line of text

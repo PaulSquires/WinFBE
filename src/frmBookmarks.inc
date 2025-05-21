@@ -10,11 +10,11 @@
 '    but WITHOUT any WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
-  
+
 
 ''
 ''  frmBookmarks.inc
-''   
+''
 
 #include once "frmBookmarks.bi"
 
@@ -23,7 +23,7 @@
 ' ========================================================================================
 function getBookmarksLineNumber( byval wszCaption as CWSTR ) as long
    ' do not use Parse for this because line may contain embedded % in description
-   dim as long nLineNum 
+   dim as long nLineNum
    dim as long f1
    f1 = instr(wszCaption, "%")
    if f1 then nLineNum = val(left(wszCaption, f1-1))
@@ -64,7 +64,7 @@ function frmBookmarks_CollapseAll() as long
    loop
    LoadBookmarksFiles()
    function = 0
-end function   
+end function
 
 
 ' ========================================================================================
@@ -99,22 +99,22 @@ function frmBookmarks_OnSize( _
    end if
    function = 0
 end function
-       
+
 ' ========================================================================================
 ' Process WM_PAINT message for window/dialog: frmBookmarks
 ' ========================================================================================
 function frmBookmarks_OnPaint( byval HWnd as HWnd ) as LRESULT
-            
+
    dim as PAINTSTRUCT ps
    dim as HDC hDc
-   
+
    hDC = BeginPaint(hWnd, @ps)
 
    SaveDC( hDC )
    FillRect( hDC, @ps.rcPaint, ghPanel.hPanelBrush )
    RestoreDC( hDC, -1 )
    EndPaint( hWnd, @ps )
-   
+
    function = 0
 end function
 
@@ -126,10 +126,10 @@ function frmBookmarks_OnMeasureItem( _
             byval HWnd as HWnd, _
             byval lpmis as MEASUREITEMSTRUCT ptr _
             ) as long
-   ' Set the height of the list box items. 
+   ' Set the height of the list box items.
    dim pWindow as CWindow ptr = AfxCWindowPtr(HWnd)
    lpmis->itemHeight = pWindow->ScaleY(EXPLORERITEM_HEIGHT)
-      
+
    function = 0
 end function
 
@@ -146,14 +146,14 @@ function frmBookmarks_OnDrawItem( _
    if pWindow = 0 then exit function
 
    if lpdis = 0 then exit function
- 
+
    if ( lpdis->itemAction = ODA_DRAWENTIRE ) orelse _
       ( lpdis->itemAction = ODA_SELECT ) orelse _
       ( lpdis->itemAction = ODA_FOCUS ) then
 
       dim as RECT rc = lpdis->rcItem
       dim as long nWidth  = rc.right-rc.left
-      dim as long nHeight = rc.bottom-rc.top 
+      dim as long nHeight = rc.bottom-rc.top
 
       SaveDC(lpdis->hDC)
 
@@ -165,24 +165,24 @@ function frmBookmarks_OnDrawItem( _
       if hbit then hbit = SelectObject( memDC, hbit )
 
       SelectObject( memDC, ghMenuBar.hFontMenuBar )
-         
+
       ' Default to using normal
       dim as HBRUSH hBrush = ghPanel.hBackBrush
       dim as COLORREF foreclr = ghPanel.ForeColor
       dim as COLORREF backclr = ghPanel.BackColor
-         
+
       dim as boolean IsHot = false
       dim as boolean isNodeHeader = false
       dim as boolean isIconDown = false
-         
+
       dim as POINT pt
       GetCursorPos( @pt )
       MapWindowPoints( lpdis->hwndItem, HWND_DESKTOP, cast( POINT ptr, @rc ), 2 )
       if PtInRect( @rc, pt ) then IsHot = true
-      
+
       ' if mouse is over VScrollBar then reset hot
       if isMouseOverWindow( HWND_FRMPANEL_VSCROLLBAR ) then IsHot = false
-         
+
       if ListBox_GetCurSel(lpdis->hwndItem) = lpdis->itemID then IsHot = true
 
       hBrush = iif( IsHot, ghPanel.hBackBrushHot, ghPanel.hBackBrush)
@@ -192,63 +192,63 @@ function frmBookmarks_OnDrawItem( _
       dim as CWSTR wszCaption = AfxGetListBoxText(lpdis->hwndItem, lpdis->ItemID)
       dim as clsDocument ptr pDoc = cast(clsDocument ptr, lpdis->itemData)
 
-      ' if this is a "node" header 
-      if left(wszCaption, 4) = "true" then 
+      ' if this is a "node" header
+      if left(wszCaption, 4) = "true" then
          isNodeHeader = true
          isIconDown = true
          if pDoc then wszCaption = AfxStrPathName( "NAMEX", pDoc->DiskFilename )
-      elseif left(wszCaption, 5) = "false" then 
+      elseif left(wszCaption, 5) = "false" then
          isNodeHeader = true
          isIconDown = false
          if pDoc then wszCaption = AfxStrPathName( "NAMEX", pDoc->DiskFilename )
       else
-         ' must be a bookmark line 
+         ' must be a bookmark line
           wszCaption = getBookmarksDescription( wszCaption )
       end if
-      
+
       ' Paint the entire background
       ' Create our rect that works with the entire line
       SetRect( @rc, 0, 0, nWidth, nHeight )
       FillRect( memDC, @rc, hBrush )
 
-      SetBkColor( memDC, backclr )   
+      SetBkColor( memDC, backclr )
       SetTextColor( memDC, foreclr )
 
       dim as RECT rcText = rc
       dim as RECT rcBitmap = rc
 
-      dim as long wsStyle 
-      
+      dim as long wsStyle
+
       ' indent the text based on its type
       if isNodeHeader then
          rcBitmap.right = rcBitmap.left + pWindow->ScaleX(20)
          SelectObject( memDC, ghMenuBar.hFontSymbol )
-         wsStyle = DT_NOPREFIX or DT_CENTER or DT_TOP or DT_SINGLELINE  
-         if isIconDown then 
+         wsStyle = DT_NOPREFIX or DT_CENTER or DT_TOP or DT_SINGLELINE
+         if isIconDown then
             DrawText( memDC, wszChevronDown, -1, cast(lpRect, @rcBitmap), wsStyle )
-         else   
+         else
             DrawText( memDC, wszChevronRight, -1, cast(lpRect, @rcBitmap), wsStyle )
          end if
          wszCaption = wszCaption
          rcText.left = rcBitmap.right
          SelectObject( memDC, ghMenuBar.hFontMenuBar )
-         wsStyle = DT_NOPREFIX or DT_LEFT or DT_VCENTER or DT_SINGLELINE  
+         wsStyle = DT_NOPREFIX or DT_LEFT or DT_VCENTER or DT_SINGLELINE
          DrawText( memDC, wszCaption.sptr, -1, cast(lpRect, @rcText), wsStyle )
       else
          ' This would be a regular file.
          rcBitmap.left = rcText.left + pWindow->ScaleX(20)
-         rcBitmap.right = rcBitmap.left + pWindow->ScaleX(20) 
+         rcBitmap.right = rcBitmap.left + pWindow->ScaleX(20)
 
          SelectObject( memDC, ghMenuBar.hFontSymbol )
-         wsStyle = DT_NOPREFIX or DT_CENTER or DT_TOP or DT_SINGLELINE  
+         wsStyle = DT_NOPREFIX or DT_CENTER or DT_TOP or DT_SINGLELINE
          DrawText( memDC, wszDocumentIcon, -1, cast(lpRect, @rcBitmap), wsStyle )
 
          rcText.left = rcBitmap.right
          SelectObject( memDC, ghMenuBar.hFontMenuBar )
-         wsStyle = DT_NOPREFIX or DT_LEFT or DT_VCENTER or DT_SINGLELINE  
+         wsStyle = DT_NOPREFIX or DT_LEFT or DT_VCENTER or DT_SINGLELINE
          DrawText( memDC, wszCaption.sptr, -1, cast(lpRect, @rcText), wsStyle )
       end if
-         
+
       BitBlt( lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, _
                 nWidth, nHeight, memDC, 0, 0, SRCCOPY )
 
@@ -256,10 +256,10 @@ function frmBookmarks_OnDrawItem( _
       if hbit  then DeleteObject SelectObject(memDC, hbit)
       if memDC then DeleteDC memDC
       RestoreDC(lpdis->hDC, -1)
-   end if   
+   end if
 
    function = true
-   
+
 end function
 
 ' ========================================================================================
@@ -278,7 +278,7 @@ function frmBookmarks_OnCommand( _
          AfxRedrawWindow(hwndCtl)
          ' update the scrollbar position if necessary
          frmBookmarks_PositionWindows()
-   end select      
+   end select
 
    function = 0
 end function
@@ -302,19 +302,19 @@ function frmBookmarks_WndProc( _
       HANDLE_MSG (HWnd, WM_COMMAND,     frmBookmarks_OnCommand)
       HANDLE_MSG (HWnd, WM_MEASUREITEM, frmBookmarks_OnMeasureItem)
       HANDLE_MSG (HWnd, WM_DRAWITEM,    frmBookmarks_OnDrawItem)
-   
+
    case WM_ERASEBKGND
       return true
 
    end select
-   
+
    ' for messages that we don't deal with
    function = DefWindowProc( HWnd, uMsg, wParam, lParam )
 
 end function
 
 ' ========================================================================================
-' frmBookmarksListBox_SubclassProc 
+' frmBookmarksListBox_SubclassProc
 ' ========================================================================================
 function frmBookmarksListBox_SubclassProc ( _
             byval hWin   as HWnd, _                 ' // Control window handle
@@ -328,49 +328,49 @@ function frmBookmarksListBox_SubclassProc ( _
    dim pWindow as CWindow ptr = AfxCWindowPtr(HWND_FRMBOOKMARKS)
    static as long accumDelta
    static as HWND hTooltip
-      
-   ' keep track of last index we were over so that we only issue a 
+
+   ' keep track of last index we were over so that we only issue a
    ' repaint if the cursor has moved off of the line
    static as long nLastIdx = -1
-      
+
    select case uMsg
       case MSG_USER_LOAD_BOOKMARKSFILES
          LoadBookmarksFiles()
 
       Case WM_MOUSEWHEEL
-         ' accumulate delta until scroll one line (up +120, down -120). 
+         ' accumulate delta until scroll one line (up +120, down -120).
          ' 120 is the Microsoft default delta
          dim as long zDelta = GET_WHEEL_DELTA_WPARAM( _wParam )
-         dim as long nTopIndex = SendMessage( hWin, LB_GETTOPINDEX, 0, 0 ) 
+         dim as long nTopIndex = SendMessage( hWin, LB_GETTOPINDEX, 0, 0 )
          accumDelta = accumDelta + zDelta
          if accumDelta >= 120 then       ' scroll up 3 lines
             nTopIndex = nTopIndex - 3
             nTopIndex = max( 0, nTopIndex )
-            SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 ) 
+            SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 )
             accumDelta = 0
             frmPanelVScroll_PositionWindows( SW_SHOWNA )
          elseif accumDelta <= -120 then  ' scroll down 3 lines
             nTopIndex = nTopIndex + 3
-            SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 ) 
+            SendMessage( hWin, LB_SETTOPINDEX, nTopIndex, 0 )
             accumDelta = 0
             frmPanelVScroll_PositionWindows( SW_SHOWNA )
          end if
-         
+
       Case WM_MOUSEMOVE
-         ' Track that we are over the control in order to catch the 
+         ' Track that we are over the control in order to catch the
          ' eventual WM_MOUSEHOVER and WM_MOUSELEAVE events
          dim tme as TrackMouseEvent
          tme.cbSize = sizeof(TrackMouseEvent)
          tme.dwFlags = TME_HOVER or TME_LEAVE
          tme.hwndTrack = hWin
-         TrackMouseEvent(@tme) 
-         
+         TrackMouseEvent(@tme)
+
          ' get the item rect that the mouse is over and only invalidate
          ' that instead of the entire listbox
          dim as RECT rc
-         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
-         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam))
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero
+         ' if the specified point is in the client area of the list box, or one if it is outside the
          ' client area.
          if hiword(idx) <> 1 then
             if idx <> nLastIdx then
@@ -381,13 +381,13 @@ function frmBookmarksListBox_SubclassProc ( _
                nLastIdx = idx
             end if
         end if
-                           
+
       case WM_MOUSEHOVER
-         dim as CWSTR wszTooltip 
+         dim as CWSTR wszTooltip
          if IsWindow(hTooltip) = 0 then hTooltip = AfxAddTooltip( hWin, "", false, false )
-         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
-         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam))
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero
+         ' if the specified point is in the client area of the list box, or one if it is outside the
          ' client area.
          if hiword(idx) <> 1 then
             dim as CWSTR wszCaption = AfxGetListBoxText( hWin, idx )
@@ -399,16 +399,16 @@ function frmBookmarksListBox_SubclassProc ( _
                AfxRedrawWindow( hWin )
             end if
          end if
-         
+
       case WM_MOUSELEAVE
          nLastIdx = -1
-         AfxRedrawWindow(hWin)   
-         
+         AfxRedrawWindow(hWin)
+
       case WM_RBUTTONDOWN
          ' Create the popup menu
-         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
-         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam))
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero
+         ' if the specified point is in the client area of the list box, or one if it is outside the
          ' client area.
          if hiword(idx) <> 1 then
             dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
@@ -418,7 +418,7 @@ function frmBookmarksListBox_SubclassProc ( _
                if (left(wszCaption, 4) = "true") orelse (left(wszCaption, 5) = "false") then
                   hPopupMenu = CreateBookmarksHeaderNodeContextMenu()
                else
-                  hPopupMenu = CreateBookmarksBookmarkNodeContextMenu()   
+                  hPopupMenu = CreateBookmarksBookmarkNodeContextMenu()
                end if
                dim as POINT pt: GetCursorPos( @pt )
                dim as long id = TrackPopupMenu(hPopUpMenu, TPM_RETURNCMD, pt.x, pt.y, 0, HWND_FRMMAIN, byval null)
@@ -434,13 +434,13 @@ function frmBookmarksListBox_SubclassProc ( _
                Return true   ' prevent further processing that leads to WM_CONTEXTMENU
             end if
          end if
-         
+
       case WM_LBUTTONUP
          ' determine if we clicked on a regular file or a node header
          dim as RECT rc
-         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam)) 
-         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero 
-         ' if the specified point is in the client area of the list box, or one if it is outside the 
+         dim as long idx = Listbox_ItemFromPoint( hWin, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam))
+         ' The return value contains the index of the nearest item in the LOWORD. The HIWORD is zero
+         ' if the specified point is in the client area of the list box, or one if it is outside the
          ' client area.
          if hiword(idx) <> 1 then
             dim as clsDocument ptr pDoc = cast(clsDocument ptr, ListBox_GetItemData( hWin, idx ))
@@ -453,34 +453,34 @@ function frmBookmarksListBox_SubclassProc ( _
             else
                ' Attempt to show the bookmark
                dim as long nLineNum = getBookmarksLinenumber( wszCaption )
-               dim as CWSTR wszDiskFilename 
+               dim as CWSTR wszDiskFilename
                if pDoc then wszDiskFilename = pDoc->DiskFilename
                OpenSelectedDocument( wszDiskFilename, "", nLineNum )
             end if
          end if
-                        
+
       case WM_ERASEBKGND
-         ' if the number of lines in the listbox maybe less than the number per page then 
+         ' if the number of lines in the listbox maybe less than the number per page then
          ' calculate from last item to bottom of listbox, otherwise calculate based on
          ' the mod of the lineheight to listbox height so we can color the partial line
          ' that won't be displayed at the bottom of the list.
          dim as RECT rc: GetClientRect( hWin, @rc )
 
-         dim as RECT rcItem  
+         dim as RECT rcItem
          SendMessage( hWin, LB_GETITEMRECT, 0, cast(LPARAM, @rcItem) )
          dim as long itemHeight = rcItem.bottom - rcItem.top
          dim as long NumItems = ListBox_GetCount(hWin)
-         dim as long nTopIndex = SendMessage( hWin, LB_GETTOPINDEX, 0, 0 ) 
+         dim as long nTopIndex = SendMessage( hWin, LB_GETTOPINDEX, 0, 0 )
          dim as long visible_rows = 0
          dim as long ItemsPerPage = 0
          dim as long bottom_index = 0
-                     
+
          if NumItems > 0 then
             ItemsPerPage = (rc.bottom - rc.top) / itemHeight
-            bottom_index = (nTopIndex + ItemsPerPage) 
+            bottom_index = (nTopIndex + ItemsPerPage)
             if bottom_index >= NumItems then bottom_index = NumItems - 1
             visible_rows = (bottom_index - nTopIndex) + 1
-            rc.top = visible_rows * itemHeight 
+            rc.top = visible_rows * itemHeight
          end if
 
          if rc.top < rc.bottom then
@@ -490,12 +490,12 @@ function frmBookmarksListBox_SubclassProc ( _
 
          ValidateRect( hWin, @rc )
          return true
-      
+
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
          RemoveWindowSubclass( hWin, @frmBookmarksListBox_SubclassProc, uIdSubclass )
    end select
-    
+
    ' For messages that we don't deal with
    function = DefSubclassProc( hWin, uMsg, _wParam, _lParam )
 
@@ -519,7 +519,7 @@ function frmBookmarks_Show( byval hWndParent as HWnd ) as LRESULT
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
 
-   HWND_FRMBOOKMARKS_LISTBOX = _ 
+   HWND_FRMBOOKMARKS_LISTBOX = _
         pWindow->AddControl("LISTBOX", , IDC_FRMBOOKMARKS_LISTBOX, "", 0, 0, 0, 0, _
         WS_CHILD or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or WS_TABSTOP or _
         LBS_NOINTEGRALHEIGHT or LBS_OWNERDRAWFIXED or LBS_HASSTRINGS or LBS_NOTIFY, _
@@ -528,7 +528,7 @@ function frmBookmarks_Show( byval hWndParent as HWnd ) as LRESULT
         IDC_FRMBOOKMARKS_LISTBOX, cast(DWORD_PTR, @pWindow))
 
    function = 0
-   
+
 end function
 
 
@@ -539,19 +539,19 @@ end function
 ' ========================================================================================
 function LoadBookmarksFiles() as long
    dim as HWND hList = GetDlgItem(HWND_FRMBOOKMARKS, IDC_FRMBOOKMARKS_LISTBOX)
-    
+
    ' Hide the listbox while it is loading so that we don't get the unpainted
    ' white background from the empty listbox
    ShowWindow( hList, SW_HIDE )
-   
-   ' Save the topindex because we will restore it after filling the new contents 
-   dim as long nTopIndex = SendMessage( hList, LB_GETTOPINDEX, 0, 0 ) 
+
+   ' Save the topindex because we will restore it after filling the new contents
+   dim as long nTopIndex = SendMessage( hList, LB_GETTOPINDEX, 0, 0 )
 
    ' Clear all content from the listbox
    ListBox_ResetContent(hList)
-   
+
    dim wszText as wstring * MAX_PATH
-   
+
    ' Iterate all pDoc in the project/files list
    dim pDoc as clsDocument ptr = gApp.pDocList
    do until pDoc = 0
@@ -559,18 +559,18 @@ function LoadBookmarksFiles() as long
       ' what glyph to display as well as the filename only portion of the diskfilename.
       ' true     ' expanded node
       ' false    ' collapsed node
-      ' Bookmark node line format. 
+      ' Bookmark node line format.
       ' 231%Select Case nCount     ' bookmark on line 231 of the specified file
 
       ' Test if the pDoc has active bookmarks
       dim as long idx, nLineNum, nCount
-      dim as string sBookmarks 
-      
-      ' Search documents that have been loaded and have valid Scintilla window. 
+      dim as string sBookmarks
+
+      ' Search documents that have been loaded and have valid Scintilla window.
       if pDoc->hWindow(0) <> null then
          sBookmarks = pDoc->GetBookmarks()
       end if
-      
+
       if len(sBookmarks) then
          wszText = wstr(pDoc->bBookmarkExpanded)
          idx = Listbox_AddString( hList, @wszText )
@@ -585,16 +585,16 @@ function LoadBookmarksFiles() as long
                idx = Listbox_AddString( hList, @wszText )
                ListBox_SetItemData( hList, idx, pDoc )
             next
-         end if    
+         end if
       end if
-            
+
       pDoc = pDoc->pDocNext
    loop
-   
-   ' Restore the top index so the list displays like it did before being reset
-   SendMessage( hList, LB_SETTOPINDEX, nTopIndex, 0 ) 
 
-   ' Ensure that Listbox is now properly sized and then show 
+   ' Restore the top index so the list displays like it did before being reset
+   SendMessage( hList, LB_SETTOPINDEX, nTopIndex, 0 )
+
+   ' Ensure that Listbox is now properly sized and then show
    ' the listbox now that it is fully populated (only if it contains any
    ' items because zero items can produce white background).
    if ListBox_GetCount( hList ) then ShowWindow( hList, SW_SHOW )
@@ -608,4 +608,4 @@ function LoadBookmarksFiles() as long
    function = 0
 end function
 
-   
+

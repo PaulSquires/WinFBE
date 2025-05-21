@@ -1,3 +1,8 @@
+Version 3.2.0
+- Compiling .bas Modules now honors Project flags set for -g, -e, -ex, and -exx allowing debug information
+to be compiled into the .bas module object files.
+- Fixed problem with editor not loading Project files on startup if the "Restore previous session files on startup" option is checked.
+
 Version 3.1.0 (June 4, 2023)
 - Updated included FreeBasic Compiler to version 1.10 (located in toolchain: "FreeBASIC-1.10.0-winlibs-gcc-9.3.0").
 
@@ -547,7 +552,7 @@ Version 1.9.0 (January 22, 2019)
 - Changed: File Open file types now have *.inc included in "Code files". "FB Include files" change to "Header files".
 - Changed: Moved Bookmark menu entries to "Bookmarks" submenu of the "Search" menu.
 - Changed: Removed the "Save Declares File" menu option as it is obsolete.
-- Changed: Updated Spanish language translation file by José Roca.
+- Changed: Updated Spanish language translation file by Jos  Roca.
 - Changed: Updated German language translation file by Joerg Buckel.
 - Changed: Updated Chinese language translation file by ganlinlao.
 - Fixed: Modified English.lang file to compress by 58 entries. Other language files will need to be slightly modified by their respective authors.

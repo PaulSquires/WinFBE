@@ -332,6 +332,12 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gApp.IsProjectActive Then
+       gCompile.CompileFlags = " " & gCompile.CompileFlags & " "
+      dim as string g_flag = iif(instr(gCompile.CompileFlags, " -g "), " -g -nostrip ", "")
+      dim as string e_flag = iif(instr(gCompile.CompileFlags, " -e "), " -e ", "")
+      dim as string ex_flag = iif(instr(gCompile.CompileFlags, " -ex "), " -ex ", "")
+      dim as string exx_flag = iif(instr(gCompile.CompileFlags, " -exx "), " -exx ", "")
+      
       dim as long nFileCount   ' used to calculate when to fire an AfxDoEvents
       pDoc = gApp.pDocList
       do until pDoc = 0
@@ -356,13 +362,13 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
                SetCompileStatusBarMessage( wst, 0 )
  
                wszCommand = gCompile.CompilerPath
-               wszParams = " -c -b " + _
+               wszParams = g_flag & e_flag & ex_flag & exx_flag & " -c -b " + _
                            wDQ + pDoc->DiskFilename + wDQ + _
                            " -v -o " + wDQ + wszTemp + wDQ 
                RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
                gCompile.wszFullCommandLine = wszCommand & " " & wszParams
                gCompile.wszFullLogFile = sConsoleText
-               
+
                ' Need to check to see if any errors occurred while compiling this
                ' object file. If yes, then stop processing object files and display
                ' the error.
@@ -638,10 +644,6 @@ function code_Compile( ByVal wID As Long ) As BOOLEAN
    end if
    
    gApp.IsCompiling = false
-
-'   if AfxFileExists( wszVDMain ) then
-'      AfxDeleteFile( wszVDMain )
-'   end if
 
    Function = True   ' successful
 End Function

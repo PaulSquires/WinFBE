@@ -828,6 +828,7 @@ function clsConfig.SaveConfigFile() as long
    pStream.WriteLine "AutoSaveFiles="         & this.AutoSaveFiles
    pStream.WriteLine "AutoSaveInterval="      & this.AutoSaveInterval
    pStream.WriteLine "RestoreSession="        & this.RestoreSession
+   if this.RestoreSession = 0 then this.wszLastActiveSession = ""
    pStream.WriteLine "LastActiveSessionFile=" & ProcessToCurdriveApp(this.wszLastActiveSession)
    pStream.WriteLine "MultipleInstances="     & this.MultipleInstances    
    pStream.WriteLine "CompileAutosave="       & this.CompileAutosave      
@@ -1480,6 +1481,12 @@ end function
 ' Save current session (open files) to a diskfile
 ' ========================================================================================
 function clsConfig.SaveSessionFile( byref wszSessionFile as wstring ) as boolean    
+   ' If the incoming file is a project then 
+   if gApp.IsProjectActive then
+       this.ProjectSaveToFile()
+       return true
+   end if
+
    dim as CWSTR wszText 
    dim as long nCount 
 
@@ -1490,44 +1497,38 @@ function clsConfig.SaveSessionFile( byref wszSessionFile as wstring ) as boolean
    
    pStream.WriteLine "' WINFBE SESSION FILE"
    
-   if gApp.IsProjectActive then
-      wszText = ProcessToCurdriveApp( gApp.ProjectFilename )
-      pStream.WriteLine "ProjectName=" & wszText
-   else
-      ' Save all of the loaded tabs
-      pStream.WriteLine "BuildConfig=" & this.CompilerBuild
-      pStream.WriteLine "ActiveTab=" & gTTabCtl.CurSel
-      pStream.WriteLine "CommandLine=" & gApp.wszCommandLine
+   ' Save all of the loaded tabs
+   pStream.WriteLine "BuildConfig=" & this.CompilerBuild
+   pStream.WriteLine "ActiveTab=" & gTTabCtl.CurSel
+   pStream.WriteLine "CommandLine=" & gApp.wszCommandLine
 
-      nCount = gTTabCtl.GetItemCount
+   nCount = gTTabCtl.GetItemCount
 
-      for i as long = 0 To nCount - 1
-         if gTTabCtl.IsSafeIndex(i) = false then continue for
-         pDoc = gTTabCtl.tabs(i).pDoc
-         ' Only deal with files that are no longer "new"
-         if pDoc->IsNewFlag = false then 
-            wszText = ProcessToCurdriveApp(pDoc->DiskFilename)
-            pStream.WriteLine "File=" & wszText
-            pStream.WriteLine "FileType=" & pDoc->ProjectFileType
-            pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than true
-            pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
-            pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
-            pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
-            pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
-            pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
-            pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
-            pStream.WriteLine "Position1=" & SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
-            pStream.WriteLine "SplitPosition=" & pDoc->SplitY
-            pStream.WriteLine "FocusEdit=" & iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
-            pStream.WriteLine "FileEnd=[-]" 
-         end if
-      next
+   for i as long = 0 To nCount - 1
+     if gTTabCtl.IsSafeIndex(i) = false then continue for
+     pDoc = gTTabCtl.tabs(i).pDoc
+     ' Only deal with files that are no longer "new"
+     if pDoc->IsNewFlag = false then 
+        wszText = ProcessToCurdriveApp(pDoc->DiskFilename)
+        pStream.WriteLine "File=" & wszText
+        pStream.WriteLine "FileType=" & pDoc->ProjectFileType
+        pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than true
+        pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+        pStream.WriteLine "FoldPoints=" & pDoc->GetFoldPoints()
+        pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
+        pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+        pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
+        pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+        pStream.WriteLine "Position1=" & SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
+        pStream.WriteLine "SplitPosition=" & pDoc->SplitY
+        pStream.WriteLine "FocusEdit=" & iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
+        pStream.WriteLine "FileEnd=[-]" 
+     end if
+   next
          
-   end if
    pStream.Close
 
    this.wszLastActiveSession = wszSessionFile
-   this.SaveConfigFile
 
    function = true   ' successful save
 end function
@@ -1537,6 +1538,16 @@ end function
 ' Load previously saved session file from a diskfile
 ' ========================================================================================
 function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean    
+
+   ' If the previously saved session file was actually a project file
+   ' then open the project.
+   if lcase(AfxGetFileExt(wszSessionFile)) = ".wfbe" then
+       if AfxFileExists(wszSessionFile) then 
+          frmMain_OpenProjectSafely( HWND_FRMMAIN, wszSessionFile ) 
+          return true
+       end if
+       return false
+   end if    
 
    dim pDoc as clsDocument ptr
    dim as CWSTR wst, wKey, wData, wszFilename, wszProjectName
@@ -1583,10 +1594,6 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
       wData = ProcessFromCurdriveApp(wData)
 
       select case wKey
-         case "ProjectName"
-            wszProjectName = wData
-            if AfxFileExists(wszProjectName) then exit do
-            
          case "BuildConfig":         this.CompilerBuild = wData
          case "CommandLine":         gApp.wszCommandLine = wData
          case "ActiveTab":           nActiveTab = nData
@@ -1637,11 +1644,6 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
    loop                        
    pStream.Close
                      
-   if AfxFileExists(wszProjectName) then 
-      frmMain_OpenProjectSafely( HWND_FRMMAIN, wszProjectName ) 
-      return true
-   end if
-
    ' Load all of the filenames into the Explorer listbox. Configure the node
    ' array to allow all types of files to be shown in the listbox
    for i as long = lbound(gConfig.Cat) to ubound(gConfig.Cat)
@@ -1688,7 +1690,6 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
    next
 
    this.wszLastActiveSession = wszSessionFile
-   this.SaveConfigFile
    
    frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
@@ -1795,6 +1796,8 @@ function clsConfig.ProjectSaveToFile() as boolean
    end IF
 
    pStream.Close
+
+   this.wszLastActiveSession = gApp.ProjectFilename
 
    function = true   ' successful save
 end function
@@ -2046,6 +2049,8 @@ function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) as boolean
          end if
       end if
    next
+
+   this.wszLastActiveSession = gApp.ProjectFilename
 
    frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
