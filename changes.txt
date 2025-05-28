@@ -4,6 +4,7 @@ to be compiled into the .bas module object files.
 - Fixed problem with editor not loading Project files on startup if the "Restore previous session files on startup" option is checked.
 - Fixed problem whereby selecting "Remove from Project" from right-click popup menu in File Explorer could unintentionally remove 
 additional document(s) in the project.
+- Fixed parsing problem whereby embedded TODO identifiers were missed when occurring at end of DIM, SUB, or FUNCTION lines.
 - Updated included FreeBasic Compiler to version 1.10.1 (located in toolchain: "FreeBASIC-1.10.1-winlibs-gcc-9.3.0").
 - Updated to latest FreeBasic CHM Help file.
 

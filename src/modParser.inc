@@ -73,7 +73,7 @@ function ctxParser.ParseTODO( byval action as PARSEACTION ) as boolean
    return true
 end function
 
-
+ 
 '':::::
 function ctxParser.ParseDIM( _
          byval action as PARSEACTION, _
@@ -92,6 +92,8 @@ function ctxParser.ParseDIM( _
    do until this.GetToken() = false
       if this.EOL then exit do
       select case this.ltoken 
+         case "'todo:"
+            this.ParseTODO( PARSINGACTION.PARSE_TODO )
          case "shared"
             ' change the scope of this variable to global and do not add it to the statement  
             originFrom = DIMSCOPE.SCOPEGLOBAL
@@ -482,6 +484,11 @@ function ctxParser.ParseFunction( byval action as PARSEACTION ) as boolean
          if this.EOL then exit do
          ' This should pickup any "byref" "as" RETURN_TYPE
          this.functionReturnType = this.functionReturnType & this.token & " "
+
+         select case this.ltoken 
+            case "'todo:"
+               this.ParseTODO( PARSINGACTION.PARSE_TODO )
+         end select       
       loop
    end if
 
@@ -775,7 +782,7 @@ function ctxParser.GetToken() as boolean
             c = this.PeekChar()
             select case c
                'case "O", "o", "D", "d", ":"
-               case 79, 111, 68, 100, 58
+               case 79, 111, 68, 100, 58    
                   c = this.ReadChar()
                case else
                   exit while
@@ -784,6 +791,7 @@ function ctxParser.GetToken() as boolean
          this.token = mid( *this.text, this.s + 1, this.i - this.s)
          this.ltoken = lcase(this.token)
          this.s = this.i
+         
          if this.ltoken = "'todo:" then
             return true
          end if
