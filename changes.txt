@@ -1,4 +1,4 @@
-Version 3.2.0
+Version 3.2.0 (May 29, 2025)
 - Compiling .bas Modules now honors Project flags set for -g, -e, -ex, and -exx allowing debug information
 to be compiled into the .bas module object files.
 - Fixed problem with editor not loading Project files on startup if the "Restore previous session files on startup" option is checked.
