@@ -167,6 +167,25 @@ end Function
 
 
 ' ========================================================================================
+' Open any Session or Project on editor startup
+' ========================================================================================
+function frmMain_RestoreSessionOrProject() as long
+   ' Only restore session if that option is active. The session file may contain
+   ' a reference to a project if the last session was a project.
+   ' Only restore the session if no files were already opened via the command line.
+   if gTTabCtl.GetItemCount = 0 then
+       if gConfig.RestoreSession then 
+          if AfxFileExists( gConfig.wszLastActiveSession ) then
+             gConfig.LoadSessionFile( gConfig.wszLastActiveSession )
+          end if   
+       end if
+   end if
+    
+   function = 0 
+end function
+
+
+' ========================================================================================
 ' Process any command line that was passed to the editor
 ' ========================================================================================
 function frmMain_ProcessCommandLine( byval HWnd as HWnd ) as long
@@ -183,7 +202,12 @@ function frmMain_ProcessCommandLine( byval HWnd as HWnd ) as long
    ' as of v1.7.4 start to use AfxCommand which is a unicode aware replacement for FB's
    ' built in COMMAND function (that is not unicode compliant).
    
-   if len(AfxCommand(1)) = 0 then exit function
+   if len(AfxCommand(1)) = 0 then 
+       ' no command line files/project specified bu the user may be wanting
+       ' to restore a previous session/project.
+       frmMain_RestoreSessionOrProject()
+       exit function
+   end if
    
    dim wszPath as wstring * MAX_PATH
    dim wszArg  as wstring * MAX_PATH
@@ -203,6 +227,7 @@ function frmMain_ProcessCommandLine( byval HWnd as HWnd ) as long
    end if
    SetForegroundWindow(hwnd)
    
+   dim as long NumCommandLineFiles = 0 
    dim as long i = 1
    Do
       wszArg = AfxCommand(i)
@@ -216,6 +241,7 @@ function frmMain_ProcessCommandLine( byval HWnd as HWnd ) as long
       if len(wszPath) = 0 then wszArg = AfxGetExePathName & wszArg 
        
       if AfxFileExists(wszArg) then
+         NumCommandLineFiles =+ 1
          DataToSend.lpData  = @wszArg
          DataToSend.cbdata  = (len(wszArg)*2) + 1
          SendMessage(hwnd, WM_COPYDATA, len(DataToSend), cast(lParam, @DataToSend))
@@ -223,6 +249,12 @@ function frmMain_ProcessCommandLine( byval HWnd as HWnd ) as long
        
       i += 1
    Loop
+
+   ' If no files or project was loaded from the command line then check if the user 
+   ' had session/project restore option.
+   if NumCommandLineFiles = 0 then
+       frmMain_RestoreSessionOrProject()
+   end if    
 
    function = 0
 end function   
@@ -1997,14 +2029,6 @@ function frmMain_Show( byval hWndParent as HWnd ) as LRESULT
 
    ' Post a message to process the application's command line as applicable.
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE, 0, 0 )
-
-   ' Only restore session if that option is active. The session file may contain
-   ' a reference to a project if the last session was a project.
-   if gConfig.RestoreSession then 
-      if AfxFileExists( gConfig.wszLastActiveSession ) then
-         gConfig.LoadSessionFile( gConfig.wszLastActiveSession )
-      end if   
-   end if
 
    ' Post a message to process any User Tools that must start after WinFBE displays.
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_STARTUPUSERTOOLS, 0, 0 )
