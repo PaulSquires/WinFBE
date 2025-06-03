@@ -247,114 +247,110 @@ end function
 ' Replace current selection or all selections
 ' ========================================================================================
 function frmFindReplace_DoReplace( _
-      byval fReplaceAll as boolean = false, _
-      byval fMovenext as boolean = true _
-      ) as long
+        byval fReplaceAll as boolean = false, _
+        byval fMovenext as boolean = true _
+        ) as long
 
-   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc = 0 then exit function
+    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+    if pDoc = 0 then exit function
 
-   dim as hwnd   hWndFind    = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
-   dim as hwnd   hWndReplace = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
-   dim as string txtFind     = str(AfxGetWindowText(hWndFind))
-   dim as string txtReplace  = str(AfxGetWindowText(hWndReplace))
-   dim as long   lenFind     = len(txtFind)
+    dim as HWND   hWndFind    = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
+    dim as HWND   hWndReplace = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
+    dim as string txtFind     = str(AfxGetWindowText(hWndFind))
+    dim as string txtReplace  = str(AfxGetWindowText(hWndReplace))
+    dim as long   lenFind     = len(txtFind)
 
-   if lenFind = 0 then exit function
-   
-   dim as long nPos, startPos, endPos, findFlags, r
+    if lenFind = 0 then exit function
     
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   if fReplaceAll = true then 
-      if gFind.nMatchCase then findFlags = (findFlags or SCFIND_MATCHCASE)
-      if gFind.nWholeWord then findFlags = (findFlags or SCFIND_WHOLEWORD)
-      SendMessage( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
-       
-      if pDoc->HasMarkerHighlight then
-         startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
-         endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
-         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-      else
-         SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-         startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
-         endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
-      end if
-      SciExec( hEdit, SCI_INDICATORCLEARRANGE, startPos, endPos)
-      
-      gApp.SuppressNotify = true
-      SetWindowRedraw( hEdit, false )
-      SendMessage( hEdit, SCI_BEGINUNDOACTION, 0, 0)
-      do 
-         r = SciExec( hEdit, SCI_SEARCHINTARGET, len(txtFind), strptr(txtFind))
-         if r = -1 then exit do
-         dim as zstring * MAX_PATH sSelText
-         SciExec( hEdit, SCI_GETTARGETTEXT, 0, @sSelText )
-         ' If Preserve Case is active then check the selection to see if the entire
-         ' selection is all UPPERCASE or all lowercase.
-         if gFind.nPreserve then
+    dim as long nPos, startPos, endPos, findFlags, r
+    
+    dim as HWND hEdit = pDoc->hWndActiveScintilla
+    if fReplaceAll = true then 
+        if gFind.nMatchCase then findFlags = (findFlags or SCFIND_MATCHCASE)
+        if gFind.nWholeWord then findFlags = (findFlags or SCFIND_WHOLEWORD)
+        SendMessage( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
+        
+        if pDoc->HasMarkerHighlight then
+            startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
+        end if
+        SciExec( hEdit, SCI_INDICATORCLEARRANGE, startPos, endPos)
+        
+        gApp.SuppressNotify = true
+        SetWindowRedraw( hEdit, false )
+        SendMessage( hEdit, SCI_BEGINUNDOACTION, 0, 0)
+        do 
+            if pDoc->HasMarkerHighlight then
+                endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
+            else    
+                ' Search the whole document. Get new length in case changed due to replacements.
+                endPos = SciExec( hEdit, SCI_GETLENGTH, 0, 0)
+            end if    
+            
+            SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+            SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+            r = SciExec( hEdit, SCI_SEARCHINTARGET, len(txtFind), strptr(txtFind))
+            if r = -1 then exit do
+            dim as zstring * MAX_PATH sSelText
+            SciExec( hEdit, SCI_GETTARGETTEXT, 0, @sSelText )
+            ' If Preserve Case is active then check the selection to see if the entire
+            ' selection is all UPPERCASE or all lowercase.
+            if gFind.nPreserve then
+                dim as string sReplaceText
+                if isUpperCaseString( sSelText ) then
+                    sReplaceText = ucase(txtReplace)
+                elseif isLowerCaseString( sSelText ) then
+                    sReplaceText = lcase(txtReplace)
+                else
+                    sReplaceText = txtReplace
+                end if
+                SciExec( hEdit, SCI_REPLACETARGET, len(sReplaceText), strptr(sReplaceText) )
+            else            
+                SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
+            end if
+            
+            ' Move start position after the replaced text
+            startPos = SendMessage(hEdit, SCI_GETTARGETEND, 0, 0)
+        loop
+        SendMessage( hEdit, SCI_ENDUNDOACTION, 0, 0)
+        SetWindowRedraw( hEdit, true )
+        gApp.SuppressNotify = false
+        AfxRedrawWindow( hEdit )
+
+    else   
+        ' Need to ensure that the current cursor/selection is actually the find
+        ' phrase that we want to replace. if not, then move to the closest selection.
+        if ucase(pDoc->GetSelText) <> ucase(txtFind) then
+            startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
+            frmFindReplace_NextSelection(startPos, fMoveNext, true)
+            exit function
+        end if
+        SciExec( hEdit, SCI_TARGETFROMSELECTION, 0, 0)
+        ' If Preserve Case is active then check the selection to see if the entire
+        ' selection is all UPPERCASE or all lowercase.
+        if gFind.nPreserve then
+            dim as string sSelText = pDoc->GetSelText
             dim as string sReplaceText
             if isUpperCaseString( sSelText ) then
-               sReplaceText = ucase(txtReplace)
+                sReplaceText = ucase(txtReplace)
             elseif isLowerCaseString( sSelText ) then
-               sReplaceText = lcase(txtReplace)
+                sReplaceText = lcase(txtReplace)
             else
-               sReplaceText = txtReplace
+                sReplaceText = txtReplace
             end if
             SciExec( hEdit, SCI_REPLACETARGET, len(sReplaceText), strptr(sReplaceText) )
-            startPos = r + len(sReplaceText)
-            endPos = endPos + len(sReplaceText) - len(sSelText)
-         else            
+            startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + len(sReplaceText)
+        else            
             SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
-            startPos = r + len(txtReplace)  
-            endPos = endPos + len(txtReplace) - len(sSelText)
-         end if
-         ' Need to update the end searching positions because the replace action may
-         ' have made the document larger or smaller.
-         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-      loop
-      SendMessage( hEdit, SCI_ENDUNDOACTION, 0, 0)
-      SetWindowRedraw( hEdit, true )
-      gApp.SuppressNotify = false
-      AfxRedrawWindow( hEdit )
+            startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + len(txtReplace)
+        end if
+        frmFindReplace_NextSelection(startPos, fMoveNext, true)
+    end if
+        
+    ' Need to reparse because some of the function names may been replaced with new names.
+    pDoc->bNeedsParsing = true
+    pDoc->ParseDocument()
 
-   else   
-      ' Need to ensure that the current cursor/selection is actually the find
-      ' phrase that we want to replace. if not, then move to the closest selection.
-      if ucase(pDoc->GetSelText) <> ucase(txtFind) then
-         startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-         frmFindReplace_NextSelection(startPos, fMoveNext, true)
-         exit function
-      end if
-      SciExec( hEdit, SCI_TARGETFROMSELECTION, 0, 0)
-      ' If Preserve Case is active then check the selection to see if the entire
-      ' selection is all UPPERCASE or all lowercase.
-      if gFind.nPreserve then
-         dim as string sSelText = pDoc->GetSelText
-         dim as string sReplaceText
-         if isUpperCaseString( sSelText ) then
-            sReplaceText = ucase(txtReplace)
-         elseif isLowerCaseString( sSelText ) then
-            sReplaceText = lcase(txtReplace)
-         else
-            sReplaceText = txtReplace
-         end if
-         SciExec( hEdit, SCI_REPLACETARGET, len(sReplaceText), strptr(sReplaceText) )
-         startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + len(sReplaceText)
-      else            
-         SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), strptr(txtReplace) )
-         startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) + len(txtReplace)
-      end if
-      frmFindReplace_NextSelection(startPos, fMoveNext, true)
-   end if
-      
-   ' Need to reparse because some of the function names may been replaced
-   ' with new names.
-   pDoc->bNeedsParsing = true
-   pDoc->ParseDocument()
-
-   function = 0
+    function = 0
 end function
 
 
@@ -363,67 +359,66 @@ end function
 ' ========================================================================================
 function frmFindReplace_HighlightSearches( byval bRepositionCaret as boolean ) as long
 
-   dim as long r, startPos, endPos, findFlags, nLength
-   dim as hwnd hWndFind = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
-   
-   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc = 0 then exit function
+    dim as long r, startPos, endPos, findFlags, nLength
+    dim as HWND hWndFind = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
+    
+    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+    if pDoc = 0 then exit function
 
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   SciExec( hEdit, SCI_SETADDITIONALCARETSVISIBLE, false, 0) 
-   SciExec( hEdit, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
-   SciExec( hEdit, SCI_SETINDICATORCURRENT, 8, 0)
-   SciExec( hEdit, SCI_INDICSETFORE, 8, ghEditor.ForeColorOccurrence ) 
-   SciExec( hEdit, SCI_INDICSETALPHA, 8, 60 )   
-   
-   dim txtFind as string = str(AfxGetWindowText(hWndFind))
-      
-   if gFind.nMatchCase then findFlags = (findFlags or SCFIND_MATCHCASE)
-   if gFind.nWholeWord then findFlags = (findFlags or SCFIND_WHOLEWORD)
-   SciExec( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
-   
-   ' Remove all existing selection indicators
-   nLength = SendMessage( hEdit, SCI_GETTEXTLENGTH, 0, 0)
-   SciExec( hEdit, SCI_INDICATORCLEARRANGE, 0, nLength)
-   
-   ' Are we searching a selection or the whole document
-   if pDoc->HasMarkerHighlight then
-      startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
-      endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
-      SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-      SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-   else
-      SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-      startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
-      endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
-   end if
+    dim as HWND hEdit = pDoc->hWndActiveScintilla
+    SciExec( hEdit, SCI_SETADDITIONALCARETSVISIBLE, false, 0) 
+    SciExec( hEdit, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
+    SciExec( hEdit, SCI_SETINDICATORCURRENT, 8, 0)
+    SciExec( hEdit, SCI_INDICSETFORE, 8, ghEditor.ForeColorOccurrence ) 
+    SciExec( hEdit, SCI_INDICSETALPHA, 8, 60 )   
+    
+    dim txtFind as string = str(AfxGetWindowText(hWndFind))
+        
+    if gFind.nMatchCase then findFlags = (findFlags or SCFIND_MATCHCASE)
+    if gFind.nWholeWord then findFlags = (findFlags or SCFIND_WHOLEWORD)
+    SciExec( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
+    
+    ' Remove all existing selection indicators
+    nLength = SendMessage( hEdit, SCI_GETTEXTLENGTH, 0, 0)
+    SciExec( hEdit, SCI_INDICATORCLEARRANGE, 0, nLength)
+    
+    ' Are we searching a selection or the whole document
+    if pDoc->HasMarkerHighlight then
+        startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
+        endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
+    else
+        startPos = 0
+        endPos = SciExec( hEdit, SCI_GETLENGTH, 0, 0)
+    end if
 
-   ' Search for the text to find
-   if len(txtFind) then
-      do 
-         r = SciExec( hEdit, SCI_SEARCHINTARGET, len(txtFind), strptr(txtFind))
-         if r = -1 then exit do
-         
-         SciExec( hEdit, SCI_SETINDICATORVALUE, 8, 0 )
-         SciExec( hEdit, SCI_INDICATORFILLRANGE, r, len(txtFind))
-         startPos = r + len(txtFind)
-         
-         ' Adjust the searching positions
-         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-      loop
-      startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
-      endPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-      if endPos < startPos then startPos = endPos
-      startPos = startPos - 1
-   else
-      startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
-   end if
+    ' Search for the text to find
+    if len(txtFind) then
+        SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+        SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+        do 
+            r = SciExec( hEdit, SCI_SEARCHINTARGET, len(txtFind), strptr(txtFind))
+            if r = -1 then exit do
+            
+            SciExec( hEdit, SCI_SETINDICATORVALUE, 8, 0 )
+            SciExec( hEdit, SCI_INDICATORFILLRANGE, r, len(txtFind))
+            startPos = r + len(txtFind)
+            
+            ' Adjust the searching positions
+            SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+            SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+        loop
+        startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
+        endPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
+        if endPos < startPos then startPos = endPos
+        startPos = startPos - 1
+    else
+        startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
+    end if
 
-   startPos = iif(startPos < 0, 0, startPos)
-   frmFindReplace_NextSelection(startPos, true, bRepositionCaret)
-   
-   function = 0
+    startPos = iif(startPos < 0, 0, startPos)
+    frmFindReplace_NextSelection(startPos, true, bRepositionCaret)
+    
+    function = 0
 
 end function
 

@@ -61,7 +61,12 @@ function clsApp.RemoveDocument( byval pDoc as clsDocument ptr ) as long
    end if
 
    ' Release memory associated with this pDoc
-   if pDoc then delete(pDoc)
+   if pDoc then 
+      ' If this doc was associated with LastPosition then set to null
+      ' because the pointer will no longer be valid.
+      if gLastPosition.pDoc = pDoc then gLastPosition.pDoc = 0
+      delete(pDoc)
+   end if   
 
    function = 0
 end function

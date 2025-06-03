@@ -37,7 +37,6 @@ private function frmOptions_SaveEditorOptions() as long
    HWnd = HWND_FRMOPTIONSGENERAL
    gConfig.MultipleInstances    = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKMULTIPLEINSTANCES) )
    gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE) )
-   gConfig.CloseFuncList        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST) )
    gConfig.AskExit              = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT) )
    gConfig.RestoreSession       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKRESTORESESSION) )
    gConfig.CheckForUpdates      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKUPDATES) )

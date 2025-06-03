@@ -35,14 +35,16 @@ function updateUserToolsMenuItems() as long
    setTopMenuMRUItem( getNextFreeMRUindex(), IDM_USERTOOLS, 0, 0, false, true )
    
    for i as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
-      hasTools = true
-      setTopMenuMRUItem( getNextFreeMRUindex(), IDM_USERTOOLS, IDM_USERTOOLSBASE + i, 0, false, false )
-      wszText = gConfig.Tools(i).wszDescription
-      if gConfig.Tools(i).wszKey then
-         wszText = wszText & chr(9) & gConfig.Tools(i).wszKey
-      end if
-      txtWidth = getTextWidth( HWND_FRMMAIN_MENUBAR, wszText, ghMenuBar.hFontMenuBar, 30 )
-      if txtWidth > nMenuWidth then nMenuWidth = txtWidth
+      if gConfig.Tools(i).IsDisplayMenu then
+         hasTools = true
+         setTopMenuMRUItem( getNextFreeMRUindex(), IDM_USERTOOLS, IDM_USERTOOLSBASE + i, 0, false, false )
+         wszText = gConfig.Tools(i).wszDescription
+         if gConfig.Tools(i).wszKey then
+            wszText = wszText & chr(9) & gConfig.Tools(i).wszKey
+         end if
+         txtWidth = getTextWidth( HWND_FRMMAIN_MENUBAR, wszText, ghMenuBar.hFontMenuBar, 30 )
+         if txtWidth > nMenuWidth then nMenuWidth = txtWidth
+      end if   
    next
 
    if hasTools = false then

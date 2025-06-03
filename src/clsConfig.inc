@@ -832,7 +832,6 @@ function clsConfig.SaveConfigFile() as long
    pStream.WriteLine "LastActiveSessionFile=" & ProcessToCurdriveApp(this.wszLastActiveSession)
    pStream.WriteLine "MultipleInstances="     & this.MultipleInstances    
    pStream.WriteLine "CompileAutosave="       & this.CompileAutosave      
-   pStream.WriteLine "CloseFuncList="         & this.CloseFuncList        
    pStream.WriteLine "SyntaxHighlighting="    & this.SyntaxHighlighting   
    pStream.WriteLine "Codetips="              & this.Codetips             
    pStream.WriteLine "AutoComplete="          & this.AutoComplete
@@ -1254,7 +1253,6 @@ function clsConfig.LoadConfigFile() as long
             case "LastActiveSessionFile":  this.wszLastActiveSession  = ProcessFromCurdriveApp(wData)
             case "MultipleInstances":      this.MultipleInstances     = nData
             case "CompileAutosave":        this.CompileAutosave       = nData
-            case "CloseFuncList":          this.CloseFuncList         = nData
             case "SyntaxHighlighting":     this.SyntaxHighlighting    = nData
             case "Codetips":               this.Codetips              = nData
             case "AutoComplete":           this.AutoComplete          = nData

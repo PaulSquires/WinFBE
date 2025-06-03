@@ -1,3 +1,14 @@
+Version 3.2.1
+- Fixed GPF on non-projects when reloading multiple files that were changed outside the editor.
+- Fixed flawed logic using Scintilla api for looped find/replace.
+- Reposition popup menus that display outside the dimensions of the desktop work area.
+- Removed unused legacy option: "Close Function List on selection".
+- Added code to convert VK_OEM codes to virtual codes based on current keyboard being used.
+- Fixed User Tool would always displaying in menu. It was not respecting the "Display this item in the editor menu" option.
+- Calculated the widest width of file paths for MRU Files and MRU Projects so that the text fits within the top menu display area.
+- If document being closed is associated with LastPosition then set to null because the pointer will no longer be valid.
+
+
 Version 3.2.0 (May 29, 2025)
 - Compiling .bas Modules now honors Project flags set for -g, -e, -ex, and -exx allowing debug information
 to be compiled into the .bas module object files.

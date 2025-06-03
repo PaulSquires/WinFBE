@@ -1303,59 +1303,66 @@ function frmMain_OnActivateApp( _
          ' Has the external file been deleted or is now not available
          if AfxFileExists(pDoc->DiskFilename) = false then
             if pDoc->DeletedButKeep = false then
-               ' Ensure that the file is open and displayed
-               frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                       false, _    ' bIsNewFile
-                                       false, _    ' bIsTemplate
-                                       true,  _    ' bShowInTab
-                                       false, _    ' bIsInclude
-                                       "", _       ' wszName
-                                       pDoc )      ' pDocIn
-               if MessageBox( HWND_FRMMAIN, _
-                               pDoc->DiskFilename & vbCrLf & _ 
-                               L(286, "This document has been deleted...?"), _
-                               L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
-                  ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
-                  pDoc->UserModified = true                
-               else
-                  ' No. Close the file.
-                  frmMain_OnCommand(HWND_FRMMAIN, IDM_REMOVEFILEFROMPROJECT, 0, 0)
-                  pDocs(idx) = 0
-                  continue do
-               end if
+                ' Ensure that the file is open and displayed
+                frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                                        false, _    ' bIsNewFile
+                                        false, _    ' bIsTemplate
+                                        true,  _    ' bShowInTab
+                                        false, _    ' bIsInclude
+                                        "", _       ' wszName
+                                        pDoc )      ' pDocIn
+                if MessageBox( HWND_FRMMAIN, _
+                                pDoc->DiskFilename & vbCrLf & _ 
+                                L(286, "This document has been deleted or is no longer available. Do you wish to keep the file open in the editor?"), _
+                                L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
+                    ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
+                    pDoc->UserModified = true                
+                else
+                    ' No. Close the file.
+                    if gApp.IsProjectActive then 
+                        OnCommand_ProjectRemove( 0, pDoc )  ' the first param (id) is not used.
+                    else
+                        if OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT ) = false then continue do
+                    end if    
+                    pDocs(idx) = 0
+                    continue do
+                end if
             end if
             pDoc->DeletedButKeep = true
 
          else
-                  
             ' Compare the disk file date time to the value currently
             ' stored in document class.
             ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
             if AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) then
-               OpenSelectedDocument( pDoc->DiskFilename, "" )
-               if MessageBox( HWND_FRMMAIN, _
-                               pDoc->DiskFilename & vbCrLf & _ 
-                               L(266, "File was changed by another application. Reload it?"), _
-                               L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
-                  
-                  dim as CWSTR wszFilename = pDoc->DiskFilename
-                  dim as CWSTR wszFileType = pDoc->ProjectFileType
-                  
-                  ' Remove the current file and open the changed file.
-                  frmMain_OnCommand(HWND_FRMMAIN, IDM_REMOVEFILEFROMPROJECT, 0, 0)
-                  
-                  ' Ensure that the file is open and displayed
-                  dim as clsDocument ptr pDocLoad = _
-                  frmMain_OpenFileSafely( HWND_FRMMAIN, _
-                                          false, _    ' bIsNewFile
-                                          false, _    ' bIsTemplate
-                                          true,  _    ' bShowInTab
-                                          false, _    ' bIsInclude
-                                          wszFilename, _ ' wszName
-                                          0 )         ' pDocIn
-                 
-                  pDocLoad->ProjectFileType = wszFileType
-               end if                
+                OpenSelectedDocument( pDoc->DiskFilename, "" )
+                if MessageBox( HWND_FRMMAIN, _
+                                pDoc->DiskFilename & vbCrLf & _ 
+                                L(266, "File was changed by another application. Reload it?"), _
+                                L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
+                    
+                    dim as CWSTR wszFilename = pDoc->DiskFilename
+                    dim as CWSTR wszFileType = pDoc->ProjectFileType
+                    
+                    ' Remove the current file and open the changed file.
+                    if gApp.IsProjectActive then 
+                        OnCommand_ProjectRemove( 0, pDoc )  ' the first param (id) is not used.
+                    else
+                        if OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT ) = false then continue do
+                    end if    
+                    
+                    ' Ensure that the file is open and displayed
+                    dim as clsDocument ptr pDocLoad = _
+                    frmMain_OpenFileSafely( HWND_FRMMAIN, _
+                                            false, _    ' bIsNewFile
+                                            false, _    ' bIsTemplate
+                                            true,  _    ' bShowInTab
+                                            false, _    ' bIsInclude
+                                            wszFilename, _ ' wszName
+                                            0 )         ' pDocIn
+                    
+                    pDocLoad->ProjectFileType = wszFileType
+                end if                
             end if
             pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
          end if

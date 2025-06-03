@@ -489,6 +489,49 @@ End Function
 
       
 ' ========================================================================================
+' frmPopupMenu_GetMaxMenuWidth
+' ========================================================================================
+function frmPopupMenu_GetMaxMenuWidth( byval nCtrlID as long ) as long
+   ' Calculate the width of the menu based on the caption text, keyboard shortcut,
+   ' and any padding. Need to do this calculation because menu widths will vary
+   ' based on the language used.
+   dim as CWSTR wszText
+   dim as long max_left_width
+   dim as long max_right_width
+   dim as long left_width
+   dim as long right_width
+   dim as long padding = AfxScaleX(30)
+   dim as long interior_width = 0
+   dim as CWSTR wszLeft
+   dim as CWSTR wszRight
+   
+   for i as long = lbound(gTopMenu) to ubound(gTopMenu)
+      if gTopMenu(i).nParentID = nCtrlID then
+         wszText = getMenuText(gTopMenu(i).nID)
+         ' If an embedded tab character then this menu item has a caption and a keyboard
+         ' accelerator so add extra internal space to expand the tab.
+         if instr(wszText, chr(9)) then 
+            interior_width = AfxScaleX(20)
+
+            wszLeft = AfxStrParse(wszText, 1, chr(9))
+            left_width = getTextWidth( HWND_FRMMAIN_MENUBAR, wszLeft, ghMenuBar.hFontMenuBar, 0 )
+            if left_width > max_left_width then max_left_width = left_width
+            
+            wszRight = AfxStrParse(wszText, 2, chr(9))
+            right_width = getTextWidth( HWND_FRMMAIN_MENUBAR, wszRight, ghMenuBar.hFontMenuBar, 0 )
+            if right_width > max_right_width then max_right_width = right_width
+         else   
+            left_width = getTextWidth( HWND_FRMMAIN_MENUBAR, wszText, ghMenuBar.hFontMenuBar, 0 )
+            if left_width > max_left_width then max_left_width = left_width
+         end if
+      end if   
+   next
+   
+   function = max_left_width + interior_width + max_right_width + padding
+end function
+
+
+' ========================================================================================
 ' frmPopupMenu_Show
 ' ========================================================================================
 function frmPopupMenu_Show( _
@@ -573,28 +616,14 @@ function frmPopupMenu_Show( _
         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(SUBCLASSPROC, @frmPopupMenu_SubclassProc), IDC_MENU_LISTBOX, Cast(DWORD_PTR, @pWindow))
 
+   nMenuWidth = frmPopupMenu_GetMaxMenuWidth(nCtrlID)
    select case nCtrlID
-      case IDC_MENUBAR_FILE:     nMenuWidth = 262
-      case IDC_MENUBAR_EDIT:     nMenuWidth = 280
-      case IDC_MENUBAR_SEARCH:   nMenuWidth = 300
-      case IDC_MENUBAR_VIEW:     nMenuWidth = 320
-      case IDC_MENUBAR_PROJECT:  nMenuWidth = 242
-      case IDC_MENUBAR_COMPILE:  nMenuWidth = 300
-      case IDC_MENUBAR_DESIGNER: nMenuWidth = 300
-      case IDC_MENUBAR_HELP:     nMenuWidth = 262
-      case IDM_USERTOOLS:        nMenuWidth = 262
-      case IDM_OPTIONS:          nMenuWidth = 300
-      case IDM_ALIGN, IDM_MAKESAME
-         nMenuWidth = 130
-      case IDM_HORIZSPACING, IDM_VERTSPACING, IDM_CENTER
-         nMenuWidth = 156
       case IDM_MRU
          ' update the list of filenames with the most current data
          ' the width of the MRU menu depends on the width of the actual filenames
-         nMenuWidth = max( 262, updateMRUFilesItems )         
+         nMenuWidth = max( 262, updateMRUFilesItems() )         
       case IDM_MRUPROJECT
-         nMenuWidth = max( 262, updateMRUProjectFilesItems )
-   
+         nMenuWidth = max( 262, updateMRUProjectFilesItems() )
    end select
   
    ' add the menuitems to the popup menu ownerdraw listbox. we do this after the
@@ -621,6 +650,20 @@ function frmPopupMenu_Show( _
                   SWP_NOZORDER Or SWP_SHOWWINDOW)
 
    nMenuHeight = nTop + nHeight + nTop
+   
+   if nPopupType = ID_SUBPOPUP then
+      ' Attempt to adjust the positioning of the popup should it extend past the bottom 
+      ' of the visible display dimensions of the desktop.
+      dim as long desktop_height = AfxGetWorkAreaHeight()
+      dim as rect rcPopupMenu = AfxGetWindowRect(hPopupMenu)
+      dim as long popupmenu_height = pWindow->ScaleY(nMenuHeight)
+      if rcPopupMenu.top + popupmenu_height > desktop_height then
+         rcPopupMenu.top = desktop_height - popupmenu_height
+         AfxSetWindowLocation(hPopupMenu, rcPopupMenu.left, rcPopupMenu.top)
+         nMenuTop = pWindow->UnScaleY(rcPopupMenu.top)
+      end if
+   end if      
+   
    
    ' create semi-transparent window slightly offset under our popup menu in order to simulate a shadow.
    pWindow = New CWindow

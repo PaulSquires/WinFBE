@@ -96,25 +96,22 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
    '' FILE MENU
    frmKeyBoard_AddKeyBinding( "File", IDM_FILENEW, "IDM_FILENEW", "New file", "Ctrl+N", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_FILEOPEN, "IDM_FILEOPEN", "Open one or more files", "Ctrl+O", "", false )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILEOPENTEMPLATES, "IDM_FILEOPENTEMPLATES", "Open templates", "Ctrl+T", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_FILECLOSE, "IDM_FILECLOSE", "Close file", "Ctrl+W", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_FILECLOSEALL, "IDM_FILECLOSEALL", "Close all files", "Ctrl+Shift+W", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVE, "IDM_FILESAVE", "Save file", "Ctrl+S", "", false )
-   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVEAS, "IDM_FILESAVEAS", "Save file as a different name", "F12", "", false )
+   frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVEAS, "IDM_FILESAVEAS", "Save file as a different name", "", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_FILESAVEALL, "IDM_FILESAVEALL", "Save all files", "Ctrl+Shift+S", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_AUTOSAVE, "IDM_AUTOSAVE", "Toggle Auto Save", "", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_LOADSESSION, "IDM_LOADSESSION", "Load session", "", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_SAVESESSION, "IDM_SAVESESSION", "Save session", "", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_KEYBOARDSHORTCUTS, "IDM_KEYBOARDSHORTCUTS", "Keyboard shortcuts", "Ctrl+K", "", false )
-   frmKeyBoard_AddKeyBinding( "File", IDM_USERTOOLSDIALOG, "IDM_USERTOOLSDIALOG", "User tools", "Ctrl+F7", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_OPTIONSDIALOG, "IDM_OPTIONSDIALOG", "Environment options", "Shift+F7", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_BUILDCONFIG, "IDM_BUILDCONFIG", "Build configurations", "F7", "", false )
-   frmKeyBoard_AddKeyBinding( "File", IDM_USERSNIPPETS, "IDM_USERSNIPPETS", "User code snippets", "Ctrl+Shift+F7", "", false )
    frmKeyBoard_AddKeyBinding( "File", IDM_EXIT, "IDM_EXIT", "Exit application", "Alt+F4", "", false )
 
    '' EDIT MENU
    frmKeyBoard_AddKeyBinding( "Edit", IDM_UNDO, "IDM_UNDO", "Undo", "Ctrl+Z", "", false )
-   frmKeyBoard_AddKeyBinding( "Edit", IDM_REDO, "IDM_REDO", "Redo", "Ctrl+E", "", false )
+   frmKeyBoard_AddKeyBinding( "Edit", IDM_REDO, "IDM_REDO", "Redo", "Ctrl+Shift+Z", "", false )
    frmKeyBoard_AddKeyBinding( "Edit", IDM_CUT, "IDM_CUT", "Cut selection to the clipboard", "Ctrl+X", "", false )
    frmKeyBoard_AddKeyBinding( "Edit", IDM_COPY, "IDM_COPY", "Copy selection to the clipboard", "Ctrl+C", "", false )
    frmKeyBoard_AddKeyBinding( "Edit", IDM_PASTE, "IDM_PASTE", "Paste clipboard contents", "Ctrl+V", "", false )
@@ -142,8 +139,8 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
    frmKeyBoard_AddKeyBinding( "Edit", IDM_SETFOCUSEDITOR, "IDM_SETFOCUSEDITOR", "Set keyboard focus to the editing window", "Ctrl+Tilde", "", false ) ' VK_OEM_3
    
    '' SEARCH MENU
-   frmKeyBoard_AddKeyBinding( "Search", IDM_DEFINITION, "IDM_DEFINITION", "Goto the sub/function definition", "F6", "", false )
-   frmKeyBoard_AddKeyBinding( "Search", IDM_LASTPOSITION, "IDM_LASTPOSITION", "Goto previous file position", "Shift+F6", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_DEFINITION, "IDM_DEFINITION", "Goto the sub/function definition", "F12", "", false )
+   frmKeyBoard_AddKeyBinding( "Search", IDM_LASTPOSITION, "IDM_LASTPOSITION", "Goto previous file position", "Shift+F12", "", false )
    frmKeyBoard_AddKeyBinding( "Search", IDM_GOTONEXTFUNCTION, "IDM_GOTONEXTFUNCTION", "Goto next sub/function", "Ctrl+PgDn", "", false )
    frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOPREVFUNCTION, "IDM_GOTOPREVFUNCTION", "Goto previous sub/function", "Ctrl+PgUp", "", false )
    frmKeyBoard_AddKeyBinding( "Search", IDM_GOTOHEADERFILE, "IDM_GOTOHEADERFILE", "Goto header file", "Ctrl+Shift+H", "", false )
@@ -200,22 +197,12 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
    frmKeyBoard_AddKeyBinding( "Compile", IDM_RUNEXE, "IDM_RUNEXE", "Run executable", "Shift+F5", "", false )
    frmKeyBoard_AddKeyBinding( "Compile", IDM_COMMANDLINE, "IDM_COMMANDLINE", "Command line", "", "", false )
    
-   '' DESIGNER MENU
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_NEWFORM, "IDM_NEWFORM", "New form", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_VIEWTOOLBOX, "IDM_VIEWTOOLBOX", "View toolbox", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_MENUEDITOR, "IDM_MENUEDITOR", "Menu editor", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_TOOLBAREDITOR, "IDM_TOOLBAREDITOR", "Toolbar editor", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_STATUSBAREDITOR, "IDM_STATUSBAREDITOR", "Statusbar editor", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_IMAGEMANAGER, "IDM_IMAGEMANAGER", "Image manager", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_SNAPLINES, "IDM_SNAPLINES", "Enable snap lines", "", "", false )
-   frmKeyBoard_AddKeyBinding( "Designer", IDM_LOCKCONTROLS, "IDM_LOCKCONTROLS", "Lock controls", "", "", false )
-   
    '' HELP MENU
    frmKeyBoard_AddKeyBinding( "Help", IDM_HELP, "IDM_HELP", "FreeBasic Help (context sensitive help)", "F1", "", false )
    
    ' Load the keybindings settings file. This will update the gKeys array with any
    ' user defined key mappings.
-   dim as CWSTR wszFilename = AfxGetExePathName & "Settings\keybindings.ini" 
+   dim as CWSTR wszFilename = AfxGetExePathName & "settings\keybindings.ini" 
    
    dim pStream AS CTextStream
    
@@ -264,6 +251,20 @@ function frmKeyboard_VirtKeyToValue( byval wszString as CWSTR ) as long
    end select
    function = 0
 end function
+
+
+' ========================================================================================
+' Converts a VK_OEM key to propery virtual key because of different keyboard layouts
+' ========================================================================================
+function frmKeyboard_OEMtoVirtKey( byval ch as ubyte ) as long
+   ' declare function VkKeyScanExW(byval ch as WCHAR, byval dwhkl as HKL) as SHORT
+   dim as HKL layout = GetKeyboardLayout(0)  '// Current layout
+   dim as short result = VkKeyScanEx(ch, layout)
+   dim as ubyte vkCode = lobyte(result)   
+   dim as ubyte shiftState = hibyte(result)
+   return vkCode
+end function
+
 
 ' ========================================================================================
 ' Convert an accelerator key string (F1, TAB, "A", etc..) to virtual key value
@@ -316,13 +317,34 @@ function frmKeyboard_AccelKeyToValue( byval wszString as CWSTR ) as long
       case ",", "COMMA": return VK_OEM_COMMA           
       case "-", "MINUS": return VK_OEM_MINUS          
       case ".", "PERIOD": return VK_OEM_PERIOD
-      case ";", ":", "SEMICOLON", "COLON": return VK_OEM_1
-      case "/", "?", "FORWARDSLASH", "QUESTIONMARK": return VK_OEM_2
-      case "`", "~", "BACKTICK", "TILDE": return VK_OEM_3
-      case "[", "{", "OPENSQUAREBRACKET", "OPENCURLYBRACE": return VK_OEM_4
-      case "\", "|", "BACKSLASH", "PIPE": return VK_OEM_5
-      case "]", "}", "CLOSESQUAREBRACKET", "CLOSECURLYBRACE": return VK_OEM_6
-      case "'", chr(34), "SINGLEQUOTE", "DOUBLEQUOTE": return VK_OEM_7
+      case ";", "SEMICOLON"       ' VK_OEM_1
+         return frmKeyboard_OEMtoVirtKey(asc(";"))
+      case ":", "COLON"           ' VK_OEM_1
+         return frmKeyboard_OEMtoVirtKey(asc(":"))
+      case "/", "FORWARDSLASH"    ' VK_OEM_2
+         return frmKeyboard_OEMtoVirtKey(asc("/"))
+      case "?", "QUESTIONMARK"    ' VK_OEM_2
+         return frmKeyboard_OEMtoVirtKey(asc("?"))
+      case "`", "BACKTICK"        ' VK_OEM_3
+         return frmKeyboard_OEMtoVirtKey(asc("`"))
+      case "~", "TILDE"           ' VK_OEM_3
+         return frmKeyboard_OEMtoVirtKey(asc("~"))
+      case "[", "OPENSQUAREBRACKET" ' VK_OEM_4
+         return frmKeyboard_OEMtoVirtKey(asc("["))
+      case "{", "OPENCURLYBRACE"    ' VK_OEM_4
+         return frmKeyboard_OEMtoVirtKey(asc("{"))
+      case "\", "BACKSLASH"         ' VK_OEM_5
+         return frmKeyboard_OEMtoVirtKey(asc("\"))
+      case "|", "PIPE"              ' VK_OEM_5
+         return frmKeyboard_OEMtoVirtKey(asc("|"))
+      case "]", "CLOSESQUAREBRACKET"  ' VK_OEM_6
+         return frmKeyboard_OEMtoVirtKey(asc("]"))
+      case "}", "CLOSECURLYBRACE"     ' VK_OEM_6
+         return frmKeyboard_OEMtoVirtKey(asc("}"))
+      case "'", "SINGLEQUOTE"         ' VK_OEM_7
+         return frmKeyboard_OEMtoVirtKey(asc("'"))
+      case chr(34), "DOUBLEQUOTE"     ' VK_OEM_7
+         return frmKeyboard_OEMtoVirtKey(34)
       case "0" to "9": return asc(wszString)   
       case "A" to "Z": return asc(wszString)
    end select
@@ -357,7 +379,6 @@ Function frmKeyboard_BuildAcceleratorTable() As long
    pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_V,   IDC_MENUBAR_VIEW )
    pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_P,   IDC_MENUBAR_PROJECT )
    pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_C,   IDC_MENUBAR_COMPILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_D,   IDC_MENUBAR_DESIGNER )
    pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_H,   IDC_MENUBAR_HELP )
 
    ' Create the accelerator table based on the data in the gKeys() array
@@ -530,7 +551,7 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmKeyboard
 ' ========================================================================================
 Function frmKeyboard_OnClose( byval HWnd As HWnd ) As LRESULT
-   dim as CWSTR wszFilename = AfxGetExePathName & "Settings\keybindings.ini" 
+   dim as CWSTR wszFilename = AfxGetExePathName & "settings\keybindings.ini" 
    frmKeyboard_SaveKeyBindings( wszFilename )
    frmKeyboard_BuildAcceleratorTable
 
