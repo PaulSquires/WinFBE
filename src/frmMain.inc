@@ -1336,11 +1336,17 @@ function frmMain_OnActivateApp( _
             ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
             if AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) then
                 OpenSelectedDocument( pDoc->DiskFilename, "" )
-                if MessageBox( HWND_FRMMAIN, _
+                dim as long res = MessageBox( HWND_FRMMAIN, _
                                 pDoc->DiskFilename & vbCrLf & _ 
                                 L(266, "File was changed by another application. Reload it?"), _
-                                L(267, "File Changed"), MB_ICONQUESTION or MB_YESNO) = IDYES then
+                                L(267, "File Changed"), MB_ICONQUESTION or MB_YESNOCANCEL) 
                     
+                if res = IDCANCEL then
+                    bInActivateApp = true
+                    exit function
+                end if
+                
+                if res = IDYES then
                     dim as CWSTR wszFilename = pDoc->DiskFilename
                     dim as CWSTR wszFileType = pDoc->ProjectFileType
                     
