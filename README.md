@@ -5,6 +5,10 @@
 
 FreeBASIC Editor for Windows
 
+**NOTE: THIS EDITOR WILL SOON BE DEPRECATED AND NO FURTHER UPDATES FORTHCOMING
+PLEASE USE THE TIKO EDITOR INSTEAD:
+https://github.com/PaulSquires/tiko**
+
 Code is written using the FreeBASIC language and uses the Scintilla editing library (in DLL form).
 
 The WinFBE Suite package (attached to each release as a compressed ZIP file), is an all-in-one package including the latest WinFBE editor, FreeBASIC compiler (32 and 64 bit compilers), Jose Roca's WinFBX library, several Help files and all necessary Include files.
