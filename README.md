@@ -5,9 +5,11 @@
 
 FreeBASIC Editor for Windows
 
-**NOTE: THIS EDITOR WILL SOON BE DEPRECATED AND NO FURTHER UPDATES FORTHCOMING
+
+**NOTE: THIS EDITOR WILL SOON BE DEPRECATED AND NO FURTHER UPDATES FORTHCOMING.
 PLEASE USE THE TIKO EDITOR INSTEAD:
 https://github.com/PaulSquires/tiko**
+
 
 Code is written using the FreeBASIC language and uses the Scintilla editing library (in DLL form).
 
